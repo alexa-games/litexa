@@ -1,0 +1,111 @@
+{
+    "extends": ["tslint:recommended"],
+    "rules": {
+        // Alphabetized imports
+        "ordered-imports": [
+            true,
+            {
+                "import-sources-order": "case-insensitive",
+                "named-imports-order": "case-insensitive"
+            }
+        ],
+        // when the complexity of a function gets to be crazy
+        "cyclomatic-complexity": [
+            true,
+            15
+        ],
+        // Enforces indentation with 4 spaces. Although 4 spaces is not enforced, as there may be special cases where
+        // it cannot be avoided, it is highly recommended to use 4 spaces everywhere for indents
+        "indent": [
+            true,
+            "spaces",
+            4
+        ],
+        "file-name-casing": [
+            false,
+            {
+                ".ts": "camel-case"
+            }
+        ],
+        "import-spacing": false,
+        "interface-name": false,
+        // Sorry Windows users, you'll have to convert line endings to remove /r as this causes issues later.
+        "linebreak-style": [
+            true,
+            "LF"
+        ],
+        // Number of classes per file. Currently not enforced, but recommend having separate classes in separate files.
+        "max-classes-per-file": [
+            false,
+            1
+        ],
+        // Maximum line length will be 150 chars, which is better than 80!
+        "max-line-length": [
+            true,
+            150
+        ],
+        "no-angle-bracket-type-assertion": false,
+        // Don't use console commands like console.log(), use other loggers instead with log levels
+        "no-console": [
+            true,
+            "debug",
+            "info",
+            "log",
+            "time",
+            "timeEnd",
+            "trace"
+        ],
+        "no-string-literal": false,
+        // Enforces consistent object literal property quote style.
+        "object-literal-key-quotes": [
+            true,
+            "consistent-as-needed"
+        ],
+        "object-literal-sort-keys": false,
+        // Don't declare multiple variables with one 'let' followed by commas
+        "one-variable-per-declaration": [
+            true,
+            "ignore-for-loop"
+        ],
+        "only-arrow-functions": false,
+        "prefer-object-spread": true,
+        "promise-function-async": true,
+        // Use single quotes for string literals for consistency
+        "quotemark": [
+            true,
+            "single",
+            "avoid-escape"
+        ],
+        // Always. Do it.
+        "semicolon": [
+            true,
+            "always"
+        ],
+        // Require a default case in all switch statements. Log something if you can't think of anything.
+        "switch-default": true,
+        // disallows multiline/singleline trailing commas
+        "trailing-comma": [
+            true,
+            {
+                "multiline": "never",
+                "singleline": "never",
+                "esSpecCompliant": true
+            }
+        ],
+        // Use === instead of ==.
+        "triple-equals": true,
+        // whitespace rules
+        "whitespace": [
+            true,
+            "check-branch",
+            "check-decl",
+            "check-operator",
+            "check-preblock",
+            "check-separator",
+            "check-type",
+            "check-typecast",
+            "check-type-operator"
+        ]
+    }
+}
+

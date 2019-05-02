@@ -1,0 +1,5 @@
+TEST "happy path"
+  launch 
+  directive: AudioPlayer.Play
+  directive: Hint
+  directive: AudioPlayer.Stop

@@ -1,0 +1,59 @@
+{
+  "document": {
+    "type": "APL",
+    "version": "1.0",
+    "theme": "dark",
+    "import": [
+      {
+        "name": "alexa-layouts",
+        "version": "1.0.0"
+      }
+    ],
+    "resources": [],
+    "styles": {},
+    "layouts": {
+      "SpeechContainer": {
+        "item": {
+          "type": "Container",
+          "items": [
+            {
+              "type": "Text",
+              "id": "speechItemId",
+              "text": "${payload.mySpeechSample.properties.testText}",
+              "speech": "${payload.mySpeechSample.properties.testSpeech}"
+            }
+          ]
+        }
+      }
+    },
+    "mainTemplate": {
+      "parameters": [
+        "payload"
+      ],
+      "item": {
+        "type": "SpeechContainer"
+      }
+    }
+  },
+  "datasources": {
+    "mySpeechSample": {
+      "type": "object",
+      "properties": {
+        "title": "Test Speech",
+        "testSpeechSsml": "<speak>Speech in APL.</speak>"
+      },
+      "transformers": [
+        {
+          "inputPath": "testSpeechSsml",
+          "outputName": "testSpeech",
+          "transformer": "ssmlToSpeech"
+        },
+        {
+          "inputPath": "testSpeechSsml",
+          "outputName": "testText",
+          "transformer": "ssmlToText"
+        }
+      ]
+    }
+  }
+}

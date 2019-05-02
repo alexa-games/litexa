@@ -1,0 +1,50 @@
+{
+  "name": "@litexa/core",
+  "version": "0.0.1",
+  "description": "Litexa, a programming language for writing Alexa Skills",
+  "bin": {
+    "litexa": "src/command-line/main.js"
+  },
+  "scripts": {
+    "build": "npm run clean && npm install",
+    "clean": "npx rimraf node_modules",
+    "coverage": "npx nyc npm test && node ../../cacheCoverage.js",
+    "rdoc": "npx coffee ./src/documentation/html/render.coffee",
+    "rdoc:watch": "npx coffee ./src/documentation/html/render.coffee watch",
+    "release": "npm run build && npm run coverage",
+    "test": "npx mocha \"./test/**/*.spec.coffee\"",
+    "test:debug": "npx mocha debug \"./test/**/**.spec.coffee\"",
+    "test:file": "npx mocha",
+    "test:file:debug": "npx mocha debug"
+  },
+  "author": "Amazon.com",
+  "keywords": [
+    "Alexa",
+    "Skill",
+    "CLI",
+    "Command Line",
+    "SDK"
+  ],
+  "license": "SEE LICENSE IN LICENSE.TXT",
+  "dependencies": {
+    "chalk": "2.4.2",
+    "chokidar": "2.1.0",
+    "coffeescript": "2.3.2",
+    "commander": "2.19.0",
+    "cson-parser": "4.0.1",
+    "debug": "4.1.1",
+    "global-modules": "2.0.0",
+    "inquirer": "6.2.2",
+    "marked": "0.6.0",
+    "mkdirp": "0.5.1",
+    "module-alias": "2.2.0",
+    "pegjs": "0.10.0",
+    "pngjs": "3.3.3",
+    "rimraf": "2.6.3",
+    "typescript": "3.3.1",
+    "uuid": "3.3.2"
+  },
+  "repository": "github:alexa-labs/litexa",
+  "bugs": "https://github.com/alexa-labs/litexa/issues",
+  "homepage": "https://litexa.github.io"
+}

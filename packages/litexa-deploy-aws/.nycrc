@@ -1,0 +1,28 @@
+{
+  "check-coverage": true,
+  "statements": 40,
+  "branches": 45,
+  "functions": 15,
+  "lines": 40,
+  "cwd": "../../",
+  "include": [
+    "packages/litexa-deploy-aws/src/*.coffee"
+  ],
+  "reporter": [
+    "text-summary",
+    "cobertura",
+    "lcovonly",
+    "html"
+  ],
+  "require": [
+    "coffeescript/register"
+  ],
+  "extension": [
+    ".coffee"
+  ],
+  "all": true,
+  "cache": false,
+  "sourceMap": true,
+  "instrument": true,
+  "report-dir": "./build/brazil-documentation/coverage"
+}

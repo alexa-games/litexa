@@ -1,0 +1,22 @@
+{
+  "deployments": {
+    "development": {
+      "module": "@litexa/deploy-aws",
+      "S3BucketName": null,
+      "askProfile": null,
+      "awsProfile": null,
+      "lambdaConfiguration": {
+        "MemorySize": 128,
+        "Environment": {
+          "Variables": {
+            "myTestVariable": 13
+          }
+        }
+      }
+    }
+  },
+  "plugins": {
+    "audio-composer": {},
+    "litexa-audio-composer": {}
+  }
+}

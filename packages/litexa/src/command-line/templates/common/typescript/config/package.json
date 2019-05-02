@@ -1,0 +1,18 @@
+{
+  "name": "{name}-build",
+  "version": "1.0.0",
+  "scripts": {
+    "clean": "npx rimraf node_modules && npm install",
+    "compile": "npx tsc",
+    "deploy": "npm run compile && litexa deploy",
+    "lint": "npx tslint -c tslint.json --project tsconfig.json --fix"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "tsconfig-paths": "3.7.0",
+    "tslint": "5.12.1",
+    "typescript": "3.2.4"
+  }
+}

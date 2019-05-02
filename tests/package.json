@@ -1,0 +1,14 @@
+{
+  "name": "@litexa/integration-tests",
+  "version": "0.0.1",
+  "description": "Integration tests for the packages.",
+  "scripts": {
+    "build": "npm run clean && npm install",
+    "clean": "npx rimraf node_modules",
+    "coverage": "npx nyc npm test && node ../cacheCoverage.js",
+    "test": "npx mocha --opts mocha.opts \"./features/*.spec.coffee\""
+  },
+  "author": "Amazon.com",
+  "license": "SEE LICENSE IN LICENSE.TXT",
+  "private": true
+}

@@ -1,0 +1,105 @@
+launch
+  # a declared here, will be visible in all intents
+  local a = 15
+  assert( a == 15, "a == 15")
+
+  # references visible in the inline code scope are kosher
+  logit("calling module function")
+
+  # for loops are scopes, and their params are inside
+  # to k, and v and local to the for loop, cannot
+  # be shadowing anything outside it, and won't exist
+  # afterwards
+  local through = 0
+  for k, v in getDictionary()
+    log k + ": " + v
+
+    for i, vv in getDictionary()
+      log k + i + ": " + v + vv
+      through = through + 1
+
+  # through existed outside the loops, and was modified
+  assert( through == 4, "through == 4" )
+
+  # but this is ok, because we don't hoist variables
+  local k = 99
+  assert( k == 99, "k == 99" )
+
+  # see if we can access the protected names
+  log context.request.requestId
+
+  when PASS1
+    assert( a == 15, "a == 15" )
+    # b declared here is only visible in this intent
+    local b = 35
+    assert( b == 35, "b == 35" )
+    assert( a == 15, "a == 15" )
+    a = 25
+
+    local c = 0
+    if true 
+      c = 9
+    else
+      c = 4
+    assert( c == 9, "c == 9" )
+
+
+  when PASS2
+    assert( a == 25, "a == 25" )
+    local c = "jim"
+    assert( c == "jim", "c == jim")
+    -> state1
+
+  $fromLaunch = true
+  @loopTracker = 1
+  log "leaving launch state"
+  assert( a == 25, "a == 25" )
+
+
+state1
+  # a is no longer visible here
+  if $fromLaunch
+    log "entering state 1 from launch"
+  else
+    log "entering state 1 NOT from launch"
+
+  local s1a = 15
+  assert(s1a == 15, "s1a == 15")
+  log "loop " + @loopTracker
+
+  if $fromLaunch
+    if @loopTracker > 3
+      say "stopping loop"
+    else
+      -> state2
+  else
+    -> done
+
+  when PASS3
+    assert(s1a == 15, "s1a == 15")
+    @loopTracker = 0
+    -> state1
+
+  @loopTracker = @loopTracker + 1
+
+
+state2 
+  local s1a = -5
+  local s2a = 20
+  assert(s2a == 20, "s2a == 20")
+
+  -> state1
+
+
+done
+  END
+
+
+TEST "main"
+  logStateTraces = true
+  launch
+  user: PASS1
+  user: PASS2
+  @loopTracker == 4
+  user: PASS3
+  @loopTracker == 2

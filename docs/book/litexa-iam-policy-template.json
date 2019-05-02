@@ -1,0 +1,91 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+      {
+          "Sid": "IAMRole",
+          "Effect": "Allow",
+          "Action": [
+              "iam:AttachRolePolicy",
+              "iam:CreateRole",
+              "iam:GetRole",
+              "iam:ListAttachedRolePolicies",
+              "iam:PassRole"
+          ],
+          "Resource": "arn:aws:iam::myAccountId:role/litexa_handler_lambda"
+      },
+      {
+          "Sid": "Lambda",
+          "Effect": "Allow",
+          "Action": [
+              "lambda:AddPermission",
+              "lambda:CreateAlias",
+              "lambda:CreateFunction",
+              "lambda:GetAlias",
+              "lambda:GetFunctionConfiguration",
+              "lambda:GetPolicy",
+              "lambda:ListAliases",
+              "lambda:RemovePermission",
+              "lambda:UpdateFunctionConfiguration",
+              "lambda:UpdateFunctionCode"
+          ],
+          "Resource": "arn:aws:lambda:*:myAccountId:function:*_*_litexa_handler"
+      },
+      {
+          "Sid": "DynamoDB",
+          "Effect": "Allow",
+          "Action": [
+              "dynamodb:CreateTable",
+              "dynamodb:DescribeTable"
+          ],
+          "Resource": "arn:aws:dynamodb:*:myAccountId:table/*_*_litexa_handler_state"
+      },
+      {
+          "Sid": "CreateLogGroupListS3Buckets",
+          "Effect": "Allow",
+          "Action": [
+              "logs:CreateLogGroup",
+              "s3:ListAllMyBuckets"
+          ],
+          "Resource": "*"
+      },
+      {
+          "Sid": "S3BucketActions",
+          "Effect": "Allow",
+          "Action": [
+              "s3:CreateBucket",
+              "s3:ListBucket"
+          ],
+          "Resource": "arn:aws:s3:::myBucketName"
+      },
+      {
+          "Sid": "S3BucketObjectActions",
+          "Effect": "Allow",
+          "Action": [
+              "s3:PutObject",
+              "s3:PutObjectAcl"
+          ],
+          "Resource": "arn:aws:s3:::myBucketName/*"
+      },
+      {
+          "Sid": "DescribeLogGroups",
+          "Effect": "Allow",
+          "Action": "logs:DescribeLogGroups",
+          "Resource": "arn:aws:logs:*:myAccountId:log-group:*"
+      },
+      {
+          "Sid": "LogStreamActions",
+          "Effect": "Allow",
+          "Action": [
+            "logs:DescribeLogStreams",
+            "logs:PutRetentionPolicy"
+          ],
+          "Resource": "arn:aws:logs:*:myAccountId:log-group:/aws/lambda/*_*_litexa_handler:log-stream:"
+      },
+      {
+          "Sid": "GetLogEvents",
+          "Effect": "Allow",
+          "Action": "logs:GetLogEvents",
+          "Resource": "arn:aws:logs:*:myAccountId:log-group:/aws/lambda/*_*_litexa_handler:*:*"
+      }
+  ]
+}

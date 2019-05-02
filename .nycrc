@@ -1,0 +1,18 @@
+{
+  "check-coverage": true,
+  "statements": 54,
+  "branches": 51,
+  "functions": 51,
+  "lines": 54,
+  "reporter": [
+    "text-summary",
+    "cobertura",
+    "lcovonly",
+    "html"
+  ],
+  "all": true,
+  "cache": false,
+  "sourceMap": true,
+  "instrument": true,
+  "report-dir": "./build/brazil-documentation/coverage"
+}

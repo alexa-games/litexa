@@ -1,0 +1,26 @@
+{
+  "name": "@litexa/gadgets",
+  "version": "0.0.1",
+  "description": "This module adds support for the Alexa Input Handlers and Set Light directives, parts of the Alexa Gadgets API. See [Alexa Gadgets] for  more information.",
+  "scripts": {
+    "build": "npm run clean && npm install",
+    "clean": "npx rimraf node_modules",
+    "coverage": "echo \"Missing coverage script.\" && exit 0"
+  },
+  "author": "Amazon.com",
+  "keywords": [
+    "Alexa",
+    "Skill",
+    "Echo Buttons",
+    "Game Engine",
+    "Gadgets",
+    "SDK"
+  ],
+  "license": "SEE LICENSE IN LICENSE.TXT",
+  "dependencies": {
+    "uuid": "3.3.2"
+  },
+  "repository": "github:alexa-labs/litexa",
+  "bugs": "https://github.com/alexa-labs/litexa/issues",
+  "homepage": "https://litexa.github.io"
+}

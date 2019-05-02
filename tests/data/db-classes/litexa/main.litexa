@@ -1,0 +1,76 @@
+# This means that @game will always already be a constructed
+# instance of the Game class when accessed. Its actual constructor
+# , if such exists, will only be executed once. From then on it's
+# data will be stored in the database, and its prototype will
+# be reattached when at each skill request.
+define @game as Game
+
+define @board as Board
+define @name as NameWrapper
+define @wrapped as JSWrapper
+
+launch
+  @control = 5
+
+  # writes the class' toString()
+  log @game
+
+  # directly invoke functions on the DB reference
+  log @game.greeting()
+
+  # call functions on the object from inside say strings
+  say "@wrapped.fullName('hello')"
+
+  # modify data directly
+  @wrapped.data.family = "Doe"
+  @wrapped.saveLoaded()
+  log @wrapped
+  -> step1
+
+
+step1
+  when "next"
+    # mutate the game state through the class
+    @game.setFlag(true)
+
+    log @name.name()
+    @name.set("Jim", "Replacey")
+    log @name.name()
+
+    # pull results into the local scope
+    local a = @game.saveScore(123)
+    log a
+
+    log @board.greeting()
+    @board.focus = 15
+    log @board
+
+    say "Ah, alright @name.name()"
+    -> step2
+
+
+step2
+  when "next"
+    # make sure values survive into the next request
+    log @game.getScore()
+    log @game.getFlag()
+    log @board.getFocus()
+    log @board.focus
+    log @name.name()
+    local a = @game.greeting()
+
+    # check we've constructed only once per request
+    log "Constructed game " + @game.constructed + " times"
+    log "Constructed board " + @board.constructed + " times"
+    say "Sure thing, score is @game.getScore()"
+    -> step3
+
+step3
+  when "next"
+    # nuke the object contents, resetting the object
+    # including running the initializer
+    @game = null
+    log @game.getScore()
+    log @board.focus
+    say "And, we're done, score is back to @game.score"
+    END

@@ -1,0 +1,13 @@
+[
+  {
+    "name": "NewButton",
+    "inputEvents": [
+      {
+        "gadgetId": "bobcat",
+        "timestamp": "2017-08-18T01:32:40.027Z",
+        "action": "down",
+        "color": "FF0000"
+      }
+    ]
+  }
+]

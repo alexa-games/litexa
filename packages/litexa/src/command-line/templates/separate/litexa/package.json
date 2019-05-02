@@ -1,0 +1,15 @@
+{
+  "name": "{name}",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "clean": "npx rimraf ./node_modules && npm install",
+    "deploy": "npm run clean && litexa deploy"
+  },
+  "dependencies": {
+    "{name}-lib": "file:../lib"
+  },
+  "author": "",
+  "license": "ISC"
+}

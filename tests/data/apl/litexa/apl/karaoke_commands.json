@@ -1,0 +1,7 @@
+[
+  {
+    "type": "SpeakItem",
+    "componentId": "karaokespeechtext",
+    "highlightMode": "line"
+  }
+]

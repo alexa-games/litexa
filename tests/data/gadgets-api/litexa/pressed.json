@@ -1,0 +1,22 @@
+[
+  {
+    "name": "button1",
+    "inputEvents": [
+      {
+        "gadgetId": "agadget",
+        "timestamp": "2017-08-18T01:32:40.027Z",
+        "action": "down",
+        "color": "FF0000"
+      },
+      {
+        "gadgetId": "agadget",
+        "timestamp": "2017-08-18T01:32:40.050Z",
+        "action": "up",
+        "color": "FF0000"
+      }
+    ]
+  },
+  {
+    "name": "button2"
+  }
+]

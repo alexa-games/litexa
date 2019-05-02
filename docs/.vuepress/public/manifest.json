@@ -1,0 +1,14 @@
+{
+  "short_name": "Litexa",
+  "name": "Litexa",
+  "icons": [
+    {
+      "src": "icon.png",
+      "type": "image/png",
+      "sizes": "122x122"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#fff",
+  "theme_color": "#00CAFF"
+}

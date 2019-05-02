@@ -1,0 +1,21 @@
+launch
+  say "Hello world."
+  -> askQuestion
+
+askQuestion
+  say "question?"
+
+  when ANSWER
+    or "answer"
+    say "I see."
+    -> goobye
+
+goobye
+  say "Goodbye."
+  END
+
+
+TEST "happy path"
+  launch
+  user: ANSWER
+  END

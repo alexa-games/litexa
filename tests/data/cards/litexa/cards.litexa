@@ -1,0 +1,64 @@
+launch
+  say "hey there!"
+  card "Welcome!"
+    image: image.png
+    content: "Some alternative content to put on the card.
+      And a second line of it too."
+  -> next
+
+next
+  when "amy"
+    local filename = "image.png"
+    card "Welcome!"
+      image: filename
+      content: "Some alternative content to put on the card.
+        And a second line of it too."
+
+  when "bob"
+    local filename = "image.png"
+    card "Welcome!", filename
+      content: "Some alternative content to put on the card.
+        And a second line of it too."
+
+  when "che"
+    card "Welcome!"
+
+  when "dad"
+    card "Hey!"
+      image: image-variants.png
+
+  when "bobby"
+    card "Hey Bob!"
+      image: https://www.example.com/b-ob.png
+      content: "Works with multi-line, no quotes."
+
+  when "robby"
+    card "Hey Rob!"
+      image: 'https://www.example.com/b_ob.png'
+      content: "Works with multi-line single quotes."
+
+  when "lizzy"
+    card "Hey Liz!", "https://www.example.com/liz.png", "Works with single line, double quotes."
+
+  when "Brizzy"
+    card "Hey Brizzy!", 'https://www.example.com/liz.png'
+
+  when "Paula"
+    card "Hey Paula!", http://www.example.com/liz.png
+
+  when "tala"
+    card "Hey Tala!", http://www.example.com/liz.png, "Works with single line, no quotes."
+
+TEST "launch"
+  launch
+  alexa: next, "hey there!"
+  user: "amy"
+  user: "bob"
+  user: "che"
+  user: "dad"
+  user: "bobby"
+  user: "robby"
+  user: "lizzy"
+  user: "brizzy"
+  user: "Paula"
+  user: "tala"

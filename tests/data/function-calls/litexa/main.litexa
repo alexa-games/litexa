@@ -1,0 +1,122 @@
+define @thing as Thing
+
+launch
+  # in entry handler
+
+  # plain functions parse and run
+  test()
+  log test()
+  say "{ test() }"
+
+  # class functions parse and run
+  @thing.test()
+  log @thing.test()
+  say "@thing.test()"
+
+  -> waitForIntent
+
+
+waitForIntent
+  # in intents
+  when PLAIN
+    test()
+    log test()
+    say "{ test() }"
+
+  when PLAIN_ARGUMENTS
+    echo(10, 'test', true, @thing)
+    log echo(10, 'test', true, @thing)
+    say "{ echo(10, 'test', true, @thing, test()) }"
+
+  when CLASS
+    @thing.test()
+    log @thing.test()
+    say "@thing.test()"
+
+  when CLASS_ARGUMENTS
+    @thing.echo(10, 'test', true, @thing)
+    log @thing.echo(10, 'test', true, @thing)
+    say "{ @thing.echo(10, 'test', true, @thing, test()) }"
+
+
+  when SWITCH_PLAIN
+    switch test()
+      == "test" then
+        say "success"
+
+  when SWITCH_CLASS
+    switch @thing.test()
+      == "thing test" then
+        say "success"
+
+  when SWITCH_COMPARE_PLAIN
+    switch a = "test"
+      == test() then
+        say "success"
+
+  when SWITCH_COMPARE_CLASS
+    switch a = "thing test"
+      == @thing.test() then
+        say "success"
+
+  when IF_PLAIN
+    if test()
+      say "success"
+
+  when IF_CLASS
+    if @thing.test()
+      say "success"
+
+  when EXPRESSION_PLAIN
+    local a = test() + " two"
+    say "{a}"
+    say "{test()}"
+    say "{test() + ' three'}"
+    say "{'four ' + test()}"
+
+  when EXPRESSION_CLASS
+    local a = @thing.test() + " two"
+    say "{a}"
+    say "{@thing.test()}"
+    say "{@thing.test() + ' three'}"
+    say "{'four ' + @thing.test()}"
+
+
+TEST "test"
+  launch
+
+  user: PLAIN
+  alexa: waitForIntent, e"test"
+
+  user: PLAIN_ARGUMENTS
+  alexa: waitForIntent, e"success"
+
+  user: CLASS
+  alexa: waitForIntent, e"thing test"
+
+  user: CLASS_ARGUMENTS
+  alexa: waitForIntent, e"success"
+
+  user: SWITCH_PLAIN
+  alexa: waitForIntent, e"success"
+
+  user: SWITCH_CLASS
+  alexa: waitForIntent, e"success"
+
+  user: SWITCH_COMPARE_PLAIN
+  alexa: waitForIntent, e"success"
+
+  user: SWITCH_COMPARE_CLASS
+  alexa: waitForIntent, e"success"
+
+  user: IF_PLAIN
+  alexa: waitForIntent, e"success"
+
+  user: IF_CLASS
+  alexa: waitForIntent, e"success"
+
+  user:EXPRESSION_PLAIN
+  alexa: waitForIntent, e"test two test test three four test"
+
+  user:EXPRESSION_CLASS
+  alexa: waitForIntent, e"thing test two thing test thing test three four thing test"
