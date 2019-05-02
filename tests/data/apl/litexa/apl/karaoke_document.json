@@ -1,0 +1,185 @@
+{
+  "type": "APL",
+  "version": "1.0",
+  "import": [
+    {
+      "name": "alexa-viewport-profiles",
+      "version": "1.0.0"
+    },
+    {
+      "name": "alexa-layouts",
+      "version": "1.0.0"
+    }
+  ],
+  "resources": [
+    {
+      "description": "Cheese colors",
+      "colors": {
+        "roundCheeseColor": "#556270",
+        "landscapeCheeseColor": "#ffffff"
+      }
+    },
+    {
+      "description": "Cheese font size",
+      "dimensions": {
+        "headFontSize": "50px"
+      }
+    }
+  ],
+  "styles": {
+    "CheeseStyle": {
+      "values": [
+        {
+          "fontSize": "@headFontSize",
+          "color": "@roundCheeseColor",
+          "textAlign": "center",
+          "fontWeight": 300
+        }
+      ]
+    },
+    "CheeseStyleLarge": {
+      "extends": "CheeseStyle",
+      "values": [
+        {
+          "fontSize": "@headFontSize",
+          "color": "@landscapeCheeseColor",
+          "paddingLeft": "30px",
+          "paddingTop": "30px",
+          "fontWeight": 100
+        }
+      ]
+    }
+  },
+  "layouts": {
+    "CheeseHeader": {
+      "parameters": [
+        {
+          "name": "title",
+          "type": "string"
+        }
+      ],
+      "items": [
+        {
+          "when": "${@viewportProfile == @hubRoundSmall}",
+          "type": "Container",
+          "direction": "column",
+          "alignItems": "center",
+          "width": "100vw",
+          "height": "20vh",
+          "items": [
+            {
+              "type": "Frame",
+              "height": "95vh",
+              "width": "100vw",
+              "borderWidth": "3px",
+              "borderColor": "#C44D58",
+              "borderRadius": "10px",
+              "backgroundColor": "#FF6B6B",
+              "items": [
+                {
+                  "type": "Text",
+                  "text": "${title}",
+                  "style": "CheeseStyle",
+                  "paddingTop": "5vh"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Text",
+          "text": "${title}",
+          "style": "CheeseStyleLarge"
+        }
+      ]
+    }
+  },
+  "mainTemplate": {
+    "parameters": [
+      "payload"
+    ],
+    "item": [
+      {
+        "when": "${@viewportProfile == @hubRoundSmall}",
+        "type": "Container",
+        "direction": "column",
+        "width": "100vw",
+        "height": "100vh",
+        "items": [
+          {
+            "type": "Image",
+            "source": "https://d2o906d8ln7ui1.cloudfront.net/images/BT6_Background.png",
+            "position": "absolute",
+            "width": "100vw",
+            "height": "100vh",
+            "scale": "best-fill"
+          },
+          {
+            "type": "CheeseHeader",
+            "title": "This is a karaoke test!"
+          },
+          {
+            "type": "ScrollView",
+            "item": [
+              {
+                "type": "Text",
+                "id": "karaokecomponent",
+                "text": "${payload.karaokeTemplateData.properties.karaokeText}",
+                "speech": "${payload.karaokeTemplateData.properties.karaokeSpeech}",
+                "fontSize": "55px",
+                "color": "#ffffff",
+                "width": "90vw",
+                "paddingTop": "30px",
+                "paddingLeft": "30px",
+                "paddingRight": "30px",
+                "fontWeight": 300
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "type": "Container",
+        "direction": "column",
+        "width": "100vw",
+        "height": "100vh",
+        "items": [
+          {
+            "type": "Image",
+            "source": "https://d2o906d8ln7ui1.cloudfront.net/images/BT6_Background.png",
+            "position": "absolute",
+            "width": "100vw",
+            "height": "100vh",
+            "scale": "best-fill"
+          },
+          {
+            "type": "CheeseHeader",
+            "title": "Hello, World!"
+          },
+          {
+            "type": "ScrollView",
+            "width": "100vw",
+            "height": "100vh",
+            "items": [
+              {
+                "type": "Text",
+                "id": "karaokespeechtext",
+                "text": "${payload.karaokeTemplateData.properties.karaokeText}",
+                "speech": "${payload.karaokeTemplateData.properties.karaokeSpeech}",
+                "fontSize": "55px",
+                "color": "#ffffff",
+                "paddingLeft": "30px",
+                "paddingTop": "30px",
+                "fontWeight": 300
+              }
+            ]
+          },
+          {
+            "type": "AlexaFooter",
+            "footerHint": "${payload.karaokeTemplateData.properties.hintString}"
+          }
+        ]
+      }
+    ]
+  }
+}

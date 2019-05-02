@@ -1,0 +1,126 @@
+launch
+  -> askForAPL
+
+askForAPL
+  if APL.isEnabled()
+    say "Which APL test would you like to run?"
+    -> waitForAPL
+  else
+    say "Sorry, APL is not supported on this device."
+    -> goodbye
+
+waitForAPL
+  # These are APL authored examples > checking that they plug & play.
+  when "device info"
+    -> showDeviceInfo
+  when "image left"
+    -> showImageLeft
+  when "image right"
+    -> showImageRight
+  when "list one"
+    -> showListOne
+  when "list two"
+    -> showListTwo
+  when "long text"
+    -> showLongText
+  when "short text"
+    -> showShortText
+
+
+  # These are some custom examples.
+  when "interleave speech"
+    -> interleaveSpeech
+  when "auto pager"
+    -> showAutoPager
+  when "pager with speech"
+    -> showPagerWithSpeech
+  when "karaoke"
+    -> testKaraoke
+  when "sound effects"
+    -> testSoundEffects
+  otherwise
+    -> goodbye
+
+showDeviceInfo
+  apl apl/device_info.json
+  -> waitForAPL
+
+showImageLeft
+  apl apl/image_left.json
+  -> waitForAPL
+
+showImageRight
+  apl apl/image_right.json
+  -> waitForAPL
+
+showListOne
+  apl apl/list1.json
+  -> waitForAPL
+
+showListTwo
+  apl apl/list2.json
+  -> waitForAPL
+
+showLongText
+  apl apl/long_text.json
+  -> waitForAPL
+
+showShortText
+  apl apl/short_text.json
+  -> waitForAPL
+
+interleaveSpeech
+  say "speech before APL"
+
+  apl apl/interleave_speech.json
+    commands: interLeaveSpeechCommand
+
+  say "speech after APL"
+  -> waitForAPL
+
+showAutoPager
+  apl apl/pager.json
+    commands: autoPageCommand
+  -> waitForAPL
+
+showPagerWithSpeech
+  apl apl/pager.json
+
+  say "page 1"
+  apl
+    commands: turnPageCommands
+  say "page 2"
+  apl
+    commands: turnPageCommands
+  say "page 3"
+  -> waitForAPL
+
+testKaraoke
+  apl apl/karaoke_document.json
+    data: apl/karaoke_data.json
+    commands: apl/karaoke_commands.json
+  -> waitForAPL
+
+testSoundEffects
+  say "sound effect should play four times"
+  say "twice in a say <sfx sound.mp3><sfx sound.mp3>"
+  say "once via soundEffect"
+  soundEffect sound.mp3
+  say "and finally once via local asset reference in the APL document"
+  apl apl/sound_effects.json
+    commands: audioCommand
+  say "finished"
+  -> waitForAPL
+
+goodbye
+  say "Goodbye!"
+  END
+
+global
+  when AMAZON.HelpIntent
+    -> askForAPL
+  when AMAZON.StopIntent
+    -> goodbye
+  when Alexa.Presentation.APL.UserEvent
+    printRequestData($request)
+    -> askForAPL

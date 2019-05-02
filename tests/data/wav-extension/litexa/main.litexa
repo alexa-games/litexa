@@ -1,0 +1,3 @@
+launch
+  soundEffect doorbell.mp3
+  say "And also, <sfx doorbell.mp3>"

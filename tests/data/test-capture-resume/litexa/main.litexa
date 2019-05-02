@@ -1,0 +1,25 @@
+launch
+  say "Hello."
+  @name = 'unknown'
+  -> names
+
+names
+  say "What is your name?"
+  when NameIntent
+    or "my name is $name"
+    with $name = "alice", "bob"
+    say "Hello, $name."
+    @name = $name
+
+
+TEST "capture"
+  launch
+  capture Launched
+  @name == 'unknown'
+
+TEST "resume"
+  resume Launched
+  user: "my name is alice"
+  @name == 'alice'
+  @name != 'unknown'
+  alexa: names

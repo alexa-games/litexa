@@ -1,0 +1,4 @@
+--require coffeescript/register
+--watch-extensions coffee
+--full-trace
+--timeout 10000

@@ -1,0 +1,15 @@
+launch
+  say "Bonjour."
+  -> askQuestion
+
+askQuestion
+  say "question?"
+
+  when ANSWER
+    or "réponse"
+    say "Bien sûr, je comprends."
+    -> goobye
+
+goobye
+  say "Bonne journée."
+  END

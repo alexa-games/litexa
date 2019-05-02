@@ -1,0 +1,11 @@
+launch 
+  say "{RuntimeInline.hello()}"
+  inlineStatement 79
+  requireStatement 52
+
+  when SYSTEM.NotRealIntent
+    say "Yeah, I am."
+
+  when TotallyNot.RealIntent
+    say "Yup, this is now real too"
+    say "Yup, this is now real too"

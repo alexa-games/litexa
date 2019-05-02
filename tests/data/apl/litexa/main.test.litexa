@@ -1,0 +1,18 @@
+TEST "happy path"
+  launch
+  alexa: waitForAPL
+  user: "image left"
+  user: "image right"
+  user: "list one"
+  user: "list two"
+  user: "long text"
+  user: "short text"
+
+  user: "interleave speech"
+  user: "auto pager"
+  user: "pager with speech"
+  user: "karaoke"
+  user: "sound effects"
+  user: AMAZON.StopIntent
+
+  END

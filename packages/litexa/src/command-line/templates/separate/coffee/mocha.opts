@@ -1,0 +1,4 @@
+--require coffeescript/register
+--recursive test/
+--watch-extensions coffee
+--full-trace

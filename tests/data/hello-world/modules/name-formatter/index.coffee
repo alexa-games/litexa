@@ -1,0 +1,2 @@
+exports.format = (name) ->
+  "~~ #{name}! ~~"   

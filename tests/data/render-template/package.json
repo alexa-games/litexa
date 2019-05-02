@@ -1,0 +1,14 @@
+{
+  "name": "render-template-integration-test",
+  "version": "0.0.1",
+  "description": "Project that tests the @litexa/render-template extension's functionality.",
+  "main": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Amazon.com",
+  "license": "SEE LICENSE IN LICENSE.TXT",
+  "dependencies": {
+    "@litexa/render-template": "file:../../../packages/litexa-render-template"
+  }
+}

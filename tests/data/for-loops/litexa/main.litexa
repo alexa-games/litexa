@@ -1,0 +1,50 @@
+launch
+  -> next
+
+next
+  when "names"
+    for job, name in getNames()
+      say "{job} {name}"
+
+  when "asyncnames"
+    for job, name in getNames()
+      say "{processJobAsync(job)} {name}"
+
+  when "nested"
+    for i, j in getNumbers()
+      for k, l in getNumbers()
+        say "{i}{j}{k}{l}"
+
+  when "justnames"
+    for name in getNames()
+      say "{name}"
+
+  when "numbers"
+    for index, number in getNumbers()
+      say "{index}{number}"
+
+  when "justnumbers"
+    for number in getNumbers()
+      say "{number}"
+
+
+TEST "run through"
+  launch
+
+  user: "numbers"
+  alexa: next, e"03 15 28 39"
+
+  user: "justnumbers"
+  alexa: next, e"3 5 8 9"
+
+  user: "names"
+  alexa: next, e"driver bob artillery tim hacker mary"
+
+  user: "asyncnames"
+  alexa: next, e"the driver bob the artillery tim the hacker mary"
+
+  user: "nested"
+  alexa: next, e"0303 0315 0328 0339 1503 1515 1528 1539 2803 2815 2828 2839 3903 3915 3928 3939"
+
+  user: "justnames"
+  alexa: next, e"bob tim mary"

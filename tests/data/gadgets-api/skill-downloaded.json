@@ -1,0 +1,76 @@
+{
+  "manifest": {
+    "publishingInformation": {
+      "locales": {
+        "en-US": {
+          "summary": "replace with brief description, no longer than 120 characters",
+          "examplePhrases": [
+            "Alexa, launch Gadgets Api",
+            "Alexa, open Gadgets Api",
+            "Alexa, play Gadgets Api"
+          ],
+          "keywords": [
+            "game",
+            "fun",
+            "single player",
+            "modify this list as appropriate"
+          ],
+          "name": "Gadgets Api (default)",
+          "smallIconUri": "https://s3.us-east-1.amazonaws.com/suncoast-assets/gadgets-api/default/default/icon-108.png",
+          "description": "Longer description, goes to the skill store. \n\nLine breaks are supported.",
+          "largeIconUri": "https://s3.us-east-1.amazonaws.com/suncoast-assets/gadgets-api/default/default/icon-512.png"
+        }
+      },
+      "isAvailableWorldwide": false,
+      "testingInstructions": "replace with testing instructions",
+      "category": "GAMES",
+      "distributionMode": "PUBLIC",
+      "distributionCountries": [
+        "US"
+      ],
+      "gadgetSupport": {
+        "maxGadgetButtons": 4,
+        "numPlayersMax": 1,
+        "minGadgetButtons": 1,
+        "requirement": "REQUIRED",
+        "numPlayersMin": 1
+      }
+    },
+    "apis": {
+      "custom": {
+        "endpoint": {
+          "uri": "arn:aws:lambda:us-east-1:085202703559:function:gadgets-api_default_litexa_handler:release-0"
+        },
+        "interfaces": [
+          {
+            "type": "GAME_ENGINE"
+          },
+          {
+            "type": "GADGET_CONTROLLER"
+          }
+        ],
+        "regions": {
+          "NA": {
+            "endpoint": {
+              "uri": "arn:aws:lambda:us-east-1:085202703559:function:gadgets-api_default_litexa_handler:release-0"
+            }
+          }
+        }
+      }
+    },
+    "manifestVersion": "1.0",
+    "privacyAndCompliance": {
+      "allowsPurchases": false,
+      "locales": {
+        "en-US": {
+          "termsOfUseUrl": "http://yoursite/terms.html",
+          "privacyPolicyUrl": "http://yoursite/privacy.html"
+        }
+      },
+      "isExportCompliant": true,
+      "containsAds": false,
+      "isChildDirected": false,
+      "usesPersonalInfo": false
+    }
+  }
+}

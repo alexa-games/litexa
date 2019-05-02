@@ -1,0 +1,14 @@
+launch # Comments Test
+  say "hello there"#SHOULDSUPPORT
+  -> goodbye # All comments
+#
+# Comment test line by itself
+#
+
+goodbye
+  say "goodbye"
+  END #All Comments
+
+TEST "run through" # in tests too
+  launch#CommentsAll day
+  alexa: null

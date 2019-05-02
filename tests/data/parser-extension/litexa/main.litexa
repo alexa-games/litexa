@@ -1,0 +1,10 @@
+launch
+  extendedStatement 10
+  extendedStatement 20
+  END
+
+
+TEST "run through"
+  launch
+  @number == 20
+  alexa: null

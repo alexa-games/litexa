@@ -1,0 +1,19 @@
+TEST "happy path"
+  launch 
+  user: AMAZON.YesIntent
+  inputHandlerEvent "pressed"
+  inputHandlerEvent pressed.json
+  inputHandlerEvent "button1"
+  inputHandlerEvent "button2"
+  inputHandlerEvent "finished"
+
+TEST "should trigger warnings in console"
+  launch
+  # warning shows up here
+  user: "endInputHandler"
+  quit
+  launch
+  user: AMAZON.YesIntent
+  user: "endInputHandler"
+  # and here
+  user: "endInputHandler"

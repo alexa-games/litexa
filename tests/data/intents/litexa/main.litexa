@@ -1,0 +1,16 @@
+launch
+  when "something"
+  when "with spaces"
+  when "how about, symbols?"
+  when "should || this <work>?"
+  when "1, 2, 3"
+  when "1 something"
+  when "  spaces   lots of space    s  "
+  when AMAZON.YesIntent
+  when MyIntentName
+  when My_IntentName
+  when One_Two_three
+  when lowercase
+  when UPPERCASE
+  when  eh
+  when   "eh?"

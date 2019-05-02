@@ -1,0 +1,32 @@
+{
+  "type": "APL",
+  "version": "1.0",
+  "theme": "dark",
+  "import": [
+    {
+      "name": "alexa-layouts",
+      "version": "1.0.0"
+    }
+  ],
+  "resources": [],
+  "styles": {},
+  "layouts": {},
+  "mainTemplate": {
+    "parameters": [
+      "payload"
+    ],
+    "items": [
+      {
+        "type": "Container",
+        "items": [
+          {
+            "type": "Text",
+            "id": "audioItemId",
+            "text": "Testing an audio URL.",
+            "speech": "assets://sound.mp3"
+          }
+        ]
+      }
+    ]
+  }
+}

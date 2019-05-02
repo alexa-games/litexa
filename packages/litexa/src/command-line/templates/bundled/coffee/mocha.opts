@@ -1,0 +1,5 @@
+--require coffeescript/register
+--require source-map-support/register
+--recursive test/
+--watch-extensions coffee
+--full-trace

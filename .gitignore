@@ -1,0 +1,32 @@
+# Brazil
+build
+
+# NYC
+.nyc_output
+.nyc_output_combined
+
+# node
+node_modules
+
+# lerna
+lerna-debug.log
+
+# litexa
+.test
+.deploy
+aws-config.json
+
+# nothing in this repo should be
+# a permanent deployment
+artifacts.json
+
+
+# OSX #
+.DS_Store
+.AppleDouble
+.LSOverride
+
+*.logs
+
+# Editors
+.idea/

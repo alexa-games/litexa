@@ -1,0 +1,195 @@
+launch
+  if RenderTemplate.isEnabled()
+    @curTemplate = ""
+    -> askForTemplate
+  else
+    say "Sorry, RenderTemplate isn't supported on this device."
+    -> goodbye
+
+askForTemplate
+  say "Which template would you like to see?"
+  -> waitForTemplate
+
+waitForTemplate
+  when "BodyTemplate One"
+    or "Body One"
+    -> showBodyOne
+  when "BodyTemplate Two"
+    or "Body Two"
+    -> showBodyTwo
+  when "BodyTemplate Three"
+    or "Body Three"
+    -> showBodyThree
+  when "BodyTemplate Six"
+    or "Body Six"
+    -> showBodySix
+  when "BodyTemplate Seven"
+    or "Body Seven"
+    -> showBodySeven
+  when "ListTemplate One"
+    or "List One"
+    -> showListOne
+  when "ListTemplate Two"
+    or "List Two"
+    -> showListTwo
+
+  when AMAZON.PreviousIntent
+    switch @curTemplate
+      == "" then
+        -> showListTwo
+      == "BodyTemplate1" then
+        -> showListTwo
+      == "BodyTemplate2" then
+        -> showBodyOne
+      == "BodyTemplate3" then
+        -> showBodyTwo
+      == "BodyTemplate6" then
+        -> showBodyThree
+      == "BodyTemplate7" then
+        -> showBodySix
+      == "ListTemplate1" then
+        -> showBodySeven
+      == "ListTemplate2" then
+        -> showListOne
+
+  when AMAZON.NextIntent
+    switch @curTemplate
+      == "" then
+        -> showBodyOne
+      == "BodyTemplate1" then
+        -> showBodyTwo
+      == "BodyTemplate2" then
+        -> showBodyThree
+      == "BodyTemplate3" then
+        -> showBodySix
+      == "BodyTemplate6" then
+        -> showBodySeven
+      == "BodyTemplate7" then
+        -> showListOne
+      == "ListTemplate1" then
+        -> showListTwo
+      == "ListTemplate2" then
+        -> showBodyOne
+
+  # If one of our list items was touched, lets just say the token out loud.
+  when Display.ElementSelected
+    say "You touched item {$request.token}."
+
+  otherwise
+    -> goodbye
+
+showBodyOne
+  @curTemplate = "BodyTemplate1"
+  say "@curTemplate"
+  screen
+    template: BodyTemplate1
+    background: 'https://d2o906d8ln7ui1.cloudfront.net/images/LT2_Background.png'
+    title: "BodyTemplate1"
+    primaryText: "<center><b Centered Bold Text>"
+    secondaryText: "<i Italic Text>"
+    tertiaryText: "<u Underlined Text>"
+  -> waitForTemplate
+
+showBodyTwo
+  @curTemplate = "BodyTemplate2"
+  say "@curTemplate"
+  screen
+    template: BodyTemplate2
+    background: background.png
+    title: "BodyTemplate2"
+    primaryText: "<b>Bold Text"
+    secondaryText: "<center><i>Centered Italic Text"
+    tertiaryText: "<u>Underlined Text"
+    image: gruyere.png
+    hint: "Hint Text"
+  -> waitForTemplate
+
+showBodyThree
+  @curTemplate = "BodyTemplate3"
+  say "@curTemplate"
+
+  local bg = "background.png"
+  local img = "gruyere.png"
+
+  screen
+    template: BodyTemplate3
+    background: bg
+    primaryText: "<f7 Font Size 7>"
+    secondaryText: "<f5>Font Size 5"
+    tertiaryText: "<f3>Font Size 3"
+    image: img
+    displaySpeechAs: "title"
+  -> waitForTemplate
+
+showBodySix
+  @curTemplate = "BodyTemplate6"
+  say "@curTemplate"
+  screen
+    template: BodyTemplate6
+    background: "background.png"
+    secondaryText: "Secondary Text"
+    tertiaryText: "Tertiary Text"
+    displaySpeechAs: "primaryText"
+    hint: "Hint Text"
+  -> waitForTemplate
+
+showBodySeven
+  @curTemplate = "BodyTemplate7"
+  say "@curTemplate"
+  screen
+    template: BodyTemplate7
+    background: background.png
+    image: gruyere.png
+    displaySpeechAs: "title"
+  -> waitForTemplate
+
+showListOne
+  @curTemplate = "ListTemplate1"
+  say "@curTemplate"
+
+  screen
+    template: ListTemplate1
+    background: background.png
+    title: "Title Text"
+    list: listOneItems
+  -> waitForTemplate
+
+showListTwo
+  @curTemplate = "ListTemplate2"
+  say "@curTemplate"
+
+  screen
+    template: ListTemplate2
+    background: background.png
+    title: "Title Text"
+    list: listTwoItems
+    hint: "Hint Text"
+  -> waitForTemplate
+
+goodbye
+  say "Bye!"
+  END
+
+global
+  when AMAZON.HelpIntent
+    -> askForTemplate
+
+  # Below intents are handled automagically, but can be overridden if needed.
+  when AMAZON.ScrollUpIntent
+    -> waitForTemplate
+  when AMAZON.ScrollDownIntent
+    -> waitForTemplate
+  when AMAZON.ScrollLeftIntent
+    -> waitForTemplate
+  when AMAZON.ScrollRightIntent
+    -> waitForTemplate
+  when AMAZON.MoreIntent
+    -> waitForTemplate
+  when AMAZON.NavigateHomeIntent
+    -> waitForTemplate
+  when AMAZON.NavigateSettingsIntent
+    -> waitForTemplate
+  when AMAZON.PageDownIntent
+    -> waitForTemplate
+  when AMAZON.PageUpIntent
+    -> waitForTemplate

@@ -1,0 +1,60 @@
+TEST "show each template"
+  launch
+  alexa: waitForTemplate
+  user: "body one"
+  @curTemplate == "BodyTemplate1"
+  alexa: waitForTemplate
+  user: "body two"
+  @curTemplate == "BodyTemplate2"
+  alexa: waitForTemplate
+  user: "body three"
+  @curTemplate == "BodyTemplate3"
+  alexa: waitForTemplate
+  user: "body six"
+  @curTemplate == "BodyTemplate6"
+  alexa: waitForTemplate
+  user: "body seven"
+  @curTemplate == "BodyTemplate7"
+  alexa: waitForTemplate
+  user: "list one"
+  @curTemplate == "ListTemplate1"
+  alexa: waitForTemplate
+  user: "list two"
+  @curTemplate == "ListTemplate2"
+  alexa: waitForTemplate
+  user: AMAZON.StopIntent
+  END
+
+TEST "next screen flow"
+  launch
+  user: AMAZON.NextIntent
+  @curTemplate == "BodyTemplate1"
+  user: AMAZON.NextIntent
+  @curTemplate == "BodyTemplate2"
+  user: AMAZON.NextIntent
+  @curTemplate == "BodyTemplate3"
+  user: AMAZON.NextIntent
+  @curTemplate == "BodyTemplate6"
+  user: AMAZON.NextIntent
+  @curTemplate == "BodyTemplate7"
+  user: AMAZON.NextIntent
+  @curTemplate == "ListTemplate1"
+  user: AMAZON.NextIntent
+  @curTemplate == "ListTemplate2"
+
+TEST "previous screen flow"
+  launch
+  user: AMAZON.PreviousIntent
+  @curTemplate == "ListTemplate2"
+  user: AMAZON.PreviousIntent
+  @curTemplate == "ListTemplate1"
+  user: AMAZON.PreviousIntent
+  @curTemplate == "BodyTemplate7"
+  user: AMAZON.PreviousIntent
+  @curTemplate == "BodyTemplate6"
+  user: AMAZON.PreviousIntent
+  @curTemplate == "BodyTemplate3"
+  user: AMAZON.PreviousIntent
+  @curTemplate == "BodyTemplate2"
+  user: AMAZON.PreviousIntent
+  @curTemplate == "BodyTemplate1"

@@ -1,0 +1,4 @@
+TEST "happy path"
+  launch
+  user: "done"
+  END

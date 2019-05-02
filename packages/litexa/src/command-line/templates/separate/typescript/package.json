@@ -1,0 +1,37 @@
+{
+  "name": "{name}-lib",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "clean": "npx rimraf node_modules && npm install",
+    "compile": "npx tsc",
+    "compile:watch": "npx tsc -w",
+    "test": "npx mocha --opts mocha.opts '**/*.spec.ts'",
+    "test:debug": "npx mocha debug --opts mocha.opts '**/*.spec.ts'",
+    "test:file": "npx mocha --opts mocha.opts",
+    "test:file:debug": "npx mocha debug --opts mocha.opts",
+    "test:watch": "npx mocha --opts mocha.opts '**/*.spec.ts' --watch",
+    "lint": "npx tslint -c tslint.json --project tsconfig.json --fix"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/chai": "4.1.7",
+    "@types/mocha": "5.2.5",
+    "@types/node": "10.12.18",
+    "@types/pino": "5.8.3",
+    "chai": "4.2.0",
+    "mocha": "5.2.0",
+    "source-map-support": "0.5.10",
+    "ts-node": "8.0.1",
+    "tsconfig-paths": "3.7.0",
+    "tslint": "5.12.1",
+    "typescript": "3.2.4"
+  },
+  "dependencies": {
+    "pino": "5.10.6",
+    "pino-pretty": "2.5.0"
+  }
+}
