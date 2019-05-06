@@ -19,6 +19,7 @@ cache:
 stages:
   - name: build
   - name: coverage
+  - name: test
   - name: nightly
     if: type = cron AND branch = develop
   - name: publish
