@@ -40,7 +40,7 @@ jobs:
     - stage: nightly
       name: 'Nightly Build'
       script:
-        - lerna publish --yes --canary --preid nightly --dist-tag nightly
+        - lerna publish --yes --canary --preid nightly.$TRAVIS_BUILD_ID --dist-tag nightly
       before_script:
         - echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" >> $HOME/.npmrc 2> /dev/null
     - stage: publish

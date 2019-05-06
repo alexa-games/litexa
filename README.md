@@ -14,7 +14,7 @@ Full documentation is available at <http://litexa.games.alexa.a2z.com/>
 
 The following packages are in this repo.
 
-### litexa
+### @litexa/core
 
 The compiler and common tooling for Litexa.
 Installing this globally installs the Litexa command line tool.

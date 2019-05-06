@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /*
  * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * Copyright 2019 Amazon.com (http://amazon.com/), Inc. or its affiliates. All Rights Reserved.
@@ -9,7 +11,6 @@
  * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
 
-#!/usr/bin/env node
 require('../../aliasing');
 var coffee = require('coffeescript').register();
 require('./router.coffee').run();
