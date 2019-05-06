@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /*
  * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * Copyright 2019 Amazon.com (http://amazon.com/), Inc. or its affiliates. All Rights Reserved.
@@ -8,8 +10,6 @@
  * terms not defined in this file have the meanings given to them in the Agreement.
  * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
-
-#!/usr/bin/env node
 
 var coffee = require('coffeescript').register();
 
