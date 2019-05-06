@@ -1,0 +1,188 @@
+launch
+  -> menu
+
+
+menu
+  when GOTOS
+    -> first
+
+  when END1
+    END
+
+  when END2
+    -> end2
+
+  when END3
+    $shouldEnd = true
+    -> shouldEnd
+
+  when END4
+    -> end4
+
+  when END5
+    -> end5
+
+  when LISTEN1
+    LISTEN
+
+  when LISTEN2
+    -> listen2
+
+  when LISTEN3
+    $shouldEnd = false
+    -> shouldEnd
+
+  when LISTEN4
+    -> listen2
+
+  when LISTEN5
+    LISTEN microphone
+
+  when LISTEN6
+    -> listen6
+
+  when LISTEN7
+    LISTEN events
+
+  when LISTEN8
+    -> listen8
+
+  when LISTEN9
+    LISTEN microphone, events
+
+  when LISTEN10
+    LISTEN events, microphone
+
+
+first
+  if false
+    -> bad
+  else
+    -> second
+
+second
+
+  when NOTTHIS
+    -> bad
+
+  when MOVEON
+    -> third
+
+third
+  switch a = 5
+    == 2 then
+      -> bad
+    == 5 then
+      -> fourth
+    else
+      -> bad
+
+fourth
+  for value in getList()
+    if value == "yo"
+      -> fifth
+
+fifth
+  END
+
+
+end2
+  END
+
+end4
+  for value in getList()
+    END
+
+end5
+  for value in getList()
+    if value == "yo"
+      END
+
+
+shouldEnd
+  if $shouldEnd
+    END
+  else
+    LISTEN
+
+
+listen2
+  LISTEN
+
+listen4
+  for value in getList()
+    LISTEN
+
+listen6
+  LISTEN microphone
+
+listen8
+  LISTEN events
+
+
+bad
+  # shouldn't get here
+
+
+TEST "happy"
+  launch
+  user: GOTOS
+  alexa: second
+  user: MOVEON
+  END
+
+  launch
+  user: END1
+  END
+
+  launch
+  user: END2
+  END
+
+  launch
+  user: END3
+  END
+
+  launch
+  user: END4
+  END
+
+  launch
+  user: LISTEN1
+  LISTEN
+
+  launch
+  user: LISTEN2
+  LISTEN
+
+  launch
+  user: LISTEN3
+  LISTEN
+
+  launch
+  user: LISTEN4
+  LISTEN
+
+  launch
+  user: LISTEN5
+  LISTEN microphone
+
+  launch
+  user: LISTEN6
+  LISTEN microphone
+
+  launch
+  user: LISTEN7
+  LISTEN
+
+  launch
+  user: LISTEN8
+  LISTEN events
+
+  launch
+  user: LISTEN9
+  LISTEN events, microphone
+
+  launch
+  user: LISTEN10
+  LISTEN microphone

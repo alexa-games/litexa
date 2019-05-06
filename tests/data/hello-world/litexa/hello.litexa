@@ -1,0 +1,72 @@
+# a simple skill that
+# * asks the user for their name
+# * greets them by name
+# * says goodbye
+
+initialize
+  log "here"
+  set resetOnLaunch = false
+
+launch
+  soundEffect door-bell.mp3
+  unless context.intent
+    say "Hello"
+      or "Hi"
+      or "Greetings"
+    say "there."
+      or "friend."
+    -> askName
+
+  when "my name is $name"
+    say "Nice to meet you $name,"
+      or "That's a nice name $name,"
+      or "A pleasure to meet you $name,"
+    -> bye
+
+
+  otherwise
+    say "I didn't understand that."
+    END
+
+askName
+  say "What is your name?"
+  reprompt "Don't be shy, what's your name?"
+    or "I can't say hello properly unless I know it, what's your name?"
+
+  when AMAZON.RepeatIntent
+    say "I asked,"
+    -> askName
+
+  when "my name is $name"
+    or "it is $name"
+    or "they call me $name"
+    or "I'm $name"
+    or "$name"
+    with $name = AMAZON.US_FIRST_NAME
+
+    local name = formatName($name)
+    log "testing module " + name
+    say "Nice to meet you $name,"
+      or "That's a nice name $name,"
+      or "A pleasure to meet you $name,"
+
+    card "Hi $name!", flowers.jpg
+    -> bye
+
+  otherwise
+    say "Appologies, I didn't quite get that."
+      or "Sorry, I didn't understand that."
+    -> askName
+
+bye
+  say "goodbye."
+    or "hear ya next time."
+    or "catch you later."
+
+  END
+
+
+global
+  when AMAZON.HelpIntent
+    say "Introduce yourself by saying something like my name is Jane. "
+    -> askName

@@ -1,0 +1,50 @@
+{
+  "version": "1.0",
+  "type": "ENTITLEMENT",
+  "referenceName": "Entitlement_isp",
+  "publishingInformation": {
+    "locales": {
+      "en-US": {
+        "name": "ent lf",
+        "summary": "TODO: REPLACE THIS WITH TEXT DESCRIBING WHY THIS IS A VALUABLE PRODUCT",
+        "description": "TODO: REPLACE THIS WITH A LONGFORM PRODUCT DESCRIPTION FOR DISPLAY",
+        "smallIconUri": "TODO",
+        "largeIconUri": "TODO",
+        "examplePhrases": [
+          "TODO: REPLACE THIS WITH SAMPLE UTTERANCE FOR HOW USERS WILL BUY OR INVOKE THIS PRODUCT - 'Alexa, buy product name'  Or 'Alexa, play product name'"
+        ],
+        "keywords": [
+          "TODO: REPLACE THIS WITH ARRAY OF KEYWORDS TO BE USED FOR SEARCH INDEXING THE PRODUCT"
+        ],
+        "customProductPrompts": {
+          "purchasePromptDescription": "TODO: REPLACE THIS WITH TEXT THAT DIFFERS FROM SUMMARY AND ALEXA WILL USE TO DESCRIBE THE PRODUCT IN THE PURCHASE PROMPT",
+          "boughtCardDescription": "TODO: REPLACE THIS WITH TEXT TO DISPLAY IN APP CARD WHEN CUSTOMER HAS PURCHASED THIS PRODUCT"
+        }
+      }
+    },
+    "distributionCountries": [
+      "US"
+    ],
+    "pricing": {
+      "amazon.com": {
+        "releaseDate": "2019-11-15T00:00Z",
+        "defaultPriceListing": {
+          "price": 0.99,
+          "currency": "USD"
+        }
+      }
+    },
+    "taxInformation": {
+      "category": "SOFTWARE"
+    }
+  },
+  "privacyAndCompliance": {
+    "locales": {
+      "en-US": {
+        "privacyPolicyUrl": "http://amazon.com"
+      }
+    }
+  },
+  "testingInstructions": "TODO: REPLACE THIS WITH TESTING INSTRUCTIONS FOR THE CERTIFICATION TEAM SO THEY KNOW HOW TO PURCHASE AND USE THIS PRODUCT",
+  "purchasableState": "PURCHASABLE"
+}

@@ -1,0 +1,60 @@
+{
+  "name": "litexa",
+  "version": "0.0.1",
+  "description": "",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "build": "npm run clean && npm install",
+    "clean": "npx lerna clean --yes && npx rimraf ./node_modules ./.nyc_output",
+    "coverage": "npx rimraf .nyc_output_combined && npx lerna exec --concurrency 1 npm run coverage && npm run coverage:report",
+    "coverage:combine": "npx rimraf .nyc_output && npx move-cli .nyc_output_combined .nyc_output && npx move-cli ./build/brazil-documentation/coverage/cobertura-coverage.xml ./build/brazil-documentation/coverage/coverage.xml",
+    "coverage:report": "npm run coverage:combine && npx nyc report",
+    "docs": "npm run docs:reference && npm run docs:dev",
+    "docs:build": "npm run docs:reference && npx vuepress build docs",
+    "docs:dev": "npx vuepress dev docs",
+    "docs:reference": "cd ./packages/litexa && npm run rdoc && npx move-cli ./src/documentation/reference.md ../../docs/reference/README.md && cd ../../",
+    "postinstall": "npx lerna bootstrap && npx lerna link convert",
+    "release": "npm run build && npm run coverage",
+    "test": "npx lerna exec --concurrency 1 npm run test"
+  },
+  "author": "Amazon.com",
+  "license": "SEE LICENSE IN LICENSE.TXT",
+  "keywords": [
+    "Alexa",
+    "Skills",
+    "SDK"
+  ],
+  "dependencies": {
+    "@litexa/apl": "file:packages/litexa-apl",
+    "@litexa/assets-wav": "file:packages/litexa-assets-wav",
+    "@litexa/core": "file:packages/litexa",
+    "@litexa/deploy-aws": "file:packages/litexa-deploy-aws",
+    "@litexa/gadgets": "file:packages/litexa-gadgets",
+    "@litexa/integration-tests": "file:tests",
+    "@litexa/render-template": "file:packages/litexa-render-template"
+  },
+  "devDependencies": {
+    "assert": "1.4.1",
+    "aws-sdk": "2.395.0",
+    "chai": "4.2.0",
+    "chai-as-promised": "7.1.1",
+    "chai-things": "0.2.0",
+    "chokidar": "2.1.0",
+    "coffeescript": "2.3.2",
+    "lerna": "3.13.1",
+    "mkdirp": "0.5.1",
+    "mocha": "6.0.2",
+    "module-alias": "2.2.0",
+    "move-cli": "1.2.1",
+    "nyc": "13.3.0",
+    "rimraf": "2.6.3",
+    "sinon": "7.2.7",
+    "vuepress": "0.14.10",
+    "webpack-dev-middleware": "3.6.2"
+  },
+  "repository": "github:alexa-labs/litexa",
+  "bugs": "https://github.com/alexa-labs/litexa/issues",
+  "homepage": "https://litexa.github.io"
+}

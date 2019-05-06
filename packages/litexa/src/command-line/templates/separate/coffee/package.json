@@ -1,0 +1,27 @@
+{
+  "name": "{name}-lib",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "clean": "npx rimraf node_modules index.js **/*.js && npm install",
+    "compile": "npx coffee --compile *.coffee",
+    "test": "npx mocha --opts mocha.opts './{,!(node_modules)/**}/*.spec.coffee'",
+    "test:debug": "npx mocha debug --opts mocha.opts './{,!(node_modules)/**}/*.spec.coffee'",
+    "test:file": "npx mocha --opts mocha.opts",
+    "test:file:debug": "npx mocha debug --opts mocha.opts",
+    "test:watch": "npx mocha --opts mocha.opts './{,!(node_modules)/**}/*.spec.coffee' --watch"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "chai": "4.2.0",
+    "coffeescript": "2.3.2",
+    "mocha": "5.2.0",
+    "sinon": "7.2.3"
+  },
+  "dependencies": {
+    "pino": "5.10.6",
+    "pino-pretty": "2.5.0"
+  }
+}

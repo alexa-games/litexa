@@ -1,0 +1,81 @@
+# start with a launch state
+launch
+  # greet the user, with their name, if we have it
+  if @name
+    say "Hello again, @name.
+         Wait a minute... you could be someone else."
+  else
+    say "Hi there, human."
+  # move on to the askForName state
+  -> askForName
+
+  when BAD_LOOPER
+    say "looping:"
+    -> badloop
+
+  when GOOD_LOOPER
+    say "looping:"
+    @loopCounter = 0
+    -> goodloop
+
+badloop
+  say "loop"
+  -> badbadloop
+
+badbadloop
+  say "boop"
+  -> badloop
+
+goodloop
+  @loopCounter = @loopCounter + 1
+  say "loop @loopCounter"
+  log @loopCounter
+  if @loopCounter >= 10
+    say "doop"
+    END
+  else
+    -> goodloop
+
+askForName
+  # do this when we first enter this state
+  say "What's your name?"
+  # install a re prompt, for the next time the mic opens
+  # and the user doesn't say anything
+  reprompt "Please tell me your name?"
+  -> waitForName
+
+waitForName
+  # do nothing when we start this state
+  # and go nowhere, which ends the handler
+  # and assumes Alexa should open the microphone
+
+  when "my name is $name"
+    or "call me $name"
+    or "$name"
+    with $name = AMAZON.US_FIRST_NAME
+    # if the user says this intent
+
+    # save the name in the permanent database
+    @name = $name
+
+    say "Nice to meet you, $name. It's a fine {todayName()}, isn't it?"
+    -> goodbye
+
+  when AMAZON.HelpIntent
+    # if the user says something that matches
+    # Alexa's built in help intent
+    say "Just tell me your name please. I'd like to know it."
+    reprompt "Please? I'm really curious to know what your name is."
+    # loop back to this state
+    -> waitForName
+
+  otherwise
+    # if it's none of the other intents in this state
+    say "Sorry, I didn't understand that."
+    # loop back to asking the question
+    -> askForName
+
+goodbye
+  say "Bye now!"
+  # we're done with the skill, tell litexa to quit
+  END

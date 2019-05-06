@@ -1,0 +1,48 @@
+launch
+  if isEntitledIsp(context, 'Entitlement_isp')
+    say "entitled"
+    -> listen
+  else
+    say "not entitled"
+    -> listen
+
+  when Connections.Response
+    local response = getMonetizationResponse(context)
+    if response.isMonetizationResponse
+      if response.purchaseResult == "ACCEPTED"
+        say "You've got a new item {response.reference_name}."
+      if response.purchaseResult == "DECLINED"
+        say "Maybe next time."
+    else
+      say "not monetization response."
+
+listen
+  when "cancel"
+    CancelPurchase "Entitlement_isp"
+# line above can be replaced with
+#    local a = buildCancelPurchaseDirective(context, 'Entitlement_isp')
+    END
+
+  when "purchase"
+    -> purchase
+
+
+purchase
+  Purchase "Entitlement_isp"
+# line above can be replaced with
+#  local b = buildPurchaseDirective(context, 'Entitlement_isp')
+  END
+
+
+global
+
+  when AMAZON.HelpIntent
+    END
+
+  when AMAZON.StartOverIntent
+    -> launch
+
+  otherwise
+    say "I'm sorry, I didn't understand that."
+    END
+

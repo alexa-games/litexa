@@ -1,0 +1,29 @@
+{
+  "name": "@litexa/assets-wav",
+  "author": "Amazon.com",
+  "version": "0.1.0",
+  "license": "SEE LICENSE IN LICENSE.TXT",
+  "description": "This module adds automatic support for WAV files in the asset pipeline of a Litexa project.",
+  "keywords": [
+    "Alexa",
+    "wav",
+    "Skill",
+    "mp3",
+    "SDK"
+  ],
+  "main": "index.js",
+  "dependencies": {
+    "coffeescript": "2.3.2",
+    "lame": "1.2.4",
+    "wav-decoder": "1.3.0"
+  },
+  "scripts": {
+    "build": "npm run clean && npm install",
+    "clean": "npx rimraf node_modules",
+    "coverage": "echo \"Missing coverage script.\" && exit 0",
+    "test": "echo \"Missing test script.\" && exit 0"
+  },
+  "repository": "github:alexa-labs/litexa",
+  "bugs": "https://github.com/alexa-labs/litexa/issues",
+  "homepage": "https://litexa.github.io"
+}

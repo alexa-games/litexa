@@ -1,0 +1,64 @@
+# start with a launch state
+launch
+  say "Gadgets API test skill."
+  say "Your buttons should be lighting up now, if they're awake."
+
+  directive pulseButtons()
+  -> waitForReady
+
+waitForReady
+  say "Do you have at least 2 buttons?"
+
+  when AMAZON.YesIntent
+    say "Press a button to get a sound."
+    startInputHandler anyButtonHandler()
+    -> waitForButton
+
+  when AMAZON.NoIntent
+    say "Okay. <...2s> How about now?"
+
+waitForButton
+
+  when GameEngine.InputHandlerEvent
+    if $request.events[0].name != "finished"
+      soundEffect doorbell.mp3
+      say "hey there"
+        or "hello"
+        or "hi"
+        or "who's there?"
+
+  when GameEngine.InputHandlerEvent "button1"
+    say "button one"
+    local aLocal = 2
+    log "received event " + $event.name
+    -> waitForButton
+
+  when GameEngine.InputHandlerEvent "button2"
+    say "button two"
+    local aLocal = 2
+    -> waitForButton
+
+  when GameEngine.InputHandlerEvent "finished"
+    -> goodbye
+
+  when AMAZON.StopIntent
+    -> goodbye
+
+  when AMAZON.HelpIntent
+    say "just press a button"
+    -> waitForButton
+
+  when "nothing"
+    log "nothing"
+    -> waitForButton
+
+
+goodbye
+  say "alright then, goodbye"
+  END
+
+global
+  when "endInputHandler"
+    say "stopping the input handler"
+    stopInputHandler
+    -> waitForButton

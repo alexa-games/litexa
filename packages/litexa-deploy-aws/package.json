@@ -1,0 +1,37 @@
+{
+  "name": "@litexa/deploy-aws",
+  "version": "0.1.0",
+  "description": "Implements deployment for litexa to AWS Lambda, DynamoDB and S3.",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm run clean && npm install",
+    "clean": "npx rimraf node_modules",
+    "coverage": "npx nyc npm test && node ../../cacheCoverage.js",
+    "test": "npx mocha \"./test/**/*.spec.coffee\"",
+    "test:debug": "npx mocha debug \"./test/**/**.spec.coffee\"",
+    "test:file": "npx mocha",
+    "test:file:debug": "npx mocha debug"
+  },
+  "author": "Amazon.com",
+  "license": "SEE LICENSE IN LICENSE.TXT",
+  "keywords": [
+    "Alexa",
+    "Skill",
+    "deploy",
+    "AWS",
+    "SDK"
+  ],
+  "dependencies": {
+    "adm-zip": "0.4.13",
+    "aws-sdk": "2.395.0",
+    "coffeescript": "2.4.1",
+    "debug": "3.2.6",
+    "md5-file": "4.0.0",
+    "mime": "2.4.0",
+    "mkdirp": "0.5.1",
+    "rimraf": "2.6.3"
+  },
+  "repository": "github:alexa-labs/litexa",
+  "bugs": "https://github.com/alexa-labs/litexa/issues",
+  "homepage": "https://litexa.github.io"
+}

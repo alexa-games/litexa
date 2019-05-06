@@ -1,0 +1,26 @@
+TEST "happy path"
+  launch 
+  @game.score == 0
+  @control == 5
+
+  user: NEXT
+  @game.score == 123
+  @board.focus == 15
+  @wrapped.first == "Lana"
+  @wrapped.loaded == true
+
+  user: NEXT
+  @game.score == 123
+  @board.focus == 15
+  @game.constructed == 1
+  @board.constructed == 1
+  @game.flag == true
+
+  user: NEXT
+  @game.score == 0
+  @game.constructed == 1
+  @board.focus == 15
+  @name.first == "Jim"
+  @name.last == "Replacey"
+  @wrapped.family == "Doe"
+  @control == 5

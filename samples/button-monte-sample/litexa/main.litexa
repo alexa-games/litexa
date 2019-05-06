@@ -1,0 +1,354 @@
+# We will end up using our Game object often, so it makes sense
+# to move its initialization here, out of handlers.
+# This means that @game will always already be a constructed
+# instance of the Game class when accessed. Its actual constructor
+# will only be executed once. From then on, its
+# data will be stored in the database, and its prototype will
+# be reattached at each skill request.
+define @game as Game
+
+launch
+  -> intro
+
+  # one-shot help intent (e.g., "Alexa, ask button monte for help")
+  when AMAZON.HelpIntent
+    say "Launch me again to have another go! Ask me to start over if you'd like to begin fresh."
+    END
+
+  # any other intent that might've been invoked as the skill launch
+  otherwise
+    -> intro
+
+
+intro
+  # check out some utility functions in litexa-library.coffee
+  if minutesBetween(context.now, @lastLaunch) > 10
+    @launched = false
+  # record number of rematches as a metric
+  if minutesBetween(context.now, @lastLaunch) < 5
+    metric relaunch
+  @lastLaunch = context.now
+
+  if @launched
+    # shorter dialogue on relaunch so that players can start the game earlier
+    soundEffect Intro-Jingle-Short.mp3
+    say "Alright! "
+      or "Here we go! "
+      or "Welcome back, "
+  else
+    soundEffect Intro-Jingle.mp3
+    say "Oh, I love this game!
+      We'll need two players for this,
+      we'll call one the Watcher, and the other the Trickster."
+
+  screen title.jpg
+
+  if minutesBetween(context.now, @lastCardTime) > 30
+    # send a card to the companion app with the instructions if we haven't done so in 30 minutes
+    card "Step right up to Button Monte!", title.jpg
+      content: "Watcher, keep an eye on the red button.
+        Trickster, shuffle the buttons around.
+        Watcher, as soon as the buttons turn green,
+        press the one you think was the red button.
+
+        Good luck!"
+    @lastCardTime = context.now
+
+  -> startRollCall
+
+
+startRollCall
+  # let's skip roll call on a quick relaunch so that users can get back into the game quickly
+  # buttons are still awake, so the saved gadget IDs are still relevant
+  if @launched and @game.hasCompletedRollCall()
+    -> start
+  else
+    directive dimButtons()
+    @launched = true
+    say "Before we start: Trickster, how many buttons do you want to use?"
+    reprompt "Tell me Trickster, how many buttons should I look for?"
+    -> rollCallCount
+
+
+rollCallCount
+  when COUNT_BUTTONS
+    or "$count buttons"
+    or "$count echo buttons"
+    or "let's do $count buttons"
+    or "how about $count buttons"
+    or "$count"
+    with $count = AMAZON.NUMBER
+
+    if isActuallyANumber($count)
+      if $count <= 1
+        say "now now, we'll need at least two buttons."
+        -> startRollCall
+      else if $count > 4
+        say "<!ouch>, I can't deal with more than four buttons right now."
+        -> startRollCall
+      else
+        startInputHandler @game.rollCallDirective($count)
+        say "Great! Now, please press each of those $count buttons in turn."
+        soundEffect Wait-Music.mp3
+        -> rollCall
+    else
+      say "I think I misheard that, how many buttons did you want?"
+      -> rollCallCount
+
+  when AMAZON.HelpIntent
+    say "Please tell me how many buttons you'd like to use."
+    -> rollCallCount
+
+  otherwise
+    say "I didn't get that. Please tell me how many buttons you'd like to use."
+    -> rollCallCount
+
+
+rollCall
+  # close microphone but keep session open
+  LISTEN
+  screen title.jpg
+
+  when GameEngine.InputHandlerEvent "NewButton"
+    local registered = @game.registerButtons($event)
+    # this input handler will get events for already-pressed buttons,
+    # so don't do anything if an already-registered button is pressed
+    if registered
+      directive @game.lightUpNewButtons()
+      soundEffect Button-Pressed.mp3
+      # Note that these say variations all end in {@game.buttonCount()}.
+      # You could move that part to a following say statement by itself,
+      # but it makes more sense to separate out say phrases by content and
+      # presentation, rather than by optimizing for code repetition. If you
+      # work with a localizer for your skill, it will be clearer for them
+      # to understand less-fragmented sentence structures.
+      say "Hey there button {@game.buttonCount()}"
+        or "How you doing, button {@game.buttonCount()}?"
+        or "Hi, button {@game.buttonCount()}"
+        or "What's up, button {@game.buttonCount()}?"
+      soundEffect Wait-Music.mp3
+    # we don't want SSML to be interrupted here, so we enforce a 3 second
+    # minimum time between responses sent from our skill
+    setResponseSpacing = 3000
+    -> rollCall
+
+  when GameEngine.InputHandlerEvent "Timedout"
+    if @game.buttonCount() == 0
+      say "Hmm, I didn't hear from any buttons."
+    else if @game.buttonCount() == 1
+      say "Hey, I only heard from one button."
+    else
+      say "Hmm, I only heard from {@game.buttonCount()} buttons."
+
+    say "If you have issues with your Echo Buttons, go to the menu in your Alexa app and select Help and Feedback. Then, under the User Guide section, select Echo Buttons."
+    screen
+      template: "BodyTemplate6"
+      primaryText: "<center>For troubleshooting steps, go to the menu in your Alexa app and select Help & Feedback. Then, under the User Guide section, select Echo Buttons."
+    card "Echo Button Troubleshooting"
+      content: "For troubleshooting steps, go to the menu in your Alexa app and select Help & Feedback. Then, under the User Guide section, select Echo Buttons."
+    END
+
+  when GameEngine.InputHandlerEvent "Finished"
+    @thisGameDidRollCall = true
+    soundEffect Button-Pressed.mp3
+    local registered = @game.registerButtons($event)
+    say "Got 'em, moving on."
+    setResponseSpacing = 3000
+    -> start
+
+  when AMAZON.HelpIntent
+    say "Press each button you want to use, once."
+    soundEffect Wait-Music.mp3
+    -> rollCall
+
+  otherwise
+    say "I didn't get that. Press each button you want to use, once."
+    soundEffect Wait-Music.mp3
+    -> rollCall
+
+
+start
+  if minutesBetween(context.now, @startRules) > 10
+    # We mixed the soundtrack with Alexa speech. This is the speech below:
+    #say "Watcher, keep an eye on the red button.
+    #  Trickster, shuffle the buttons around.
+    #  Watcher, as soon as the buttons turn green,
+    #  press the one you think was the red button. Good luck!"
+    soundEffect Round-Music-LongVO.mp3
+  else
+    if minutesBetween(context.now, @startOverPrompt) > 15
+      say "Hey, if you want to change the number of buttons
+        we're using, just ask me to start over!"
+      @startOverPrompt = context.now
+    # say "Shuffle 'em up Trickster. Watcher, eyes on the prize!"
+    soundEffect Round-Music-ShortVO.mp3
+
+  @startRules = context.now
+
+  local directives = @game.startGame(@thisGameDidRollCall)
+  # declare startInputHandler separately from other directives
+  #   for the litexa extension to keep track of its originatingRequestId
+  startInputHandler directives[0]
+  # send the rest of the directives
+  directive directives.slice(1)
+  @thisGameDidRollCall = false
+  -> result
+
+
+result
+  LISTEN
+
+  screen title.jpg
+
+  when GameEngine.InputHandlerEvent "win"
+    -> won
+
+  when GameEngine.InputHandlerEvent "lose"
+    @reason = 'badpick'
+    -> lost
+
+  when GameEngine.InputHandlerEvent "timeout"
+    @reason = 'timeout'
+    -> lost
+
+  when AMAZON.HelpIntent
+    # note that game is still running, even though help was invoked
+    say "Watcher, once the buttons turn green
+      press the button you think was red,
+      or you could ask me to start over."
+    soundEffect Round-Music.mp3
+    # here, you can either write `LISTEN` or `-> result` and they will do the same
+    #   it's a personal preference on which you use
+    -> result
+
+  otherwise
+    say "I didn't get that. Watcher, once the buttons turn green
+      press the button you think was red,
+      or you could ask me to start over."
+    soundEffect Round-Music.mp3
+    -> result
+
+
+won
+  metric game-won
+  screen title.jpg
+
+  soundEffect kaching.mp3
+  directive @game.resultDirectives()
+  say "Hah! Look at that, great job."
+    or "Way to go! "
+    or "That's a bingo! "
+    or "Amazing! "
+    or "Winner winner, chicken dinner! "
+    or "<!bada bing bada boom>."
+    or "<!bam>."
+    or "<!bingo>."
+  local rand = randomIndex(6)
+  if rand == 0
+    say "Great work, watcher!"
+    soundEffect Celebration.mp3
+    say "Perhaps you should see how well you do on the other side!"
+  else if rand == 1
+    soundEffect Celebration.mp3
+    say "Not tricky enough, trickster. Maybe you're meant to be a watcher."
+  else
+    say "You won, watcher!"
+    soundEffect Celebration.mp3
+  -> promptReplay
+
+
+lost
+  metric game-lost
+  screen title.jpg
+
+  soundEffect error_buzzer.mp3
+  directive @game.resultDirectives()
+  if @reason == 'badpick'
+    local rand = randomIndex(6)
+    if rand > 0
+      say "Nope! Wrong one."
+      say "Too bad Watcher, better luck next time!"
+        or "Not your day huh, Watcher?"
+        or "<!aw man>"
+        or "<!boo hoo>"
+        or "Well done, trickster. Think you can do as well as the watcher?"
+    else
+      say "Oops, wrong one, watcher. Maybe you'd have better luck as the trickster."
+  else
+    say "<!Doh>. Ran out of time there watcher, you lose."
+  soundEffect Commiseration.mp3
+  -> promptReplay
+
+promptReplay
+  say "One more time?"
+    or "Shall we go again?"
+    or "You two want another round?"
+  reprompt "Want to play another round?"
+
+  when AMAZON.YesIntent
+    say "Alright, here we go! "
+      or "Sweet! "
+      or "Great! "
+      or "Sure, "
+    -> start
+
+  when AMAZON.NoIntent
+    say "No worries. See you next time! "
+    END
+
+  when AMAZON.HelpIntent
+    say "Say start over if you'd like to begin fresh. Otherwise,
+      shuffle the buttons up, and when they turn green, press the
+      one you think used to be red."
+    say "Want to play another round?"
+    reprompt "Want to play another round?"
+
+  when AMAZON.RepeatIntent
+    say "Want to play another round?"
+    reprompt "Want to play another round?"
+
+  otherwise
+    say "Sorry, I didn't understand that."
+    say "Want to play another round?"
+    reprompt "Want to play another round?"
+
+
+global
+  when AMAZON.StopIntent
+    say "See ya later, alligator"
+    # good practice to explicitly end the skill session for AMAZON.StopIntent
+    # litexa will do this for you for AMAZON.StopIntent and AMAZON.CancelIntent
+    # in case you forget, though :)
+    END
+
+  when AMAZON.CancelIntent
+    say "After a while, crocodile"
+    END
+
+  when AMAZON.StartOverIntent
+    # in the case that the user asks to start over in the
+    # middle of an input handler, we don't want the
+    # timeout or any other event to occur anymore
+    stopInputHandler
+    @launched = false
+    @startRules = 0
+    -> intro
+
+  # Note that there is no help intent or otherwise in the global state,
+  # because it is handled contextually in all other states where it would occur.
+
+# this state will never be reached
+renderTemplateRequiredIntents
+  # These are required to exist in the skill model since the skill uses the RenderTemplate interface.
+  # Only the Next and Previous intents go to our skill though, but since we don't handle them in other
+  # states, these will route to that state's 'otherwise' handler.
+  when AMAZON.MoreIntent
+  when AMAZON.NavigateSettingsIntent
+  when AMAZON.NextIntent
+  when AMAZON.PageDownIntent
+  when AMAZON.PageUpIntent
+  when AMAZON.PreviousIntent
+  when AMAZON.ScrollDownIntent
+  when AMAZON.ScrollLeftIntent
+  when AMAZON.ScrollRightIntent
+  when AMAZON.ScrollUpIntent

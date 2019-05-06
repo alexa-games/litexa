@@ -1,0 +1,51 @@
+# start with a launch state
+launch
+  # greet the user, with their name if we have it
+  if @name
+    say "Hello again, @name.
+         Wait a minute... you could be someone else."
+  else
+    say "Hi there, human."
+  # move on to the askForName state
+  -> askForName
+
+askForName
+  # add this question to our next response
+  say "What's your name?"
+  # add an automatic re-prompt, in case the user says nothing
+  reprompt "Please tell me your name?"
+  -> waitForName
+
+waitForName
+  # do nothing when we start this state, and go nowhere; this ends the handler,
+  # sends our response, and opens the microphone to listen
+
+  when "my name is $name"
+    or "call me $name"
+    or "$name"
+    with $name = AMAZON.US_FIRST_NAME
+    # if user answers with a name from our names list
+
+    # save the name in the permanent database
+    @name = $name
+
+    say "Nice to meet you, $name. It's a fine {todayName()}, isn't it?"
+    -> goodbye
+
+  when AMAZON.HelpIntent
+    # if user says something that maps to the built-in help intent
+    say "Just tell me your name please. I'd like to know it."
+    reprompt "Please? I'm really curious to know what your name is."
+    # loop back to waiting for a name
+    -> waitForName
+
+  otherwise
+    # if user says something that maps to neither of the above intents
+    say "Sorry, I didn't understand that."
+    # loop back to asking for the name
+    -> askForName
+
+goodbye
+  say "Bye now!"
+  # we're done with the skill; end the skill session
+  END

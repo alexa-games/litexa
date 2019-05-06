@@ -1,0 +1,61 @@
+language: node_js
+node_js:
+  - '10'
+  - '9'
+  - '8'
+os:
+  - linux
+  - osx
+
+git:
+  depth: false
+
+cache:
+  directories:
+    - $HOME/.npm
+    - node_modules
+    - packages/*/node_modules
+
+stages:
+  - name: build
+  - name: coverage
+  - name: nightly
+    if: type = cron AND branch = develop
+  - name: publish
+    if: branch = master AND type = push AND tag IS blank
+
+jobs:
+  include:
+    - stage: build
+      name: 'Compile'
+      script: npm run build
+      before_script:
+        - echo "$TRAVIS_EVENT_TYPE"
+        - echo "$TRAVIS_COMMIT"
+        - echo "$TRAVIS_BRANCH"
+        - echo "$TRAVIS_TAG"
+    - stage: coverage
+      name: 'Code Coverage and Tests'
+      script: npm run coverage
+    - stage: nightly
+      name: 'Nightly Build'
+      script:
+        - lerna publish --yes --canary --preid nightly --dist-tag nightly
+      before_script:
+        - echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" >> $HOME/.npmrc 2> /dev/null
+    - stage: publish
+      name: 'Publish'
+      script:
+        - lerna version --github-release --conventional-commits --yes
+        - lerna publish from-git --yes
+      before_script:
+        - echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" >> $HOME/.npmrc 2> /dev/null
+        - git config user.email $GH_EMAIL
+        - git config user.name $GH_NAME
+        - git remote set-url origin https://$GH_TOKEN@github.com/$GH_REPO.git
+        - git checkout master
+      after_script:
+        - git fetch
+        - git checkout -t origin/develop
+        - git merge master
+        - git push

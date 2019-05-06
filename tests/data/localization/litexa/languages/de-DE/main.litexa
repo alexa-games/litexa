@@ -1,0 +1,15 @@
+launch
+  say "Schönen Tag."
+  -> askQuestion
+
+askQuestion
+  say "frage?"
+
+  when ANSWER
+    or "antworten"
+    say "Gut, ich verstehe."
+    -> goobye
+
+goobye
+  say "Auf wiedersehen."
+  END

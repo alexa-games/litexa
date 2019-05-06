@@ -1,0 +1,109 @@
+# this skill just loops through the same state producing
+# strings of variations that the external test code will
+# validate for the absence of repetition
+
+launch
+  testSay(context)
+  -> doubles
+
+doubles
+  say "one"
+    or "two"
+
+  when AGAIN
+    -> doubles
+
+  when NEXT
+    -> triples
+
+triples
+  say "uno"
+    or "dos"
+    or "tres"
+
+  when AGAIN
+    -> triples
+
+  when NEXT
+    -> manies
+
+
+manies
+  say "alpha"
+    or "beta"
+    or "gamma"
+    or "delta"
+    or "epsilon"
+    or "mu"
+    or "nu"
+    or "xi"
+
+  when AGAIN
+    -> manies
+
+  when NEXT
+    -> sounds
+
+sounds
+  soundEffect first.mp3
+    or second.mp3
+    or third.mp3
+
+  when AGAIN
+    -> sounds
+
+
+TEST "randoms"
+  launch
+
+  # doubles
+  user: AGAIN
+  user: AGAIN
+  user: AGAIN
+  user: AGAIN
+  user: AGAIN
+
+  # triples
+  user: NEXT
+  user: AGAIN
+  user: AGAIN
+  user: AGAIN
+  user: AGAIN
+  user: AGAIN
+  user: AGAIN
+  user: AGAIN
+  user: AGAIN
+  user: AGAIN
+  user: AGAIN
+
+  # manies
+  user: NEXT
+  user: AGAIN
+  user: AGAIN
+  user: AGAIN
+  user: AGAIN
+  user: AGAIN
+  user: AGAIN
+  user: AGAIN
+  user: AGAIN
+  user: AGAIN
+  user: AGAIN
+  user: AGAIN
+  user: AGAIN
+  user: AGAIN
+  user: AGAIN
+  user: AGAIN
+  user: AGAIN
+  user: AGAIN
+
+  # sounds
+  user: NEXT
+  user: AGAIN
+  user: AGAIN
+  user: AGAIN
+  user: AGAIN
+  user: AGAIN
+  user: AGAIN
+  user: AGAIN
+  user: AGAIN
+  user: AGAIN

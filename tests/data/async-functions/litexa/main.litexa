@@ -1,0 +1,12 @@
+# start with a launch state
+launch
+  say "{ getAfterDelay(1) }"
+  say "{ getAfterDelay(2) }"
+  -> thenState
+
+thenState
+  say "{ getAfterDelay(3) }"
+
+  when "done"
+    say "{ getAfterDelay(4) }"
+    END

@@ -1,0 +1,21 @@
+{
+    "npmClient": "npm",
+    "command": {
+        "publish": {
+            "message": "chore(release): publish %s"
+        },
+        "bootstrap": {
+            "hoist": true
+        }
+    },
+    "packages": [
+        "packages/litexa",
+        "packages/litexa-apl",
+        "packages/litexa-assets-wav",
+        "packages/litexa-deploy-aws",
+        "packages/litexa-gadgets",
+        "packages/litexa-render-template",
+        "tests"
+    ],
+    "version": "0.1.0"
+}

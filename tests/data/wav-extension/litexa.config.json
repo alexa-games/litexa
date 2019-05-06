@@ -1,0 +1,6 @@
+{
+  "name": "wavExtensionTests",
+  "extensionOptions": {
+    "forceMono": false
+  }
+}

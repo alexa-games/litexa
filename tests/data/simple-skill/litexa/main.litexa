@@ -1,0 +1,12 @@
+launch
+  say "hello there"
+  -> goodbye
+
+goodbye
+  say "goodbye"
+  END
+
+
+TEST "run through"
+  launch
+  alexa: null

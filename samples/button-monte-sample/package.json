@@ -1,0 +1,11 @@
+{
+  "name": "button-monte-sample",
+  "version": "0.0.1",
+  "description": "Sample game using Echo Buttons via the @litexa/gadgets extension.",
+  "main": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Amazon.com",
+  "license": "SEE LICENSE IN LICENSE.TXT"
+}

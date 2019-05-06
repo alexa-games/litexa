@@ -1,0 +1,341 @@
+<!--
+  ~ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  ~ Copyright 2019 Amazon.com (http://amazon.com/), Inc. or its affiliates. All Rights Reserved.
+  ~ These materials are licensed as "Restricted Program Materials" under the Program Materials
+  ~ License Agreement (the "Agreement") in connection with the Amazon Alexa voice service.
+  ~ The Agreement is available at https://developer.amazon.com/public/support/pml.html.
+  ~ See the Agreement for the specific terms and conditions of the Agreement. Capitalized
+  ~ terms not defined in this file have the meanings given to them in the Agreement.
+  ~ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Litexa Reference</title>
+  <style>
+    div,
+    p,
+    body,
+    blockquote,
+    pre,
+    ul,
+    ol,
+    li,
+    hr {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #aaa;
+      font-family: "Georgia", "Times", serif;
+      line-height: 1.5;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    #page-wrapper {
+      max-width: 1100px;
+      box-shadow: 0 4px 16px rgb(66, 62, 78);
+      padding: 0;
+      margin: 10pt auto 40pt auto;
+      background: #fff;
+    }
+
+    a {
+      color: #0a4ea7;
+    }
+
+    a:hover {
+      color: #00aeff;
+    }
+
+    hr {
+      width: 90%;
+      height: 2px;
+      background: #f9d96a;
+      outline: none;
+      margin: 2em auto;
+      border: 0;
+    }
+
+    pre {
+      white-space: pre-wrap;
+      border: 0;
+    }
+
+    code {
+      color: #07070c;
+      padding: 1px 4px;
+      margin: 1px 0;
+      display: inline-block;
+      font-family: "Courier", "Andale Mono", monospace;
+      font-size: 11pt;
+      border: 0;
+    }
+
+    p code {
+      border: 1px solid #bbbbe7;
+    }
+
+    code a {
+      color: #07070c;
+    }
+
+    code a:hover {
+      color: #000;
+    }
+
+    pre code {
+      display: block;
+      margin: 0.5em 0 1em 0;
+      padding: 1em;
+      background: #4f4f6c;
+      color: #f5f5ff;
+    }
+
+
+    h1,
+    h2,
+    h3,
+    .entry-name {
+      font-family: "Amazon Ember", helvetica, sans-serif;
+    }
+
+    h1 {
+      padding: 1em 1em 0.5em 1em;
+      margin: 2em 0 0.5em 0;
+      background: #f9d96a;
+      ;
+      color: #000;
+    }
+
+    h1:first-child {
+      margin: 0 0 0.5em 0;
+    }
+
+
+    #pages h2,
+    h3 {
+      margin: 2em 18pt 0.5em 18pt;
+      border-bottom: 2px solid #f9d96a;
+      ;
+    }
+
+    #pages p {
+      padding: 0 24pt;
+      margin-bottom: 1em;
+    }
+
+    #pages>ul {
+      padding: 0 32pt 0 48pt;
+      margin-bottom: 1em;
+    }
+
+    #pages p:last-child {
+      margin-bottom: 0;
+    }
+
+    #pages blockquote {
+      margin: 32pt 32pt;
+      padding: 12pt;
+      background: #ddd;
+      border-left: 8px solid red;
+      border-right: 8px solid red;
+    }
+
+    #pages pre {
+      padding: 0 0;
+      margin-bottom: 1em;
+    }
+
+    #pages pre code {
+      padding: 1em 2em;
+    }
+
+    #toc a {
+      text-decoration: none;
+    }
+
+    #toc a:hover {
+      text-decoration: underline;
+    }
+
+    #toc ul {
+      padding: 0 32pt 0 12pt;
+      margin-left: 0.5em;
+      margin-bottom: 1em;
+      list-style: none;
+    }
+
+    #toc li {
+      margin-bottom: 0.2em;
+    }
+
+    #toc li:before {
+      content: "➡";
+      padding-right: 0.5em;
+      color: #ad8e1e;
+    }
+
+    #toc>ul {
+      margin-left: 4em;
+      margin-bottom: 0;
+    }
+
+
+    #toc>ul>li>ul {
+      margin-top: 0.4em;
+      margin-bottom: 2em;
+    }
+
+    #toc>ul>li>a {
+      font-weight: bold;
+      font-size: 120%;
+    }
+
+    .toc-language-reference li {
+      display: inline-block;
+      margin: 0 0.1em;
+      border: 1px solid #c9b97e;
+      padding: 0 0.6em;
+    }
+
+    #toc .toc-language-reference li:before {
+      content: none;
+    }
+
+    #toc .toc-language-reference li code {
+      background: none;
+      color: #000;
+      padding: 0;
+    }
+
+    #toc .toc-language-reference li code a {
+      background: none;
+      color: #000;
+    }
+
+
+    .entry-cell {
+      padding: 0;
+    }
+
+    .entry-name {
+      padding: 1em;
+      vertical-align: top;
+      border-top: 1px solid rgba(218, 215, 228, 1);
+      border-bottom: 1px solid rgba(218, 215, 228, 1);
+      text-align: right;
+      background: linear-gradient(90deg,
+        rgba(255, 255, 255, 0.5) 50%,
+        rgba(240, 240, 240, 0.5) 90%,
+        rgba(215, 215, 215, 0.5) 97%,
+        rgba(154, 146, 181, 0.5) 100%);
+      color: #225;
+      font-weight: bold;
+    }
+
+    .entry-text {
+      vertical-align: top;
+      border-bottom: 1px solid rgba(218, 215, 228, 1);
+      border-top: 1px solid rgba(218, 215, 228, 1);
+      padding: 1em 0 1em 0;
+    }
+
+    .entry-text p {
+      margin: 0 1em 0.5em 1em;
+    }
+
+    .entry-text p:last-child {
+      margin-bottom: 0;
+    }
+
+    .entry-text table td {
+      padding: 0.25em 0.5em;
+    }
+
+    .entry-text table td:first-child {
+      border-right: 1px solid #999;
+      text-align: right;
+    }
+
+    .entry-text table td:first-child pre {
+      position: relative;
+    }
+
+    .entry-text table td:first-child code {
+      text-align: center;
+      display: block;
+      position: relative;
+      left: 0;
+      top: 0;
+      right: 0;
+    }
+
+    .entry-text pre:last-child code {
+      margin-bottom: 0;
+    }
+
+    .entry-text ul {
+      margin: 0 3em 1em 3em;
+    }
+
+    .entry-text ul:last-child {
+      margin-bottom: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="page-wrapper">
+    <div id='pages'>
+      <h1>Litexa</h1>
+      <p>
+        This page contains all the documentation for
+        Litexa. The same material can be found
+        as a set of markdown file, in the
+        <code>/documentation</code>
+        folder of the code package.
+      </p>
+      <p>
+        The
+        <a href='#Literate_Alexa_Language_Tour'>
+          Litexa Language Tour
+        </a>
+        section contains a guided walkthrough of the
+        language's features, while the
+        <a href='#Language_Reference'>Language Reference</a>
+        section contains a cross-referenced complete
+        list of features.
+      </p>
+      <p>
+        The
+        <a href='#Literate_Alexa_Readme'>
+          Litexa Readme
+        </a>
+        section mirrors the contents of the readme.md
+        file in the code package, and contains an
+        installation and getting started guide.
+      </p>
+
+      <div id='toc'>
+        <hr />
+        <ul>{toc}</ul>
+        <hr />
+      </div>
+
+      {pages}
+    </div>
+    <h1 id='Language_Reference'>Language Reference</h1>
+    <table id='entries'>{entries}</table>
+  </div>
+</body>
+
+</html>

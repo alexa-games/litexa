@@ -1,0 +1,9 @@
+{
+  "name": "logger",
+  "version": "0.0.1",
+  "description": "Mock external package that exports a single function to test inline scope fallback behavior",
+  "main": "",
+  "scripts": {},
+  "author": "Amazon.com",
+  "license": "Apache-2.0"
+}

@@ -1,0 +1,73 @@
+launch
+  when "run interjection"
+    or "interjection test"
+    -> testInterjection
+
+  when "run break"
+    or "break test"
+    -> testBreak
+
+  when "run sound effect"
+    or "sound effect test"
+    -> testSfx
+
+  when "run all"
+    or "all test"
+    -> testAllMixed
+
+  when "run all exact"
+    or "exact all test"
+    -> testAllExact
+
+testInterjection
+  say "Interjection <!howdy> test <!aha>"
+
+testBreak
+  say "Break <...100ms> Another Break <...1s> Done"
+
+testSfx
+  say "Test Sound Effect "
+  soundEffect alien.mp3
+  say "Now test the Sound Library "
+  soundEffect soundbank://soundlibrary/animals/amzn_sfx_sheep_baa_01
+  say "Now test shorthands <sfx alien.mp3> and <sfx http://www.soundtest.com/test.mp3>"
+
+testAllExact
+  say "test <!howdy> Woof <sfx http://www.dogs.com/woof.mp3> Meow "
+  soundEffect "soundbank://test/meow"
+
+testAllMixed
+  soundEffect "soundbank://test/lion"
+  say "test <!howdy> First aliens <sfx alien.mp3> beep "
+    or "test <!aha> First dogs <sfx https://test/dog.mp3> woof "
+  soundEffect https://test/dog.mp3
+  say "<...1s> finally cats <sfx soundbank://test/cat> meow"
+
+
+TEST "Interjection Tag Testing"
+  launch
+  user: "run interjection"
+  alexa: testInterjection, "Interjection <!howdy> test <!aha>"
+
+TEST "Break Tag Testing"
+  launch
+  user: "run break"
+  alexa: testBreak, "Break <...100ms> Another Break <...1s> Done"
+
+TEST "SFX Tag Testing"
+  launch
+  user: "run sound effect"
+  alexa: testSfx, "Test Sound Effect <alien.mp3> Now test the Sound Library <sfx soundbank://soundlibrary/animals/amzn_sfx_sheep_baa_01> Now test shorthands <sfx alien.mp3> and <sfx http://www.soundtest.com/test.mp3>"
+
+TEST "Exact Tag Testing"
+  launch
+  user: "run all exact"
+  alexa: testAllExact, "test <!howdy> Woof <sfx 'http://www.dogs.com/woof.mp3'> Meow <sfx 'soundbank://test/meow'>"
+  alexa: testAllExact, e"test <!howdy> Woof <sfx 'http://www.dogs.com/woof.mp3'> Meow <sfx 'soundbank://test/meow'>"
+  alexa: testAllExact, e"test <say-as interpret-as='interjection'>howdy</say-as> Woof <audio src='http://www.dogs.com/woof.mp3'/> Meow <audio src='soundbank://test/meow'/>"
+
+TEST "Mixed Tag Testing"
+  launch
+  user: "run all"
+  alexa: testAllMixed, "<sfx soundbank://test/lion> test <!howdy> First aliens <alien.mp3> beep <sfx https://test/dog.mp3> <...1s> finally cats <sfx soundbank://test/cat> meow"
+  alexa: testAllMixed, "<sfx soundbank://test/lion> test <!aha> First dogs <sfx "https://test/dog.mp3"> woof <sfx https://test/dog.mp3> <...1s> finally cats <sfx soundbank://test/cat> meow"

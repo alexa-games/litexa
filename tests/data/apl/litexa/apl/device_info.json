@@ -1,0 +1,201 @@
+{
+  "document": {
+    "type": "APL",
+    "version": "1.0",
+    "import": [
+      {
+        "name": "alexa-viewport-profiles",
+        "version": "1.0.0"
+      },
+      {
+        "name": "alexa-layouts",
+        "version": "1.0.0"
+      },
+      {
+        "name": "alexa-styles",
+        "version": "1.0.0"
+      }
+    ],
+    "layouts": {
+      "BackgroundImage": {
+        "parameters": [],
+        "items": [
+          {
+            "type": "Image",
+            "source": "assets://background.png",
+            "position": "absolute",
+            "width": "100%",
+            "height": "100%",
+            "scale": "best-fill"
+          }
+        ]
+      }
+    },
+    "mainTemplate": {
+      "parameters": [
+        "payload"
+      ],
+      "items": [
+        {
+          "when": "${@viewportProfile == @tvLandscapeXLarge}",
+          "type": "Container",
+          "direction": "column",
+          "width": "100%",
+          "items": [
+            {
+              "type": "BackgroundImage"
+            },
+            {
+              "type": "Text",
+              "text": "<br>What type of device is this?",
+              "color": "#ffffff",
+              "width": "100%",
+              "fontSize": 40,
+              "textAlign": "center",
+              "fontWeight": "100",
+              "paddingLeft": 10,
+              "paddingRight": 10
+            },
+            {
+              "type": "Text",
+              "text": "XLarge landscape TV",
+              "color": "#ffffff",
+              "width": "100%",
+              "fontSize": 140,
+              "textAlign": "center",
+              "paddingLeft": 10,
+              "paddingRight": 10
+            },
+            {
+              "type": "AlexaFooter",
+              "footerHint": "${payload.deviceTemplateData.properties.hintString}"
+            }
+          ]
+        },
+        {
+          "when": "${@viewportProfile == @hubRoundSmall}",
+          "type": "Container",
+          "direction": "column",
+          "width": "100%",
+          "items": [
+            {
+              "type": "BackgroundImage"
+            },
+            {
+              "type": "Text",
+              "text": "<br><br><br>What type of device is this?",
+              "color": "#ffffff",
+              "width": "100%",
+              "fontSize": 30,
+              "textAlign": "center",
+              "fontWeight": "100",
+              "paddingLeft": 10,
+              "paddingRight": 10
+            },
+            {
+              "type": "Text",
+              "text": "Small round hub",
+              "color": "#ffffff",
+              "width": "100%",
+              "fontSize": 80,
+              "textAlign": "center",
+              "paddingLeft": 10,
+              "paddingRight": 10
+            },
+            {
+              "type": "AlexaFooter",
+              "footerHint": "${payload.deviceTemplateData.properties.hintString}"
+            }
+          ]
+        },
+        {
+          "when": "${@viewportProfile == @hubLandscapeMedium}",
+          "type": "Container",
+          "direction": "column",
+          "width": "100%",
+          "items": [
+            {
+              "type": "BackgroundImage"
+            },
+            {
+              "type": "Text",
+              "text": "<br>What type of device is this?",
+              "color": "#ffffff",
+              "width": "100%",
+              "fontSize": 40,
+              "textAlign": "center",
+              "fontWeight": "100",
+              "paddingLeft": 10,
+              "paddingRight": 10
+            },
+            {
+              "type": "Text",
+              "text": "Medium landscape hub",
+              "color": "#ffffff",
+              "width": "100%",
+              "fontSize": 140,
+              "textAlign": "center",
+              "paddingLeft": 10,
+              "paddingRight": 10
+            },
+            {
+              "type": "AlexaFooter",
+              "footerHint": "${payload.deviceTemplateData.properties.hintString}"
+            }
+          ]
+        },
+        {
+          "type": "Container",
+          "direction": "column",
+          "width": "100%",
+          "items": [
+            {
+              "type": "BackgroundImage"
+            },
+            {
+              "type": "Text",
+              "text": "<br>What type of device is this?",
+              "color": "#ffffff",
+              "width": "100%",
+              "fontSize": 40,
+              "textAlign": "center",
+              "fontWeight": "100",
+              "paddingLeft": 10,
+              "paddingRight": 10
+            },
+            {
+              "type": "Text",
+              "text": "This is a ${payload.deviceTemplateData.properties.deviceName}",
+              "color": "#ffffff",
+              "width": "100%",
+              "fontSize": 140,
+              "textAlign": "center",
+              "paddingLeft": 10,
+              "paddingRight": 10
+            },
+            {
+              "type": "AlexaFooter",
+              "footerHint": "${payload.deviceTemplateData.properties.hintString}"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "datasources": {
+    "deviceTemplateData": {
+      "type": "object",
+      "objectId": "deviceSample",
+      "properties": {
+        "deviceName": "viewportProfile",
+        "hintString": "try and buy more devices!"
+      },
+      "transformers": [
+        {
+          "inputPath": "hintString",
+          "transformer": "textToHint"
+        }
+      ]
+    }
+  }
+}

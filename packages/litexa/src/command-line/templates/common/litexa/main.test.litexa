@@ -1,0 +1,21 @@
+TEST "happy path"
+  launch 
+  alexa: waitForName 
+  user: "my name is Dude"
+  @name == "Dude"
+  END
+
+  launch
+  alexa: waitForName 
+  user: "my name is Rose"
+  @name == "Rose"
+  END
+
+
+TEST "asking for help"
+  launch 
+  alexa: waitForName
+  user: AMAZON.HelpIntent
+  alexa: waitForName
+  user: "Jimbo"
+  END

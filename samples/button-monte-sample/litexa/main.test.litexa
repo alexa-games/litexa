@@ -1,0 +1,93 @@
+# Disclaimer: This is not a complete set of test cases.
+# Keep in mind, Litexa tests cannot verify that your
+# Input Handler directive does what you expect. You, as
+# the test-writer, are responsible for what skill requests
+# get sent to your skill.
+TEST "run through"
+  launch
+  alexa: rollCallCount
+
+  user: "3"
+  inputHandlerEvent event_NewButton_1.json
+  alexa: rollCall
+
+  inputHandlerEvent event_NewButton_2.json
+  alexa: rollCall
+
+  inputHandlerEvent event_Finished_3.json
+  alexa: result
+
+  # store this as a snapshot we can use in a different test
+  # by the way, it is totally fine to define a capture in a test
+  # after another test that resumes it - Litexa figures
+  # out these dependencies for you :)
+  capture Finish_3_button_roll_call
+
+  # our Input Handler definition bases the win event
+  # on the gadgetId and color already, so we don't need
+  # to append a json file with an inputEvents list for this
+  inputHandlerEvent "win"
+  alexa: promptReplay
+  user: AMAZON.NoIntent
+  alexa: null
+  END
+
+TEST "relaunching"
+  launch
+  alexa: rollCallCount
+  user: "2"
+  inputHandlerEvent event_NewButton_1.json
+  inputHandlerEvent event_Finished_3.json
+  alexa: result
+
+  quit
+
+  launch
+  alexa: result
+
+  user: AMAZON.StopIntent
+  wait 1 hour
+
+  launch
+  alexa: rollCallCount
+
+TEST "rematch"
+  # use the snapshot we captured in the test "run through"
+  resume Finish_3_button_roll_call
+
+  inputHandlerEvent "lose"
+  user: AMAZON.YesIntent
+  alexa: result
+
+  inputHandlerEvent "win"
+  user: AMAZON.NoIntent
+  # null indicates the skill quit
+  alexa: null
+
+TEST "help and repeat rematch"
+  resume Finish_3_button_roll_call
+
+  inputHandlerEvent "lose"
+  user: AMAZON.RepeatIntent
+  alexa: promptReplay
+
+  user: AMAZON.HelpIntent
+  alexa: promptReplay
+
+  user: AMAZON.NoIntent
+  alexa: null
+
+# always good to check for invalid input
+TEST "rollcall non-happy cases"
+  launch
+  alexa: rollCallCount
+  user: "5"
+  alexa: rollCallCount
+  user: AMAZON.RepeatIntent
+  # check that it went to our `otherwise` handler by checking say fragment
+  alexa: rollCallCount, "I didn't get that. Please tell me how many buttons you'd like to use."
+  user: "3"
+  inputHandlerEvent event_NewButton_1.json
+  alexa: rollCall
+  inputHandlerEvent "Timedout"
+  alexa: null

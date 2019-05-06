@@ -1,0 +1,14 @@
+{
+    "env": {
+        "node": true,
+        "commonjs": true
+    },
+    "extends": "eslint:recommended",
+    "parser": "babel-eslint",
+    "parserOptions": {
+        "ecmaFeatures": {
+            "modules": true
+        }
+    }
+}
+
