@@ -8,14 +8,45 @@ askQuestion
   when ANSWER
     or "answer"
     say "I see."
-    -> goobye
+    -> goodbye
 
-goobye
+  when "cat"
+    -> goToCat
+
+goToCat
+  say "cat breed?"
+
+  when CAT_BREED
+    or "$cat"
+    or "$cat breed"
+    or "$cat cat"
+    with $cat = cats.build.js:catBreeds
+    say "<!Meow.>"
+    END
+
+goodbye
   say "Goodbye."
   END
 
+unusedState
+  when ANSWER
+    or "another answer utterance"
+    say "unused state answer"
+    END
+
+global
+  when AMAZON.RepeatIntent
+    say "repeat"
+    END
 
 TEST "happy path"
   launch
   user: ANSWER
+  END
+
+TEST "happy path en-GB"
+  setRegion en-GB
+  launch
+  alexa: askQuestion, e"Hello world. Here is your question."
+  user: "another answer utterance" # aggregates utterances from default skill for same intent
   END

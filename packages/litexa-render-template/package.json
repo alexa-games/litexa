@@ -1,6 +1,6 @@
 {
   "name": "@litexa/render-template",
-  "version": "0.1.1",
+  "version": "0.1.0",
   "description": "This module adds support for the Alexa Display.RenderTemplate directive to litexa.",
   "scripts": {
     "build": "npm run clean && npm install",
@@ -26,7 +26,7 @@
     "rollup-plugin-commonjs": "9.3.4",
     "rollup-plugin-node-resolve": "4.2.3"
   },
-  "repository": "github:alexa-labs/litexa",
-  "bugs": "https://github.com/alexa-labs/litexa/issues",
-  "homepage": "https://litexa.github.io"
+  "repository": "github:alexa-games/litexa",
+  "bugs": "https://github.com/alexa-games/litexa/issues",
+  "homepage": "http://litexa.games.alexa.a2z.com"
 }

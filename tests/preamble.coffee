@@ -108,6 +108,67 @@ exports.runSkill = (name) ->
     cleanNPM()
     return result
 
+exports.buildSkillModel = (name, locale='en-US') ->
+  root = path.join __dirname, 'data', name
+
+  cleanTempDirectories = ->
+    new Promise (resolve, reject) ->
+      rimraf.sync path.join root, '.test'
+      rimraf.sync path.join root, '.deploy'
+      rimraf.sync path.join root, '.logs'
+      resolve()
+
+  cleanNPM = ->
+    new Promise (resolve, reject) ->
+      rimraf.sync path.join root, 'node_modules'
+      rimraf.sync path.join root, 'litexa', 'node_modules'
+      try
+        fs.unlinkSync path.join root, 'package-lock.json'
+      resolve()
+
+  installNPM = ->
+    await cleanNPM()
+    await new Promise (resolve, reject) ->
+      installAt = (loc) ->
+        if fs.existsSync path.join loc, 'package.json'
+          try
+            fs.unlinkSync path.join root, 'package-lock.json'
+          spawnSync 'npm', ['install'], { cwd: loc, shell: true }
+      installAt root
+      installAt path.join root, 'litexa'
+      resolve()
+
+  builder = require '@litexa/core/src/command-line/skill-builder'
+
+  cleanTempDirectories()
+  .then ->
+    installNPM()
+  .then ->
+    builder.build(root)
+  .then (skill) ->
+    skill.projectInfo.testRoot = path.join skill.projectInfo.root, '.test'
+    mkdirp.sync skill.projectInfo.testRoot
+
+    new Promise (resolve, reject) ->
+      try
+        js = skill.toLambda()
+      catch err
+        if err.location
+          l = err.location
+          err = new Error "
+            #{l.source}[#{l.start.line}:#{l.start.column}]
+            #{err.toString()}"
+        return reject(err)
+
+      # Let's run our tests on a 'show', so Display & APL are supported.
+      try
+        resolve(skill.toModelV2 locale)
+      catch err
+        reject("failed to build model: #{JSON.stringify err}")
+
+  .then (result) ->
+    cleanNPM()
+    return result
 
 exports.buildSkill = (lit) ->
   require('@litexa/core/src/parser/parserlib.coffee').__resetLib()

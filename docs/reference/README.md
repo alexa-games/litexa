@@ -91,9 +91,105 @@ A [@ variable (Testing)](#variable-testing) can use any of these operators:
 | `<` | the reference value should be less than the expression |
 | `>` | the reference value should be greater than the expression |
 
-## $
+## $ variable
 
-TODO
+Also known as a request variable, defines a variable that only
+exists for the duration of the current request. Request variables remain in
+scope anywhere after they are declared in the current request, and will be
+released when a response is sent to the customer. Request variables are always
+memory backed.
+
+Request variables are dynamically scoped, and are always valid references.
+Checking the value of an unassigned request scope variable will always yield a
+falsy value, so they can be checked for existence with an [if](#if) or [unless](#unless)
+statement.
+
+$ variables are also supported directly in [Say String](#say-string) interpolation.
+
+```coffeescript
+say "Hello there, $username"
+```
+
+The name of the variable follows the rules for an [Identifier](#identifier).
+
+There are three uses of $ variables:
+
+* reserved variable [$request](#request)
+* [slot variables](#slot-variables)
+* [general use variables](#general-use-variables)
+
+More information and examples of request variables can be found in the Variables and
+Expressions chapter of the Book.
+
+### $request
+
+There is a reserved variable called `$request`. It is a read-only variable that
+contains your raw skill request, whose schema is described in the [Request Types
+documentation](https://developer.amazon.com/docs/custom-skills/request-types-reference.html).
+
+Here is a sample IntentRequest type `$request` from running `litexa test` in a project:
+
+```json
+{
+  ❝type❝:❝IntentRequest❝,
+  ❝requestId❝:❝litexaRequestId.7633ae0e-ef82-41a1-b2a7-d0daf9659156❝,
+  ❝timestamp❝:❝2017-10-01T22:02:10.000Z❝,
+  ❝locale❝:❝default❝,
+  ❝intent❝:{
+    ❝name❝:❝MY_CAT_BREED❝,
+    ❝slots❝:{
+      ❝cat❝:{
+        ❝name❝:❝cat❝,
+        ❝value❝:❝nebelung❝
+      }
+    }
+  }
+}
+```
+### slot variables
+
+The most common use of request variables is population of slot values in
+intents. If an intent contains a slot value, Litexa will automatically populate
+the $ variable defined in the handler from the skill request.
+
+```coffeescript
+askForCatName
+  say "What is your cat's name?"
+
+  when "my cat is named $name"
+    or "$name"
+    or "my cat's name is $name"
+    with $name = AMAZON.US_FIRST_NAME
+    say "$name you say. How cute!"
+```
+
+For the example above, Litexa will populate `$name` in the intent handler with
+the value the skill received from the request. Therefore, if the user said "my
+cat is named Ellie," then the skill would respond with "Ellie you say. How
+cute!"
+
+### general use variables
+
+You can assign your own $ variables as a messaging system to affect
+downstream states.
+
+```coffeescript
+launch
+  say "hello!"
+  $wasInLaunch = true
+  -> askQuestion
+
+askQuestion
+  # this will be true if we came from the launch intent
+  # but will be false if we did not.
+  unless $wasInLaunch
+    say "one more time, "
+  say "what is your name?"
+
+  when AMAZON.RepeatIntent
+    -> askQuestion
+```
+
 
 ## alexa:
 
@@ -182,10 +278,6 @@ TEST "greeting - expect test to fail"
 ```
 
 
-## CancelPurchase
-
-TODO
-
 ## capture
 
 Takes a snapshot of the skill state at that point in time of
@@ -200,7 +292,7 @@ Please see [resume](#resume) for how to use the snapshot.
 
 Sends a card to the user's companion app with a title, an image, and/or text.
 
-See the section on [Cards](/book/companion-app.html) for more details.
+See the The Companion App chapter of the Book for more details.
 
 ```coffeescript
 card "Welcome", image.png, "This is my wonderful card"
@@ -233,7 +325,7 @@ switch score
 
 ## define
 
-TODO
+Coming soon!
 
 ## directive
 
@@ -288,7 +380,7 @@ For an example, see [LISTEN (Testing)](#listen-testing).
 
 ## Expression
 
-TODO
+Coming soon!
 
 ## for
 
@@ -428,7 +520,7 @@ unless age < 21
 
 ## Inline Function
 
-TODO
+Coming soon!
 
 ## Intent Name
 
@@ -721,7 +813,22 @@ waitForAnswer
 
 ## playMusic
 
-TODO
+Issues an [AudioPlayer Play](https://developer.amazon.com/docs/custom-skills/audioplayer-interface-reference.html#play)
+directive, and automacially adds the required `AUDIO_PLAYER` interface to the skill manifest.
+Playback can be stopped with the [stopMusic](#stopmusic) statement.
+
+The statement requires a sound target parameter, which can be a deployed asset's name or an
+existing URL. The directive will stream the target audio, and bring up a visual audio player
+interface on screen devices. The supported target audio formats include AAC/MP4, MP3, and HLS, and
+the source audio's bit rate must fall between 16 kbps and 384 kbps.
+
+```coffeescript
+# assuming a compatible sound.mp3 is deployed via litexa/assets:
+playMusic sound.mp3
+
+# or, assuming the URL points to a compatible sound file:
+playMusic "https://www.example.com/sound.mp3"
+```
 
 ## pronounce
 
@@ -738,23 +845,9 @@ readable spelling in your code.
 pronounce "tomato" as "<phoneme alphabet="ipa" ph="/təˈmɑːtoʊ/">tomato</phoneme>"
 ```
 
-## purchase
-
-TODO
-
 ## quit
 
-TODO: bug fix
-This is broken right now. If you were to substitute it with
-StopIntent, you would get different behaviors. Quit behaves
-as if nothing has changed in skill session state.
-
-Expected behavior:
-Equivalent to the user saying "exit" during your skill
-session in that the request is received outside your skill
-and a
-[SessionEndedRequest](https://developer.amazon.com/docs/custom-skills/request-types-reference.html#sessionendedrequest)
-is sent to your skill.
+Coming soon!
 
 ## Regular Expression
 
@@ -818,12 +911,7 @@ will be included in the response.
 
 ## request:
 
-TODO
-You will need to see Alexa documentation about
-request types, but also testing.coffee's RequestStep
-seems to only set the value of intent to "LaunchRequest".
-
-Refer to TestLineRequest in pegjs.
+Coming soon!
 
 ## Reserved Word
 
@@ -960,7 +1048,7 @@ and supports any of the following:
 say "Basic statement with letters, the numbers 1, 2, 3, and punctuation."
 ```
 
-2. Interpolated [@](#variable) DB variables and [$](#-2) slot variables:
+2. Interpolated [@](#variable) DB variables and [$](#variable-2) slot variables:
 
 ```coffeescript
 @myDbVar = 'myDbVar'
@@ -1077,8 +1165,8 @@ used, such as below:
 Testing in region en-US, language default out of ["default"]
 ```
 
-For context on the usage of this statement, read the
-[Localization Chapter](/book/localization.html).
+For context on the usage of this statement, read the Localization chapter of the
+Book.
 
 
 ## setResponseSpacing
@@ -1139,11 +1227,17 @@ tag in [Say Strings](#say-string).
 A state is defined by writing an [Identifier](#identifier) as the
 first and only thing on its own line.
 
-TODO elaborate
+See the State Management chapter of the Book, for more information.
 
 ## stopMusic
 
-TODO
+Issues an [AudioPlayer Stop](https://developer.amazon.com/docs/custom-skills/audioplayer-interface-reference.html#stop)
+directive. The directive halts any ongoing AudioPlayer stream (e.g. such as one started with the
+[playMusic](#playmusic) statement).
+
+```coffeescript
+stopMusic
+```
 
 ## switch
 
@@ -1325,11 +1419,11 @@ This statement takes 2 arguments:
 
 ```coffeescript
 launch
-  if minutesBetween(context.now, @lastLaunchTime) > 15 # TODO: are we supporting these functions
+  if minutesBetween(context.now, @lastLaunchTime) > 15
     say "Welcome back! We spoke more than 15 minutes ago."
   else
     say "Greetings, young grasshopper."
-  @lastLaunchTime = context.now # TODO: likewise, are we supporting access to context.now?
+  @lastLaunchTime = context.now
   END
 
 TEST "test welcome back speech"

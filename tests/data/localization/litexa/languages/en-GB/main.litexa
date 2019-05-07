@@ -1,0 +1,10 @@
+askQuestion
+  say "Here is your question."
+
+  when ANSWER
+    or "answer"
+    say "I see."
+    -> goodbye
+
+  when "cat"
+    -> goToCat
