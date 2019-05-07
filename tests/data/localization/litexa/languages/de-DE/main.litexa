@@ -8,8 +8,8 @@ askQuestion
   when ANSWER
     or "antworten"
     say "Gut, ich verstehe."
-    -> goobye
+    -> goodbye
 
-goobye
+goodbye
   say "Auf wiedersehen."
   END

@@ -8,8 +8,8 @@ askQuestion
   when ANSWER
     or "réponse"
     say "Bien sûr, je comprends."
-    -> goobye
+    -> goodbye
 
-goobye
+goodbye
   say "Bonne journée."
   END

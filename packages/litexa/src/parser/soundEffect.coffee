@@ -9,7 +9,7 @@
  * See the Agreement for the specific terms and conditions of the Agreement. Capitalized
  * terms not defined in this file have the meanings given to them in the Agreement.
  * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 
+
 ###
 
 
@@ -24,7 +24,7 @@ literalRegex = (line) ->
   line = line.replace /\\/g, '\\'
   line = line.replace /\-/g, '\\-'
   return line
-    
+
 
 class lib.SoundEffect
   constructor: (@location, assetName) ->
@@ -95,9 +95,13 @@ class lib.PlayMusic
   toString: "playMusic #{@assetName}"
 
   toLambda: (output, indent, options) ->
-    output.push "#{indent}context.musicCommand = { action: 'play', url: '#{@assetName.toURL(options.language)}' }"
+    if @assetName.localFile
+      output.push "#{indent}context.musicCommand = { action: 'play', url: #{@assetName.toURLFunction(options.language)} }"
+    else
+      output.push "#{indent}context.musicCommand = { action: 'play', url: '#{@assetName}' }"
 
-  collectRequiredAPIs: (apis) -> apis['AUDIO_PLAYER']
+  collectRequiredAPIs: (apis) ->
+    apis['AUDIO_PLAYER'] = true
 
 class lib.StopMusic
   constructor: (@location) ->
@@ -107,4 +111,5 @@ class lib.StopMusic
   toLambda: (output, indent, options) ->
     output.push "#{indent}context.musicCommand = { action: 'stop' }"
 
-  collectRequiredAPIs: (apis) -> apis['AUDIO_PLAYER']
+  collectRequiredAPIs: (apis) ->
+    apis['AUDIO_PLAYER'] = true

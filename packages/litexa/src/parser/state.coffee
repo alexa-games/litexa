@@ -78,6 +78,12 @@ class lib.State
 
   isState: true
 
+  prepareForLanguage: (location) ->
+    return unless location?.language
+    return if location.language == 'default'
+    unless location.language of @languages
+      @languages[location.language] = {}
+
   resetParsePhase: ->
     # used by the default constructors, pre parser
     @parsePhase = 'start'
@@ -169,15 +175,17 @@ class lib.State
 
   collectIntentsForLanguage: (language) ->
     workingIntents = {}
-
-    if @intents?
-      for name, intent of @intents
-        workingIntents[name] = intent
-
+    # for a given state, you will get the intents in that locale's 
+    # version of that state only (intents are not inherited from the parent state)
     if language of @languages
       for name, intent of @languages[language]
         workingIntents[name] = intent
-
+      if @name == 'global'
+        unless '--default--' of workingIntents
+          workingIntents['--default--'] = @intents['--default--']
+    else if @intents?
+      for name, intent of @intents
+        workingIntents[name] = intent
     return workingIntents
 
   toLambda: (output, options) ->
