@@ -1,6 +1,6 @@
 {
   "name": "@litexa/deploy-aws",
-  "version": "0.1.3",
+  "version": "0.1.0",
   "description": "Implements deployment for litexa to AWS Lambda, DynamoDB and S3.",
   "main": "index.js",
   "scripts": {
@@ -31,7 +31,7 @@
     "mkdirp": "0.5.1",
     "rimraf": "2.6.3"
   },
-  "repository": "github:alexa-labs/litexa",
-  "bugs": "https://github.com/alexa-labs/litexa/issues",
-  "homepage": "https://litexa.github.io"
+  "repository": "github:alexa-games/litexa",
+  "bugs": "https://github.com/alexa-games/litexa/issues",
+  "homepage": "http://litexa.games.alexa.a2z.com"
 }

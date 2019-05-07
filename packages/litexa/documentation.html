@@ -378,1812 +378,13 @@
 <li><a href='#@_variable'>@ variable</a>
 <li><a href='#@_variable_(Testing)'>@ variable (Testing)</a>
 <li><a href='#@_Variable_Comparison_Operators'>@ Variable Comparison Operators</a>
-<li><a href='#</ul>
-        <hr />
-      </div>
-
-      <h1 id='Litexa_Package'>Litexa Package</h1><p>Litexa is an Alexa domain specific language, developed for long form multi-turn skills such as games.
-This package contains the source for the CLI and core runtime.</p>
-<p>Further documentation can be found at <a href="https://litexa.github.io">https://litexa.github.io</a></p>
-<h2 id='Installing_Litexa'>Installing Litexa</h2><h3 id='Prerequisites'>Prerequisites</h3><p>The following needs to be installed and configured:</p>
+<li><a href='#$_variable'>$ variable</a>
 <ul>
-<li><a href="https://nodejs.org/">Node.js</a> (with npm)</li>
-</ul>
-<p>Note: Requires Node.js version 8.11 or higher.</p>
-<h3 id='Installing'>Installing</h3><p>Litexa is intended to be used as a command line
-utility, installed as a global npm package.
-Given an environment with node installed:</p>
-<pre><code class="language-bash">npm install -g @litexa/core</code></pre>
-<p>From then on, you should be able to invoke the <code>litexa</code>
-command from anywhere on your machine.</p>
-<p>Note: if you are installing from the source monorepo, then you
-can use a local reference for installing instead. Switch to
-the litexa directory, then run:</p>
-<pre><code>npm install ./ -g</code></pre><p>Additional components of Litexa are provided as
-separate extension modules, with the intention that each
-project can pick and choose which functionality it would
-like to incorporate. See further below for a list of known
-extensions.</p>
-
-<h1 id='Litexa_Language_Tour'>Litexa Language Tour</h1><blockquote>
-<p>NOTE: This is a work in progress, expect plenty to be
-missing. Please yell at <a href="mailto:surjosub@amazon.com">surjosub@amazon.com</a> with any
-questions, errata or straight up omissions</p>
-</blockquote>
-<p>The Litexa language is oriented around a few core
-goals and ideas:</p>
-<ul>
-<li>It is state oriented: the top level construct in a <code>.litexa</code>
-file is a state, and flow control is described as
-transitioning between states.</li>
-<li>Focused on Alexa Skill input, which is to say voice intents
-and events, and Alexa skill output, which is to say speech
-and screens.</li>
-<li>Brevity: a <code>.litexa</code> file should contain your skill&#39;s unique
-content, and very little else.</li>
-</ul>
-<p>Litexa is a white space dependent language like Python
-or Coffee Script, which is to say that statements are grouped
-using indentation rather than begin and end symbols.</p>
-<p>The exact amount of white space doesn&#39;t matter, consecutive
-statements are considered to be in the same block if they
-begin with exactly the same white space. Samples and
-tests in this package are written with two spaces for
-each indent. In the abstract:</p>
-<pre><code>This is statement 1
-  This statement is subordinate to statement 1
-  This statement is the same, let&#39;s call it X
-    This statement is subordinate to X
-  This statement is back to belonging to statement 1</code></pre><p>Blank lines can be inserted anywhere to aid legibility, they
-never have any semantic meaning.</p>
-<p>Note, any line that begins with a <code>#</code> symbol is considered
-a comment and will be ignored by the parser, even if it
-is otherwise a valid statement. Likewise, any line containing
-a <code>#</code> symbol is split in half, with the second part being
-a comment too.
-You can use this to leave yourself notes, or disable
-statements temporarily.</p>
-<h2 id='States'>States</h2><p>A new state is defined by adding a name on its own line, with
-no preceding white space. State names must begin with a letter,
-may contain any mix of letters, numbers, and underscores and
-can NOT contain any spaces.
-<code>launch</code>, <code>doAThing</code> and <code>Ask-for-something</code> are
-all valid state names.</p>
-<p>A state contains two parts, the entrance code, and the event code.
-The entrance code is executed immediately after another state
-transitions to it. Event code is executed whenever the skill
-is stopped at a particular state, and receives the appropriate
-event.</p>
-<p>An event is defined by adding a <code>when</code> statement to a State,
-which then contains all the code subordinate to it.
-An entrance is then all statements subordinate to the
-state, before the first <code>when</code> statement.</p>
-<p>Here&#39;s an example:</p>
-<pre><code>askForANumber
-  say &quot;Hey there, can you give me a number please?&quot;
-  reprompt &quot;Just say a number, any number.&quot;
-
-  when &quot;how about $number&quot;
-    with $number = AMAZON.NUMBER
-    say &quot;Great! I love the number $number&quot;</code></pre><p>In this case, the name of our state is <code>askForANumber</code>. It
-contains one <code>say</code> and one <code>reprompt</code> statement in its entrance
-code. It has one event handler, which in turn contains two
-statements, one <code>with</code> statement and one <code>say</code> statement.</p>
-<p>State code executes atomically, that is to say an entrance
-or event blocks of statements will finish executing completely
-before any other Litexa statement will execute: a skill is
-always executing exactly one state.</p>
-<p>Execution of a skill always begins at the <code>launch</code> state, so you
-must define it. When you determine the skill should proceed to
-another state, you use the <code>-&gt;</code> or &quot;arrow&quot; statement.</p>
-<p>Execution will continue, following arrows, until you hit an
-entrance that does not have any arrows. This is called an open
-state, and will result in a response being sent to the skill&#39;s
-user, along with instructions to open the microphone and expect
-an answer.</p>
-<p>Alternatively, the <code>END</code> statement can be used to indicate that
-the skill has reached its end, should send the response to the
-user and not open the microphone any further.</p>
-<pre><code>launch
-  say &quot;welcome, person.&quot;
-  -&gt; askName
-
-askName
-  say &quot;what is your name?&quot;
-  reprompt &quot;please tell me your name&quot;
-
-  when &quot;my name is $name&quot;
-    with $name = AMAZON.US_FIRST_NAME
-    say &quot;Nice to meet you, $name!&quot;
-    END
-
-  when AMAZON.RepeatIntent
-    -&gt; askName
-
-  when AMAZON.HelpIntent
-    -&gt; askName</code></pre><p>In this short skill, we begin at launch, say something then
-proceed to the <code>askName</code> state. On entering that state we&#39;ll
-ask a question. Should the question be answered with an
-intent, then we&#39;ll acknowledge it by saying something and
-then end the skill. Should the user instead say &quot;Alexa, help&quot;
-or &quot;Alexa, repeat that&quot;, we&#39;ll reenter the <code>askName</code> state,
-causing it to ask the question again, and open the microphone.</p>
-<p><strong>Important!</strong> recall that states cannot interleave operation.
-This means that arrow statements do not take effect until
-the rest of the statements in the same state have been
-evaluated; arrows are an instruction for what to do after
-the state is complete, not an instruction to execute
-immediately. Likewise, the <code>END</code> instruction refers to
-the course of action to take after this state is complete,
-and does not immediately stop execution.</p>
-<p>As an example, the following skills would produce the same
-response:</p>
-<pre><code># skill 1
-launch
-  say &quot;Hello &quot;
-  -&gt; world
-
-world
-  say &quot;World&quot;
-  END
-
-# skill 2
-launch
-  -&gt; world
-  say &quot;Hello &quot;
-
-world
-  END
-  say &quot;World&quot;</code></pre><h2 id='Audio_output'>Audio output</h2><p>An Alexa Skill communicates with its user primarily through
-speech. The Litexa command to say something is <code>say</code>.</p>
-<pre><code>say &quot;Hello, Alexa user&quot;</code></pre><p>You can add white space, including line breaks between the
-quotes, which may make longer lines easier to work with.</p>
-<pre><code>say &quot;Hello there Alexa user.
-  Glad to make your acquaintance.
-  Should we continue?&quot;</code></pre><p>Litexa supports a tagging system to add more
-information to the speech stream. Tags always begin and
-end with the angle brackets, <code>&lt;</code> and <code>&gt;</code>, are identified
-by the first thing written inside them, and sometimes
-take additional parameters.</p>
-<p>To add pauses in speech, you can normally rely on commas and
-periods. For longer or more specific durations, you can use
-a <code>...</code> tag, which takes a time value as a parameter. You can
-specify the time in milliseconds or seconds.</p>
-<pre><code>say &quot;Welcome to the &lt;... 2s&gt; show!&quot;
-say &quot;I see you shiver with antici &lt;...3000ms&gt; pation!&quot;</code></pre><p>You can add Alexa interjections, or <a href="https://developer.amazon.com/docs/custom-skills/speechcon-reference-interjections-english-us.html">speechcons</a>,
-with the <code>!</code> tag.</p>
-<pre><code>say &quot;&lt;!Howdy&gt;, partner!&quot;
-say &quot;I bid you, &lt;!au revoir&gt;.&quot;</code></pre><p>You can specify audio files with the <code>soundEffect</code> statement.
-This statement takes a filename, assumed to be in your <code>assets</code>
-folder.</p>
-<pre><code>soundEffect beepbeep.mp3</code></pre><p>All of the <code>say</code> and <code>soundEffect</code> statements encountered while
-executing the state machine are collected and concatenated
-together during the next response sent to the user.</p>
-<pre><code>soundEffect dingdong.mp3
-say &quot;Oh, was that the doorbell?&quot;
-soundEffect footsteps.mp3
-say &quot;I wonder who that could be?&quot;</code></pre><p>You can add variations to a <code>say</code> statement using subordinate
-<code>or</code> statements. Each time the statement is encountered, a
-random variation will be selected, with a strong bias away
-from using the same variation consecutively.</p>
-<pre><code>say &quot;Hello there.&quot;
-  or &quot;Hi there.&quot;
-  or &quot;Greetings!&quot;</code></pre><p>During the course of a skill, you will often need to interpolate
-dynamic values into your speech. There are three forms of
-built in interpolation available to say statements:</p>
-<ul>
-<li><code>@variable</code> is a reference to a persistent variable</li>
-<li><code>$variable</code> is a reference to a slot variable</li>
-<li><code>{ code }</code> is a call to JavaScript code, including local
-variable references</li>
-</ul>
-<p>We&#39;ll cover these in detail in other sections, but for now
-let&#39;s look at an example of how they&#39;re used:</p>
-<pre><code>launch
-  say &quot;hmm, I think today is { getTodayName() }.&quot;
-  if @name
-    say &quot;Oh, hey there @name. Good to see you again!&quot;
-    END
-  else
-    say &quot;Oh hello there, person I don&#39;t know.&quot;
-    -&gt; askName
-
-askName
-  say &quot;Hey, what&#39;s your name?&quot;
-
-  when &quot;my name is $name&quot;
-    with $name = AMAZON.US_FIRST_NAME
-    say &quot;great to meet you $name&quot;
-    @name = $name
-    END</code></pre><h2 id='Voice_input'>Voice input</h2><p>Users communicate with Alexa skills primarily through voice
-intents. As a skill author, you want to define what you
-think a user will say to get a specific outcome, then write
-code to produce that outcome.</p>
-<p>Intents are defined as events using the <code>when</code> statement,
-followed by the <em>utterance</em> you expect the user to say. As
-with the <code>say</code> statement, subordinate <code>or</code> statements can
-be used to define variations you think a user might say
-instead.</p>
-<p>An intent can be reused in another state by using the same
-first utterance in another <code>when</code> statement. Sometimes in
-these cases it can be convenient to name the intent
-separately rather than reusing the first utterance, freeing
-you to change the utterance in one spot rather than
-in every state it appears in. In this case you can substitute
-a name in the <code>when</code> statement by omitting the quotation
-marks.</p>
-<pre><code>waitForAction
-  say &quot;what do we do?&quot;
-
-  when AMAZON.HelpIntent
-    # when the built in help intent is received
-
-  when &quot;jump in circles&quot;
-    # when the user says exactly &#39;jump in circles&#39;
-
-  when &quot;lie down&quot;
-    or &quot;drop to the ground&quot;
-    or &quot;go prone&quot;
-    or &quot;duck&quot;
-    # when the user says any of these things
-
-  when ENTER_HOUSE
-    or &quot;enter the house&quot;
-    or &quot;go inside the house&quot;
-    or &quot;get in the house&quot;
-    # when the user says any of these things
-
-waitForOtherAction
-  when ENTER_HOUSE
-    # when the user says anything from the list
-    # of utterances defined for ENTER_HOUSE above</code></pre><p>As part of an utterance, you might expect a segment that could
-have one of many values. These are called <em>slots</em>. See the
-<a href="https://developer.amazon.com/docs/custom-skills/slot-type-reference.html">ASK documentation</a>
-for a deep dive into these.</p>
-<p>In Litexa, slots are placed into an utterance
-using the <code>$</code> symbol, and their type is defined using a <code>with</code>
-statement. In the code for the event, the slot is then
-available as a variable.</p>
-<pre><code>askForName
-  say &quot;What is your name?&quot;
-
-  when &quot;my name is $name&quot;
-    with $name = AMAZON.US_FIRST_NAME
-
-    # use the value of the slot to say something
-    say &quot;Hello there, $name&quot;
-
-    # store the slot value for later
-    @username = name</code></pre><p>Should you require a custom slot, that is to say a slot that
-expects values from a list you define, then you will need to
-write a <em>slot builder function</em>, a function that returns
-a list of values. To refer to a specific slot builder function
-you set it as the type for the slot.</p>
-<pre><code>askForColor
-  say &quot;which color would you like?&quot;
-
-  when &quot;I&#39;d like $color&quot;
-    with $color = slots.build.coffee:colorNames
-    say &quot;oh, I suppose I like $color too. Good choice&quot;</code></pre><p>In this example, the values for the <code>$color</code> slot will be
-defined by the function named <code>roomNames</code> exported by file
-<code>litexa/slots.build.coffee</code> Here&#39;s an example of what that
-file might look like:</p>
-<pre><code>exports.colorNames = (skill, language) -&gt;
-  return [&#39;COLORNAMES&#39;, [ &#39;red&#39;, &#39;blue&#39;, &#39;green&#39;] ]</code></pre><p>In this example, the colorNames function returns the definition
-for a slot called <code>COLORNAMES</code> that specifies three possible
-values.</p>
-<h2 id='Variables'>Variables</h2><p>There are three kinds of variables in Litexa.</p>
-<ul>
-<li><code>@variables</code>, those beginning with the <code>@</code> symbol, are
-permanent variables, stored in your skill&#39;s
-database, surviving from skill session to skill session.</li>
-<li><code>$variables</code> are the contents of slots, and only exist during
-the statements directly following a <code>when</code> statement.</li>
-<li>regular <code>variables</code> can be one of two things:<ul>
-<li>values defined in your inline code files</li>
-<li>values defined locally in the current event</li>
-</ul>
-</li>
-</ul>
-<p>You can assign the value of a variable with the <code>=</code> <em>assignment</em>
-operator.</p>
-<pre><code>@name = Bob
-@age = 13
-@rememberThis = $aSlotValue</code></pre><p>The right side of the assignment operator can be any valid
-expression. See the <a href="#Expressions">Expressions</a> section for more details.</p>
-<p>There are several types of values a variable might have:</p>
-<ul>
-<li>a string, or a list of characters, e.g. <code>&quot;Jane&quot;</code></li>
-<li>a number, e.g. <code>6</code> or <code>439.8</code></li>
-<li>a boolean, i.e. either <code>true</code> or <code>false</code></li>
-<li>specifically nothing, i.e. the value <code>null</code></li>
-</ul>
-<p>A variable that has never been defined before will have the
-special value <code>undefined</code>, rather than <code>null</code></p>
-<p>All values have a <em>truthiness</em> value, meaning that when they
-are used in a place that expects a true/false value, they
-can stand in for either true or false. The number <code>0</code>, the values
-<code>null</code>, <code>undefined</code> and the empty string <code>&quot;&quot;</code> are all considered
-false. All other values are considered true.</p>
-<p>You can create temporary variables anywhere with the <code>var</code>
-statement. You can use these as temporary value stores between
-statements, but they will disappear at the end of the current
-event. These temporary variables <em>must</em> be initialized to some
-value when they are created.</p>
-<p>Regular variables can be interpolated into strings using the
-curly bracket notation, including accessing members of
-objects built in your code files.</p>
-<pre><code>reportUser
-  local user = getCurrentUser()
-  say &quot;The user&#39;s name is { user.name }, they are
-    { user.age } years old&quot;</code></pre><h2 id='Flow_Control'>Flow Control</h2><p>Litexa has an <code>if</code> - <code>else</code> structure to
-define simple branches in your code. All statements subordinate
-to the <code>if</code> clause will only execute if the condition is
-true, otherwise the statements subordinate to the <code>else</code>
-clause will take place.</p>
-<p>The conditional portion of the <code>if</code> clause can compare numbers,
-strings and boolean literals, to any kind of variable and or
-the result of function calls. See the <a href="#Expressions">Expressions</a>
-section  for a deeper look at the possibilities here:
-the comparison portion can be any expression, with any
-value other than true or false being checked for <em>truthiness</em></p>
-<p>You can chain exclusive conditions by inserting in <code>else if</code>
-clause between the <code>if</code> and <code>else</code> clauses.</p>
-<pre><code>if @name == &quot;Bob&quot;
-  say &quot;Oh it&#39;s you, Bob&quot;
-else if @name == &quot;Jane&quot; and @lastName == &quot;Spellman&quot;
-  say &quot;Hey Jane, good afternoon&quot;
-else
-  say &quot;I don&#39;t recognize you.&quot;</code></pre><p>For more complex branching, you may want to use the <code>switch</code>
-statement. This statement supports a number of optional
-features.</p>
-<p>The simplest form expects you to give it a value as part
-of the <code>switch</code> statement. Subsequent subordinate statements
-then each begin with a comparison against that value, followed
-by the <code>then</code> keyword. Each <code>then</code> statement begins a new
-block of subordinate statements that will execute when the
-condition is true. Note: only one <code>then</code> clause will be
-executed, the first to be true when checked top to bottom.
-Optionally an <code>else</code> statement can be added, which will
-be executed if all <code>then</code> statements prove to be false.</p>
-<pre><code>switch $diceValue
-  == 1 then
-    say &quot;bad luck, that&#39;s a 1&quot;
-  &lt; 5 then
-    say &quot;good enough, you pass!&quot;
-  else
-    say &quot;wow! you&#39;re like the luckiest person&quot;</code></pre><p>For more complex string matching scenarios, you can use
-a full regular expression by using the <code>match</code> operator.</p>
-<pre><code>switch $name
-  match /bob|greg/i then
-    say &quot;Hello fellas&quot;
-  match /jane|maria/i then
-    say &quot;Hello ladies&quot;
-  else
-    say &quot;Hello friends&quot;</code></pre><p>Regular expressions are in the JavaScript format, and
-can include the trailing <code>i</code> flag to indicate that
-matches should be (ASCII) case insensitive.</p>
-<p>Each <code>then</code> statement can be preceded by any valid
-expression, and the <code>switch</code> statement supports omitting
-the initial value. In this way, you can rewrite a long
-set of <code>if</code> - <code>else if</code> statements as a <code>switch</code> instead</p>
-<pre><code>switch
-  @name == &quot;Bob&quot; then
-    say &quot;Oh it&#39;s you, Bob&quot;
-  @name == &quot;Jane&quot; and @lastName == &quot;Spellman&quot; then
-    say &quot;Hey Jane, good afternoon&quot;
-  else
-    say &quot;I don&#39;t recognize you.&quot;</code></pre><p>The <code>switch</code> statement can also optionally bind more than
-one named variable, all of which will only be valid
-for the duration of the <code>switch</code> statement</p>
-<pre><code>switch a = getFirstAge(), b = getSecondAge()
-  a == b then
-    say &quot;Oh! You&#39;re the same ages!&quot;
-  a &gt; b then
-    say &quot;B, you&#39;re older, aren&#39;t you?&quot;
-  b &lt; a then
-    say &quot;A, you&#39;re the older one.&quot;</code></pre><h2 id='Expressions'>Expressions</h2><p>Expression appear in a number of places in Litexa,
-like in the conditional parts of flow control statements
-and on the right side of variable assignment.</p>
-<p>An expression is any combination of variable references,
-combinatory operators, function calls and braces to
-control order.</p>
-<p>The mathematical operators <code>+</code>, <code>-</code>, <code>*</code> and <code>/</code> are available
-for working with numbers</p>
-<pre><code>local a = 5 + 1
-local b = a / 3
-local c = a + ( b * 4 )</code></pre><p>Additionally the <code>+</code> operator also combines strings</p>
-<pre><code>local a = &quot;Hello&quot; + &quot; &quot; + &quot;World&quot;</code></pre><p>The <code>&gt;</code>, <code>&gt;=</code>, <code>&lt;</code>, <code>&lt;=</code>, <code>==</code> logical operators produce
-boolean values, along with the <code>~=</code> equals operator. Boolean
-values can be combined with the <code>or</code> and <code>and</code> operators.</p>
-<pre><code>local a = 5 &gt; 6
-local a = 2 &lt; val and val &lt; 10
-local a = ( 2 &lt; val and val &lt; 10 ) or val == 100</code></pre><p>You can call any function you&#39;ve defined in your inline
-code files directly from a Litexa expression, they
-are defined in the same scope. You can also call functions
-bound onto any objects you retrieve in that way.</p>
-<pre><code>local person = getPersonTalking()
-local name = formatPersonName( person )
-say &quot;Hello there, { person.getFullName() }&quot;</code></pre><h2 id='Cards'>Cards</h2><p>Litexa has built in statements to produce Alexa
-companion app cards.</p>
-<pre><code>card &quot;Hello World&quot;, flowers.jpg, &quot;This is a good day to
-  meet you, person.&quot;
-
-card &quot;Hello World&quot;, flowers.jpg
-
-card &quot;Hello World&quot;, &quot;This is a good day to
-  meet you, person.&quot;
-
-card &quot;Hello World&quot;
-  image: flowers.jpg
-  content: &quot;This is a good day to meet you, person.&quot;</code></pre><p>For cards, you&#39;re specifying 3 things: a title, an image
-and some text. You can optionally specify the image and
-content on their own lines as properties if the statement
-is getting too long winded to read easily.</p>
-<p>Variable interpolation is supported in the same manner
-as with the <code>say</code> statement.</p>
-<pre><code>card &quot;Hello @name&quot;, flowers.jpg</code></pre>
-<h1 id='Litexa_Projects'>Litexa Projects</h1><p>A Litexa project is any directory with a valid <code>litexa.config.json/js/ts/coffee</code> file in it. 
-This directory is called the project root.</p>
-<p>Other files that are likely to exist at the project root:</p>
-<ul>
-<li><code>artifacts.json</code>. This file stores generated information about the project, 
-such as the skill ID for each deployment or the ARN of lambdas. You must 
-source control this file to share this information with anyone who works
-on the project.</li>
-<li><code>skill.json/js/ts/coffee</code>. This is a subset of the info found in an Alexa 
-Skill manifest, edited with the assumption that the rest of the information
-will be derived from your project&#39;s usage.</li>
-<li><code>tsconfig.json</code> and <code>tslint.json</code>. These files exist if you use TypeScript 
-to configure your project. They contain your project configuration&#39;s compilation 
-and linting settings.</li>
-<li><code>webpack.config.js</code>. This file exists if you use a webpack bundling-strategy and contains 
-the webpack configuration for the language you chose for your project.</li>
-<li>Language and Project support files. These files will vary based on your bundling-strategy 
-and source-code choice. They tend to be files such as runtime configuration, linting, and
-options for supporting tools.</li>
-</ul>
-<p>Under the project root, you can expect to see a number of directories.</p>
-<p>One set of directories is ephemeral, it is always safe to delete these 
-directories, and you should not version control them:</p>
-<ul>
-<li><code>.deploy</code> is created automatically when you run the command
-<code>litexa deploy</code> and contains all the artifacts produced while deploying, 
-and logs that record what happened.</li>
-<li><code>.test</code> is created when you run the command <code>litexa test</code> and contains
-all of the artifacts produced while testing.</li>
-</ul>
-<p>The main directory of interest under the root is the <code>litexa</code> directory. This
-contains your Litexa code files, and various other files to support 
-them.</p>
-<p>Litexa, by default, chooses JavaScript as your source-code, JSON as your configuration, and an inlined 
-code organization strategy as your bundling-strategy (more on this later).</p>
-<h2 id='Supported_Languages'>Supported Languages</h2><p>Litexa currently supports the following languages for Litexa and skill configuration:</p>
-<ul>
-<li>JSON</li>
-<li>JavaScript</li>
-<li>TypeScript</li>
-<li>CoffeeScript</li>
-</ul>
-<p>and the following languages for source code generation:</p>
-<ul>
-<li>JavaScript</li>
-<li>TypeScript</li>
-<li>CoffeeScript</li>
-</ul>
-<h2 id='Code_Organization_Strategies'>Code Organization Strategies</h2><p>Litexa has support for three code organization strategies: inlined, separate, and bundling.</p>
-<h3 id='The_Inlined_Strategy'>The Inlined Strategy</h3><p>This strategy is useful when you are new to Litexa, prototyping, or working on a skill with
-limited scope. When you choose this strategy, it generates a single <code>litexa</code> folder and configuration 
-files at the root of the project.</p>
-<p>An example of a generated project might look like this:</p>
-<pre><code>├── litexa
-│   ├── assets
-│   │   ├── icon-108.png
-│   │   └── icon-512.png
-│   ├── languages/
-│   ├── main.litexa
-│   ├── main.test.litexa
-│   ├── utils.js
-│   └── utils.test.js
-├── litexa.config.json
-└── skill.json</code></pre><h4 id='The_<code>litexa</code>_folder'>The <code>litexa</code> folder</h4><p>In this folder you may see:</p>
-<ul>
-<li>One or more files with the <code>.litexa</code> extension. You write these in the Literate 
-Alexa language.</li>
-<li>One or more files with the extensions <code>coffee</code>/<code>js</code>/<code>ts</code>. These are code 
-files that get inlined with your Litexa handler. Any functions or variables 
-you define here are visible within the states defined in your <code>.litexa</code> files.</li>
-<li>An <code>assets</code> folder. This contains any images, videos or sounds you&#39;d like to 
-deploy automatically with your project.</li>
-<li>A <code>languages</code> folder. This contains a folder per additional language you&#39;d 
-like to support, beyond your default language.</li>
-<li>A <code>package.json</code> file. This is a standard npm file and is necessary when you
-have npm packages you would like to depend on and deploy with your skill.</li>
-<li>A <code>node_modules</code> file. This contains all of the packages you installed with 
-npm as specified in the <code>packages.json</code> file, and will be deployed as a copy 
-along with your handler.</li>
-<li>A <code>tsconfig.json</code> and <code>tslint.json</code>. These files will exist if you chose TypeScript 
-as the source-code language for your project. They will contain your project 
-configuration&#39;s compilation and linting settings for your code.</li>
-</ul>
-<h4 id='Using_external_packages'>Using external packages</h4><p>To add an external package dependency to your skill, you can run <code>npm init</code>
-then <code>npm install</code> in the <code>litexa</code> directory as usual, which will result 
-in a <code>package.json</code> that describes your skill&#39;s dependencies.</p>
-<p>You can then require the external packages from any of your inline code 
-files, and appropriately import their contents into the Litexa scope.</p>
-<p>The entire contents of <code>litexa/node_modules</code> will then be copied by the 
-Litexa deployment process alongside your skill handler.</p>
-<p>To add tools for use during the development of your skill, you can also 
-setup a <code>package.json</code> file in the project root and install modules as usual.</p>
-<p>Some Litexa extension packages that extend functionality during 
-compilation, testing or deployment are also designed to be installed at 
-the root level, as they do not provide any runtime functionality that needs 
-to be copied to the deployed handler. Consult each package&#39;s readme for 
-details.</p>
-<h3 id='The_Separate_Strategy'>The Separate Strategy</h3><p>This strategy is useful when your use-case requires a decent amount of code logic outside
-the Litexa files, your code takes on several external dependencies, and you prefer to organize
-your code as local dependencies imported by Litexa. In this context, your local dependency 
-is an npm package linked to the <code>litexa</code> folder using npm.</p>
-<p>The strategy generates two top level directories, a <code>litexa</code> folder and a second <code>lib</code> directory 
-with the supporting code files. The configuration files will be generated at the root of the project.</p>
-<p>An example of a generated project might look like this:</p>
-<pre><code>├── lib
-│   ├── index.coffee
-│   ├── logger.coffee
-│   ├── mocha.opts
-│   ├── package.json
-│   ├── utils.coffee
-│   └── utils.spec.coffee
-├── litexa
-│   ├── assets
-│   │   ├── icon-108.png
-│   │   └── icon-512.png
-│   ├── main.coffee
-│   ├── main.litexa
-│   ├── main.test.litexa
-│   └── package.json
-├── litexa.config.coffee
-└── skill.coffee</code></pre><h4 id='The_<code>lib</code>_folder'>The <code>lib</code> folder</h4><p>This folder houses your code. In here you may see:</p>
-<ul>
-<li>One or more code files with the extensions <code>coffee</code>/<code>js</code>/<code>ts</code> and supporting files
-for the source code language. These are scaffolded code files to get you started.</li>
-<li>A <code>package.json</code> file. This is the standard npm file for your code and is 
-necessary in order to link your code as an external dependency to Litexa.
-This file will also contain convenient shorthands for compiling your code and other 
-useful operations.</li>
-<li>An <code>index.js/ts/coffee</code> file. This is the code entry-point for your dependency.
-Export functions and objects here that you want available for use in Litexa.
-You have to import the dependency in the <code>litexa</code> folder to use them in your <code>.litexa</code> files.
-An example of this exists in the <code>main.js/ts/coffee</code> of your <code>litexa</code> folder. 
-Additionally, in the case of TypeScript, your entry-point will be compiled by the TypeScript
-compiler and outputted into <code>dist/main.js</code> inside the <code>lib</code> folder.</li>
-</ul>
-<p>Remember, this folder is a separately managed dependency. Thus, you are free to structure 
-your code in anyway you see fit as long as it is a valid npm package that npm can install 
-in the <code>litexa</code> folder. You can also extend and replicate this pattern by creating new top 
-level directories that are local npm packages that you also import into Litexa.</p>
-<h3 id='The_Bundling_Strategy'>The Bundling Strategy</h3><p>This strategy is useful when your use-case requires a minimal deployment, the project&#39;s scope 
-is a decent size, and you prefer to organize your code as a single application. In this case, 
-your application code is bundled into a stand-alone executable that is placed into your <code>litexa</code>
-folder and the exported objects and functions are visible within the states defined in your <code>.litexa</code> files.</p>
-<p>This strategy generates three top level directories, a <code>litexa</code> folder, a second <code>lib</code> folder 
-with a directory structure intended to help you organize your code, and a third <code>test</code> folder 
-that matches the directory structure in the <code>lib</code> folder and houses all your tests. 
-Additionally, the configuration files will be generated at the root of the project.</p>
-<p>An example of a generated project might look like this:</p>
-<pre><code>├── lib
-│   ├── components
-│   │   ├── logger.ts
-│   │   └── utils.ts
-│   ├── index.ts
-│   ├── pino-pretty.d.ts
-│   └── services
-│       └── time.service.ts
-├── globals.d.ts
-├── litexa
-│   ├── assets
-│   │   ├── icon-108.png
-│   │   └── icon-512.png
-│   ├── main.litexa
-│   └── main.test.litexa
-├── mocha.opts
-├── package.json
-├── litexa.config.js
-├── litexa.config.ts
-├── skill.ts
-├── test
-│   ├── components
-│   │   └── utils.spec.ts
-│   └── services
-│       └── time.service.spec.ts
-├── tsconfig.json
-├── tslint.json
-└── webpack.config.js</code></pre><h4 id='The_<code>lib</code>_and_<code>test</code>_folder'>The <code>lib</code> and <code>test</code> folder</h4><h5 id='Overview'>Overview</h5><p>Litexa bundling strategy is fulfilled by webpack. It bundles the contents of <code>lib</code> and generates
-a single executable, <code>main.min.js</code>. Whenever you compile your code, webpack creates that executable
-and puts it in the <code>litexa</code> folder. Your exported functions and objects are then available to for use
-in Litexa within the states defined in your <code>.litexa</code> files.</p>
-<h5 id='Directory_Structure_and_Files'>Directory Structure and Files</h5><p>The directory structure of your application looks like this:</p>
-<pre><code>/litexa       -- Contains Litexa specific files
-/lib          -- Root folder for application being developed
-  /services   -- Location for service layer calls / data access calls
-  /components -- Location for misc business logic ordered by components
-/test         -- Test root folder for the application being developer
-  /services   -- Location for service layer calls / data access calls tests
-  /components -- Location for misc business logic ordered by components tests</code></pre><ul>
-<li>In the <code>lib</code> root folder contains an <code>index.js/ts/coffee</code>.
-This file is a webpack entry-point for your application. Whatever you export in this
-file will be visible and accessible in Litexa through the compiled <code>main.min.js</code>.</li>
-<li>The <code>lib/components</code> folder contains simple components to help you get started.
-The strategy intends that you use this folder to organize your code by components. Put your 
-components code here.</li>
-<li>The <code>lib/services</code> folder contains a simple <code>time.service.js/ts/coffee</code> to get 
-you started. The strategy intends that you use this folder to organize your service layer 
-files or data access calls while keeping them separated from your components. Place your 
-service layer or data access code here.</li>
-<li>The <code>test</code> folder mimics the directory structure of the <code>lib</code> folder. This is where the
-tests will be stored. They have been labeled with the extension <code>.spec.js/ts/coffee</code> so they 
-are congruent with TDD file-naming nomenclature.</li>
-<li>The <code>test/components</code> folder contains specs for corresponding components.</li>
-<li>The <code>test/services</code> folder contains specs for corresponding services.</li>
-</ul>
-<h5 id='Testing'>Testing</h5><p>The strategy configures the generated tests to work with Mocha, Chai, and Sinon in order to
-to help you get started the quickest. The mocha options file, <code>mocha.opts</code>, is at the root of 
-the project and the utility scripts are in <code>package.json</code> prefixed with <code>&quot;test&quot;</code>.
-If you already have a preferred testing stack, please modify this setup-up to suit your needs.</p>
-
-<h1 id='Litexa_Testing'>Litexa Testing</h1><p>The Litexa package comes with support for testing your
-logic offline. You can simulate invocations of your handler
-with a simple scripting language, and test your js/coffee code
-with a basic test harness.</p>
-<p>For more details about testing, please see the Testing
-chapter of The Book.</p>
-<h2 id='Running_the_tests'>Running the tests</h2><p>At any time, you can execute the command <code>litexa test</code> in your
-project directory to have all the tests in your project run
-and print a report to the command line.</p>
-<p>When you do this, a <code>.test</code> directory is also created, with
-a full report of all the output, and intermediate artifacts
-like the full skill JavaScript function to inspect.</p>
-<p>To have the test watch for file changes and re-run itself, you
-can add the <code>-w</code> flag to the command, i.e. <code>litexa test -w</code></p>
-<p>You can also narrow down the tests that get executed, by providing
-a text filter. This will attempt to match the name of the file that
-the tests are define in, or the name of the individual tests.
-Matches are fuzzy, so <code>litexa test first</code> will match all tests
-in the <code>the-first.test.litexa</code> file.</p>
-<h2 id='Skill_tests'>Skill tests</h2><p>You can define a skill test in any <code>.litexa</code> file. If you&#39;d like
-to create a file specifically for testing, name it <code>.test.litexa</code>
-instead.</p>
-<p>A test begins with the <code>TEST</code> statement, which is followed by a
-name.</p>
-<p>Subsequent lines in turn actions and expected outcomes. The first
-action is usually the <code>launch</code> statement, which simulates a
-new launch intent.</p>
-<p>Subsequently, the <code>user</code> statement defines what the user says,
-while the <code>alexa</code> statement defines what state we expect the skill
-to be in after that action, and optionally what we expect Alexa
-to say.</p>
-<p>Here&#39;s an example.</p>
-<pre><code>TEST &quot;cold launch&quot;
-  launch
-  alexa: askName, &quot;&lt;door-bell.mp3&gt; Greetings friend. What is your name?&quot;
-  user: &quot;it is Bob&quot;
-  alexa: null, &quot;Nice to meet you Bob, goodbye.&quot;
-  END</code></pre><p>In this test, we expect alexa to be in the state <code>askName</code> after
-launch, and for her to say exactly that line. Subsequently, if
-the user says &quot;it is Bob&quot;, then we expect Alexa to be in the
-state <code>null</code>, or terminated, and we expect her to say the line,
-and finally we expect the session to have ended with the <code>END</code>
-statement.</p>
-<p>The <code>alexa</code> statement can omit the output speech if we don&#39;t need
-to assert its exact contents, and the user statement can specify
-an intent name directly instead. So we might see</p>
-<pre><code>TEST &quot;asking for help&quot;
-  launch
-  alexa: askName
-  user: AMAZON.HelpIntent
-  alexa: askName
-  user: &quot;I&#39;m Bob&quot;
-  alexa: null
-  END</code></pre><p>Here we didn&#39;t care exactly what was said, we&#39;re just interested in
-making sure that a query for help would result in the skill returning
-to the askName state, and that the skill would continue as expected.</p>
-<p>You can run through this test interactively in the console by using
-the command <code>litexa interactive</code>, and typing in each of the statements.</p>
-<h2 id='Code_tests'>Code tests</h2><p>Any file with the extension <code>spec.js/test.js/spec.ts/spec.coffee/test.coffee</code>
-in the <code>litexa</code> directory will be assumed to contain code
-tests.</p>
-<p>Inside a code test file, you can assume that a library exists in
-scope called <code>Test</code>.</p>
-<p>Each named test begins by calling the <code>expect</code> function on the <code>Test</code>
-object with a name, and a function to evaluate.</p>
-<p>Inside the function, you&#39;ll use functions on the <code>Test</code> object to
-assert requirements. The <code>equal</code> function tests for value equality,
-while the <code>check</code> function takes a function that should return
-<code>true</code> or <code>false</code> for its success. To log outputs, you can use the
-<code>report</code> function.</p>
-<p>Here&#39;s an example:</p>
-<pre><code>Test.expect &quot;stuff to work&quot;, -&gt;
-  Test.equal typeof(todayName()), &#39;string&#39;
-  Test.check -&gt; addNumbers(1, 2, 3) == 6
-  Test.report &quot;today is #{todayName()}&quot;</code></pre>
-    </div>
-    <h1 id='Language_Reference'>Language Reference</h1>
-    <table id='entries'><tr class='entry'> <td id='->' class='entry-cell entry-name'><code>-></code></td> <td class='entry-cell entry-text'><p>Queues the next state to be executed after the current one
-completes. The given name should refer to a state anywhere
-else in the current project.</p>
-<p>Note, this does <em>not</em> transition to the next
-state immediately, the current state will always complete
-first.</p>
-<pre><code class="language-coffeescript">  -&gt; askUserForName</code></pre>
-</td> </tr><tr class='entry'> <td id='@_variable' class='entry-cell entry-name'><code>@ variable</code></td> <td class='entry-cell entry-text'><p>Defines a variable that will be stored permanently, and so
-be accessible at any time, across all future requests to the skill.</p>
-<p>You can directly read and write from an @ variable anywhere
-in your code, the persistence mechanism will save it to your
-database as appropriate.</p>
-<pre><code class="language-coffeescript">@username = &quot;john&quot;
-if @username == &quot;john&quot;
-  say &quot;Hi, John&quot;</code></pre>
-<p>@ variables are also supported directly in <a href="#say-string">Say String</a> interpolation.</p>
-<pre><code class="language-coffeescript">say &quot;Hello there, @username&quot;</code></pre>
-<p>The name of the variable follows the rules for an <a href="#identifier">Identifier</a>.</p>
-</td> </tr><tr class='entry'> <td id='@_variable_(Testing)' class='entry-cell entry-name'><code>@ variable (Testing)</code></td> <td class='entry-cell entry-text'><p>You can use <a href="#variable">@ variable</a>s in Litexa test cases in 2 ways:</p>
-<ul>
-<li>compare their values using any of the <a href="#variable-comparison-operators">@ Variable
-Comparison Operators</a>.</li>
-<li>assign a new value using the assignment operator <code>=</code>.</li>
-</ul>
-<p>If your @ variable is an object or array, you can use
-comparison operators on its members. However, object or
-array compares are not compared by content values and will
-fail (for the same reasons JavaScript will fail these):</p>
-<pre><code class="language-coffeescript">@testClass.val == 2 # will pass
-@testClass == {val: 2} # will not pass
-@someArray[0] == &#39;catfish&#39; # will pass
-@someArray == [&#39;catfish&#39;,&#39;b&#39;,&#39;c&#39;] # will not pass</code></pre>
-<p>For cases where you want to simulate the experience given a
-particular stored state, you can use assignment to change
-@ variable values.</p>
-<p>If your @ variable is an object or array, you can
-access its members/elements and modify those.</p>
-<p>All the examples below are valid:</p>
-<pre><code class="language-coffeescript">@testClass = { val: 3}
-@testClass.val = 3
-@someArray[0] = &quot;catfish&quot;</code></pre>
-<p>For both of these operations, the right hand operand must be
-a concrete value (cannot be a variable).</p>
-<p><strong>Warning:</strong> Don&#39;t place assignments and comparisons on the same variable in the
-same location of the skill state. They do not necessarily execute in order.</p>
-</td> </tr><tr class='entry'> <td id='@_Variable_Comparison_Operators' class='entry-cell entry-name'><code>@ Variable Comparison Operators</code></td> <td class='entry-cell entry-text'><p>A <a href="#variable-testing">@ variable (Testing)</a> can use any of these operators:</p>
-<table>
-<thead>
-<tr>
-<th></th>
-<th></th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>==</code></td>
-<td>the values should be equal</td>
-</tr>
-<tr>
-<td><code>!=</code></td>
-<td>the values should <em>not</em> be equal</td>
-</tr>
-<tr>
-<td><code>&lt;=</code></td>
-<td>the reference value should be less than or equal to the expression</td>
-</tr>
-<tr>
-<td><code>&gt;=</code></td>
-<td>the reference value should be greater than or equal to the expression</td>
-</tr>
-<tr>
-<td><code>&lt;</code></td>
-<td>the reference value should be less than the expression</td>
-</tr>
-<tr>
-<td><code>&gt;</code></td>
-<td>the reference value should be greater than the expression</td>
-</tr>
-</tbody></table>
-</td> </tr><tr class='entry'> <td id='</table>
-  </div>
-</body>
-
-</html>
- class='entry-cell entry-name'><code>$</code></td> <td class='entry-cell entry-text'><p>TODO</p>
-</td> </tr><tr class='entry'> <td id='alexa:' class='entry-cell entry-name'><code>alexa:</code></td> <td class='entry-cell entry-text'><p>Asserts that the skill winds up in an expected state at a
-specific point in the interaction. It requires at least the
-name of the expected state as an argument:</p>
-<pre><code class="language-coffeescript">  alexa: waitForName</code></pre>
-<p>If the skill session should end at that point, then write
-<code>null</code> instead of a state:</p>
-<pre><code class="language-coffeescript">  alexa: null</code></pre>
-<p>This statement optionally takes in a whole say statement
-to assert that the skill response matches the specified
-text. You can specify a variable match or an exact match.</p>
-<p>If your skill looks like this:</p>
-<pre><code class="language-coffeescript">launch
-  say &quot;Hello there.&quot;
-    or &quot;Hi there.&quot;
-    or &quot;&lt;!Howdy&gt;&quot;
-  -&gt; askForName
-
-askForName
-  say &quot;What&#39;s your name?&quot;
-    or &quot;What is your name?&quot;
-  reprompt &quot;Please tell me your name?&quot;
-  -&gt; waitForName
-
-waitForName
-  when AMAZON.RepeatIntent
-    say &quot;Please tell me your name.&quot;
-  ...</code></pre>
-<p>For a variable match, put the complete skill response text
-(or any of its variations) in the statement. Then, the tests
-below would pass:</p>
-<pre><code class="language-coffeescript">TEST &quot;greeting&quot;
-  launch
-  alexa: waitForName, &quot;Hello there. What&#39;s your name?&quot;
-
-TEST &quot;same greeting, different variation&quot;
-  launch
-  alexa: waitForName, &quot;&lt;!Howdy.&gt; What is your name?&quot; # interchanges variations</code></pre>
-<p>Note that you need to put complete statements. This means
-the following would <em>not</em> pass:</p>
-<pre><code class="language-coffeescript">TEST &quot;greeting - expect test to fail&quot;
-  launch
-  alexa: waitForName, &quot;Hello there.&quot;
-  alexa: waitForName, &quot;What&#39;s your name?&quot;</code></pre>
-<p>You can also perform an exact match on the spoken text by
-prepending the string with <code>e</code>. Thus, the following would pass:</p>
-<pre><code class="language-coffeescript">TEST &quot;get to repeat&quot;
-  launch
-  user: AMAZON.RepeatIntent
-  alexa: waitForName, e&quot;Please tell me your name.&quot;</code></pre>
-<p>Note that you cannot apply this when the say statements have
-variations. The following would <em>not</em> pass:</p>
-<pre><code class="language-coffeescript">TEST &quot;greeting - expect test to fail&quot;
-  launch
-  alexa: waitForName, e&quot;Hello there. What is your name?&quot;
-  alexa: waitForName, e&quot;&lt;!Howdy.&gt; What&#39;s your name?&quot;
-  alexa: waitForName, e&quot;Hi there.</code></pre>
-</td> </tr><tr class='entry'> <td id='CancelPurchase' class='entry-cell entry-name'>CancelPurchase</td> <td class='entry-cell entry-text'><p>TODO</p>
-</td> </tr><tr class='entry'> <td id='capture' class='entry-cell entry-name'><code>capture</code></td> <td class='entry-cell entry-text'><p>Takes a snapshot of the skill state at that point in time of
-the test. Takes as an argument a name for the capture.</p>
-<p>You can write multiple captures in a single test to snapshot
-different points in time.</p>
-<p>Please see <a href="#resume">resume</a> for how to use the snapshot.</p>
-</td> </tr><tr class='entry'> <td id='card' class='entry-cell entry-name'><code>card</code></td> <td class='entry-cell entry-text'><p>Sends a card to the user&#39;s companion app with a title, an image, and/or text.</p>
-<p>See the section on <a href="/book/companion-app.html">Cards</a> for more details.</p>
-<pre><code class="language-coffeescript">card &quot;Welcome&quot;, image.png, &quot;This is my wonderful card&quot;
-...
-card &quot;Another Way&quot;
-  image: image.png
-  content: &quot;Another way to initialize a card&quot;</code></pre>
-</td> </tr><tr class='entry'> <td id='Comments' class='entry-cell entry-name'>Comments</td> <td class='entry-cell entry-text'><p>Anything on a line after the # character is considered a comment, which means it will be ignored by the parser.
-You can use comments to leave notes for yourself or for the next author to read
-your code.</p>
-<pre><code class="language-coffeescript"># the score should only end up being between 1 and 10
-switch score
-  &lt; 5 then
-    say &quot;You have room for improvement&quot;
-  &lt; 9 then
-    say &quot;Almost there!&quot;#comments can also happen after statements
-  else
-    say &quot;Perfect!&quot;
-
- TEST &quot;run through&quot; # in tests too
-   launch#Comments All day long
-   alexa: null</code></pre>
-</td> </tr><tr class='entry'> <td id='define' class='entry-cell entry-name'><code>define</code></td> <td class='entry-cell entry-text'><p>TODO</p>
-</td> </tr><tr class='entry'> <td id='directive' class='entry-cell entry-name'><code>directive</code></td> <td class='entry-cell entry-text'><p>Adds directives to the next Alexa response, by calling an
-<a href="#inline-function">Inline Function</a>. The function is expected to return
-an array of JavaScript objects each representing a
-single directive.</p>
-<pre><code class="language-coffeescript">directive createIntroAPLScreen()</code></pre>
-<p>For more on Alexa directives, see:
-<a href="https://developer.amazon.com/docs/alexa-voice-service/interaction-model.html#interfaces">Alexa Interfaces, Directives and Events</a></p>
-</td> </tr><tr class='entry'> <td id='directive:' class='entry-cell entry-name'><code>directive:</code></td> <td class='entry-cell entry-text'><p>Much like <a href="#alexa">alexa:</a> statements, asserts that a directive of
-the specified type was sent in the skill response. This
-matches any directive, regardless of whether it was sent
-using a Litexa extension&#39;s added statements or not.</p>
-<details><summary>Example</summary>
-
-<pre><code class="language-coffeescript">launch
-  say &quot;Welcome to the Cat Kingdom!&quot;
-  screen title.jpg # look at the Screens chapter for more on what this is
-  END
-
-TEST &quot;launch&quot;
-  launch
-  directive: Display.RenderTemplate</code></pre>
-</details>
-
-<p>Note: You cannot assert the absence of any directive with this
-command.</p>
-</td> </tr><tr class='entry'> <td id='END' class='entry-cell entry-name'>END</td> <td class='entry-cell entry-text'><p>Indicates that your skill should end after the next response, so
-it should not expect any further interaction from the user.</p>
-</td> </tr><tr class='entry'> <td id='END_(Testing)' class='entry-cell entry-name'>END (Testing)</td> <td class='entry-cell entry-text'><p>Asserts that your skill response indicated that the skill
-session should end.</p>
-<p>For an example, see <a href="#listen-testing">LISTEN (Testing)</a>.</p>
-</td> </tr><tr class='entry'> <td id='Expression' class='entry-cell entry-name'>Expression</td> <td class='entry-cell entry-text'><p>TODO</p>
-</td> </tr><tr class='entry'> <td id='for' class='entry-cell entry-name'><code>for</code></td> <td class='entry-cell entry-text'><p>Use a for loop when you need to iterate over an array or object.
-For loops have the following syntax:</p>
-<pre><code>for &lt;value&gt; in &lt;array | object&gt;</code></pre><p>or</p>
-<pre><code>for &lt;key | index&gt;, &lt;value&gt; in &lt;array | object&gt;</code></pre><p>Given a scenario where we have these functions:</p>
-<pre><code class="language-javascript">getNames = function() {
-    return {
-      driver: &#39;bob&#39;,
-      artillery: &#39;tim&#39;,
-      hacker: &#39;mary&#39;
-    };
-};
-getNumbers = function() {
-  return [3, 5, 8, 9];
-}</code></pre>
-<p>You can iterate object values:</p>
-<pre><code class="language-coffeescript">for name in getNames()
-  say &quot;{name}&quot;</code></pre>
-<p>This will output:</p>
-<pre><code>say bob
-say tim
-say mary</code></pre><p>You can iterate object keys and values:</p>
-<pre><code class="language-coffeescript">for job, name in getNames()
-  say &quot;{job} {name}&quot;</code></pre>
-<pre><code>say driver bob
-say artillery tim
-say hacker mary</code></pre><p>You can iterate array values:</p>
-<pre><code class="language-coffeescript">for number in getNumbers()
-  say &quot;{number}&quot;</code></pre>
-<p>You can iterate array indices and values:</p>
-<pre><code class="language-coffeescript">for index, number in getNumbers()
-  say &quot;{index}{number}&quot;</code></pre>
-<p>You can nest <code>for</code> loops:</p>
-<p><strong>Warning:</strong> You cannot reuse iterator names in the nested loop. In the below example
-you could not use <code>i</code> for both loops.</p>
-<pre><code class="language-coffeescript">for i, j in getNumbers()
-  for k, l in getNumbers()
-    say &quot;{i}{j}{k}{l}&quot;</code></pre>
-<p>You can iterate and call asynchronous function in the <code>for</code> loop:</p>
-<pre><code class="language-coffeescript">for job, name in getNames()
-  say &quot;{processJobAsync(job)} {name}&quot;</code></pre>
-</td> </tr><tr class='entry'> <td id='Identifier' class='entry-cell entry-name'>Identifier</td> <td class='entry-cell entry-text'><p>A word used to name things in code that must conform to the
-following rules:</p>
-<ul>
-<li>It must begin with an ASCII letter or an underscore.</li>
-<li>It can then contain any combination of numbers, ASCII letters and underscores.</li>
-<li>It cannot be one of the <a href="#reserved-words">Reserved Word</a>s.</li>
-</ul>
-<pre><code class="language-coffeescript">aName
-aDifferentName
-a_name
-A_Thing_I_Named
-counter1
-counter_23</code></pre>
-</td> </tr><tr class='entry'> <td id='if' class='entry-cell entry-name'><code>if</code></td> <td class='entry-cell entry-text'><p>The <code>if</code> statement lets you split between two behaviors,
-based on the outcome of an <a href="#expression">Expression</a>. The block
-following the <code>if</code> statement will only be executed if
-the expression evaluates to true.</p>
-<p>After the <code>if</code> statement, you can optionally add an <code>else</code>
-statement, The block following that statement will only
-be executed if the expression was false.</p>
-<pre><code class="language-coffeescript">if age &gt;= 21
-  say &quot;Hey, would you like a beer?&quot;
-else
-  say &quot;Hey, would you like a soda?&quot;</code></pre>
-<p>The unless statement is equivalent to the statement
-<code>if not expression</code>, making it clearer that the code
-block should only be executed if the test is negative.</p>
-<pre><code class="language-coffeescript">unless age &lt; 21
-  say &quot;Hey, would you like a beer?&quot;</code></pre>
-</td> </tr><tr class='entry'> <td id='Inline_Function' class='entry-cell entry-name'>Inline Function</td> <td class='entry-cell entry-text'><p>TODO</p>
-</td> </tr><tr class='entry'> <td id='Intent_Name' class='entry-cell entry-name'>Intent Name</td> <td class='entry-cell entry-text'><p>A code name used to refer to a specific type of intent, as part
-of the <a href="#when">when</a> statement.</p>
-<p>An intent name consists of one or more <a href="#identifier">Identifier</a>s, separated
-by a <code>.</code>. You can create your own intent names to override the
-default names created from your utterances, or you can refer
-directly to the set of <a href="https://developer.amazon.com/docs/custom-skills/standard-built-in-intents.html">Alexa built-in intents</a></p>
-<pre><code class="language-coffeescript">waitForAnswer
-
-  when TheAnswer
-    or &quot;The answer is $answer&quot;
-    say &quot;Alright, checking your answer&quot;
-
-  when AMAZON.HelpIntent
-    say &quot;Just wait for my ring to light up blue, then tell me your answer.&quot;
-    -&gt; askQuestion
-
-  when AMAZON.StopIntent
-    say &quot;Oh, alright then. See you later!&quot;
-    END</code></pre>
-</td> </tr><tr class='entry'> <td id='jsonFiles' class='entry-cell entry-name'><code>jsonFiles</code></td> <td class='entry-cell entry-text'><p>The object name that consolidates all <code>.json</code> files, keyed by the
- <code>.json</code> filename. To reference this within a Litexa file, you
- can use the object as you would any variable in a Litexa file.</p>
-<p> Here are some examples of referencing a <code>.json</code> file within
- a <code>.litexa</code> file.</p>
-<p> <strong>Directory Structure</strong></p>
-<pre><code class="language-stdout"> project_dir
- └── litexa
-     └── test.json
-     └── main.litexa</code></pre>
-<p> <strong>test.json</strong></p>
-<pre><code class="language-json"> {
-   &quot;simple&quot;: &quot;Reference me.&quot;,
-   &quot;test&quot;: &quot;I am a test.&quot;
- }</code></pre>
-<p> <strong>main.litexa</strong></p>
-<pre><code class="language-coffeescript"> # File: main.litexa
- launch
-   # Reference a JSON file as a variable
-   local jsonTest = jsonFiles[&quot;test.json&quot;]
-   say &quot;Simple. {jsonTest.simple}&quot;
-
-   # Reference a JSON file in-line
-   say &quot;Test. {jsonFiles[&quot;test.json&quot;].test}&quot;</code></pre>
-</td> </tr><tr class='entry'> <td id='launch' class='entry-cell entry-name'><code>launch</code></td> <td class='entry-cell entry-text'><p>Simulates the user invoking the skill in a Litexa test.
-Starts the skill session in the <code>launch</code> state.</p>
-<p><strong>Warning:</strong> Litexa does not prevent you from using <code>launch</code> in the
-middle of your test, such as after another intent. It will
-take you to the <code>launch</code> state. However, on a real Alexa
-device, this is equivalent to saying &quot;Alexa, launch &lt;my
-skill&gt;&quot; in the middle of your skill session. Unless utterances for
-launching skills are part of your skill model, your skill will most
-likely receive some other intent instead.</p>
-</td> </tr><tr class='entry'> <td id='LISTEN' class='entry-cell entry-name'>LISTEN</td> <td class='entry-cell entry-text'><p>Indicates that your skill session should stay open after the next response.</p>
-<p>It optionally takes in one of 2 arguments with the following effects:</p>
-<ul>
-<li><code>microphone</code>: opens the device microphone, expecting the user to say something.
-This marks the response with <code>shouldEndSession: false</code>.</li>
-<li><code>events</code>: does not open the device microphone, but does not end the skill session either.
-This marks the response with <code>shouldEndSession: undefined</code>. It is useful if
-you want to give your users more time to think and require them to prefix their
-response with the wake word, or are expecting other types of input,
-such as a <code>GameEngine.InputHandlerEvent</code>.</li>
-</ul>
-<p>If no argument is given, it defaults to <code>LISTEN events</code>.</p>
-<p>By default, <code>LISTEN microphone</code> is the behavior for the end of a state handler,
-so you are not required to write it in your state handlers to expect users
-to respond to your skill.</p>
-<p>Keep in mind, this does not gate the kind of skill request that your skill
-may receive in that state; all intents and events supported by your skill
-may still come in regardless of this setting.</p>
-</td> </tr><tr class='entry'> <td id='LISTEN_(Testing)' class='entry-cell entry-name'>LISTEN (Testing)</td> <td class='entry-cell entry-text'><p>Asserts that your skill response indicated that the skill
-session should stay open. It optionally takes in one of 2
-arguments with the following effects:</p>
-<ul>
-<li><code>microphone</code>: asserts that the response would open the
-device microphone. This checks that the response has
-<code>shouldEndSession: false</code>.</li>
-<li><code>events</code>: asserts that the response would <em>not</em> open the
-device microphone. This checks that the response has
-<code>shouldEndSession: undefined</code>.</li>
-</ul>
-<p>If no argument is given, it defaults to <code>LISTEN events</code>.</p>
-<details><summary>Example</summary>
-
-<p>If your skill looks something like this:</p>
-<pre><code class="language-coffeescript">launch
-  say &quot;Are you a cat person or a dog person?&quot;
-  -&gt; waitForAnswer
-
-waitForAnswer
-  # no LISTEN statement here implies LISTEN microphone
-  when &quot;cat&quot;
-    say &quot;Meow&quot;
-    END
-  when &quot;dog&quot;
-    say &quot;Bork&quot;
-    END</code></pre>
-<p>Then you can assert your skill state and microphone like so:</p>
-<pre><code class="language-coffeescript">TEST &quot;user says cat&quot;
-  launch
-  LISTEN microphone # replacing this with LISTEN or LISTEN events will cause the test to fail
-                    # because it is expecting the microphone to open
-  user: &quot;cat&quot;
-  END</code></pre>
-</details>
-
-</td> </tr><tr class='entry'> <td id='local' class='entry-cell entry-name'><code>local</code></td> <td class='entry-cell entry-text'><p>Defines a variable much like traditional variables in that
-they are lexically scoped, meaning that their lifespan will align
-with the block of code they sit in, and they will be visible to any code inside that block.</p>
-<p>Local variables must be declared before use, with the <code>local</code> statement,
-and cannot be declared again in the same scope, including in subordinate blocks of code:
-<em>Litexa does not allow variable shadowing.</em></p>
-<p>Local variables must also be initialized with a value.</p>
-<pre><code class="language-coffeescript">launch
-  local counter = 0
-  local name = &quot;Jane&quot;
-  local flag = false</code></pre>
-<p>Local variables that are declared and used in a single handler have memory storage.
-Local variables can survive across more than one handler though, when declared
-in the state&#39;s entry handler and then referenced in any of the state&#39;s intent
-handlers or the state&#39;s exit handler. In this case, they are automatically promoted
-to database storage.</p>
-<p><strong>Warning:</strong> Reentering a state will reset its &quot;persistent&quot; local variables, since it
-will call the initialization in the state&#39;s entry handler.</p>
-<p>In the next example:</p>
-<ol>
-<li>The loops variable is declared and initialized to 0
-in askForAction&#39;s entry handler.</li>
-<li>While in askForAction, any help or unexpected intent
-will increment loops by 1 in its handler.</li>
-<li>In the handler for a valid action intent, a state
-transition to takeAction is called. This triggers
-askForAction&#39;s exit handler and reads out the loops value.</li>
-</ol>
-<pre><code class="language-coffeescript">askForAction
-  local loops = 0
-  say &quot;What should we do?&quot;
-
-  when &quot;let&#39;s $action&quot;
-    with $action = &quot;jump&quot;, &quot;run&quot;, &quot;shoot&quot;
-    say &quot;Alright, attempting $action&quot;
-    -&gt; takeAction
-
-  when AMAZON.HelpIntent
-    loops = loops + 1
-    say &quot;Just tell me what you want to do.&quot;
-
-  otherwise
-    say &quot;Yeah no, that&#39;s not going to work. What should we do?
-      Maybe jump, run, or shoot?&quot;
-    loops = loops + 1
-
-  if loops &gt; 1
-    say &quot;Geez, that only took {loops} tries.&quot;</code></pre>
-</td> </tr><tr class='entry'> <td id='log' class='entry-cell entry-name'><code>log</code></td> <td class='entry-cell entry-text'><p>Writes the result of the given <a href="#expression">Expression</a> to your logging system.</p>
-<p>In the standard <code>@litexa/deploy-aws</code> library, this will write
-to your Lambda&#39;s Cloudwatch log.</p>
-</td> </tr><tr class='entry'> <td id='logStateTraces' class='entry-cell entry-name'><code>logStateTraces</code></td> <td class='entry-cell entry-text'><p>Prints out every subsequent state transition and intent handler
-encountered until the end of of the current test. Use this
-if you suspect your state transition logic isn&#39;t doing exactly
-what you think it should be.</p>
-<p>You will need to add <code>= true</code> or <code>= false</code> as an argument to
-enable and disable it, respectively. You can have multiple
-statements throughout your test, with at most one for each
-skill request-producing interaction.</p>
-<details><summary>Example</summary>
-
-<pre><code class="language-coffeescript">TEST &quot;find the cat&quot;
-  launch
-  user: &quot;left&quot;
-  logStateTraces = true # output states traversed
-  user: &quot;right&quot;
-  user: AMAZON.YesIntent
-  user: AMAZON.RepeatIntent
-  logStateTraces = false # stop showing states traversed
-  user: &quot;pick up the cat&quot;
-  user: AMAZON.NoIntent</code></pre>
-</details>
-</td> </tr><tr class='entry'> <td id='metric' class='entry-cell entry-name'><code>metric</code></td> <td class='entry-cell entry-text'><p>Records a single counter metric to the metric database. You
-can use this to keep track of how many times a given thing
-has happened in your skill.</p>
-<p>The metric name can be any combination of numbers, letters
-and the <code>-</code> symbol.</p>
-<pre><code class="language-coffeescript">metric playerCompletedGame</code></pre>
-<p>The standard @litexa/deploy-aws package will write
-these to cloudwatch. If you are using a different package,
-please see its documentation for how metrics are routed.</p>
-</td> </tr><tr class='entry'> <td id='or' class='entry-cell entry-name'><code>or</code></td> <td class='entry-cell entry-text'><p>Used to provide variations to various statements:</p>
-<ul>
-<li><a href="#say">say</a></li>
-<li><a href="#when">when</a></li>
-<li><a href="#soundeffect">soundEffect</a></li>
-</ul>
-</td> </tr><tr class='entry'> <td id='otherwise' class='entry-cell entry-name'><code>otherwise</code></td> <td class='entry-cell entry-text'><p>Defines a catch all intent that will be executed should
-its parent state receive an intent that it has no explicit
-handler for. It&#39;s always possible for the user to say
-something unexpected, so you should generally always have
-something to say to guide them back on track in these cases.</p>
-<pre><code class="language-coffeescript">waitForAnswer
-
-  when TheAnswerIs
-    say &quot;alright, checking&quot;
-
-  otherwise
-    say &quot;I&#39;m sorry, I didn&#39;t quite get that. Let&#39;s try again.&quot;
-    -&gt; askQuestion</code></pre>
-</td> </tr><tr class='entry'> <td id='playMusic' class='entry-cell entry-name'><code>playMusic</code></td> <td class='entry-cell entry-text'><p>TODO</p>
-</td> </tr><tr class='entry'> <td id='pronounce' class='entry-cell entry-name'><code>pronounce</code></td> <td class='entry-cell entry-text'><p>Specifies a one for one replacement that will be automatically
-applied to all voiced responses from this skill. The statement
-should be placed outside of the scope of any state, at the top
-level of the file.</p>
-<p>Use this to improve Alexa&#39;s pronounciation of words, or select
-a specific pronounciation skill wide, while retaining human
-readable spelling in your code.</p>
-<pre><code class="language-coffeescript">pronounce &quot;tomato&quot; as &quot;&lt;phoneme alphabet=&quot;ipa&quot; ph=&quot;/təˈmɑːtoʊ/&quot;&gt;tomato&lt;/phoneme&gt;&quot;</code></pre>
-</td> </tr><tr class='entry'> <td id='purchase' class='entry-cell entry-name'><code>purchase</code></td> <td class='entry-cell entry-text'><p>TODO</p>
-</td> </tr><tr class='entry'> <td id='quit' class='entry-cell entry-name'><code>quit</code></td> <td class='entry-cell entry-text'><p>TODO: bug fix
-This is broken right now. If you were to substitute it with
-StopIntent, you would get different behaviors. Quit behaves
-as if nothing has changed in skill session state.</p>
-<p>Expected behavior:
-Equivalent to the user saying &quot;exit&quot; during your skill
-session in that the request is received outside your skill
-and a
-<a href="https://developer.amazon.com/docs/custom-skills/request-types-reference.html#sessionendedrequest">SessionEndedRequest</a>
-is sent to your skill.</p>
-</td> </tr><tr class='entry'> <td id='Regular_Expression' class='entry-cell entry-name'>Regular Expression</td> <td class='entry-cell entry-text'><p>Litexa supports a subset of <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions">JavaScript&#39;s regular
-expressions</a>.</p>
-<p>In brief, a regular expression, or regex for short,
-is a compact program designed to recognize strings.
-They begin and end with the <code>/</code> character.</p>
-<p>The simplest regex matches an exact string:</p>
-<pre><code class="language-coffeescript">/bob/</code></pre>
-<p>This matches the exact string &#39;bob&#39;. We can make the
-match case insensitive by adding an <code>i</code> flag.</p>
-<pre><code class="language-coffeescript">/bob/i</code></pre>
-<p>This matches &quot;Bob&quot;, &quot;bob&quot; and all combinations in
-between.</p>
-<p>We can use the <code>|</code> character to provide alternates.</p>
-<pre><code class="language-coffeescript">/bob|greg|john/i</code></pre>
-<p>The <code>.</code> character stands in for any single character.</p>
-<pre><code class="language-coffeescript">/b.b/</code></pre>
-<p>This would match &quot;bob&quot;, &quot;bab&quot;, &quot;bib&quot;, and so on.</p>
-<p>The <code>+</code> character specifies that the string should have
-one or more of the preceeding character.</p>
-<pre><code class="language-coffeescript">/bo+b/</code></pre>
-<p>This would match &quot;bob&quot;, &quot;boob&quot;, &quot;booob&quot;, etc.</p>
-</td> </tr><tr class='entry'> <td id='reprompt' class='entry-cell entry-name'><code>reprompt</code></td> <td class='entry-cell entry-text'><p>Specifies the reprompt that will be installed during
-the next response. The content is specified in the
-<a href="#say-string">Say String</a> format.</p>
-<p>Note: Unlike <a href="#say">say</a> statements, reprompt statements
-are <em>not</em> accumulative; only the most recent reprompt statement
-will be included in the response.</p>
-</td> </tr><tr class='entry'> <td id='request:' class='entry-cell entry-name'><code>request:</code></td> <td class='entry-cell entry-text'><p>TODO
-You will need to see Alexa documentation about
-request types, but also testing.coffee&#39;s RequestStep
-seems to only set the value of intent to &quot;LaunchRequest&quot;.</p>
-<p>Refer to TestLineRequest in pegjs.</p>
-</td> </tr><tr class='entry'> <td id='Reserved_Word' class='entry-cell entry-name'>Reserved Word</td> <td class='entry-cell entry-text'><p>A reserved word is any word reserved for the language&#39;s
-use and thus unavailable for any user defined names.</p>
-<p>The full list:</p>
-<ul>
-<li><a href="#capture">capture</a></li>
-<li><a href="#card">card</a></li>
-<li><a href="#define">define</a></li>
-<li><a href="#directive">directive</a></li>
-<li><a href="#end">END</a></li>
-<li><a href="#for">for</a></li>
-<li><a href="#for">in</a></li>
-<li><a href="#if">if</a></li>
-<li><a href="#else">else</a></li>
-<li>global</li>
-<li><a href="#launch">launch</a></li>
-<li><a href="#listen">LISTEN</a></li>
-<li><a href="#listen">microphone</a></li>
-<li><a href="#listen">events</a></li>
-<li><a href="#local">local</a></li>
-<li><a href="#log">log</a></li>
-<li><a href="#logstatetraces">logStateTraces</a></li>
-<li><a href="#metric">metric</a></li>
-<li><a href="#or">or</a></li>
-<li><a href="#otherwise">otherwise</a></li>
-<li><a href="#pronounce">pronounce</a></li>
-<li><a href="#quit">quit</a></li>
-<li><a href="#reprompt">reprompt</a></li>
-<li><a href="#resume">resume</a></li>
-<li><a href="#say">say</a></li>
-<li><a href="#set">set</a></li>
-<li><a href="#setregion">setRegion</a></li>
-<li><a href="#setresponsespacing">setResponseSpacing</a></li>
-<li><a href="#switch">switch</a></li>
-<li><a href="#test">TEST</a></li>
-<li><a href="#then">then</a></li>
-<li><a href="#unless">unless</a></li>
-<li><a href="#wait">wait</a></li>
-<li><a href="#when">when</a></li>
-<li><a href="#with">with</a></li>
-</ul>
-</td> </tr><tr class='entry'> <td id='resume' class='entry-cell entry-name'><code>resume</code></td> <td class='entry-cell entry-text'><p>Continues a skill from the state saved by <a href="#capture">capture</a>. Takes
-as an argument a name for the snapshot to resume.</p>
-<p>The order that <code>resume</code>s and their dependent <code>capture</code>s are
-listed in the file does not matter - Litexa will sort out
-the dependency tree for you and run your tests in that
-order.</p>
-<details><summary>Example</summary>
-If your skill looks something like this:
-
-<pre><code class="language-coffeescript">launch
-  say &quot;Please say &#39;apple.&#39;&quot;
-  -&gt; waitForApple
-
-waitForApple
-  when &quot;apple&quot;
-    say &quot;Now, say &#39;banana.&#39;&quot;
-    -&gt; waitForBanana
-  otherwise
-    say &quot;You didn&#39;t say apple. Try again.&quot;
-
-waitForBanana
-  when &quot;banana&quot;
-    say &quot;You did it. Goodbye.&quot;
-    END
-  otherwise
-    say &quot;You didn&#39;t say banana. Try again.&quot;</code></pre>
-<p>Then you could succinctly cover all handlers with the
-following tests:</p>
-<pre><code class="language-coffeescript">TEST &quot;apple -&gt; apple&quot;
-  launch
-  user: &quot;apple&quot;
-  alexa: waitForBanana
-  capture userSaidApple # unquoted name of the capture
-  user: &quot;apple&quot;
-  alexa: waitForBanana
-
-TEST &quot;apple -&gt; banana&quot;
-  resume userSaidApple # resume from the named capture
-  user: &quot;banana&quot;
-  alexa: null
-
-TEST &quot;banana -&gt; apple&quot;
-  launch
-  user: &quot;banana&quot;
-  alexa: waitForApple
-  user: &quot;apple&quot;</code></pre>
-</details>
-
-<p>You can also write multiple captures in a single test to
-snapshot different points in time. However, it is
-recommended to only resume once per test. Resuming will
-override your test&#39;s current state with the snapshotted
-state. Keep in mind that <code>resume</code> resumes <em>skill state</em>, not
-the sequence of statements in the written test.</p>
-</td> </tr><tr class='entry'> <td id='say' class='entry-cell entry-name'><code>say</code></td> <td class='entry-cell entry-text'><p>Adds spoken content to the next response. The content
-is specified in the <a href="#say-string">Say String</a> format.</p>
-<p>Say statements are accumulative until the next
-response is sent, with each subsequent statement
-being separated by a single space.</p>
-<pre><code class="language-coffeescript">say &quot;Hello&quot;
-say &quot;World&quot;</code></pre>
-<p>This would result in Alexa saying &quot;Hello World&quot;</p>
-</td> </tr><tr class='entry'> <td id='Say_String' class='entry-cell entry-name'>Say String</td> <td class='entry-cell entry-text'><p>The Say String format is used by <a href="#say">say</a> and <a href="#reprompt">reprompt</a> statements,
-and supports any of the following:</p>
-<ol>
-<li>Alphanumerical characters and punctuation:</li>
-</ol>
-<pre><code class="language-coffeescript">say &quot;Basic statement with letters, the numbers 1, 2, 3, and punctuation.&quot;</code></pre>
-<ol start="2">
-<li>Interpolated <a href="#variable">@</a> DB variables and <a href="#-2">$</a> slot variables:</li>
-</ol>
-<pre><code class="language-coffeescript">@myDbVar = &#39;myDbVar&#39;
-say &quot;My DB variable&#39;s value is @myDbVar.&quot;
-
-when &quot;my name is $name&quot;
-  with $name = AMAZON.US_FIRST_NAME
-  say &quot;Your name is $name.&quot;</code></pre>
-<ol start="3">
-<li>Interpolated <a href="#expression">expressions</a>:</li>
-</ol>
-<pre><code class="language-js">function echo(str) { return str; }
-
-const myConst = &#39;my constant&#39;</code></pre>
-<pre><code class="language-coffeescript">say &quot;{1 + 1}&quot;               # says &quot;2&quot;
-say &quot;{echo(&#39;test&#39;)}&quot;        # says &quot;test&quot;
-say &quot;constant is {myConst}&quot; # says &quot;constant is my constant&quot;
-
-@intro = &#39;Hello &#39;
-when &quot;my name is $name&quot;
-  with $name = &quot;Bob&quot;
-  say &quot;{@intro + $name}!&quot;  # says &quot;Hello Bob!&quot;</code></pre>
-<ol start="4">
-<li>Explicit <a href="https://developer.amazon.com/docs/custom-skills/speech-synthesis-markup-language-ssml-reference.html">SSML</a>:</li>
-</ol>
-<pre><code class="language-coffeescript"># Note the required escape slashes before the opening/closing SSML tags!
-say &quot;\&lt;say-as interpret-as=&#39;ordinal&#39;&gt;1\&lt;/say-as&gt;&quot;
-# says &quot;first&quot;</code></pre>
-<ol start="5">
-<li>Shorthand <a href="https://developer.amazon.com/docs/custom-skills/speech-synthesis-markup-language-ssml-reference.html">SSML</a>,
-which facilitates using the following tags:</li>
-</ol>
-<ul>
-<li><a href="https://developer.amazon.com/docs/custom-skills/speechcon-reference-interjections-english-us.html">Interjections</a></li>
-</ul>
-<pre><code class="language-coffeescript">say &quot;&lt;!abracadabra&gt;&quot;
-# shorthand for: &quot;&lt;say-as interpret-as=&quot;interjection&quot;&gt;abracadabra!&lt;/say-as&gt;&quot;</code></pre>
-<ul>
-<li><a href="https://developer.amazon.com/docs/custom-skills/speech-synthesis-markup-language-ssml-reference.html#break">Break time</a></li>
-</ul>
-<pre><code class="language-coffeescript">say &quot;Before pause. &lt;...100ms&gt; After 100 millisecond pause.&quot;
-# shorthand for: &quot;Before pause. &lt;break time=&#39;100ms&#39;&gt; After 100 millisecond pause.&quot;</code></pre>
-<ul>
-<li><a href="https://developer.amazon.com/docs/custom-skills/speech-synthesis-markup-language-ssml-reference.html#audio">Audio</a></li>
-</ul>
-<pre><code class="language-coffeescript"># assuming a sound.mp3 file is deployed with skill, via litexa/assets
-say &quot;playing sound effect &lt;sfx sound.mp3&gt;&quot;
-# shorthand for: &quot;playing sound effect &lt;audio src=&#39;[deployed_mp3_url]&#39; /&gt;&quot;</code></pre>
-<ol start="6">
-<li>Multi-line strings:</li>
-</ol>
-<pre><code class="language-coffeescript">say &quot;Multiline
-  string!
-  &lt;!abracadabra&gt;!&quot;
-
-# says: &quot;Multiline string!&lt;say-as interpret-as=&#39;interjection&#39;&gt;abracadabra&lt;/say-as&gt;!</code></pre>
-<ol start="7">
-<li>Combinations of multiple components:</li>
-</ol>
-<pre><code class="language-coffeescript">say &quot;&lt;!aloha&gt;. This {&#39;is &#39; + &#39;an &#39; + &#39;example&#39;}
-  of &lt;...100ms&gt; multiple
-  \&lt;amazon:effect name=&#39;whispered&#39;&gt;components\&lt;/amazon:effect&gt;.&quot;</code></pre>
-</td> </tr><tr class='entry'> <td id='set' class='entry-cell entry-name'><code>set</code></td> <td class='entry-cell entry-text'><p>Allows for setting skill context flags to true or false.</p>
-<ul>
-<li><p><code>resetOnLaunch</code></p>
-<ul>
-<li>true (default): every skill launch request will start the skill in the
-<code>launch</code> state</li>
-<li>false: if the last skill session wasn&#39;t intentionally ended, this
-will attempt to restore the last skill sesssion&#39;s pre-termination state</li>
-</ul>
-<pre><code class="language-coffeescript">launch
-  set resetOnLaunch false</code></pre>
-</li>
-</ul>
-</td> </tr><tr class='entry'> <td id='setRegion' class='entry-cell entry-name'><code>setRegion</code></td> <td class='entry-cell entry-text'><p>Run the test in the specified region until the end of the
-Litexa test case.</p>
-<p>It takes in one of 2 arguments:</p>
-<ul>
-<li>language code: format [a-zA-Z][a-zA-Z]</li>
-<li>locale code: format [a-zA-Z][a-zA-Z]-[a-zA-Z][a-zA-Z]</li>
-</ul>
-<p>The default region is en-US.</p>
-<p>If you would instead like to run all your tests in a
-specified region, you can use the <code>-r</code> flag in <code>litexa test</code>
-which takes the same arguments as above. Litexa will tell
-you in the test output which litexa file region will be
-used, such as below:</p>
-<pre><code>Testing in region en-US, language default out of [&quot;default&quot;]</code></pre><p>For context on the usage of this statement, read the
-<a href="/book/localization.html">Localization Chapter</a>.</p>
-</td> </tr><tr class='entry'> <td id='setResponseSpacing' class='entry-cell entry-name'><code>setResponseSpacing</code></td> <td class='entry-cell entry-text'><p>Sets a timeout (in milliseconds) before the next response is sent. This can be
-used to prevent a user request from triggering a new response before the
-ongoing response has finished.</p>
-<p>This isn&#39;t relevant for a vocal intent, since giving a vocal intent requires
-either the microphone being open (meaning the response has finished), or
-the wake word being used (which actively interrupts the response).</p>
-<p>However, it is relevant for something like Echo Buttons, as users pressing their
-buttons sometimes shouldn&#39;t interrupt the ongoing response. An example for this
-would be a roll call:</p>
-<pre><code class="language-coffeescript">rollCall
-  when GameEngine.InputHandlerEvent &quot;NewButton&quot;
-    say &quot;This is a welcome message that takes approximately 3000 milliseconds.&quot;
-
-  # While in roll call, add a delay of 3 seconds between welcome messages. That way,
-  # new players joining back to back won&#39;t interrupt the previous welcome message.
-  setResponseSpacing = 3000</code></pre>
-</td> </tr><tr class='entry'> <td id='soundEffect' class='entry-cell entry-name'><code>soundEffect</code></td> <td class='entry-cell entry-text'><p>Converts a specified sound effect to SSML, and adds it to the next response.
-Importantly, only sound effects in an
-<a href="https://developer.amazon.com/docs/custom-skills/speech-synthesis-markup-language-ssml-reference.html#h3_converting_mp3">Alexa-friendly format</a>
-are playable. The sound effect can be specified as a:</p>
-<ol>
-<li>URL:</li>
-</ol>
-<pre><code class="language-coffeescript">soundEffect &quot;https://www.example.com/sound.mp3&quot;</code></pre>
-<ol start="2">
-<li>file name (assuming the file is placed in <code>litexa/assets</code> and deployed):</li>
-</ol>
-<pre><code class="language-coffeescript"># assuming sound.mp3 is placed in litexa/assets and deployed with the skill
-soundEffect sound.mp3</code></pre>
-<ol start="3">
-<li><a href="https://developer.amazon.com/docs/custom-skills/ask-soundlibrary.html">ASK sound library</a> reference:</li>
-</ol>
-<pre><code class="language-coffeescript">soundEffect &quot;soundbank://soundlibrary/animals/amzn_sfx_bear_groan_roar_01&quot;</code></pre>
-<p>All three of the above specifications can alternatively be used in the <code>&lt;sfx&gt;</code>
-tag in <a href="#say-string">Say Strings</a>.</p>
-</td> </tr><tr class='entry'> <td id='State' class='entry-cell entry-name'>State</td> <td class='entry-cell entry-text'><p>A state is defined by writing an <a href="#identifier">Identifier</a> as the
-first and only thing on its own line.</p>
-<p>TODO elaborate</p>
-</td> </tr><tr class='entry'> <td id='stopMusic' class='entry-cell entry-name'><code>stopMusic</code></td> <td class='entry-cell entry-text'><p>TODO</p>
-</td> </tr><tr class='entry'> <td id='switch' class='entry-cell entry-name'><code>switch</code></td> <td class='entry-cell entry-text'><p>A switch statement lets you split the flow between
-any number of mutually exclusive possibilities, each
-defined by a case statement ending with
-the keyword <code>then</code>.</p>
-<p>The switch statement can optionally include a reference
-value that each case can compare against, specified as
-an argument after the <code>switch</code> keyword.</p>
-<pre><code class="language-coffeescript">switch age
-  &lt; 1 then
-    say &quot;it&#39;s a baby&quot;
-  &lt; 3 then
-    say &quot;it&#39;s a toddler&quot;
-  &lt; 12 then
-    say &quot;it&#39;s a child&quot;
-  &lt; 18 then
-    say &quot;it&#39;s a teenager&quot;
-  else
-    say &quot;it&#39;s a grown up&quot;</code></pre>
-<p>Each <code>switch</code> will only execute one of its cases,
-the first one that is eligible. If another case further
-down the list is also eligible, it will be skipped.</p>
-<p>The <code>else</code> case is executed if none of the other cases
-are eligible.</p>
-<p>There are three kinds of case statements:</p>
-<ul>
-<li><a href="#switch-comparison-case">Switch Comparison Case</a></li>
-<li><a href="#switch-expression-case">Switch Expression Case</a></li>
-<li><a href="#switch-regular-expression-case">Switch Regular Expression Case</a></li>
-</ul>
-</td> </tr><tr class='entry'> <td id='Switch_Comparison_Case' class='entry-cell entry-name'>Switch Comparison Case</td> <td class='entry-cell entry-text'><p>A <a href="#switch">switch</a> case statement can begin with one of the
-<a href="#switch-comparison-operators">Switch Comparison Operators</a>. This will compare the
-<a href="#switch">switch</a>&#39;s reference value directly against the
-case&#39;s <a href="#expression">Expression</a> value.</p>
-<pre><code class="language-coffeescript">switch card
-  == @luckyCard then
-    say &quot;That&#39;s it, you found the lucky one!&quot;
-  == &#39;a&#39; then
-    say &quot;You have an ace&quot;
-  == &#39;j&#39; then
-    say &quot;You have a jack&quot;
-  &lt; 5 then
-    say &quot;You have a low number card&quot;
-  &lt;= 10
-    say &quot;You have a high number card&quot;
-  else
-    say &quot;I have no clue what card you have...&quot;</code></pre>
-</td> </tr><tr class='entry'> <td id='Switch_Comparison_Operators' class='entry-cell entry-name'>Switch Comparison Operators</td> <td class='entry-cell entry-text'><p>A <a href="#switch-comparison-case">Switch Comparison Case</a> can
-begin with any of these operators:</p>
-<table>
-<thead>
-<tr>
-<th></th>
-<th></th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>==</code></td>
-<td>the values should be equal</td>
-</tr>
-<tr>
-<td><code>!=</code></td>
-<td>the values should <em>not</em> be equal</td>
-</tr>
-<tr>
-<td><code>&lt;=</code></td>
-<td>the reference value should be less than or equal to the expression</td>
-</tr>
-<tr>
-<td><code>&gt;=</code></td>
-<td>the reference value should be greater than or equal to the expression</td>
-</tr>
-<tr>
-<td><code>&lt;</code></td>
-<td>the reference value should be less than the expression</td>
-</tr>
-<tr>
-<td><code>&gt;</code></td>
-<td>the reference value should be greater than the expression</td>
-</tr>
-</tbody></table>
-</td> </tr><tr class='entry'> <td id='Switch_Expression_Case' class='entry-cell entry-name'>Switch Expression Case</td> <td class='entry-cell entry-text'><p>A <a href="#switch">switch</a> case can have a full expression, and will be
-eligible as long as the expression resolve to a truthy value.</p>
-<pre><code class="language-coffeescript">var someNumber = getNumber()
-switch
-  someNumber % 2 == 0 then
-    say &quot;Your number is even!&quot;
-  someNumber % 2 == 1 then
-    say &quot;Your number is odd!&quot;
-  else
-    say &quot;I&#39;m not sure that&#39;s a number...&quot;</code></pre>
-</td> </tr><tr class='entry'> <td id='Switch_Regular_Expression_Case' class='entry-cell entry-name'>Switch Regular Expression Case</td> <td class='entry-cell entry-text'><p>When you need to fuzzy match a string, you can use a
-<a href="#regular-expression">Regular Expression</a> as the case statement to directly
-test the <a href="#switch">switch</a>&#39;s reference value.</p>
-<pre><code class="language-coffeescript">switch characterName
-  /Jack|Bob/ then
-    say &quot;Hey guys, what&#39;s up?&quot;
-  /Rose/i then
-    say &quot;Long time no see, Rose&quot;
-  /.*elle/ then
-    say &quot;Bonjour, {characterName}&quot;</code></pre>
-</td> </tr><tr class='entry'> <td id='TEST' class='entry-cell entry-name'>TEST</td> <td class='entry-cell entry-text'><p>Names a Litexa test case. All statements in the test will
-then be indented.</p>
-<pre><code class="language-coffeescript">TEST &quot;first time user interaction&quot;
-  launch
-  ... # rest of the test case</code></pre>
-</td> </tr><tr class='entry'> <td id='then' class='entry-cell entry-name'><code>then</code></td> <td class='entry-cell entry-text'><p>Terminates case statements for the <a href="#switch">switch</a> statement.</p>
-</td> </tr><tr class='entry'> <td id='unless' class='entry-cell entry-name'><code>unless</code></td> <td class='entry-cell entry-text'><p>The negated version of the <a href="#if">if</a> statement. Note: unless
-statements do not support a dependent else statement.</p>
-</td> </tr><tr class='entry'> <td id='user:' class='entry-cell entry-name'><code>user:</code></td> <td class='entry-cell entry-text'><p>Sends skill intent requests to the skill to drive test
-execution. Intents are specified by either one of its
-utterances or name:</p>
-<pre><code class="language-coffeescript">user: &quot;start the game over please&quot; # by utterance
-user: NameIntent # by name</code></pre>
-<p>If a slot value is needed, it can be specified in an
-utterance directly, or it can be appended to the end of the
-statement.</p>
-<p>For example, if a handler in the skill looks like this:</p>
-<pre><code class="language-coffeescript">  when NameIntent
-    or &quot;my name is $name&quot;
-    or &quot;$name&quot;
-    with $name = AMAZON.US_FIRST_NAME</code></pre>
-<p>Then the following statements behave the same way in your test:</p>
-<pre><code class="language-coffeescript">user: &quot;my name is Cat&quot; # Litexa deduces $name = Cat from the utterance
-user: NameIntent with $name = Cat # append more slots by separating them with commas
-user: &quot;my name is&quot; with $name = Cat # this is valid, but can&#39;t happen in a real interaction</code></pre>
-</td> </tr><tr class='entry'> <td id='wait' class='entry-cell entry-name'><code>wait</code></td> <td class='entry-cell entry-text'><p>Simulates a designated amount of time to pass in a Litexa test case.
-The Litexa test framework automatically increments time
-passing for every interaction, so this would be useful if
-you need a minimum amount of time to pass to trigger some
-condition in the skill.</p>
-<p>This statement takes 2 arguments:</p>
-<ul>
-<li>an integer (positive or negative)</li>
-<li>one of {<code>second(s)</code>, <code>minute(s)</code>, <code>hour(s)</code>, <code>day(s)</code>}</li>
-</ul>
-<details><summary>Example</summary>
-
-<pre><code class="language-coffeescript">launch
-  if minutesBetween(context.now, @lastLaunchTime) &gt; 15 # TODO: are we supporting these functions
-    say &quot;Welcome back! We spoke more than 15 minutes ago.&quot;
-  else
-    say &quot;Greetings, young grasshopper.&quot;
-  @lastLaunchTime = context.now # TODO: likewise, are we supporting access to context.now?
-  END
-
-TEST &quot;test welcome back speech&quot;
-  launch
-  alexa: null, &quot;Greetings, young grasshopper.&quot;
-  launch
-  alexa: null, &quot;Greetings, young grasshopper.&quot;
-  wait 2 hours
-  launch
-  alexa: null, &quot;Welcome back! We spoke more than 15 minutes ago.&quot;</code></pre>
-</details>
-
-<p><strong>Negative wait time:</strong> Litexa will honor negative time values in your tests.
-This may be useful if you think Litexa is making too much time pass between
-interactions and you would like to test something time-sensitive that won&#39;t
-simulate properly otherwise.</p>
-</td> </tr><tr class='entry'> <td id='when' class='entry-cell entry-name'><code>when</code></td> <td class='entry-cell entry-text'><p>Defines an intent that the parent state is willing to handle.</p>
-<pre><code class="language-coffeescript">when &quot;my name is $name&quot;</code></pre>
-<p>The intent will be rolled into the Alexa skill model for
-your skill. The code subordinate to this statement will
-be executed when your skill receives the intent <em>and</em> is in
-this state.</p>
-<p>This statement is part of a larger <em>when clause</em>, beginning with
-a <code>when</code>, followed by optional subordinate <code>or</code> and <a href="#with">with</a>
-statements.</p>
-<p>The content of the statement can be an <a href="#utterance">Utterance</a>, or an
-<a href="#intent-name">Intent Name</a>. In either case, the statement can be followed
-by a series of subordinate <a href="#or">or</a> utterance statements that offer
-alternative ways to specify the same intent.</p>
-<pre><code class="language-coffeescript">when &quot;my name is $name&quot;
-  or &quot;I&#39;m $name&quot;
-  or &quot;call me $name&quot;</code></pre>
-<p>When the <code>when</code> statement contains an <a href="#utterance">Utterance</a>, the underlying
-intent name will be automatically generated from that utterance,
-e.g. <code>MY_NAME_IS_NAME</code> for the above example.</p>
-<p>You can reuse the same intent in different states by specifying
-the identical <code>when</code> statement; you only have to define the set
-of alternate utterances once.</p>
-<pre><code class="language-coffeescript">askForName
-  say &quot;what is your name?&quot;
-
-  when &quot;my name is $name&quot;
-    or &quot;the name is $name&quot;
-    or &quot;call me $name&quot;
-    say &quot;Got it, thanks!&quot;
-
-askForAlternateName
-  say &quot;what should I call you on the weekend?&quot;
-
-  when &quot;my name is $name&quot;
-    say &quot;Understood.&quot;</code></pre>
-<p>When the statement contains an <a href="#intent-name">Intent Name</a> instead, if the
-name is unique to this skill, then at least one <code>when</code> statement
-specifying it must be followed by an or statement in order to
-define at least one utterance for the intent. As per above,
-other locations need not repeat the utterances.</p>
-<pre><code class="language-coffeescript">askForName
-  say &quot;what is your name?&quot;
-
-  when MyNameIs
-    or &quot;my name is $name&quot;
-    or &quot;call me $name&quot;
-    say &quot;Got it, thanks!&quot;
-
-askForAlternativeName
-  say &quot;what should I call you on the weekend?&quot;
-
-  when MyNameIs
-    say &quot;Understood.&quot;</code></pre>
-</td> </tr><tr class='entry'> <td id='with' class='entry-cell entry-name'><code>with</code></td> <td class='entry-cell entry-text'><p>Specifies the type of a <a href="#slot">slot</a>, as part of a <a href="#when">when</a> clause.</p>
-<p>The contents of the statement refer to the name of the slot
-in question, and the type it should be expected to receive.</p>
-<p>The type may be specified as either a built in <a href="https://developer.amazon.com/docs/custom-skills/slot-type-reference.html">Alexa slot type</a>
-or as a list of possible values, or as an <a href="#inline-function">Inline Function</a>
-call, where you can build your own slot values.</p>
-<p>To use a built in slot type, just specify it directly as the
-type in the statement, in this case &quot;AMAZON.US_FIRST_NAME&quot;</p>
-<pre><code class="language-coffeescript">when &quot;My name is $name&quot;
-  with $name = AMAZON.US_FIRST_NAME</code></pre>
-<p>To use a list of possible values, provide a comma separated
-list of strings instead</p>
-<pre><code class="language-coffeescript">when &quot;My favorite pet is $pet&quot;
-  with $pet = &quot;dog&quot;, &quot;cat&quot;, &quot;bird&quot;</code></pre>
-<p>Finally, the most comprehensive option is to use an inline
-code function to supply the values. To do this, use the
-source filename, followed by a colon, followed by the
-function name you&#39;d like to use:</p>
-<pre><code class="language-coffeescript">when &quot;I&#39;ll be traveling by $vehicle&quot;
-  with $vehicle = slots.build.js:vehicleNames</code></pre>
-<p>Your source file will be expected to write one or more slot
-building functions to the <code>exports</code> object.</p>
-<p>Each slot building function will expected to return a single
-object like the type definition portion of the <a href="https://developer.amazon.com/docs/custom-skills/create-and-edit-custom-slot-types.html#json-for-slot-types-interaction-model-schema">Alexa
-language
-model</a>.</p>
-<pre><code class="language-javascript">    // in slots.build.js
-exports.vehicleNames = function() {
-  return {
-    name: &quot;LIST_OF_VEHICLES&quot;,
-    values: [
-      {
-        &quot;id&quot;: &quot;TRAIN&quot;,
-        &quot;name&quot;: {
-          &quot;value&quot;: &quot;train&quot;,
-          &quot;synonyms&quot;: [
-            &quot;taking the train&quot;,
-            &quot;train ride&quot;,
-            &quot;choo choo&quot;
-          ]
-        }
-      },
-      {
-        &quot;id&quot;: &quot;FLY&quot;,
-        &quot;name&quot;: {
-          &quot;value&quot;: &quot;plane&quot;,
-          &quot;synonyms&quot;: [
-            &quot;flying&quot;,
-            &quot;jet&quot;,
-            &quot;fly&quot;,
-            &quot;on an airplane&quot;
-          ]
-        }
-      },
-      {
-        &quot;id&quot;: &quot;DRIVE&quot;,
-        &quot;name&quot;: {
-          &quot;value&quot;: &quot;car&quot;,
-          &quot;synonyms&quot;: [
-            &quot;driving&quot;,
-            &quot;auto&quot;,
-            &quot;automobile&quot;,
-            &quot;taking a road trip&quot;,
-            &quot;road trip&quot;
-          ]
-        }
-      }
-    ]
-  }
-}</code></pre>
-<p>If your intention is to use a simpler list of words, then you can
-use a shortcut and return an array of strings for the values key:</p>
-<pre><code class="language-javascript">// in slotbuilder.js
-exports.vehicleNames = function() {
-  return {
-    name: &quot;LIST_OF_TRAVEL_MODES&quot;,
-    values: [ &quot;train&quot;,
-      &quot;train&quot;,
-      &quot;jet&quot;,
-      &quot;fly&quot;,
-      &quot;plane&quot;,
-      &quot;on an airplane&quot;,
-      &quot;car&quot;,
-      &quot;auto&quot;,
-      &quot;automobile&quot;,
-      &quot;taking a road trip&quot;,
-      &quot;road trip&quot;
-    ]
-  }
-}</code></pre>
-</td> </tr></table>
-  </div>
-</body>
-
-</html>
->$</a>
+<li><a href='#$request'>$request</a></li>
+<li><a href='#slot_variables'>slot variables</a>
+<li><a href='#general_use_variables'>general use variables</a>
+</ul></li>
 <li><a href='#alexa:'>alexa:</a>
-<li><a href='#CancelPurchase'>CancelPurchase</a>
 <li><a href='#capture'>capture</a>
 <li><a href='#card'>card</a>
 <li><a href='#Comments'>Comments</a>
@@ -2210,7 +411,6 @@ exports.vehicleNames = function() {
 <li><a href='#otherwise'>otherwise</a>
 <li><a href='#playMusic'>playMusic</a>
 <li><a href='#pronounce'>pronounce</a>
-<li><a href='#purchase'>purchase</a>
 <li><a href='#quit'>quit</a>
 <li><a href='#Regular_Expression'>Regular Expression</a>
 <li><a href='#reprompt'>reprompt</a>
@@ -2243,7 +443,7 @@ exports.vehicleNames = function() {
 
       <h1 id='Litexa_Package'>Litexa Package</h1><p>Litexa is an Alexa domain specific language, developed for long form multi-turn skills such as games.
 This package contains the source for the CLI and core runtime.</p>
-<p>Further documentation can be found at <a href="https://litexa.github.io">https://litexa.github.io</a></p>
+<p>Further documentation can be found at <a href="http://litexa.games.alexa.a2z.com">http://litexa.games.alexa.a2z.com</a></p>
 <h2 id='Installing_Litexa'>Installing Litexa</h2><h3 id='Prerequisites'>Prerequisites</h3><p>The following needs to be installed and configured:</p>
 <ul>
 <li><a href="https://nodejs.org/">Node.js</a> (with npm)</li>
@@ -3045,12 +1245,76 @@ same location of the skill state. They do not necessarily execute in order.</p>
 <td>the reference value should be greater than the expression</td>
 </tr>
 </tbody></table>
-</td> </tr><tr class='entry'> <td id='</table>
-  </div>
-</body>
+</td> </tr><tr class='entry'> <td id='$_variable' class='entry-cell entry-name'><code>$ variable</code></td> <td class='entry-cell entry-text'><p>Also known as a request variable, defines a variable that only
+exists for the duration of the current request. Request variables remain in
+scope anywhere after they are declared in the current request, and will be
+released when a response is sent to the customer. Request variables are always
+memory backed.</p>
+<p>Request variables are dynamically scoped, and are always valid references.
+Checking the value of an unassigned request scope variable will always yield a
+falsy value, so they can be checked for existence with an <a href="#if">if</a> or <a href="#unless">unless</a>
+statement.</p>
+<p>$ variables are also supported directly in <a href="#say-string">Say String</a> interpolation.</p>
+<pre><code class="language-coffeescript">say &quot;Hello there, $username&quot;</code></pre>
+<p>The name of the variable follows the rules for an <a href="#identifier">Identifier</a>.</p>
+<p>There are three uses of $ variables:</p>
+<ul>
+<li>reserved variable <a href="#request">$request</a></li>
+<li><a href="#slot-variables">slot variables</a></li>
+<li><a href="#general-use-variables">general use variables</a></li>
+</ul>
+<p>More information and examples of request variables can be found in the Variables and
+Expressions chapter of the Book.</p>
+<h3 id='$request'>$request</h3><p>There is a reserved variable called <code>$request</code>. It is a read-only variable that
+contains your raw skill request, whose schema is described in the <a href="https://developer.amazon.com/docs/custom-skills/request-types-reference.html">Request Types
+documentation</a>.</p>
+<p>Here is a sample IntentRequest type <code>$request</code> from running <code>litexa test</code> in a project:</p>
+<pre><code class="language-json">{
+  ❝type❝:❝IntentRequest❝,
+  ❝requestId❝:❝litexaRequestId.7633ae0e-ef82-41a1-b2a7-d0daf9659156❝,
+  ❝timestamp❝:❝2017-10-01T22:02:10.000Z❝,
+  ❝locale❝:❝default❝,
+  ❝intent❝:{
+    ❝name❝:❝MY_CAT_BREED❝,
+    ❝slots❝:{
+      ❝cat❝:{
+        ❝name❝:❝cat❝,
+        ❝value❝:❝nebelung❝
+      }
+    }
+  }
+}</code></pre>
+<h3 id='slot_variables'>slot variables</h3><p>The most common use of request variables is population of slot values in
+intents. If an intent contains a slot value, Litexa will automatically populate
+the $ variable defined in the handler from the skill request.</p>
+<pre><code class="language-coffeescript">askForCatName
+  say &quot;What is your cat&#39;s name?&quot;
 
-</html>
- class='entry-cell entry-name'><code>$</code></td> <td class='entry-cell entry-text'><p>TODO</p>
+  when &quot;my cat is named $name&quot;
+    or &quot;$name&quot;
+    or &quot;my cat&#39;s name is $name&quot;
+    with $name = AMAZON.US_FIRST_NAME
+    say &quot;$name you say. How cute!&quot;</code></pre>
+<p>For the example above, Litexa will populate <code>$name</code> in the intent handler with
+the value the skill received from the request. Therefore, if the user said &quot;my
+cat is named Ellie,&quot; then the skill would respond with &quot;Ellie you say. How
+cute!&quot;</p>
+<h3 id='general_use_variables'>general use variables</h3><p>You can assign your own $ variables as a messaging system to affect
+downstream states.</p>
+<pre><code class="language-coffeescript">launch
+  say &quot;hello!&quot;
+  $wasInLaunch = true
+  -&gt; askQuestion
+
+askQuestion
+  # this will be true if we came from the launch intent
+  # but will be false if we did not.
+  unless $wasInLaunch
+    say &quot;one more time, &quot;
+  say &quot;what is your name?&quot;
+
+  when AMAZON.RepeatIntent
+    -&gt; askQuestion</code></pre>
 </td> </tr><tr class='entry'> <td id='alexa:' class='entry-cell entry-name'><code>alexa:</code></td> <td class='entry-cell entry-text'><p>Asserts that the skill winds up in an expected state at a
 specific point in the interaction. It requires at least the
 name of the expected state as an argument:</p>
@@ -3107,14 +1371,13 @@ variations. The following would <em>not</em> pass:</p>
   alexa: waitForName, e&quot;Hello there. What is your name?&quot;
   alexa: waitForName, e&quot;&lt;!Howdy.&gt; What&#39;s your name?&quot;
   alexa: waitForName, e&quot;Hi there.</code></pre>
-</td> </tr><tr class='entry'> <td id='CancelPurchase' class='entry-cell entry-name'>CancelPurchase</td> <td class='entry-cell entry-text'><p>TODO</p>
 </td> </tr><tr class='entry'> <td id='capture' class='entry-cell entry-name'><code>capture</code></td> <td class='entry-cell entry-text'><p>Takes a snapshot of the skill state at that point in time of
 the test. Takes as an argument a name for the capture.</p>
 <p>You can write multiple captures in a single test to snapshot
 different points in time.</p>
 <p>Please see <a href="#resume">resume</a> for how to use the snapshot.</p>
 </td> </tr><tr class='entry'> <td id='card' class='entry-cell entry-name'><code>card</code></td> <td class='entry-cell entry-text'><p>Sends a card to the user&#39;s companion app with a title, an image, and/or text.</p>
-<p>See the section on <a href="/book/companion-app.html">Cards</a> for more details.</p>
+<p>See the The Companion App chapter of the Book for more details.</p>
 <pre><code class="language-coffeescript">card &quot;Welcome&quot;, image.png, &quot;This is my wonderful card&quot;
 ...
 card &quot;Another Way&quot;
@@ -3135,7 +1398,7 @@ switch score
  TEST &quot;run through&quot; # in tests too
    launch#Comments All day long
    alexa: null</code></pre>
-</td> </tr><tr class='entry'> <td id='define' class='entry-cell entry-name'><code>define</code></td> <td class='entry-cell entry-text'><p>TODO</p>
+</td> </tr><tr class='entry'> <td id='define' class='entry-cell entry-name'><code>define</code></td> <td class='entry-cell entry-text'><p>Coming soon!</p>
 </td> </tr><tr class='entry'> <td id='directive' class='entry-cell entry-name'><code>directive</code></td> <td class='entry-cell entry-text'><p>Adds directives to the next Alexa response, by calling an
 <a href="#inline-function">Inline Function</a>. The function is expected to return
 an array of JavaScript objects each representing a
@@ -3166,7 +1429,7 @@ it should not expect any further interaction from the user.</p>
 </td> </tr><tr class='entry'> <td id='END_(Testing)' class='entry-cell entry-name'>END (Testing)</td> <td class='entry-cell entry-text'><p>Asserts that your skill response indicated that the skill
 session should end.</p>
 <p>For an example, see <a href="#listen-testing">LISTEN (Testing)</a>.</p>
-</td> </tr><tr class='entry'> <td id='Expression' class='entry-cell entry-name'>Expression</td> <td class='entry-cell entry-text'><p>TODO</p>
+</td> </tr><tr class='entry'> <td id='Expression' class='entry-cell entry-name'>Expression</td> <td class='entry-cell entry-text'><p>Coming soon!</p>
 </td> </tr><tr class='entry'> <td id='for' class='entry-cell entry-name'><code>for</code></td> <td class='entry-cell entry-text'><p>Use a for loop when you need to iterate over an array or object.
 For loops have the following syntax:</p>
 <pre><code>for &lt;value&gt; in &lt;array | object&gt;</code></pre><p>or</p>
@@ -3236,7 +1499,7 @@ else
 block should only be executed if the test is negative.</p>
 <pre><code class="language-coffeescript">unless age &lt; 21
   say &quot;Hey, would you like a beer?&quot;</code></pre>
-</td> </tr><tr class='entry'> <td id='Inline_Function' class='entry-cell entry-name'>Inline Function</td> <td class='entry-cell entry-text'><p>TODO</p>
+</td> </tr><tr class='entry'> <td id='Inline_Function' class='entry-cell entry-name'>Inline Function</td> <td class='entry-cell entry-text'><p>Coming soon!</p>
 </td> </tr><tr class='entry'> <td id='Intent_Name' class='entry-cell entry-name'>Intent Name</td> <td class='entry-cell entry-text'><p>A code name used to refer to a specific type of intent, as part
 of the <a href="#when">when</a> statement.</p>
 <p>An intent name consists of one or more <a href="#identifier">Identifier</a>s, separated
@@ -3443,7 +1706,18 @@ something to say to guide them back on track in these cases.</p>
   otherwise
     say &quot;I&#39;m sorry, I didn&#39;t quite get that. Let&#39;s try again.&quot;
     -&gt; askQuestion</code></pre>
-</td> </tr><tr class='entry'> <td id='playMusic' class='entry-cell entry-name'><code>playMusic</code></td> <td class='entry-cell entry-text'><p>TODO</p>
+</td> </tr><tr class='entry'> <td id='playMusic' class='entry-cell entry-name'><code>playMusic</code></td> <td class='entry-cell entry-text'><p>Issues an <a href="https://developer.amazon.com/docs/custom-skills/audioplayer-interface-reference.html#play">AudioPlayer Play</a>
+directive, and automacially adds the required <code>AUDIO_PLAYER</code> interface to the skill manifest.
+Playback can be stopped with the <a href="#stopmusic">stopMusic</a> statement.</p>
+<p>The statement requires a sound target parameter, which can be a deployed asset&#39;s name or an
+existing URL. The directive will stream the target audio, and bring up a visual audio player
+interface on screen devices. The supported target audio formats include AAC/MP4, MP3, and HLS, and
+the source audio&#39;s bit rate must fall between 16 kbps and 384 kbps.</p>
+<pre><code class="language-coffeescript"># assuming a compatible sound.mp3 is deployed via litexa/assets:
+playMusic sound.mp3
+
+# or, assuming the URL points to a compatible sound file:
+playMusic &quot;https://www.example.com/sound.mp3&quot;</code></pre>
 </td> </tr><tr class='entry'> <td id='pronounce' class='entry-cell entry-name'><code>pronounce</code></td> <td class='entry-cell entry-text'><p>Specifies a one for one replacement that will be automatically
 applied to all voiced responses from this skill. The statement
 should be placed outside of the scope of any state, at the top
@@ -3452,17 +1726,7 @@ level of the file.</p>
 a specific pronounciation skill wide, while retaining human
 readable spelling in your code.</p>
 <pre><code class="language-coffeescript">pronounce &quot;tomato&quot; as &quot;&lt;phoneme alphabet=&quot;ipa&quot; ph=&quot;/təˈmɑːtoʊ/&quot;&gt;tomato&lt;/phoneme&gt;&quot;</code></pre>
-</td> </tr><tr class='entry'> <td id='purchase' class='entry-cell entry-name'><code>purchase</code></td> <td class='entry-cell entry-text'><p>TODO</p>
-</td> </tr><tr class='entry'> <td id='quit' class='entry-cell entry-name'><code>quit</code></td> <td class='entry-cell entry-text'><p>TODO: bug fix
-This is broken right now. If you were to substitute it with
-StopIntent, you would get different behaviors. Quit behaves
-as if nothing has changed in skill session state.</p>
-<p>Expected behavior:
-Equivalent to the user saying &quot;exit&quot; during your skill
-session in that the request is received outside your skill
-and a
-<a href="https://developer.amazon.com/docs/custom-skills/request-types-reference.html#sessionendedrequest">SessionEndedRequest</a>
-is sent to your skill.</p>
+</td> </tr><tr class='entry'> <td id='quit' class='entry-cell entry-name'><code>quit</code></td> <td class='entry-cell entry-text'><p>Coming soon!</p>
 </td> </tr><tr class='entry'> <td id='Regular_Expression' class='entry-cell entry-name'>Regular Expression</td> <td class='entry-cell entry-text'><p>Litexa supports a subset of <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions">JavaScript&#39;s regular
 expressions</a>.</p>
 <p>In brief, a regular expression, or regex for short,
@@ -3490,11 +1754,7 @@ the next response. The content is specified in the
 <p>Note: Unlike <a href="#say">say</a> statements, reprompt statements
 are <em>not</em> accumulative; only the most recent reprompt statement
 will be included in the response.</p>
-</td> </tr><tr class='entry'> <td id='request:' class='entry-cell entry-name'><code>request:</code></td> <td class='entry-cell entry-text'><p>TODO
-You will need to see Alexa documentation about
-request types, but also testing.coffee&#39;s RequestStep
-seems to only set the value of intent to &quot;LaunchRequest&quot;.</p>
-<p>Refer to TestLineRequest in pegjs.</p>
+</td> </tr><tr class='entry'> <td id='request:' class='entry-cell entry-name'><code>request:</code></td> <td class='entry-cell entry-text'><p>Coming soon!</p>
 </td> </tr><tr class='entry'> <td id='Reserved_Word' class='entry-cell entry-name'>Reserved Word</td> <td class='entry-cell entry-text'><p>A reserved word is any word reserved for the language&#39;s
 use and thus unavailable for any user defined names.</p>
 <p>The full list:</p>
@@ -3604,7 +1864,7 @@ and supports any of the following:</p>
 </ol>
 <pre><code class="language-coffeescript">say &quot;Basic statement with letters, the numbers 1, 2, 3, and punctuation.&quot;</code></pre>
 <ol start="2">
-<li>Interpolated <a href="#variable">@</a> DB variables and <a href="#-2">$</a> slot variables:</li>
+<li>Interpolated <a href="#variable">@</a> DB variables and <a href="#variable-2">$</a> slot variables:</li>
 </ol>
 <pre><code class="language-coffeescript">@myDbVar = &#39;myDbVar&#39;
 say &quot;My DB variable&#39;s value is @myDbVar.&quot;
@@ -3692,8 +1952,8 @@ specified region, you can use the <code>-r</code> flag in <code>litexa test</cod
 which takes the same arguments as above. Litexa will tell
 you in the test output which litexa file region will be
 used, such as below:</p>
-<pre><code>Testing in region en-US, language default out of [&quot;default&quot;]</code></pre><p>For context on the usage of this statement, read the
-<a href="/book/localization.html">Localization Chapter</a>.</p>
+<pre><code>Testing in region en-US, language default out of [&quot;default&quot;]</code></pre><p>For context on the usage of this statement, read the Localization chapter of the
+Book.</p>
 </td> </tr><tr class='entry'> <td id='setResponseSpacing' class='entry-cell entry-name'><code>setResponseSpacing</code></td> <td class='entry-cell entry-text'><p>Sets a timeout (in milliseconds) before the next response is sent. This can be
 used to prevent a user request from triggering a new response before the
 ongoing response has finished.</p>
@@ -3731,8 +1991,11 @@ soundEffect sound.mp3</code></pre>
 tag in <a href="#say-string">Say Strings</a>.</p>
 </td> </tr><tr class='entry'> <td id='State' class='entry-cell entry-name'>State</td> <td class='entry-cell entry-text'><p>A state is defined by writing an <a href="#identifier">Identifier</a> as the
 first and only thing on its own line.</p>
-<p>TODO elaborate</p>
-</td> </tr><tr class='entry'> <td id='stopMusic' class='entry-cell entry-name'><code>stopMusic</code></td> <td class='entry-cell entry-text'><p>TODO</p>
+<p>See the State Management chapter of the Book, for more information.</p>
+</td> </tr><tr class='entry'> <td id='stopMusic' class='entry-cell entry-name'><code>stopMusic</code></td> <td class='entry-cell entry-text'><p>Issues an <a href="https://developer.amazon.com/docs/custom-skills/audioplayer-interface-reference.html#stop">AudioPlayer Stop</a>
+directive. The directive halts any ongoing AudioPlayer stream (e.g. such as one started with the
+<a href="#playmusic">playMusic</a> statement).</p>
+<pre><code class="language-coffeescript">stopMusic</code></pre>
 </td> </tr><tr class='entry'> <td id='switch' class='entry-cell entry-name'><code>switch</code></td> <td class='entry-cell entry-text'><p>A switch statement lets you split the flow between
 any number of mutually exclusive possibilities, each
 defined by a case statement ending with
@@ -3871,11 +2134,11 @@ condition in the skill.</p>
 <details><summary>Example</summary>
 
 <pre><code class="language-coffeescript">launch
-  if minutesBetween(context.now, @lastLaunchTime) &gt; 15 # TODO: are we supporting these functions
+  if minutesBetween(context.now, @lastLaunchTime) &gt; 15
     say &quot;Welcome back! We spoke more than 15 minutes ago.&quot;
   else
     say &quot;Greetings, young grasshopper.&quot;
-  @lastLaunchTime = context.now # TODO: likewise, are we supporting access to context.now?
+  @lastLaunchTime = context.now
   END
 
 TEST &quot;test welcome back speech&quot;

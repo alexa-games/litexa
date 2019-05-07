@@ -349,7 +349,7 @@ to generate them. In that case, we'll refer to a file in the
 In `litexa/slotbuilder.build.js` we'd then need to define a function
 to return the new slot name and its values. The function will
 be called with the litexa parser's skill object, and the
-litexa language being parsed.
+litexa language being parsed. We then assign that function to `exports`.
 
 ```javascript
 // litexa/slotbuilder.build.js
@@ -359,6 +359,8 @@ function plantSlots(skill, language){
     values: [ "cucumber", "zucchini", "potato", "eggplant", "tomato" ]
   };
 }
+
+exports.plantSlots = plantSlots;
 ```
 
 We can take advantage of Alexa's built in synonym mapping by
@@ -391,6 +393,8 @@ function plantSlots(skill, language){
     ]
   }
 }
+
+exports.plantSlots = plantSlots;
 ```
 
 The slot building function is executed in the litexa inline
@@ -406,6 +410,7 @@ You may find you need to sanitize your slot values by removing
 unnecessary punctuation.
 
 Let's assume we have a data file at `litexa/questions.json`
+
 ```json
 [
   {
@@ -421,6 +426,7 @@ Let's assume we have a data file at `litexa/questions.json`
 
 We could then extract a slot for answers with the following
 code in `litexa/slotbuilder.build.js`
+
 ```javascript
 // litexa/slotbuilder.build.js
 function answerSlots(skill, language){
@@ -432,5 +438,6 @@ function answerSlots(skill, language){
     values: answers
   }
 }
-```
 
+exports.answerSlots = answerSlots;
+```

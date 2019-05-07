@@ -250,6 +250,7 @@ class lib.Skill
 
     # record this as the one
     state.locations[location.language] = location
+    state.prepareForLanguage(location)
 
     # record the default location as primary
     if location.language == 'default'

@@ -1,0 +1,8 @@
+TEST "happy path"
+  launch
+  user: "play file"
+  alexa: playFile
+  user: "play URL"
+  alexa: playURL
+  user: "stop"
+  alexa: stop

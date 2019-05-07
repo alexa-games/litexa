@@ -1,6 +1,6 @@
 {
   "name": "@litexa/core",
-  "version": "0.1.3",
+  "version": "0.1.0",
   "description": "Litexa, a programming language for writing Alexa Skills",
   "bin": {
     "litexa": "src/command-line/main.js"
@@ -44,7 +44,7 @@
     "typescript": "3.3.1",
     "uuid": "3.3.2"
   },
-  "repository": "github:alexa-labs/litexa",
-  "bugs": "https://github.com/alexa-labs/litexa/issues",
-  "homepage": "https://litexa.github.io"
+  "repository": "github:alexa-games/litexa",
+  "bugs": "https://github.com/alexa-games/litexa/issues",
+  "homepage": "http://litexa.games.alexa.a2z.com"
 }
