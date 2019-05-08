@@ -234,11 +234,11 @@ class](/reference/inlined-code-tests.html).
 
 Here is the test case:
 
-@[code lang=javascript](@/packages/litexa/src/command-line/templates/inlined/javascript/utils.test.js)
+@[code lang=javascript transclude={12-21}](@/packages/litexa/src/command-line/templates/inlined/javascript/utils.test.js)
 
 Here is the piece of code it tests:
 
-@[code lang=javascript](@/packages/litexa/src/command-line/templates/inlined/javascript/utils.js)
+@[code lang=javascript transclude={12-30}](@/packages/litexa/src/command-line/templates/inlined/javascript/utils.js)
 
 Here is its test output again:
 

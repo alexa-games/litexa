@@ -20,12 +20,14 @@ validator = require './optionsValidator'
 GenerateCommandDirector = require './generateCommandDirector'
 projectClean = require './project-clean'
 
+packageVersion = require('../../package.json').version
+
 module.exports.run = ->
 
   root = process.cwd()
 
   program
-    .version '0.1.0'
+    .version packageVersion
     .option '--no-color', 'disables print output coloring'
     .option '-r, --region [region]', 'execution region, e.g. en-US or de-DE', 'en-US'
     .option '-v, --verbose', 'verbose output'
@@ -265,6 +267,7 @@ module.exports.run = ->
     .description "prints out a litexa project's information block."
     .action (cmd) ->
       chalk.enabled = cmd.parent.color
+
       options =
         root: root
         region: cmd.parent.region

@@ -11,10 +11,11 @@
     "packages": [
         "packages/litexa",
         "packages/litexa-apl",
+        "packages/litexa-assets-wav",
         "packages/litexa-deploy-aws",
         "packages/litexa-gadgets",
         "packages/litexa-render-template",
         "tests"
     ],
-    "version": "0.1.0"
+    "version": "0.1.3"
 }

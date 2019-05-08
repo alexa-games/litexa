@@ -1322,7 +1322,7 @@ A [switch](#switch) case can have a full expression, and will be
 eligible as long as the expression resolve to a truthy value.
 
 ```coffeescript
-var someNumber = getNumber()
+local someNumber = getNumber()
 switch
   someNumber % 2 == 0 then
     say "Your number is even!"
