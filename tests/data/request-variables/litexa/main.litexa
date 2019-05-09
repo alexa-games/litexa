@@ -1,0 +1,35 @@
+launch
+  say "hello!"
+  $wasInLaunch = true
+  -> askQuestion
+
+askQuestion
+  # this will be true if we came from the launch intent
+  # but will be false if we did not.
+  unless $wasInLaunch 
+    say "one more time, "
+  say "what is your name?"
+  
+  when AMAZON.RepeatIntent
+    -> askQuestion
+
+  when "my name is $cat cat"
+    or "I have no name"
+    with $cat = "himalayan", "bombay", "nebelung"
+    if $cat
+      say "Meow, $cat cat."
+    else
+      say "Sorry to hear that. How about I just call you Cat."
+
+TEST "happy path"
+  launch
+  alexa: askQuestion, e"hello! what is your name?"
+  user: AMAZON.RepeatIntent
+  alexa: askQuestion, e"one more time, what is your name?"
+
+TEST "cat and no cat"
+  launch
+  user: "my name is nebelung cat"
+  alexa: askQuestion, e"Meow, nebelung cat."
+  user: "I have no name"
+  alexa: askQuestion, e"Sorry to hear that. How about I just call you Cat."

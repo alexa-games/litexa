@@ -8,7 +8,7 @@ as a runtime environment.
 
 Specifically it requires node version 8.x or greater, for the `async` support.
 
-Full documentation is available at <http://litexa.games.alexa.a2z.com/>
+Full documentation is available at <http://litexa.games.alexa.a2z.com>
 
 ## Packages
 

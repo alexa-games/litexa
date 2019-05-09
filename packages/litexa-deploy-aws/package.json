@@ -31,7 +31,7 @@
     "mkdirp": "0.5.1",
     "rimraf": "2.6.3"
   },
-  "repository": "github:alexa-labs/litexa",
-  "bugs": "https://github.com/alexa-labs/litexa/issues",
-  "homepage": "https://litexa.github.io"
+  "repository": "github:alexa-games/litexa",
+  "bugs": "https://github.com/alexa-games/litexa/issues",
+  "homepage": "http://litexa.games.alexa.a2z.com"
 }

@@ -1,0 +1,18 @@
+launch
+
+playFile
+  playMusic sound.mp3
+
+playURL
+  playMusic "https://www.example.com/sound.mp3"
+
+stop
+  stopMusic
+
+global
+  when "play file"
+    -> playFile
+  when "play url"
+    -> playURL
+  when "stop"
+    -> stop

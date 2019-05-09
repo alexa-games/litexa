@@ -347,7 +347,7 @@ Deploying requires some simple setup. In the Litexa configuration you must speci
 you want to deploy to, your `askProfile`, and your `awsProfile`. By default, Litexa configures your project to deploy with
 the `@litexa/deploy-aws` module for the `development` environment and sets the other options to `null`.
 
-@[code lang=javascript transclude={5-12}](@/packages/litexa/src/command-line/templates/common/javascript/litexa.config.js)
+@[code lang=javascript transclude={16-23}](@/packages/litexa/src/command-line/templates/common/javascript/litexa.config.js)
 
 ::: warning NOTE
 If your `S3BucketName` doesn't exist we'll create it for you, given that you provided an S3 bucket name that does not yet exist.
