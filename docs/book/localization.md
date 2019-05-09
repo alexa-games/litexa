@@ -24,8 +24,8 @@ skill manifest object for 'en-US' like so:
       testingInstructions: 'replace with testing instructions',
       locales: {
         'en-US': {
-          name: '{name}',
-          invocation: '{invocation}',
+          name: 'Cat Chase in Space',
+          invocation: 'cat chase in space',
           // ... more fields
         }
       }
