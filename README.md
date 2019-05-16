@@ -8,7 +8,7 @@ as a runtime environment.
 
 Specifically it requires node version 8.x or greater, for the `async` support.
 
-Full documentation is available at <http://litexa.games.alexa.a2z.com>
+Full documentation is available at <https://litexa.games.alexa.a2z.com>
 
 ## Packages
 
@@ -21,21 +21,21 @@ Installing this globally installs the Litexa command line tool.
 
 ### @litexa/deploy-aws
 
-A deployment module that pushes a skill to AWS using the services: Lambda, DynamoDB, and S3. <link to book>
+A deployment module that pushes a skill to AWS using the services: Lambda, DynamoDB, and S3. Click to learn more about the [Litexa deployment module](./docs/book/deployment.md#litexa-deploy-aws).
 
 ### @litexa/apl
 
-An extension that makes working with APL documents in your Litexa project more powerful with shorthand for managing APL documents and common design patterns. <link to book>
+An extension that makes working with APL documents in your Litexa project more powerful with shorthand for managing APL documents and common design patterns. Click to learn more about the [APL extension](./docs/book/screens.md#apl-directives).
 
 ### litexa-vscode
 
-VS Code extensions for the Litexa language that provides syntax highlighting for ```.litexa``` files. <link to book>
+VS Code extensions for the Litexa language that provides syntax highlighting for ```.litexa``` files. Click to learn more about the [VS Code extension](./docs/get-started/README.md#the-code).
 
 ### @litexa/assets-wav
 
 A WAV/MP3 composer that can combine multiple overlapping samples
 into a single MP3 stream, and a binding layer for use in Literate
-Alexa. <link to book>
+Alexa. Click to learn more about the [WAV audio converter](./docs/book/appendix-wav-conversion.md).
 
 ### litexa-test-projects
 
@@ -156,7 +156,7 @@ For more information on the `link` command [check out the lerna docs](https://gi
 
 ## Documentation Website
 
-Full documentation is available at <http://litexa.games.alexa.a2z.com.> To run the documentation website locally, please do the following.
+Full documentation is available at <https://litexa.games.alexa.a2z.com.> To run the documentation website locally, please do the following.
 
 ### One Time Setup
 
