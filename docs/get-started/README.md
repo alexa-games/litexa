@@ -53,9 +53,6 @@ often want to incorporate external code and dependencies alongside your skill lo
 * Development
   * [Node.js](https://nodejs.org/) version
     <strong>8.11</strong> or higher
-* Additional step for Windows: If you're on Windows you will need
-  `windows-build-tools` installed. To install, run `npm
-  install -g windows-build-tools` on your Windows machine.
 
 ### Installation Steps
 

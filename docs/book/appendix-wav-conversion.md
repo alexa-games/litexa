@@ -23,6 +23,28 @@ required because `@litexa/assets-wav` depends on the
 npm install -g node-gyp
 ```
 
+Additionally, you will need to install build tools to compile the 'lame' dependency:
+
+* Windows:
+
+```sh
+npm install -g windows-build-tools
+```
+
+* Linux:
+
+```sh
+# apt-get (Ubuntu/Debian)
+sudo apt-get install build-essential
+
+# yum (RHEL/Amazon Linux)
+sudo yum groupinstall "Development Tools"
+```
+
+* Mac OS:
+
+Install [Xcode Command Line Tools](https://developer.apple.com/xcode/features/)
+
 Next, the extension can be installed locally with the
 following command:
 
