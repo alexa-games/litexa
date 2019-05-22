@@ -1,34 +1,29 @@
 # Litexa
 
-Language support for the Litexa skill writing
-language, usually contained in text files identified
-by the extension .litexa
+This Visual Studio Code (VS Code) plugin supports syntax highlighting for files written in the Litexa language for Alexa 
+Skills. Any such files will be denoted with the `.litexa` file extension.
 
 ## Installation
 
-To install this extension, either copy it into your
-`.vscode/extensions directory`, or better yet, create a
-symlink from this location to a subdirectory there.
+To install this extension, you can either copy or symlink the `litexa-vscode/litexa` directory to your 
+[VS Code extensions directory](#vs-code-extensions-directory) and relaunch VS Code.
 
-See [the VS Code documentation about installing an extension locally.](https://code.visualstudio.com/docs/extensions/example-hello-world#_installing-your-extension-locally)
+**Note**: The added benefit of using a symlink is being able to keep the extension up-to-date by running `git pull` on this project when a
+new feature is launched.
 
-Once visible at that location, you can reload your
-VS Code window to see syntax highlighting appear for
-`.litexa` files.
+### VS Code Extensions Directory
+Extensions are installed in a per-user extensions directory. Depending on your platform, the directory is located here:
 
-## Features
+* Windows `%USERPROFILE%\.vscode\extensions`
+* macOS `~/.vscode/extensions`
+* Linux `~/.vscode/extensions`
 
-* Simple syntax highlighting
+You can change the location by launching VS Code with the `--extensions-dir <dir>` command line option.
 
-## Future plans
+## Resources
 
-* Document Outline: jump to states and intent handlers
-* Jump to state: highlight a state, hit jump and get
-taken to the definition
-
-## Requirements
-
-This is intended to work hand in hand with the litexa package.
+* [Installing your VS Code Extensions Locally](https://vscode-docs.readthedocs.io/en/stable/extensions/example-hello-world/#installing-your-extension-locally)
+* [Your VS Code Extensions Folder](https://vscode-docs.readthedocs.io/en/stable/extensions/install-extension/#your-extensions-folder)
 
 ## Release Notes
 
