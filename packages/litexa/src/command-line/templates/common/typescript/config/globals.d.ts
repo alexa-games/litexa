@@ -19,12 +19,27 @@ interface PluginCollection {
 interface DeploymentCollection {
     [key: string]: Deployment;
 }
+interface InvocationCollection {
+    [key: Region | Locale]: string;
+}
+interface LambdaSettings {
+    Environment?: {
+        Variables?: {
+            [key: string]: string
+        }
+    };
+    MemorySize?: number;
+    Timeout?: number;
+}
 
 interface Deployment {
     module: string;
     S3BucketName: string;
     askProfile: string;
     awsProfile: string;
+    invocationSuffix?: string;
+    invocation?: InvocationMap;
+    lambdaConfiguration?: LambdaSettings;
 }
 
 interface Configuration {

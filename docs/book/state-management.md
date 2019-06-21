@@ -266,10 +266,10 @@ your language at any time, a skill must be prepared to handle
 any intent while waiting in any state. To capture intents
 you don't expect, you can use the `otherwise` statement.
 
-Given that we're not paying attention to the which intent
-is coming in, it's usually best to treat the otherwise case
-as a failure to understand the player's actual intent, and
-redirect them back into the skill's flow.
+Given that we're not distinguishing between which intent
+is coming in for the state, it's usually best to treat the
+otherwise case as a failure to understand the player's actual
+intent, and redirect them back into the skill's flow.
 
 ```coffeescript
 askAQuestion

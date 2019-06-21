@@ -29,7 +29,7 @@ validateS3BucketName = (bucketName) ->
   unless bucketName.match safeTester
     throw "S3 bucket name '#{bucketName}' does not follow the rules for bucket naming in
       https://docs.aws.amazon.com/AmazonS3/latest/dev/BucketRestrictions.html.
-      Please rename your bucket in the litexa config to follow these guidelines and try again."
+      Please rename your bucket in the Litexa config to follow these guidelines and try again."
 
 module.exports =
   deploy: (context, logger) ->

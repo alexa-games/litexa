@@ -385,6 +385,8 @@
 <li><a href='#general_use_variables'>general use variables</a>
 </ul></li>
 <li><a href='#alexa:'>alexa:</a>
+<li><a href='#buyInSkillProduct'>buyInSkillProduct</a>
+<li><a href='#cancelInSkillProduct'>cancelInSkillProduct</a>
 <li><a href='#capture'>capture</a>
 <li><a href='#card'>card</a>
 <li><a href='#Comments'>Comments</a>
@@ -1351,7 +1353,9 @@ below would pass:</p>
 
 TEST &quot;same greeting, different variation&quot;
   launch
-  alexa: waitForName, &quot;&lt;!Howdy.&gt; What is your name?&quot; # interchanges variations</code></pre>
+  # accepts either SSML shorthand or SSML
+  alexa: waitForName, &quot;&lt;!Howdy.&gt; What is your name?&quot; # interchanges variations
+  alexa: waitForName, &quot;&lt;say-as interpret-as=&#39;interjection&#39;&gt;Howdy.&lt;/say-as&gt; What&#39;s your name?&quot;</code></pre>
 <p>Note that you need to put complete statements. This means
 the following would <em>not</em> pass:</p>
 <pre><code class="language-coffeescript">TEST &quot;greeting - expect test to fail&quot;
@@ -1370,7 +1374,57 @@ variations. The following would <em>not</em> pass:</p>
   launch
   alexa: waitForName, e&quot;Hello there. What is your name?&quot;
   alexa: waitForName, e&quot;&lt;!Howdy.&gt; What&#39;s your name?&quot;
-  alexa: waitForName, e&quot;Hi there.</code></pre>
+  alexa: waitForName, e&quot;Hi there.&quot;</code></pre>
+<p>Alternatively, you can provide a
+<a href="#regular-expression">Regular Expression</a> to match on a say
+statement - this would allow you to perform partial or
+pattern matches on say statements.</p>
+<pre><code class="language-coffeescript">launch
+  say &quot;&lt;!Howdy.&gt; What would you like me to do?&quot;
+  -&gt; waitForResponse
+
+waitForResponse
+  when &quot;roll a six sided die&quot;
+    say &quot;Look at that, it came up with a {getD6Roll()}.&quot;
+    END
+
+TEST &quot;roll die&quot;
+  launch
+  alexa: waitForResponse, /&lt;!howdy.&gt; what would you like me to do\?/i # case insensitive regex to full speech
+  user: &quot;roll a six sided die&quot;
+  alexa: null, /it came up with a \w+/ # regex for partially matching speech</code></pre>
+</td> </tr><tr class='entry'> <td id='buyInSkillProduct' class='entry-cell entry-name'><code>buyInSkillProduct</code></td> <td class='entry-cell entry-text'><p>Requires a case sensitive in-skill product reference name as an argument, where
+the product must exist and be linked to the skill.</p>
+<p>If the specified product exists, this sends a purchase directive <em>and</em> sets <code>shouldEndSession</code>
+to true for the pending response (required for a Connections.Response handoff directive).</p>
+<pre><code class="language-coffeescript">buyInSkillProduct &quot;MyProduct&quot;</code></pre>
+<p>The above would send the following directive:</p>
+<pre><code class="language-json">{
+  &quot;type&quot;: &quot;Connections.SendRequest&quot;,
+  &quot;name&quot;: &quot;Buy&quot;,
+  &quot;payload&quot;: {
+      &quot;InSkillProduct&quot;: {
+        &quot;productId&quot;: &quot;&lt;MyProduct&#39;s productId&gt;&quot;,
+      }
+  },
+  &quot;token&quot;: &quot;&lt;apiAccessToken&gt;&quot;
+}</code></pre>
+</td> </tr><tr class='entry'> <td id='cancelInSkillProduct' class='entry-cell entry-name'><code>cancelInSkillProduct</code></td> <td class='entry-cell entry-text'><p>Requires a case sensitive in-skill product reference name as an argument, where
+the product must exist and be linked to the skill.</p>
+<p>If the specified product exists, this sends a cancellation directive <em>and</em> sets <code>shouldEndSession</code>
+to true for the pending response (required for a Connections.Response handoff directive).</p>
+<pre><code class="language-coffeescript">cancelInSkillProduct &quot;MyProduct&quot;</code></pre>
+<p>The above would send the following directive:</p>
+<pre><code class="language-json">{
+  &quot;type&quot;: &quot;Connections.SendRequest&quot;,
+  &quot;name&quot;: &quot;Cancel&quot;,
+  &quot;payload&quot;: {
+      &quot;InSkillProduct&quot;: {
+        &quot;productId&quot;: &quot;&lt;MyProduct&#39;s productId&gt;&quot;,
+      }
+  },
+  &quot;token&quot;: &quot;&lt;apiAccessToken&gt;&quot;
+}</code></pre>
 </td> </tr><tr class='entry'> <td id='capture' class='entry-cell entry-name'><code>capture</code></td> <td class='entry-cell entry-text'><p>Takes a snapshot of the skill state at that point in time of
 the test. Takes as an argument a name for the capture.</p>
 <p>You can write multiple captures in a single test to snapshot
@@ -1726,6 +1780,8 @@ level of the file.</p>
 a specific pronounciation skill wide, while retaining human
 readable spelling in your code.</p>
 <pre><code class="language-coffeescript">pronounce &quot;tomato&quot; as &quot;&lt;phoneme alphabet=&quot;ipa&quot; ph=&quot;/təˈmɑːtoʊ/&quot;&gt;tomato&lt;/phoneme&gt;&quot;</code></pre>
+<p>Note that you must use SSML in the replacement text; the Litexa
+SSML shorthand statements (e.g &quot;&lt;!Bravo&gt;&quot;) will not work.</p>
 </td> </tr><tr class='entry'> <td id='quit' class='entry-cell entry-name'><code>quit</code></td> <td class='entry-cell entry-text'><p>Coming soon!</p>
 </td> </tr><tr class='entry'> <td id='Regular_Expression' class='entry-cell entry-name'>Regular Expression</td> <td class='entry-cell entry-text'><p>Litexa supports a subset of <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions">JavaScript&#39;s regular
 expressions</a>.</p>
@@ -1737,17 +1793,21 @@ They begin and end with the <code>/</code> character.</p>
 <p>This matches the exact string &#39;bob&#39;. We can make the
 match case insensitive by adding an <code>i</code> flag.</p>
 <pre><code class="language-coffeescript">/bob/i</code></pre>
-<p>This matches &quot;Bob&quot;, &quot;bob&quot; and all combinations in
+<p>This matches &#39;Bob&#39;, &#39;bob&#39;, and all combinations in
 between.</p>
 <p>We can use the <code>|</code> character to provide alternates.</p>
-<pre><code class="language-coffeescript">/bob|greg|john/i</code></pre>
+<pre><code class="language-coffeescript">/red|green|blue/</code></pre>
 <p>The <code>.</code> character stands in for any single character.</p>
-<pre><code class="language-coffeescript">/b.b/</code></pre>
-<p>This would match &quot;bob&quot;, &quot;bab&quot;, &quot;bib&quot;, and so on.</p>
+<pre><code class="language-coffeescript">/o.o/</code></pre>
+<p>This would match &#39;ooo&#39;, &#39;owo&#39;, &#39;ovo&#39;, and so on.</p>
+<p>The <code>?</code> character specifies that the string should have
+zero or one occurrences of the preceding character.</p>
+<pre><code class="language-coffeescript">/flavou?r/</code></pre>
+<p>This would match both &#39;flavor&#39; and &#39;flavour&#39;.</p>
 <p>The <code>+</code> character specifies that the string should have
-one or more of the preceeding character.</p>
-<pre><code class="language-coffeescript">/bo+b/</code></pre>
-<p>This would match &quot;bob&quot;, &quot;boob&quot;, &quot;booob&quot;, etc.</p>
+one or more occurrences of the preceding character.</p>
+<pre><code class="language-coffeescript">/ca+t/</code></pre>
+<p>This would match &#39;cat&#39;, &#39;caat&#39;, &#39;caaat&#39;, etc.</p>
 </td> </tr><tr class='entry'> <td id='reprompt' class='entry-cell entry-name'><code>reprompt</code></td> <td class='entry-cell entry-text'><p>Specifies the reprompt that will be installed during
 the next response. The content is specified in the
 <a href="#say-string">Say String</a> format.</p>
@@ -2090,11 +2150,11 @@ switch
 <a href="#regular-expression">Regular Expression</a> as the case statement to directly
 test the <a href="#switch">switch</a>&#39;s reference value.</p>
 <pre><code class="language-coffeescript">switch characterName
-  /Jack|Bob/ then
+  match /Jack|Bob/ then
     say &quot;Hey guys, what&#39;s up?&quot;
-  /Rose/i then
+  match /Rose/i then
     say &quot;Long time no see, Rose&quot;
-  /.*elle/ then
+  match /.*elle/ then
     say &quot;Bonjour, {characterName}&quot;</code></pre>
 </td> </tr><tr class='entry'> <td id='TEST' class='entry-cell entry-name'>TEST</td> <td class='entry-cell entry-text'><p>Names a Litexa test case. All statements in the test will
 then be indented.</p>

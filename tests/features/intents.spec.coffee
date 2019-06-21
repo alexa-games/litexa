@@ -77,15 +77,15 @@ describe 'supports intent statements', ->
     when "imposter state"
       say "hello"
     """
-  
-  it 'does not allow duplicate intents in the same state', ->
+
+  it 'does not allow duplicate intents that are not event/name-specific in the same state', ->
     expectParse """
     someState
       when "yes"
         say "wahoo"
       when AMAZON.NoIntent
         say "aww"
-    
+
     anotherState
       when "yes"
         or "yea"
@@ -113,13 +113,13 @@ describe 'supports intent statements', ->
 
       when AMAZON.NoIntent
         say "You said"
-      
+
       when AMAZON.NoIntent
         say "no."
     """, "redefine intent `AMAZON.NoIntent`"
 
     expectParse """
-    global 
+    global
       when AMAZON.StopIntent
         say "Goodbye."
         END
@@ -127,45 +127,57 @@ describe 'supports intent statements', ->
       when AMAZON.CancelIntent
         say "Bye."
         END
-      
+
       when AMAZON.StartOverIntent
         say "No."
         END
     """
 
     expectFailParse """
-    global 
+    global
       when AMAZON.StopIntent
         say "Goodbye."
         END
 
       when AMAZON.CancelIntent
         say "Bye"
-      
+
       when AMAZON.StartOverIntent
         say "No."
         END
-      
+
       when AMAZON.CancelIntent
         say "bye."
         END
     """
 
     expectFailParse """
-    global 
+    global
       when AMAZON.YesIntent
         say "Goodbye."
         END
 
       when AMAZON.CancelIntent
         say "Bye"
-      
+
       when AMAZON.StartOverIntent
         say "No."
         END
-      
+
       when AMAZON.YesIntent
         say "bye."
         END
     """
 
+  it 'does allow multiple name-specific intents in the same state', ->
+    expectParse """
+    global
+      when Connections.Response
+        say "Connections.Response"
+
+      when Connections.Response "Upsell"
+        say "upsell Connections.Response"
+
+      when Connections.Response "Unknown"
+        say "unknown Connections.Response"
+    """

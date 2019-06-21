@@ -21,7 +21,7 @@ cloneOf = function(obj) {
 };
 
 describe('RenderTemplate HandlerHelpers', function() {
-  let errorSpy = undefined;
+  let errorStub = undefined;
   const errorPrefix = "This expected error wasn't logged: ";
 
   const args = {
@@ -161,17 +161,17 @@ describe('RenderTemplate HandlerHelpers', function() {
   describe('createListItem()', function() {
     beforeEach(function() {
       helpers.init(cloneOf(args));
-      errorSpy = stub(logger, 'error');
+      errorStub = stub(logger, 'error');
     });
 
     afterEach(function() {
-      errorSpy.restore();
+      errorStub.restore();
     });
 
     it('rejects empty source item', function() {
       helpers.createListItem({});
       const expectedError = "Empty srcItem > ignoring list item.";
-      assert(errorSpy.calledWith(match(expectedError)), `${errorPrefix}${expectedError}`);
+      assert(errorStub.calledWith(match(expectedError)), `${errorPrefix}${expectedError}`);
     });
 
     it('creates a valid list item', function() {
@@ -217,7 +217,7 @@ describe('RenderTemplate HandlerHelpers', function() {
       };
       const destItem = helpers.createListItem(srcItem);
       const expectedError = "Attribute 'tertiaryText' not supported by 'ListTemplate2'";
-      assert(errorSpy.calledWith(match(expectedError)), `${errorPrefix}${expectedError}`);
+      assert(errorStub.calledWith(match(expectedError)), `${errorPrefix}${expectedError}`);
       expect(destItem).to.be.empty;
     });
 
@@ -227,7 +227,7 @@ describe('RenderTemplate HandlerHelpers', function() {
       };
       const destItem = helpers.createListItem(srcItem);
       const expectedError = "Unsupported attribute 'bogus' found";
-      assert(errorSpy.calledWith(match(expectedError)), `${errorPrefix}${expectedError}`);
+      assert(errorStub.calledWith(match(expectedError)), `${errorPrefix}${expectedError}`);
       expect(destItem).to.be.empty;
     });
   });
@@ -235,11 +235,11 @@ describe('RenderTemplate HandlerHelpers', function() {
   describe('addList()', function() {
     beforeEach(function() {
       helpers.init(cloneOf(args));
-      errorSpy = stub(logger, 'error');
+      errorStub = stub(logger, 'error');
     });
 
     afterEach(function() {
-      errorSpy.restore();
+      errorStub.restore();
     });
 
     it('adds a valid list', function() {
@@ -302,7 +302,7 @@ describe('RenderTemplate HandlerHelpers', function() {
       };
       helpers.addList(srcList);
       const expectedError = "srcList was not an array > ignoring list.";
-      assert(errorSpy.calledWith(match(expectedError)), `${errorPrefix}${expectedError}`);
+      assert(errorStub.calledWith(match(expectedError)), `${errorPrefix}${expectedError}`);
     });
 
     it('rejects a invalid items', function() {
@@ -315,7 +315,7 @@ describe('RenderTemplate HandlerHelpers', function() {
       const expectedError = "no valid attributes found > ignoring list item.";
       // 1st error = createListItem ignoring the invalid attribute.
       // 2nd error = addList ignoring the empty item.
-      assert(errorSpy.secondCall.calledWith(match(expectedError)), `${errorPrefix}${expectedError}`);
+      assert(errorStub.secondCall.calledWith(match(expectedError)), `${errorPrefix}${expectedError}`);
     });
   });
 
@@ -348,6 +348,11 @@ describe('RenderTemplate HandlerHelpers', function() {
 
     beforeEach(function() {
       helpers.init(cloneOf(args));
+    });
+
+    it('ignores speech if displaySpeechAs is undefined', function() {
+      helpers.addDisplaySpeechAs(speech, undefined);
+      expect(helpers.template.textContent).to.be.undefined;
     });
 
     it('adds speech to empty title', function() {

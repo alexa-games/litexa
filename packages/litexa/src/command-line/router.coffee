@@ -18,6 +18,7 @@ chalk = require 'chalk'
 path = require 'path'
 validator = require './optionsValidator'
 GenerateCommandDirector = require './generateCommandDirector'
+isp = require './isp'
 projectClean = require './project-clean'
 
 packageVersion = require('../../package.json').version
@@ -75,7 +76,7 @@ module.exports.run = ->
       )
 
       errors.forEach (error) ->
-        console.log(chalk.red error.message)
+        console.log chalk.red(error.message)
 
       directory = directory ? process.cwd()
       config = await require('./project-config.coffee').identifyConfigFileFromPath directory
@@ -90,7 +91,7 @@ module.exports.run = ->
             when 'assets'
               console.log path.join root, 'litexa', 'assets'
             else
-              throw "unknown path type #{cmd.type}"
+              console.error chalk.red("unknown path type #{cmd.type}")
         else
           switch cmd.type
             when 'root'
@@ -100,9 +101,9 @@ module.exports.run = ->
             when 'assets'
               console.log path.join root, 'litexa', 'languages', cmd.language, 'assets'
             else
-              throw "unknown path type #{cmd.type}"
+              console.error chalk.red("unknown path type #{cmd.type}")
       else
-        throw "#{directory} does not appear to be in a litexa project"
+        console.error chalk.red("#{directory} does not appear to be in a litexa project")
 
   program
     .command 'deploy'
@@ -130,7 +131,8 @@ module.exports.run = ->
       )
 
       errors.forEach (error) ->
-        console.log(chalk.red "unknown option value #{error.name} \"#{cmd[error.name]}\" : #{error.message}")
+        console.log chalk.red("unknown option value #{error.name} \"#{cmd[error.name]}\" :
+          #{error.message}")
 
       process.exit(1) if errors.length > 0
 
@@ -225,7 +227,8 @@ module.exports.run = ->
       )
 
       errors.forEach (error) ->
-        console.log(chalk.red "unknown option value #{error.name} \"#{cmd[error.name]}\" : #{error.message}")
+        console.log chalk.red("unknown option value #{error.name} \"#{cmd[error.name]}\" :
+          #{error.message}")
 
       process.exit(1) if errors.length > 0
 
@@ -267,7 +270,6 @@ module.exports.run = ->
     .description "prints out a litexa project's information block."
     .action (cmd) ->
       chalk.enabled = cmd.parent.color
-
       options =
         root: root
         region: cmd.parent.region
@@ -277,6 +279,48 @@ module.exports.run = ->
         console.log JSON.stringify info, null, 2
       catch err
         console.error err
+
+  program
+    .command 'pull [data]'
+    .description "downloads specified data from the hosted skill via SMAPI. Currently supported for:
+      isp (downloads remote in-skill products, and ovewrites local product files)"
+    .option '-s --stage [stage]', "stage for which to pull skill data (either development or live)", 'development'
+    .action (data, cmd) ->
+      options =
+        root: root
+        stage: cmd.stage
+        verbose: cmd.parent.verbose
+
+      switch data
+        when 'isp'
+          try
+            await isp.init options
+            await isp.pullAndStoreRemoteProducts()
+          catch err
+            console.error chalk.red("failed to pull in-skill products")
+        else
+          console.error chalk.red("unknown data type '#{data}'. Currently supported data: isp")
+
+  program
+    .command 'push [data]'
+    .description "pushes specified data from local to the hosted skill via SMAPI. Currently
+      supports: isp (uploads local in-skill product files, and overrides remote products)"
+    .option '-s --stage [stage]', "stage for which to push skill data (either development or live)", 'development'
+    .action (data, cmd) ->
+      options =
+        root: root
+        stage: cmd.stage
+        verbose: cmd.parent.verbose
+
+      switch data
+        when 'isp'
+          try
+            await isp.init options
+            await isp.pushLocalProducts()
+          catch err
+            console.error chalk.red("failed to push in-skill products")
+        else
+          console.error chalk.red("unknown data type '#{data}'. Currently supported data: isp")
 
   program.on 'command:*', ->
     console.error """Invalid command: #{program.args.join(' ')}

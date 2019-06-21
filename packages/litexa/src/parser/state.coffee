@@ -9,14 +9,14 @@
  * See the Agreement for the specific terms and conditions of the Agreement. Capitalized
  * terms not defined in this file have the meanings given to them in the Agreement.
  * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 
+
 ###
 
 
 lib = module.exports.lib = {}
 
 { Function } = require('./function.coffee').lib
-{ Intent } = require('./intent.coffee').lib
+{ Intent, EventIntent, NamedIntent } = require('./intent.coffee').lib
 { LocalizationContext } = require('./localization.coffee')
 { ParserError } = require("./errors.coffee").lib
 
@@ -142,16 +142,19 @@ class lib.State
       throw new ParserError location, "Cannot create intent name from `#{utterance}`: #{err}"
     language = location?.language ? 'default'
     collection = @intents
+
     if language != 'default'
       @languages[language] = @languages[language] ? {}
       collection = @languages[language]
     unless key of collection
       if intentInfo?.class?
-        collection[key] = new intentInfo.class location, utterance
+        collection[key] = new intentInfo.class({ location, utterance })
       else
-        collection[key] = new Intent location, utterance
+        collection[key] = new Intent({ location, utterance })
     else if !collection[key].defaultedResetOnGet and key != '--default--'
-      throw new ParserError location, "Not allowed to redefine intent `#{key}` in state `#{@name}`"
+      # event-specific intents and name-specific intents should aggregate
+      if collection[key] not instanceof EventIntent and collection[key] not instanceof NamedIntent
+        throw new ParserError location, "Not allowed to redefine intent `#{key}` in state `#{@name}`"
     intent = collection[key]
 
     if intent.defaultedResetOnGet
@@ -175,7 +178,7 @@ class lib.State
 
   collectIntentsForLanguage: (language) ->
     workingIntents = {}
-    # for a given state, you will get the intents in that locale's 
+    # for a given state, you will get the intents in that locale's
     # version of that state only (intents are not inherited from the parent state)
     if language of @languages
       for name, intent of @languages[language]

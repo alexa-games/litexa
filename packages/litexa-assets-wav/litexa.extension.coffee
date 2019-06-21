@@ -34,7 +34,7 @@ module.exports = (options, lib) ->
   # * assetName: filename relative to project's /assets
   # * assetsRoot: source asset directory
   # * targetsRoot: target asset directory
-  # * options: options block from the litexa config file
+  # * options: options block from the Litexa config file
 
   # list what asset name(s) will be available in the
   # output, after this processor runs.

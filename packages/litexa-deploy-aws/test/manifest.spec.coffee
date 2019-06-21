@@ -9,7 +9,7 @@
  * See the Agreement for the specific terms and conditions of the Agreement. Capitalized
  * terms not defined in this file have the meanings given to them in the Agreement.
  * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 
+
 ###
 
 
@@ -39,6 +39,7 @@ describe 'construct and deploy artifacts for manifest', ->
       error: -> undefined
       warning: -> undefined
       verbose: -> undefined
+      derive: -> undefined
     }
     context =
       # manifest uses require() and it doesn't work in test execution with relative paths
@@ -108,7 +109,8 @@ describe 'construct and deploy artifacts for manifest', ->
       assert.equal(e, "failed manifest deployment")
     assert(errorThrown, 'an exception was thrown')
     assert(logSpy.calledWith(match("building skill manifest")), 'it loaded skill info')
-    assert(errorSpy.calledWith(match("didn't find a `manifest` property")), 'manifest file missing `manifest` field')
+    assert(errorSpy.calledWith(match("Didn't find a 'manifest' property")),
+      'manifest file missing `manifest` field')
 
   it 'loads an invalid skill file - missing `lambdaARN`', ->
     logSpy = spy(loggerInterface, 'log')
@@ -132,12 +134,11 @@ describe 'construct and deploy artifacts for manifest', ->
     errorSpy = spy(loggerInterface, 'error')
 
     fs.writeFileSync "./.manifest-test/skill.coffee", defaultManifest, 'utf8'
-    dummyExec = -> {stdout: "end SMAPI call"}
     try
-      await Manifest.deploy context, loggerInterface, dummyExec
+      await Manifest.deploy context, loggerInterface
     catch
       errorThrown = true
-      assert(errorSpy.calledWith(match("couldn't find `askProfile`")), 'execution stopped at calling SMAPI')
+      assert(errorSpy.calledWith(match("missing an ASK profile")), 'execution stopped at calling SMAPI')
     assert(errorThrown, 'an exception was thrown')
     assert(fs.existsSync path.join(context.deployRoot,'skill.json'), 'manifest file was written')
     writtenManifest = JSON.parse fs.readFileSync path.join(context.deployRoot,'skill.json')
@@ -154,12 +155,11 @@ describe 'construct and deploy artifacts for manifest', ->
     errorSpy = spy(loggerInterface, 'error')
 
     fs.writeFileSync "./.manifest-test/skill.coffee", defaultManifest, 'utf8'
-    dummyExec = -> {stdout: "end SMAPI call"}
     try
-      await Manifest.deploy context, loggerInterface, dummyExec
+      await Manifest.deploy context, loggerInterface
     catch
       errorThrown = true
-      assert(errorSpy.calledWith(match("couldn't find `askProfile`")), 'execution stopped at calling SMAPI')
+      assert(errorSpy.calledWith(match("missing an ASK profile")), 'execution stopped at calling SMAPI')
     assert(errorThrown, 'an exception was thrown')
     assert(fs.existsSync path.join(context.deployRoot,'skill.json'), 'manifest file was written')
     writtenManifest = JSON.parse fs.readFileSync path.join(context.deployRoot,'skill.json')
@@ -174,12 +174,11 @@ describe 'construct and deploy artifacts for manifest', ->
     errorSpy = spy(loggerInterface, 'error')
 
     fs.writeFileSync "./.manifest-test/skill.coffee", defaultManifest, 'utf8'
-    dummyExec = -> {stdout: "end SMAPI call"}
     try
-      await Manifest.deploy context, loggerInterface, dummyExec
+      await Manifest.deploy context, loggerInterface
     catch
       errorThrown = true
-      assert(errorSpy.calledWith(match("couldn't find `askProfile`")), 'execution stopped at calling SMAPI')
+      assert(errorSpy.calledWith(match("missing an ASK profile")), 'execution stopped at calling SMAPI')
     assert(errorThrown, 'an exception was thrown')
     assert(fs.existsSync path.join(context.deployRoot,'skill.json'), 'manifest file was written')
     writtenManifest = JSON.parse fs.readFileSync path.join(context.deployRoot,'skill.json')

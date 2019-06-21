@@ -9,26 +9,26 @@
  * See the Agreement for the specific terms and conditions of the Agreement. Capitalized
  * terms not defined in this file have the meanings given to them in the Agreement.
  * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 
+
 ###
 
 
 lib = module.exports.lib = {}
 
-class lib.PurchaseStatement
-  constructor: (referance_name) ->
-    @referance_name = referance_name
+class lib.BuyInSkillProductStatement
+  constructor: (referenceName) ->
+    @referenceName = referenceName
 
   toLambda: (output, indent, options) ->
     # TODO: add warning if context.directives is not empty
     # purchase directive must be the only directive in the response
-    output.push "#{indent}buildPurchaseDirective(context, \"#{@referance_name}\");"
+    output.push "#{indent}buildBuyInSkillProductDirective(context, \"#{@referenceName}\");"
 
-class lib.CancelPurchaseStatement
-  constructor: (referance_name) ->
-    @referance_name = referance_name
+class lib.CancelInSkillProductStatement
+  constructor: (referenceName) ->
+    @referenceName = referenceName
 
   toLambda: (output, indent, options) ->
     # TODO: add warning if context.directives is not empty
     # purchase directive must be the only directive in the response
-    output.push "#{indent}buildCancelPurchaseDirective(context, \"#{@referance_name}\");"
+    output.push "#{indent}buildCancelInSkillProductDirective(context, \"#{@referenceName}\");"

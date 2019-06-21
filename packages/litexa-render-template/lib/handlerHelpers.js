@@ -123,6 +123,10 @@ module.exports = {
   },
 
   addDisplaySpeechAs: function(speech, type, delimiter = ' ') {
+    if (isEmpty(type)) {
+      return;
+    }
+
     const cleanSpeech = this.stripSpeechSSML(speech);
 
     switch (type) {

@@ -1,11 +1,11 @@
 {
   "version": "1.0",
   "type": "ENTITLEMENT",
-  "referenceName": "Entitlement_isp",
+  "referenceName": "MyProduct",
   "publishingInformation": {
     "locales": {
       "en-US": {
-        "name": "ent lf",
+        "name": "My Product",
         "summary": "TODO: REPLACE THIS WITH TEXT DESCRIBING WHY THIS IS A VALUABLE PRODUCT",
         "description": "TODO: REPLACE THIS WITH A LONGFORM PRODUCT DESCRIPTION FOR DISPLAY",
         "smallIconUri": "TODO",

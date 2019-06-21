@@ -15,7 +15,7 @@
 
 lib = module.exports.lib = {}
 
-Function = require("./function.coffee").lib.Function
+{ Function, FunctionMap } = require("./function.coffee").lib
 { ParserError } = require("./errors.coffee").lib
 { LocalizationContext } = require('./localization.coffee')
 
@@ -144,7 +144,7 @@ compileSlot = (context, type) ->
 
   for key in ['name', 'values']
     unless key of data
-      throw "Missing key #{key} in result of slot builder #{type.functionName}: #{JSON.stringify data}"
+      throw "Missing key `#{key}` in result of slot builder #{type.functionName}: #{JSON.stringify data}"
 
   for value, index in data.values
     if typeof(value) == 'string'
@@ -191,7 +191,10 @@ class lib.Slot
 
   setType: (location, type) ->
     if @type?
-      throw new ParserError location, "The slot named `#{@name}` already has a defined type: `#{@type}`"
+      if @type.filename? and @type.functionName?
+        throw new ParserError location, "The slot named `#{@name}` already has a defined type from the slot builder: `#{@type.filename}:#{@type.functionName}`"
+      else
+        throw new ParserError location, "The slot named `#{@name}` already has a defined type: `#{@type}`"
 
     @type = type
     @typeLocation = location
@@ -200,7 +203,7 @@ class lib.Slot
 
   collectDefinedSlotTypes: (context, customSlotTypes) ->
     unless @type?
-      throw "the slot named `#{@name}` doesn't have a when statement defining its type"
+      throw "the slot named `#{@name}` doesn't have a 'with' statement defining its type"
 
     if Array.isArray @type
       typeName = createSlotFromArray(context, @name.toString(), @type)
@@ -208,7 +211,6 @@ class lib.Slot
     else if @type.isFileFunctionReference
       typeName = compileSlot(context, @type)
       customSlotTypes.push typeName
-
 
   validateSlotTypes: (customSlotTypes) ->
     # todo: validate built in types? Maybe just a warning?
@@ -246,10 +248,14 @@ class lib.Intent
     else
       utterance
 
-  constructor: (@location, utterance) ->
+  constructor: (args) ->
+    @location = args.location
+    utterance = args.utterance
+
     @utterances = []
     @allLocations = [@location]
     @slots = {}
+
     if utterance.isUtterance
       @pushUtterance utterance
       try
@@ -271,10 +277,8 @@ class lib.Intent
           throw new ParserError @location, "Intent names cannot contain a period unless they
           refer to a built in intent beginning with `AMAZON.`"
 
-
     @builtin = @name in builtInIntents
     @hasContent = false
-
 
   report: ->
     "#{@name} {#{k for k of @slots}}"
@@ -314,8 +318,8 @@ class lib.Intent
     return language of @startFunction.languages
 
   resetCode: ->
-    @hasContent = false 
-    @startFunction = null    
+    @hasContent = false
+    @startFunction = null
 
   pushCode: (line) ->
     @startFunction = @startFunction ? new Function
@@ -393,3 +397,85 @@ class lib.Intent
   toLocalization: (result, context) ->
     if @startFunction?
       @startFunction.toLocalization(result, context)
+
+# Subset of intents that can be scoped to individual events.
+class lib.EventIntent extends lib.Intent
+  constructor: (args) ->
+    super args
+    @startFunction = new FunctionMap
+    @hasEventNames = false
+
+  setCurrentEventName: (name) ->
+    @startFunction.setCurrentName name
+    @hasEventNames = true unless name == '__'
+
+  toLambda: (output, options) ->
+    indent = "    "
+
+    if @startFunction?
+      options.scopeManager.pushScope @location, @name
+      output.push "#{indent}// Event-unrelated intent handler logic."
+      @startFunction.toLambda(output, indent, options, '__')
+      options.scopeManager.popScope @location
+
+    if @hasEventNames
+      output.push "#{indent}// Event-specific intent handler logic."
+      output.push "#{indent}for (let __eventIndex = 0; __eventIndex < context.slots.request.events.length; ++__eventIndex) {"
+      output.push "#{indent}  const __event = context.slots.request.events[__eventIndex];"
+      output.push "#{indent}  context.slots.event = __event;"
+      for eventName, func of @startFunction.functions
+        continue if eventName == '__'
+        options.scopeManager.pushScope @location, "#{@name}:#{eventName}"
+        output.push "#{indent}  if (__event.name === '#{eventName}') {"
+        @startFunction.toLambda(output, "#{indent}    ", options, eventName)
+        output.push "#{indent}  }"
+        options.scopeManager.popScope @location
+      output.push "#{indent}};"
+
+# Subset of intents that can be scoped to individual intent "name"s.
+class lib.NamedIntent extends lib.Intent
+  constructor: (args) ->
+    super args
+    @startFunction = new FunctionMap
+    @hasIntentNames = false
+
+  setCurrentIntentName: (name) ->
+    @startFunction.setCurrentName name
+    @hasIntentNames = true unless name == '__'
+
+  toLambda: (output, options) ->
+    indent = "    "
+
+    if @startFunction?
+      options.scopeManager.pushScope @location, @name
+      output.push "#{indent}// Name-unrelated intent handler logic."
+      @startFunction.toLambda(output, indent, options, '__')
+      options.scopeManager.popScope @location
+
+    if @hasIntentNames
+      output.push "#{indent}// Name-specific intent handler logic."
+      output.push "#{indent}const __name = context.event.request.name;"
+      output.push "#{indent}const __payload = context.event.request.payload;"
+
+      for intentName, func of @startFunction.functions
+        continue if intentName == '__'
+
+        options.scopeManager.pushScope @location, "#{@name}:#{intentName}"
+        output.push "#{indent}if (__name === '#{intentName}') {"
+
+        # Logic for monetization-specific intent names.
+        if intentName == 'Buy' || intentName == 'Cancel'
+          output.push "#{indent}  if (__payload &&
+                                      __payload.purchaseResult &&
+                                      __payload.productId) {"
+          # Add shorthand $purchaseResult and $referenceName slot variables.
+          output.push "#{indent}    context.slots.purchaseResult = __payload.purchaseResult"
+          output.push "#{indent}    context.slots.referenceName =
+                                      getReferenceNameByProductId(context, __payload.productId)"
+          @startFunction.toLambda(output, "#{indent}    ", options, intentName)
+          output.push "#{indent}  }"
+        else
+          @startFunction.toLambda(output, "#{indent}  ", options, intentName)
+
+        output.push "#{indent}}"
+        options.scopeManager.popScope @location
