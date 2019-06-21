@@ -75,28 +75,43 @@ Repeat the above steps 4-6 for any products you'd like to create for your skill.
 
 ### Step 2: Pull in-skill product(s)
 
-You should pull the JSON summaries of your skill's in-skill products, so that any product references
-can be properly tested by Litexa. To do so, simply run the following command from your Litexa
-project's root directory.
+You should pull the JSON definitions of your skill's in-skill products, so that any product
+references can be properly tested by Litexa. To do so, simply run the following command from your
+Litexa project's root directory.
 
 ```bash
-litexa pull isps
+litexa pull isp
 ```
 
-This will create an `isps` directory in your project root directory, with a JSON file for every
-product you've linked to the skill. Assuming you've linked a product with the reference name
-"MyPremiumProduct" to your skill, you should see the following file structure:
+This will create an `isp` directory in your project root directory, with a subdirectory for the
+deployment stage you specify (default: `development`). A JSON file will then be created within, for
+every in-skill product associated with the specified stage of your skill.
+
+For example, assuming you've linked a product with the reference name "MyPremiumProduct" to your
+skill in the `development` stage, you would see the following file structure:
 
 ```stdout
 project_dir
-└── isps
-    └── MyPremiumProduct.json
+└── isp
+    └── development
+        └── MyPremiumProduct.json
 └── litexa
 ```
 
-These summaries are purely used by tests, and shouldn't be used to edit your products (do so in the
-ASK Developer Console, as seen in step 1). You should re-pull your in-skill products, whenever
-you've added or removed any.
+:::warning isp pulling overrides local products
+Any local product files will be replaced by remote products during `pull isp`.
+:::
+
+If you prefer modifying your in-skill products locally via their JSON, you can do so and push
+these changes with the following command:
+
+```bash
+litexa push isp
+```
+
+:::warning isp pushing overrides remote products
+Any remote products will be replaced by local products during `push isp`.
+:::
 
 ### Step 3: Configure your skill for ISP
 
@@ -212,38 +227,33 @@ The purchaseResult can be one of four values:
 3. ALREADY_PURCHASED
 4. ERROR
 
-To listen for and handle this purchaseResult, use the following code in a `global` state intent
-handler.
+To listen for and handle the purchaseResult, use the following code in a `global` state intent
+handler:
 
 ```coffeescript
 global
-  when Connections.Response "monetization"
-    switch $request.payload.purchaseResult
-      == "ACCEPTED"
-        say "Congratulations! You now have access to $request.payload.referenceName."
-        cachePurchases
-      == "DECLINED"
+  when Connections.Response "Buy"    # handles return from buyInSkillProduct
+    switch $purchaseResult
+      == "ACCEPTED" then
+        say "You now own $referenceName!"
+      == "DECLINED" then
         # ...
-      == "ALREADY_PURCHASED"
+      == "ALREADY_PURCHASED"  then
         # ...
-      == "ERROR"
+      == "ERROR" then
+        # ...
+
+  when Connections.Response "Cancel" # handles return from cancelInSkillProduct
+    switch $purchaseResult
+      == "ACCEPTED" then
         # ...
 ```
 
-:::tip cachePurchases
-As seen in the above example, Litexa supports a `cachePurchases` statement. This statement is used
-to store a list of the user's active purchases in database storage.
-
-This stored cache will be consulted by the `inSkillProductBought` check in step 7, and offers the
-convenience of persisting a user's purchases throughout a skill session. Otherwise, something like
-an expired subscription could cause a disruptive experience mid-session.
-
-You should call `cachePurchases` at least once in a meaningful location of your skill (e.g. in the
-`launch` state), **and** call it again after any new purchase is "ACCEPTED".
-
-If `cachePurchases` fails to retrieve a user's active purchases (e.g. due to server unavailability),
-it will leave the purchases that were last cached in database storage untouched, and print an error
-to the logs.
+:::tip $purchaseResult, $referenceName
+As seen in the above example, using a `when Connections.Response "Buy"|"Cancel"` listener
+will automatically create two shorthand [$](/reference/#variable-2) variables with the purchase
+result and the relevant product's reference name! These can then be handled in whichever way is
+required.
 :::
 
 ### Step 7: Handle bought products

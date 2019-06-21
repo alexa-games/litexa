@@ -1,48 +1,37 @@
 launch
-  if isEntitledIsp(context, 'Entitlement_isp')
-    say "entitled"
+  if inSkillProductBought(context, 'MyProduct')
+    say "You're entitled to use MyProduct."
     -> listen
   else
-    say "not entitled"
+    say "You're not entitled to use MyProduct."
     -> listen
 
-  when Connections.Response
-    local response = getMonetizationResponse(context)
-    if response.isMonetizationResponse
-      if response.purchaseResult == "ACCEPTED"
-        say "You've got a new item {response.reference_name}."
-      if response.purchaseResult == "DECLINED"
-        say "Maybe next time."
-    else
-      say "not monetization response."
-
 listen
+  when "buy"
+    buyInSkillProduct "MyProduct"
+
   when "cancel"
-    CancelPurchase "Entitlement_isp"
-# line above can be replaced with
-#    local a = buildCancelPurchaseDirective(context, 'Entitlement_isp')
-    END
-
-  when "purchase"
-    -> purchase
-
-
-purchase
-  Purchase "Entitlement_isp"
-# line above can be replaced with
-#  local b = buildPurchaseDirective(context, 'Entitlement_isp')
-  END
-
+    cancelInSkillProduct "MyProduct"
 
 global
+  when Connections.Response "Buy"
+    switch $purchaseResult
+      == "ACCEPTED" then
+        say "Looks like you now own $referenceName."
+      == "DECLINED" then
+        say "Looks like you opted not to purchase $referenceName. Maybe next time!"
+
+  when Connections.Response "Cancel"
+    switch $purchaseResult
+      == "ACCEPTED" then
+        say "Looks like you've canceled $referenceName."
+      == "DECLINED" then
+        say "Looks like you opted out of cancelling $referenceName."
 
   when AMAZON.HelpIntent
-    END
-
-  when AMAZON.StartOverIntent
-    -> launch
+    say "Please say buy or cancel."
+    -> listen
 
   otherwise
     say "I'm sorry, I didn't understand that."
     END
-

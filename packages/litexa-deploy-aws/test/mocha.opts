@@ -1,4 +1,5 @@
 --require coffeescript/register
+--require @litexa/core/aliasing
 --watch-extensions coffee
 --full-trace
 --timeout 10000

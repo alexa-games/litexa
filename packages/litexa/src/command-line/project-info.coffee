@@ -9,7 +9,7 @@
  * See the Agreement for the specific terms and conditions of the Agreement. Capitalized
  * terms not defined in this file have the meanings given to them in the Agreement.
  * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 
+
 ###
 
 
@@ -25,10 +25,10 @@ fs = require 'fs'
 path = require 'path'
 globalModulesPath = require('global-modules')
 debug = require('debug')('litexa-project-info')
-LoggingChannel = require './logging-channel'
+LoggingChannel = require './loggingChannel'
 
 class ProjectInfo
-  constructor: (jsonConfig, @variant, logger = new LoggingChannel 'project info') ->
+  constructor: (jsonConfig, @variant, logger = new LoggingChannel({logPrefix: 'project info'})) ->
     @variant = @variant ? "development"
     for k, v of jsonConfig
       @[k] = v
@@ -230,7 +230,7 @@ class ProjectInfo
 
       for f in fs.readdirSync(def.assets.root)
         continue if f in fileBlacklist
-  
+
         processed = false
         if assetFilter(f)
           def.assets.files.push f

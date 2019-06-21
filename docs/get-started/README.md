@@ -144,10 +144,8 @@ section of the cookbook.
 :::
 
 ### The Code
-*If you want to go straight to getting your skill up and running, feel free to skip this section.
+*If you want to go straight to getting your skill up and running, feel free to [skip this section](#building-and-running).
 This part just skims through the content of your generated skill code.*
-
-<details><summary>Click to show the Litexa code walkthrough</summary>
 
 Before we run our code, lets take a look at the contents of our code files in the `litexa` folder.
 
@@ -157,6 +155,8 @@ highlighting. You can find it under the folder `packages/litexa-vscode` in the L
 
 For other editors, we recommend extending your `coffeescript` syntax highlighting to include `*.litexa` files, as Litexa
 language extensions don't exist for other editors yet.
+
+For information on how to install go to [Editor Support](../book/appendix-editor-support.md).
 :::
 
 Open the `main.litexa` file and take a minute to look it over. In it, you should see the following sections
@@ -219,8 +219,6 @@ skill session.
 ::: tip Testing
 For more information on ensuring your code works properly, check out the cookbook section on [Testing](../book/testing.md).
 :::
-
-</details>
 
 ### Building and Running
 

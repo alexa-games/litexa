@@ -8,23 +8,28 @@
  * See the Agreement for the specific terms and conditions of the Agreement. Capitalized
  * terms not defined in this file have the meanings given to them in the Agreement.
  * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 
+
 ###
 
 
-chalk = require 'chalk'
 debug = require('debug')('litexa')
 fs = require 'fs'
 mkdirp = require 'mkdirp'
 path = require 'path'
 
-LoggingChannel = require './logging-channel'
+LoggingChannel = require './loggingChannel'
 { formatLocationStart } = require("../parser/errors.coffee").lib
-
 
 module.exports.run = (options) ->
 
-  logger = options.logger ? console
+  logStream = options.logger ? console
+  verbose = options.verbose ? false
+
+  logger = new LoggingChannel({
+    logPrefix: 'deploy'
+    logStream
+    verbose
+  })
 
   try
     deploymentStartTime = new Date
@@ -38,8 +43,7 @@ module.exports.run = (options) ->
     deployRoot = path.join skill.projectInfo.root, '.deploy', skill.projectInfo.variant
     mkdirp.sync deployRoot
 
-    output = options.logger ? console
-    logger = new LoggingChannel 'deploy', output, path.join(deployRoot,'deploy.log'), options.verbose
+    logger.filename = path.join(deployRoot,'deploy.log')
 
     # couldn't log this until now, but it's close enough
     logger.log "skill build complete in #{(new Date) - deploymentStartTime}ms"
@@ -50,14 +54,14 @@ module.exports.run = (options) ->
     deploymentTypes = parseDeploymentTypes(options)
 
     unless 'deployments' of skill.projectInfo
-      throw "missing `deployments` key in the Litexa config file, can't continue without parameters
-        to pass to the deployment module!"
+      throw new Error "missing 'deployments' key in the Litexa config file, can't continue without
+        parameters to pass to the deployment module!"
 
     deploymentOptions = skill.projectInfo.deployments[options.deployment]
 
     unless deploymentOptions?
-      throw "couldn't find a deployment called `#{options.deployment}` in the deployments section
-        of the Litexa config file, cannot continue."
+      throw new Error "couldn't find a deployment called `#{options.deployment}` in the deployments
+        section of the Litexa config file, cannot continue."
 
     deployModule = require('../deployment/deployment-module')(skill.projectInfo.root, deploymentOptions, logger)
     deployModule.manifest = require('./deploy/manifest')
@@ -78,7 +82,7 @@ module.exports.run = (options) ->
       JSONValidator: require('../parser/jsonValidator').lib.JSONValidator
 
   catch err
-    logger.error err
+    logger.error err.message
     return
 
   require('../deployment/artifacts.coffee').loadArtifacts context, logger
@@ -95,7 +99,12 @@ module.exports.run = (options) ->
     # neither of these rely on the other, let them interleave
     step1 = []
     if deploymentTypes.assets
-      assetsLogger = new LoggingChannel 'assets', output, path.join(deployRoot,'assets.log'), options.verbose
+      assetsLogger = new LoggingChannel({
+        logPrefix: 'assets'
+        logStream
+        logFile: path.join(deployRoot,'assets.log')
+        verbose
+      })
       assetsPipeline = Promise.resolve()
       .then ->
         # run all the external converters
@@ -105,14 +114,24 @@ module.exports.run = (options) ->
       step1.push assetsPipeline
 
     if deploymentTypes.lambda
-      lambdaLogger = new LoggingChannel 'lambda', output, path.join(deployRoot,'lambda.log'), options.verbose
+      lambdaLogger = new LoggingChannel({
+        logPrefix: 'lambda'
+        logStream
+        logFile: path.join(deployRoot,'lambda.log')
+        verbose
+      })
       step1.push deployModule.lambda.deploy context, lambdaLogger
 
     Promise.all step1
   .then ->
     # manifest depends on the lambda deployment
     if deploymentTypes.manifest
-      lambdaLogger = new LoggingChannel 'manifest', output,   path.join(deployRoot,'manifest.log'), options.verbose
+      lambdaLogger = new LoggingChannel({
+        logPrefix: 'manifest'
+        logStream
+        logFile: path.join(deployRoot,'manifest.log')
+        verbose
+      })
       deployModule.manifest.deploy context, lambdaLogger
     else
       Promise.resolve()

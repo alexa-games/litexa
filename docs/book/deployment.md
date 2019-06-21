@@ -6,7 +6,7 @@ Now that you have a Litexa project generated and working, it is time to deploy i
 Deploying your skill is how you can see it in action on a real Alexa-enabled device like an Echo,
 or, if you don't have access to one, the ASK Developer Console.
 
-Let's take a look at your [litexa config](/reference/readme.html#litexa-config) again. It probably
+Let's take a look at your Litexa config again. It probably
 looks something like this:
 
 ```json
@@ -55,11 +55,11 @@ your skill logic, or backend deployment. The second is your Alexa Skills Kit (AS
 what Alexa needs to know about to build and publish your skill to the Skill Store. This comprises
 of your skill model, manifest file, skill ID, and if it exists, monetization metadata.
 
-Going back to your litexa config, you'll notice that within a deployment target, there is a `module`
+Going back to your Litexa config, you'll notice that within a deployment target, there is a `module`
 field. This field indicates the name of the node module your Litexa skill will use for its backend
 deployment. The module implements what sort of hosting, persistent data storage, and logging your
 skill code will use during execution. At this time, there is one official deployment module called
-`@litexa/deploy-aws`, which is already set in the litexa config for your convenience. Meanwhile,
+`@litexa/deploy-aws`, which is already set in the Litexa config for your convenience. Meanwhile,
 Litexa itself performs the second part for you.
 
 Let's talk about each of these two deployment parts in turn.
@@ -95,7 +95,7 @@ node_module dependency), so all of its configuration mechanisms are supported
 
 The simplest way to authorize AWS is to complete the aws-cli
 installation, and then use the profile name you set up
-in the `awsProfile` field in your litexa config.
+in the `awsProfile` field in your Litexa config.
 
 See: [Installing the AWS CLI](
   https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html) for
@@ -118,7 +118,7 @@ the following credentials:
 where `development` is the name of the deployment target you want this configuration
 for.
 
-*Implementation detail: If you have neither an `awsProfile` field in your litexa config
+*Implementation detail: If you have neither an `awsProfile` field in your Litexa config
 nor a local `aws-config.json` file, `@litexa/deploy-aws` will attempt to use the
 aws-cli profile named `default`.*
 
@@ -156,7 +156,7 @@ you can put into your configuration for further project customization.
 The deploy module uses S3 to host your skill's assets, which can be sounds and images.
 Assets are deployed to the [S3 bucket](
   https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingBucket.html) with the name you
-put in the `S3BucketName` field in your litexa config.
+put in the `S3BucketName` field in your Litexa config.
 
 If this bucket doesn't exist yet, the module will automatically create it for you. If
 you create your own bucket:
@@ -216,7 +216,7 @@ Please see the [section on assets](/book/presentation.html#asset-file-references
 #### Lambda Configuration (optional)
 
 The `@litexa/deploy-aws` module deploys your skill to AWS Lambda. It sets a few defaults,
-but you are welcome to override these settings with your own in the litexa config. Here
+but you are welcome to override these settings with your own in the Litexa config. Here
 is an example with all the supported Lambda configuration options:
 
 ```json
@@ -295,7 +295,7 @@ the `.deploy` directory at any time; this module will detect the cache as
 empty and rebuild it as necessary. If you'd like to delete all deployment caches,
 you can also just delete the `.deploy` directory.
 
-If you modify the contents of your litexa config during
+If you modify the contents of your Litexa config during
 development, Litexa will automatically wipe the `.deploy` and
 `.test` temporary directories to perform a clean deployment.
 
@@ -310,7 +310,7 @@ to know about to build and publish your skill to the Skill Store.
 Please install the [ask-cli](https://developer.amazon.com/docs/smapi/quick-start-alexa-skills-kit-command-line-interface.html)
 first and create an ASK profile associated with your Amazon developer account.
 
-You'll notice that the litexa config has one field we haven't discussed yet, which is the `askProfile` field. Please set
+You'll notice that the Litexa config has one field we haven't discussed yet, which is the `askProfile` field. Please set
 that field with the name of the ASK profile you want to use for your skill.
 
 :::tip Congrats! You are ready to deploy your skill.
@@ -323,8 +323,8 @@ If you want to know what Litexa is doing for ASK deployment, then read on.
 ### Deployment Details and Artifacts
 
 Under the hood, Litexa uses the Skill Management API, or SMAPI, to deploy your skill, using your designated `askProfile`
-in the litexa config. It constructs and deploys 2 ASK Developer Console artifacts for you: the skill manifest and model files.
-*Because it manages backend deployment separately by using the `module` specified in the litexa config, it actually does not
+in the Litexa config. It constructs and deploys 2 ASK Developer Console artifacts for you: the skill manifest and model files.
+*Because it manages backend deployment separately by using the `module` specified in the Litexa config, it actually does not
 rely on the configured AWS profile that you may have associated with your ASK profile.*
 
 If this is your first time deploying to that deployment target, it will create a new skill for you
@@ -349,7 +349,7 @@ description and privacy policy, and Alexa-specific information, such as which AP
 Skill developers can provide this information via a skill manifest file + SMAPI, or
 by filling out the information manually in the ASK Developer Console.
 
-Litexa takes your `skill.coffee/js/ts` (we might refer to this as `skill.*` in documentation) and litexa config file
+Litexa takes your `skill.coffee/js/ts` (we might refer to this as `skill.*` in documentation) and Litexa config file
 to create your skill manifest file. You can find the constructed skill manifest file after a deployment
 in `.deploy/{yourDeploymentTarget}/skill.json`.
 
@@ -401,7 +401,7 @@ automatically appended to the end of your skill invocation name.
 
 Here's an example. Let's say your skill's invocation names in en-US and en-GB are both
 `cats versus cucumbers`. If you add an alternate invocation name to just en-GB in your
-`development` deployment target, your litexa config will look like this:
+`development` deployment target, your Litexa config will look like this:
 
 ```json
 {
@@ -422,7 +422,7 @@ Here's an example. Let's say your skill's invocation names in en-US and en-GB ar
 With this setting, your skill invocation name in en-GB will be `cloudy cats` while the one in
 en-US will remain `cats versus cucumbers`.
 
-If you instead add an invocation suffix, your litexa config will look like this:
+If you instead add an invocation suffix, your Litexa config will look like this:
 
 ```json
 {

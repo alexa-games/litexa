@@ -57,7 +57,7 @@ launch
   switch a = 8
     match /dog|cat|bear/i then
       fail("not a dog, cat or bear")
-    match /4|8/i then
+    match /4|8/ig then
       ok("just eight")
     else
       fail("not an 8")

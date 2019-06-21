@@ -9,7 +9,7 @@
  * See the Agreement for the specific terms and conditions of the Agreement. Capitalized
  * terms not defined in this file have the meanings given to them in the Agreement.
  * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 
+
 ###
 
 
@@ -340,12 +340,12 @@ class DBTypeWrapper
     @db.finalize cb
 
 # Monetization
-isEntitledIsp = (stateContext, referenceName) ->
-  isp = await getIspByReferenceName(stateContext, referenceName)
+inSkillProductBought = (stateContext, referenceName) ->
+  isp = await getProductByReferenceName(stateContext, referenceName)
   return false unless isp?
   return isp.entitled == "ENTITLED"
 
-getIspByReferenceName = (stateContext, referenceName) ->
+getProductByReferenceName = (stateContext, referenceName) ->
   if stateContext.monetization.fetchEntitlements
     await fetchEntitlements stateContext
 
@@ -354,10 +354,11 @@ getIspByReferenceName = (stateContext, referenceName) ->
       return p
   return null
 
-buildPurchaseDirective = (stateContext, referenceName) ->
-  isp = await getIspByReferenceName stateContext, referenceName
+buildBuyInSkillProductDirective = (stateContext, referenceName) ->
+  isp = await getProductByReferenceName stateContext, referenceName
   unless isp?
-    # console.log "buildPurchaseDirective: In Skill Product \"#{referenceName}\" not found."
+    console.log "buildBuyInSkillProductDirective(): in-skill product \"#{referenceName}\" not
+      found."
     return
 
   stateContext.directives.push {
@@ -370,6 +371,8 @@ buildPurchaseDirective = (stateContext, referenceName) ->
       }
       "token": "bearer " + stateContext.event.context.System.apiAccessToken
     }
+
+  stateContext.shouldEndSession = true
 
 fetchEntitlements = (stateContext, ignoreCache = false) ->
   if !stateContext.monetization.fetchEntitlements and !ignoreCache
@@ -417,36 +420,17 @@ fetchEntitlements = (stateContext, ignoreCache = false) ->
       console.log 'Error calling InSkillProducts API: ' + e
       reject(e)
 
-getMonetizationResponse = (context) ->
-  response = { isMonetizationResponse : false }
-  if context?.event?.request?.name not in [ "Buy", "Cancel" ]
-    return response
-
-  response.name = context.event.request.name
-
-  if not context.event.request.payload?.purchaseResult?
-    return response
-
-  if not context.event.request.payload.productId?
-    return response
-
-  response.isMonetizationResponse = true
-
-  response.purchaseResult = context.event.request.payload.purchaseResult
-  response.reference_name = getIspByProductId(context, context.event.request.payload.productId).referenceName
-
-  response
-
-getIspByProductId = (stateContext, productId) ->
+getReferenceNameByProductId = (stateContext, productId) ->
   for p in stateContext.monetization.inSkillProducts
     if p.productId == productId
-      return p
+      return p.referenceName
   return null
 
-buildCancelPurchaseDirective = (stateContext, referenceName) =>
-  isp = await getIspByReferenceName(stateContext, referenceName)
+buildCancelInSkillProductDirective = (stateContext, referenceName) =>
+  isp = await getProductByReferenceName(stateContext, referenceName)
   unless isp?
-    # console.log "buildCancelPurchaseDirective: In Skill Product \"#{referenceName}\" not found."
+    console.log "buildCancelInSkillProductDirective(): in-skill product \"#{referenceName}\" not
+      found."
     return
 
   stateContext.directives.push {
@@ -459,3 +443,5 @@ buildCancelPurchaseDirective = (stateContext, referenceName) =>
       }
       "token": "bearer " + stateContext.event.context.System.apiAccessToken
     }
+
+  stateContext.shouldEndSession = true

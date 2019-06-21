@@ -14,7 +14,7 @@ Services, with the following structure:
 
 ## Before You Start
 
-Let's take a closer look at your litexa config (the `litexa.config.js/ts/json/coffee` in your project
+Let's take a closer look at your Litexa config (the `litexa.config.js/ts/json/coffee` in your project
 root). It probably looks something like this:
 
 ```json
@@ -41,11 +41,11 @@ Alexa skill deployment is comprised of 2 parts. The first part is deployment of 
 or backend deployment. This is what a deploy module takes care of for you, and what this README will be
 about. For the second part, read the `litexa` module's README or the Book's chapter on ASK deployment.
 
-In your litexa config, you'll notice that within a deployment target, there is a `module` field.
+In your Litexa config, you'll notice that within a deployment target, there is a `module` field.
 This field indicates the name of the node module your Litexa skill will use for its backend
 deployment. The module implements what sort of hosting, persistent data storage, and logging your
 skill code will use during execution. At this time, there is one official deployment module called
-`@litexa/deploy-aws` (this one!), which is already set in the litexa config for your convenience.
+`@litexa/deploy-aws` (this one!), which is already set in the Litexa config for your convenience.
 
 ## Installation
 
@@ -68,7 +68,7 @@ node_module dependency), so all of its configuration mechanisms are supported
 
 The simplest way to authorize AWS is to complete the aws-cli
 installation, and then use the profile name you set up
-in the `awsProfile` field in your litexa config.
+in the `awsProfile` field in your Litexa config.
 
 See: [Installing the AWS CLI](
   https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html) for
@@ -91,7 +91,7 @@ the following credentials:
 where `development` is the name of the deployment target you want this configuration
 for.
 
-*Implementation detail: If you have neither an `awsProfile` field in your litexa config
+*Implementation detail: If you have neither an `awsProfile` field in your Litexa config
 nor a local `aws-config.json` file, `@litexa/deploy-aws` will attempt to use the
 aws-cli profile named `default`.*
 
@@ -127,7 +127,7 @@ you can put into your configuration for further project customization.
 The deploy module uses S3 to host your skill's assets, which can be sounds and images.
 Assets are deployed to the [S3 bucket](
   https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingBucket.html) with the name you
-put in the `S3BucketName` field in your litexa config.
+put in the `S3BucketName` field in your Litexa config.
 
 If this bucket doesn't exist yet, the module will automatically create it for you. If
 you create your own bucket:
@@ -188,7 +188,7 @@ ignore any file types it does not recognize. These files must have the file exte
 ### Lambda Configuration (optional)
 
 The `@litexa/deploy-aws` module deploys your skill to AWS Lambda. It sets a few defaults,
-but you are welcome to override these settings with your own in the litexa config. Here
+but you are welcome to override these settings with your own in the Litexa config. Here
 is an example with all the supported Lambda configuration options:
 
 ```json
@@ -267,7 +267,7 @@ the `.deploy` directory at any time; this module will detect the cache as
 empty and rebuild it as necessary. If you'd like to delete all deployment caches,
 you can also just delete the `.deploy` directory.
 
-If you modify the contents of your litexa config during
+If you modify the contents of your Litexa config during
 development, Litexa will automatically wipe the `.deploy` and
 `.test` temporary directories to perform a clean deployment.
 

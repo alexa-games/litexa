@@ -17,17 +17,17 @@ const aplValidators = require('../lib/aplValidators');
 const logger = console;
 
 describe('aplValidators', function() {
-  let errorSpy = undefined;
+  let errorStub = undefined;
   const validator = {};
 
   beforeEach(function() {
-    errorSpy = stub(logger, 'error');
+    errorStub = stub(logger, 'error');
     validator.jsonObject = {};
     validator.errors = [];
   });
 
   afterEach(function() {
-    errorSpy.restore();
+    errorStub.restore();
   });
 
   it('validates model', function() {

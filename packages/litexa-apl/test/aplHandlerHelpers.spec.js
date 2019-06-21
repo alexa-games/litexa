@@ -10,7 +10,7 @@
  */
 
 const {assert, expect} = require('chai');
-const {match, stub} = require('sinon');
+const {match, spy, stub} = require('sinon');
 
 const helpers = require('../lib/aplHandlerHelpers');
 
@@ -27,7 +27,7 @@ describe('aplHandlerHelpers', function() {
     curSpeechIndex: 0
   };
 
-  let errorSpy = undefined;
+  let errorStub = undefined;
   let speakSpy = undefined;
 
   it('runs init()', function() {
@@ -57,12 +57,12 @@ describe('aplHandlerHelpers', function() {
 
   describe('addSpeech()', function() {
     beforeEach(function() {
-      errorSpy = stub(logger, 'error');
-      speakSpy = stub(helpers, 'addSpeakItem');
+      errorStub = stub(logger, 'error');
+      speakSpy = spy(helpers, 'addSpeakItem');
     });
 
     afterEach(function() {
-      errorSpy.restore();
+      errorStub.restore();
       speakSpy.restore();
     });
 
@@ -73,7 +73,7 @@ describe('aplHandlerHelpers', function() {
         string: 'string'
       });
       const expectedError = "Received non-string speech of type 'object'";
-      assert(errorSpy.calledWith(match(expectedError)), `Expected error not logged: ${expectedError}`);
+      assert(errorStub.calledWith(match(expectedError)), `Expected error not logged: ${expectedError}`);
     });
 
     it('adds regular speech', function() {
@@ -133,14 +133,14 @@ describe('aplHandlerHelpers', function() {
 
   describe('directives', function() {
     beforeEach(function() {
-      errorSpy = stub(logger, 'error');
+      errorStub = stub(logger, 'error');
       helpers.init({
         myData: myTestData
       });
     });
 
     afterEach(function() {
-      errorSpy.restore();
+      errorStub.restore();
     });
 
     it('returns undefined directives if document/commands invalid', function() {

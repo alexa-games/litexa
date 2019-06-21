@@ -7,7 +7,7 @@
     "@litexa/assets-wav": "file:../../../packages/litexa-assets-wav"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Warning: no test specified\" && exit 0"
   },
   "author": "Amazon.com",
   "license": "Apache-2.0"

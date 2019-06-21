@@ -19,10 +19,14 @@ fs = require 'fs'
 mkdirp = require 'mkdirp'
 debug = require('debug')('litexa')
 
-LoggingChannel = require './logging-channel'
+LoggingChannel = require './loggingChannel'
 
 module.exports.run = (options, after) ->
-  logger = new LoggingChannel 'logs'
+  logger = new LoggingChannel({
+      logStream: options.logger ? console
+      logPrefix: 'logs'
+      verbose: options.verbose
+    })
 
   logger.important "Beginning log pull"
 
