@@ -77,7 +77,7 @@ module.exports = {
 
   spawnPromise: (cmd, args) ->
     return new Promise (resolve, reject) =>
-      spawnedProcess = spawn(cmd, args)
+      spawnedProcess = spawn(cmd, args, {shell:true})
 
       stdout = ''
       stderr = ''
@@ -95,10 +95,13 @@ module.exports = {
       spawnedProcess.stderr.on('data', (data) ->
         stderr += data
       )
-      spawnedProcess.once('exit', (code) ->
+
+      resolver = ->
         resolve {
           stdout,
           stderr
         }
-      )
+
+      spawnedProcess.on('exit', resolver);
+      spawnedProcess.on('close', resolver);
 }
