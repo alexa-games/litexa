@@ -21,16 +21,16 @@ if __filename.indexOf('.coffee') > 0
   requirePrefix = 'src'
 
 module.exports = (options, lib) ->
-  language = 
+  language =
     statements: {}
     testStatements: {}
-    lib: 
+    lib:
       StartInputHandler: require "./#{requirePrefix}/StartInputHandler"
       StopInputHandler: require "./#{requirePrefix}/StopInputHandler"
       InputHandlerEventIntent: require("./#{requirePrefix}/InputHandlerEventIntent")(lib)
       InputHandlerEventTestStep: require "./#{requirePrefix}/InputHandlerEventTestStep"
 
-  language.statements.startInputHandler = 
+  language.statements.startInputHandler =
     parser: """
       startInputHandler
       = "startInputHandler" ___ expression:ExpressionString {
@@ -38,7 +38,7 @@ module.exports = (options, lib) ->
       }
     """
 
-  language.statements.stopInputHandler = 
+  language.statements.stopInputHandler =
     parser: """
       stopInputHandler
       = "stopInputHandler" {
@@ -46,22 +46,22 @@ module.exports = (options, lib) ->
       }
     """
 
-  language.statements.WhenGameEngineInputHandlerEvent = 
+  language.statements.WhenGameEngineInputHandlerEvent =
     parser: """
       WhenGameEngineInputHandlerEvent
       = "when" ___ "GameEngine.InputHandlerEvent" __ name:QuotedString {
-        var intent = pushIntent(location(), "GameEngine.InputHandlerEvent", {class:lib.InputHandlerEventIntent});
+        const intent = pushIntent(location(), "GameEngine.InputHandlerEvent", {class:lib.InputHandlerEventIntent});
         intent.setCurrentEventName(name);
       }
       / "when" ___ "GameEngine.InputHandlerEvent" {
-        var intent = pushIntent(location(), "GameEngine.InputHandlerEvent", {class:lib.InputHandlerEventIntent});
+        const intent = pushIntent(location(), "GameEngine.InputHandlerEvent", {class:lib.InputHandlerEventIntent});
         intent.setCurrentEventName('__');
       }
     """
 
-  language.testStatements.inputHandlerEvent = 
+  language.testStatements.inputHandlerEvent =
     parser: """
-      inputHandlerEvent 
+      inputHandlerEvent
       = "inputHandlerEvent" ___ first:QuotedString rest:inputHandlerEventListTail+  {
         rest.unshift(first);
         currentTest().pushTestStep(new lib.InputHandlerEventTestStep(location(), rest));
@@ -73,11 +73,11 @@ module.exports = (options, lib) ->
         currentTest().pushTestStep(new lib.InputHandlerEventTestStep(location(), name));
       }
 
-      inputHandlerEventListTail 
+      inputHandlerEventListTail
       = __ "," __ name:QuotedString { return name; }
     """
 
-  language.testStatements.inputHandlerAction = 
+  language.testStatements.inputHandlerAction =
     parser: """
       inputHandlerAction
       = "inputHandlerAction" ___ id:Identifier ___ event:InputHandlerActionType ___ color:HexColor {
@@ -95,15 +95,15 @@ module.exports = (options, lib) ->
         step.pushAction(location(), id, event, 'FFFFFF');
       }
 
-      InputHandlerActionType 
+      InputHandlerActionType
       = "up" / "down"
     """
 
-  compiler = 
+  compiler =
     validIntentNames: [
       'GameEngine.InputHandlerEvent'
     ]
-    validators: 
+    validators:
       directives:
         'GameEngine.StartInputHandler': require "./#{requirePrefix}/GameEngine.StartInputHandler"
         'GameEngine.StopInputHandler': require "./#{requirePrefix}/GameEngine.StopInputHandler"
@@ -111,6 +111,4 @@ module.exports = (options, lib) ->
       model: require "./#{requirePrefix}/modelValidator.coffee"
       manifest: require "./#{requirePrefix}/manifestValidator.coffee"
 
-
   return { language, compiler }
-

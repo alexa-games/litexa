@@ -243,7 +243,9 @@ TEST "greeting"
 
 TEST "same greeting, different variation"
   launch
+  # accepts either SSML shorthand or SSML
   alexa: waitForName, "<!Howdy.> What is your name?" # interchanges variations
+  alexa: waitForName, "<say-as interpret-as='interjection'>Howdy.</say-as> What's your name?"
 ```
 
 Note that you need to put complete statements. This means
@@ -274,9 +276,85 @@ TEST "greeting - expect test to fail"
   launch
   alexa: waitForName, e"Hello there. What is your name?"
   alexa: waitForName, e"<!Howdy.> What's your name?"
-  alexa: waitForName, e"Hi there.
+  alexa: waitForName, e"Hi there."
 ```
 
+Alternatively, you can provide a
+[Regular Expression](#regular-expression) to match on a say
+statement - this would allow you to perform partial or
+pattern matches on say statements.
+
+```coffeescript
+launch
+  say "<!Howdy.> What would you like me to do?"
+  -> waitForResponse
+
+waitForResponse
+  when "roll a six sided die"
+    say "Look at that, it came up with a {getD6Roll()}."
+    END
+
+TEST "roll die"
+  launch
+  alexa: waitForResponse, /<!howdy.> what would you like me to do\?/i # case insensitive regex to full speech
+  user: "roll a six sided die"
+  alexa: null, /it came up with a \w+/ # regex for partially matching speech
+```
+
+
+## buyInSkillProduct
+
+Requires a case sensitive in-skill product reference name as an argument, where
+the product must exist and be linked to the skill.
+
+If the specified product exists, this sends a purchase directive *and* sets `shouldEndSession`
+to true for the pending response (required for a Connections.Response handoff directive).
+
+```coffeescript
+buyInSkillProduct "MyProduct"
+```
+
+The above would send the following directive:
+
+```json
+{
+  "type": "Connections.SendRequest",
+  "name": "Buy",
+  "payload": {
+      "InSkillProduct": {
+        "productId": "<MyProduct's productId>",
+      }
+  },
+  "token": "<apiAccessToken>"
+}
+```
+
+## cancelInSkillProduct
+
+Requires a case sensitive in-skill product reference name as an argument, where
+the product must exist and be linked to the skill.
+
+If the specified product exists, this sends a cancellation directive *and* sets `shouldEndSession`
+to true for the pending response (required for a Connections.Response handoff directive).
+
+```coffeescript
+cancelInSkillProduct "MyProduct"
+```
+
+The above would send the following directive:
+
+```json
+{
+  "type": "Connections.SendRequest",
+  "name": "Cancel",
+  "payload": {
+      "InSkillProduct": {
+        "productId": "<MyProduct's productId>",
+      }
+  },
+  "token": "<apiAccessToken>"
+}
+```
 
 ## capture
 
@@ -845,6 +923,9 @@ readable spelling in your code.
 pronounce "tomato" as "<phoneme alphabet="ipa" ph="/təˈmɑːtoʊ/">tomato</phoneme>"
 ```
 
+Note that you must use SSML in the replacement text; the Litexa
+SSML shorthand statements (e.g "<!Bravo>") will not work.
+
 ## quit
 
 Coming soon!
@@ -871,32 +952,40 @@ match case insensitive by adding an `i` flag.
 /bob/i
 ```
 
-This matches "Bob", "bob" and all combinations in
+This matches 'Bob', 'bob', and all combinations in
 between.
 
 We can use the `|` character to provide alternates.
 
 ```coffeescript
-/bob|greg|john/i
+/red|green|blue/
 ```
 
 The `.` character stands in for any single character.
 
 ```coffeescript
-/b.b/
+/o.o/
 ```
 
-This would match "bob", "bab", "bib", and so on.
+This would match 'ooo', 'owo', 'ovo', and so on.
 
-
-The `+` character specifies that the string should have
-one or more of the preceeding character.
+The `?` character specifies that the string should have
+zero or one occurrences of the preceding character.
 
 ```coffeescript
-/bo+b/
+/flavou?r/
 ```
 
-This would match "bob", "boob", "booob", etc.
+This would match both 'flavor' and 'flavour'.
+
+The `+` character specifies that the string should have
+one or more occurrences of the preceding character.
+
+```coffeescript
+/ca+t/
+```
+
+This would match 'cat', 'caat', 'caaat', etc.
 
 
 ## reprompt
@@ -1341,11 +1430,11 @@ test the [switch](#switch)'s reference value.
 
 ```coffeescript
 switch characterName
-  /Jack|Bob/ then
+  match /Jack|Bob/ then
     say "Hey guys, what's up?"
-  /Rose/i then
+  match /Rose/i then
     say "Long time no see, Rose"
-  /.*elle/ then
+  match /.*elle/ then
     say "Bonjour, {characterName}"
 ```
 

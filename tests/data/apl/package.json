@@ -4,7 +4,7 @@
   "description": "Project that tests the @litexa/apl extension's functionality.",
   "main": "",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Warning: no test specified\" && exit 0"
   },
   "author": "Amazon.com",
   "license": "SEE LICENSE IN LICENSE.TXT",

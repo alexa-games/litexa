@@ -367,6 +367,8 @@ class lib.Skill
       output.push "litexa.sayMapping = ["
       lines = []
       for source, target of @sayMapping
+        source = source.replace(/'/g, '\\\'')
+        target = target.replace(/'/g, '\\\'')
         lines.push "  { test: new RegExp(' #{source}','gi'), change: ' #{target}' }"
         lines.push "  { test: new RegExp('#{source} ','gi'), change: '#{target} ' }"
       output.push lines.join ",\n"

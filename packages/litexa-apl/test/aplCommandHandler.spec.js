@@ -21,7 +21,7 @@ commandHandler.init({
 });
 
 describe('aplCommandHandler', function() {
-  let errorSpy = undefined;
+  let errorStub = undefined;
   const errorPrefix = "This expected error wasn't logged: ";
 
   const cmds = [
@@ -36,12 +36,12 @@ describe('aplCommandHandler', function() {
   ];
 
   beforeEach(function() {
-    errorSpy = stub(logger, 'error');
+    errorStub = stub(logger, 'error');
     commandHandler.commands = [];
   });
 
   afterEach(function() {
-    errorSpy.restore();
+    errorStub.restore();
   });
 
   it('adds a single command', function() {
@@ -82,7 +82,7 @@ describe('aplCommandHandler', function() {
   it('rejects a non-object/array command', function() {
     commandHandler.addCommands('string');
     const expectedError = "Received non-array and non-object command of type 'string'";
-    assert(errorSpy.calledWith(match(expectedError)), `${errorPrefix}${expectedError}`);
+    assert(errorStub.calledWith(match(expectedError)), `${errorPrefix}${expectedError}`);
   });
 
   it('validates good commands', function() {
@@ -97,7 +97,7 @@ describe('aplCommandHandler', function() {
     commandHandler.addCommands(cmd);
     commandHandler.areValidCommands();
     const expectedError = "Found command with undefined 'type'";
-    assert(errorSpy.calledWith(match(expectedError)), `${errorPrefix}${expectedError}`);
+    assert(errorStub.calledWith(match(expectedError)), `${errorPrefix}${expectedError}`);
   });
 
   it('invalidates incorrect command parameter', function() {
@@ -107,7 +107,7 @@ describe('aplCommandHandler', function() {
     commandHandler.addCommands(cmd);
     commandHandler.areValidCommands();
     const expectedError = `Found invalid command type '${cmd.type}'`;
-    assert(errorSpy.calledWith(match(expectedError)), `${errorPrefix}${expectedError}`);
+    assert(errorStub.calledWith(match(expectedError)), `${errorPrefix}${expectedError}`);
   });
 
   it('invalidates incorrect command parameter', function() {
@@ -118,6 +118,6 @@ describe('aplCommandHandler', function() {
     commandHandler.addCommands(cmd);
     commandHandler.areValidCommands();
     const expectedError = `Found invalid command parameter 'bogusParam' in '${cmd.type}'`;
-    assert(errorSpy.calledWith(match(expectedError)), `${errorPrefix}${expectedError}`);
+    assert(errorStub.calledWith(match(expectedError)), `${errorPrefix}${expectedError}`);
   });
 });

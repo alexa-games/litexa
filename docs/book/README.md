@@ -62,19 +62,19 @@ is ignored by the language.
 say "Hello There" # even when it's on a line with code
 ```
 
-
 ## On Editor Support
 
-We're mostly Visual Studio Code users on our team, se we're
-happy to share the same VSCode extension we use [here]
-that adds syntax highlighting for .litexa code files.
+The team uses Visual Studio Code and JetBrains for development. If you're a Visual Studio Code user, we're more than
+happy to share the same VS Code extension we use [here](https://github.com/alexa-games/litexa/tree/master/packages/litexa-vscode/litexa).
+This extension adds syntax highlighting for `.litexa` code files. 
 
-Any modern editor that can handle auto indenting successive
-lines of code should work just fine though.
+For other editors, we recommend extending your `coffeescript` syntax highlighting to include `*.litexa` files. 
+However, any modern editor that can handle auto-indenting consecutive lines of code should work just fine.
 
 *Psst, we're a 2 spaces tribe, but we won't hold your white
 space preferences against you.*
 
+For more information go to [Editor Support](../book/appendix-editor-support.md).
 
 ## Why Litexa?
 

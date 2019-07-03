@@ -291,6 +291,19 @@ class lib.ExpectedExactSay
     unless @line == test
       throw new ParserError @location, "speech did not exactly match `#{@line}`"
 
+class lib.ExpectedRegexSay
+  # given a regex, rather than constructing one
+  constructor: (@location, @regex) ->
+
+  test: (skill, context, result) ->
+    # compare without the say markers
+    test = result.speech ? ""
+    test = test.replace /\s/g, ' '
+
+    abbreviatedTest = abbreviateTestOutput test, context
+    regexp = new RegExp(@regex.expression, @regex.flags)
+    unless test.match(regexp) or abbreviatedTest.match(regexp)
+      throw new ParserError @location, "speech did not match regex `/#{@regex.expression}/#{@regex.flags}`"
 
 class lib.ExpectedSay
   # expect all say statements that concatenate into @line

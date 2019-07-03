@@ -19,6 +19,7 @@ fs = require 'fs'
 rimraf = require 'rimraf'
 { spawnSync } = require 'child_process'
 
+require('@litexa/core/aliasing') # Load Aliases that Litexa uses in require statements
 Skill = require('@litexa/core/src/parser/skill')
 ProjectInfo = require('@litexa/core/src/command-line/project-info')
 

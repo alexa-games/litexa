@@ -1,0 +1,27 @@
+pronounce "dog" as "cat"
+pronounce "hidden" as "<phoneme alphabet='ipa' ph='hɪd.ɛn'>hidden</phoneme>"
+pronounce "'goodbye'" as "goodbye then"
+
+launch
+  say "I really like my dog. Do you agree?"
+
+  when AMAZON.YesIntent
+    say "Sometimes, my dog likes to play hide and seek. She can stay hidden for hours!"
+    END
+
+  when AMAZON.NoIntent
+    say "<!Boo.> 'Goodbye'."
+    END
+
+TEST "say yes"
+  launch
+  alexa: launch, /I really like my cat/i
+  user: AMAZON.YesIntent
+  alexa: null, /my cat/
+  alexa: null, /phoneme/
+
+TEST "say no"
+  launch
+  alexa: launch, /I really like my cat/i
+  user: AMAZON.NoIntent
+  alexa: null, /goodbye then/i

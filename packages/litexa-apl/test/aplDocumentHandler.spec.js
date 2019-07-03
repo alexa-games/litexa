@@ -29,17 +29,17 @@ describe('aplDocumentHandler', function() {
   const speechContainerId = 'LitexaSpeechContainer';
   const url = 'http://myUrl';
 
-  let errorSpy = undefined;
-  let warnSpy = undefined;
+  let errorStub = undefined;
+  let warnStub = undefined;
 
   describe('itemToItems()', function() {
     beforeEach(function() {
-      errorSpy = stub(logger, 'error');
+      errorStub = stub(logger, 'error');
       documentHandler.document = {};
     });
 
     afterEach(function() {
-      errorSpy.restore();
+      errorStub.restore();
     });
 
     it('converts mainTemplate item object to items array', function() {
@@ -96,20 +96,20 @@ describe('aplDocumentHandler', function() {
       };
       const expectedError = `Found non-array and non-object 'item' of type '${mainTemplate.item}'`;
       documentHandler.itemToItems(mainTemplate);
-      assert(errorSpy.calledWith(match(expectedError)), `${errorPrefix}${expectedError}`);
+      assert(errorStub.calledWith(match(expectedError)), `${errorPrefix}${expectedError}`);
     });
   });
 
   describe('addDocument()', function() {
     beforeEach(function() {
-      errorSpy = stub(logger, 'error');
-      warnSpy = stub(logger, 'warn');
+      errorStub = stub(logger, 'error');
+      warnStub = stub(logger, 'warn');
       documentHandler.document = {};
     });
 
     afterEach(function() {
-      errorSpy.restore();
-      warnSpy.restore();
+      errorStub.restore();
+      warnStub.restore();
     });
 
     it('addDocument() rejects empty or non-object document', function() {
@@ -119,7 +119,7 @@ describe('aplDocumentHandler', function() {
       const document = 'string';
       documentHandler.addDocument(document);
       const expectedError = `Tried adding non-object document of type '${typeof document}'`;
-      assert(errorSpy.calledWith(match(expectedError)), `${errorPrefix}${expectedError}`);
+      assert(errorStub.calledWith(match(expectedError)), `${errorPrefix}${expectedError}`);
     });
 
     it('addDocument() replaces mainTemplate', function() {
@@ -143,7 +143,7 @@ describe('aplDocumentHandler', function() {
       documentHandler.addDocument(doc2);
 
       const expectedWarning = "aplDocumentHandler found two mainTemplates";
-      assert(warnSpy.calledWith(match(expectedWarning)), `${warnPrefix}${expectedWarning}`);
+      assert(warnStub.calledWith(match(expectedWarning)), `${warnPrefix}${expectedWarning}`);
 
       const expectedDoc = {
         mainTemplate: {
@@ -159,12 +159,12 @@ describe('aplDocumentHandler', function() {
 
   describe('addSpeechContainer()', function() {
     beforeEach(function() {
-      errorSpy = stub(logger, 'error');
+      errorStub = stub(logger, 'error');
       documentHandler.document = {};
     });
 
     afterEach(function() {
-      errorSpy.restore();
+      errorStub.restore();
     });
 
     it('adds non-URL speech to an empty document', function() {
@@ -365,14 +365,14 @@ describe('aplDocumentHandler', function() {
 
   describe('isValidDocument()', function() {
     beforeEach(function() {
-      errorSpy = stub(logger, 'error');
-      warnSpy = stub(logger, 'warn');
+      errorStub = stub(logger, 'error');
+      warnStub = stub(logger, 'warn');
       documentHandler.document = {};
     });
 
     afterEach(function() {
-      errorSpy.restore();
-      warnSpy.restore();
+      errorStub.restore();
+      warnStub.restore();
     });
 
     it('rejects empty document and missing or empty mainTemplate', function() {
@@ -384,14 +384,13 @@ describe('aplDocumentHandler', function() {
       };
       documentHandler.isValidDocument(document);
       let expectedError = "Missing required attribute 'mainTemplate'";
-      assert(errorSpy.calledWith(match(expectedError)), `${errorPrefix}${expectedError}`);
+      assert(errorStub.calledWith(match(expectedError)), `${errorPrefix}${expectedError}`);
 
       document = {
         mainTemplate: {}
       };
-      expectedError = "Missing required attribute 'mainTemplate'";
       documentHandler.isValidDocument(document);
-      assert(errorSpy.calledWith(match(expectedError)), `${errorPrefix}${expectedError}`);
+      assert(errorStub.calledWith(match(expectedError)), `${errorPrefix}${expectedError}`);
     });
 
     it('adds missing version and type', function() {
@@ -419,7 +418,7 @@ describe('aplDocumentHandler', function() {
       };
       documentHandler.isValidDocument(document);
       const expectedWarning = "Unsupported attribute 'bogusAttribute' found in document.";
-      assert(warnSpy.calledWith(match(expectedWarning)), `${warnPrefix}${expectedWarning}`);
+      assert(warnStub.calledWith(match(expectedWarning)), `${warnPrefix}${expectedWarning}`);
     });
   });
 });

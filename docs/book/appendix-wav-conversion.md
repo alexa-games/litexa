@@ -25,6 +25,11 @@ npm install -g node-gyp
 
 Additionally, you will need to install build tools to compile the 'lame' dependency:
 
+:::danger
+As of July 2019, there is a [known issue](https://github.com/TooTallNate/node-lame/issues/92) with installing `lame` on 
+Node version 12+. To use this extension, we recommend using an LTS version of Node (either 8 or 10).
+:::
+
 * Windows:
 
 ```sh

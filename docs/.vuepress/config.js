@@ -38,7 +38,7 @@ module.exports = {
       { text: 'Get Started', link: '/get-started/' },
       { text: 'The Book', link: '/book/'},
       { text: 'Reference', link: '/reference/'},
-      { text: 'GitHub', link: 'https://github.com/alexa-labs/litexa' },
+      { text: 'GitHub', link: 'https://github.com/alexa-games/litexa' },
     ],
     sidebarDepth: 3,
     sidebar: [
@@ -69,6 +69,7 @@ module.exports = {
           '/book/backdoor',
           '/book/appendix-aws-permissions',
           '/book/appendix-default-aws-settings',
+          '/book/appendix-editor-support',
           '/book/appendix-render-template',
           '/book/appendix-wav-conversion'
         ]

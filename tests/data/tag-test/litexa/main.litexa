@@ -65,9 +65,17 @@ TEST "Exact Tag Testing"
   alexa: testAllExact, "test <!howdy> Woof <sfx 'http://www.dogs.com/woof.mp3'> Meow <sfx 'soundbank://test/meow'>"
   alexa: testAllExact, e"test <!howdy> Woof <sfx 'http://www.dogs.com/woof.mp3'> Meow <sfx 'soundbank://test/meow'>"
   alexa: testAllExact, e"test <say-as interpret-as='interjection'>howdy</say-as> Woof <audio src='http://www.dogs.com/woof.mp3'/> Meow <audio src='soundbank://test/meow'/>"
+  alexa: testAllExact, /test <!howdy> Woof/
+  alexa: testAllExact, /test <!hoWdy> WOOF/ig
+  alexa: testAllExact, /test <!howdy> Woof <.*> Meow <soundbank:/
+  alexa: testAllExact, /test <say-as interpret-as='interjection'>howdy<\/say-as> Woof <.*>/
+  alexa: testAllExact, /Meow <audio src='soundbank:\/\/test\/meow'\/>/
+  alexa: testAllExact, /Meow <soundbank:\/\/test\/meow>/
+  alexa: testAllExact, /<audio src='http:\/\/www.dogs.com\/woof.mp3'\/>/
 
 TEST "Mixed Tag Testing"
   launch
   user: "run all"
   alexa: testAllMixed, "<sfx soundbank://test/lion> test <!howdy> First aliens <alien.mp3> beep <sfx https://test/dog.mp3> <...1s> finally cats <sfx soundbank://test/cat> meow"
   alexa: testAllMixed, "<sfx soundbank://test/lion> test <!aha> First dogs <sfx "https://test/dog.mp3"> woof <sfx https://test/dog.mp3> <...1s> finally cats <sfx soundbank://test/cat> meow"
+  

@@ -329,7 +329,6 @@ handlerSteps.initializeMonetization = (stateContext, event) ->
     stateContext.handoffState = 'launch'
     stateContext.nextState = 'launch'
 
-  # return fetchEntitlements stateContext
   return Promise.resolve()
 
 

@@ -137,12 +137,12 @@ ends with a LISTEN or END statement. This means
 they survive between states, and will always have
 memory storage.
 
-Request variable names mush always begin with the
+Request variable names must always begin with the
 `$` character, and are declared and created on
 their first assignment.
 
 We've already come across several request variables
-so far, in the from of slot values.
+so far, in the form of slot values.
 
 ```coffeescript
 askForName

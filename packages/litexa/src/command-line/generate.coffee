@@ -21,7 +21,7 @@ AssetsDirectoryGenerator = require('./generators/assetsDirectoryGenerator')
 ConfigGenerator = require('./generators/configGenerator')
 DirectoryCreator = require('./generators/directoryCreator')
 DirectoryStructureCreator = require('./generators/directory/structureCreator')
-LoggingChannel = require './logging-channel'
+LoggingChannel = require './loggingChannel'
 ProjectInfo = require('./project-info')
 SkillIconsGenerator = require('./generators/skillIconsGenerator')
 SkillManifestGenerator = require('./generators/skillManifestGenerator')
@@ -31,7 +31,11 @@ TemplateFilesHandler = require('./generators/templateFilesHandler')
 config = require './project-config'
 
 module.exports.run = (options) ->
-  logger = new LoggingChannel 'generator'
+  logger = new LoggingChannel({
+      logStream: options.logger ? console
+      logPrefix:'generator'
+      verbose: options.verbose
+    })
   # absent any other options, generate all assets that don't exist
   logger.important "Beginning project generators"
 

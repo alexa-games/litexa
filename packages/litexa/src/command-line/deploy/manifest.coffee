@@ -9,7 +9,7 @@
  * See the Agreement for the specific terms and conditions of the Agreement. Capitalized
  * terms not defined in this file have the meanings given to them in the Agreement.
  * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 
+
 ###
 
 
@@ -18,6 +18,7 @@ path = require 'path'
 util = require 'util'
 child_process = require 'child_process'
 assert = require 'assert'
+smapi = require '../api/smapi'
 
 { JSONValidator } = require('../../parser/jsonValidator').lib
 
@@ -57,9 +58,14 @@ logger = console
 writeFilePromise = util.promisify fs.writeFile
 exec = util.promisify child_process.exec
 
+askProfile = null
+
 module.exports =
   deploy: (context, overrideLogger) ->
     logger = overrideLogger
+
+    askProfile = context.deploymentOptions?.askProfile
+
     manifestContext = {}
 
     logger.log "beginning manifest deployment"
@@ -74,21 +80,16 @@ module.exports =
     .then ->
       enableSkill context, manifestContext
     .then ->
-      loadIspData context, manifestContext
-    .then ->
-      createOrUpdateIspData context, manifestContext
-    .then ->
       logger.log "manifest deployment complete, #{logger.runningTime()}ms"
-    .catch (error) ->
-      if error?.code? or error?.error?
-        logger.error if error.error? then error.error else error.code
-        throw "SMAPI: #{error.code ? ''} #{error.error}"
+    .catch (err) ->
+      if err?.code?
+        logger.error "SMAPI error: #{err.code ? ''} #{err.message}"
       else
-        if error.stack?
-          logger.error error.stack
+        if err.stack?
+          logger.error err.stack
         else
-          logger.error JSON.stringify error
-        throw "failed manifest deployment"
+          logger.error JSON.stringify err
+      throw "failed manifest deployment"
 
 
 loadSkillInfo = (context, manifestContext) ->
@@ -110,13 +111,13 @@ loadSkillInfo = (context, manifestContext) ->
 buildSkillManifest = (context, manifestContext) ->
   logger.log "building skill manifest"
   unless 'manifest' of manifestContext.info
-    throw "didn't find a `manifest` property in the skill.* file. Has it been corrupted?"
+    throw "Didn't find a 'manifest' property in the skill.* file. Has it been corrupted?"
 
   info = manifestContext.info.manifest
 
   lambdaArn = context.artifacts.get 'lambdaARN'
   unless lambdaArn
-    throw "Missing lambda ARN during manifest deployment. Has the Lambda deployed yet?"
+    throw "Missing lambda ARN during manifest deployment. Has the Lambda been deployed yet?"
 
   manifest =
     manifestVersion: "1.0"
@@ -169,7 +170,7 @@ buildSkillManifest = (context, manifestContext) ->
         iconURLs = for name in ['icon-108.png', 'icon-512.png']
           assetInfo = requiredAssets[name]
           unless assetInfo?
-            throw "missing #{name} in the assets directory, or you haven't deployed it with the
+            throw "Missing #{name} in the assets directory, or you haven't deployed it with the
               assets yet. Please remedy and try again."
           manifestContext.assetsMd5 += assetInfo.md5
           assetInfo.url
@@ -223,7 +224,7 @@ buildSkillManifest = (context, manifestContext) ->
           }
 
         unless manifestContext.locales.length > 0
-          throw "no locales found in the skill.json manifest. Please add at least one."
+          throw "No locales found in the skill.json manifest. Please add at least one."
 
       when 'privacyAndCompliance'
         # dig through these too
@@ -288,70 +289,6 @@ buildSkillManifest = (context, manifestContext) ->
   writeFilePromise manifestContext.manifestFilename, JSON.stringify(manifest, null, 2), 'utf8'
 
 
-callSMAPI = (context, command, parameters) ->
-  call = [ 'ask', 'api', command ]
-
-  unless context.deploymentOptions?.askProfile?
-    throw "couldn't find `askProfile` in the '#{context.deploymentName}' deployment parameters from
-      this project's config file. Please set it to the ask-cli profile you'd like to use."
-
-  call.push '--profile'
-  call.push context.deploymentOptions.askProfile
-
-  for k, v of parameters
-    call.push "--#{k}"
-    call.push '"' + v + '"'
-
-  logger.verbose call.join ' '
-
-  exec call.join(' '), {maxBuffer: 1024 * 1024}
-  .then (data) ->
-    if data.stdout.toLowerCase().indexOf("command not recognized") >= 0
-      throw "#{command} was reported as not a valid ask-cli command.
-        Please ensure you have the latest version "
-
-    logger.verbose "SMAPI #{command} complete #{data.stdout}"
-    logger.verbose "SMAPI stderr: " + data.stderr
-    if data.stderr and data.stderr.indexOf('ETag') < 0
-      throw data.stderr
-    Promise.resolve data.stdout
-  .catch (err) ->
-    logger.verbose err
-    logger.verbose "failed to call #{command} during manifest deployment"
-    statusCode = null
-    errorMessage = null
-    errorText = "" + err
-    if errorText.match /ask\s*:\s*command not found/i
-      errorMessage = 'ask command not found. Is ask-cli correctly installed and configured?'
-    else if errorText.match /\s*Cannot resolve profile/i
-      errorMessage = "ASK profile not found. Make sure the profile:
-        '#{context.deploymentOptions.askProfile}' exists and is set up correctly."
-    else
-      try
-        lines = errorText.split '\n'
-        for line in lines
-          k = line.split(':')[0] ? ''
-          v = (line.replace k, '')[1..].trim()
-          k = k.trim()
-          if k.toLowerCase().indexOf('error code') == 0
-            statusCode = parseInt v
-          else if k == '"message"'
-            errorMessage = v.trim()
-      catch err
-        logger.error "failed to extract failure status code from SMAPI call"
-
-    unless statusCode?
-      statusCode = -1
-
-    unless errorMessage?
-      msg = err
-      if typeof(err) == 'object'
-        msg = JSON.stringify msg
-      errorMessage = "Unknown SMAPI error, failed to execute #{command}: #{msg}"
-
-    throw { code: statusCode, error: errorMessage }
-
-
 createOrUpdateSkill = (context, manifestContext) ->
   skillId = context.artifacts.get 'skillId'
   if skillId?
@@ -387,16 +324,19 @@ parseSkillInfo = (data) ->
 
 
 updateSkill = (context, manifestContext) ->
-  callSMAPI context, 'get-skill', {
-    'skill-id': manifestContext.skillId
+  smapi.call {
+    askProfile
+    command: 'get-skill'
+    params: { 'skill-id': manifestContext.skillId }
+    logChannel: logger
   }
-  .catch (error) ->
-    if error.code == 404
+  .catch (err) ->
+    if err.code == 404
       Promise.reject "The skill ID stored in artifacts.json doesn't seem to exist in the deployment
         account. Have you deleted it manually in the dev console? If so, please delete it from the
         artifacts.json and try again."
     else
-      Promise.reject error
+      Promise.reject err.message
   .then (data) ->
     needsUpdating = false
     info = parseSkillInfo data
@@ -420,22 +360,32 @@ updateSkill = (context, manifestContext) ->
       return Promise.resolve()
 
     logger.log "updating skill manifest"
-    callSMAPI context, 'update-skill', {
-      'skill-id': manifestContext.skillId
-      'file': manifestContext.manifestFilename
+    smapi.call {
+      askProfile
+      command: 'update-skill'
+      params: {
+        'skill-id': manifestContext.skillId
+        'file': manifestContext.manifestFilename
+      }
+      logChannel: logger
     }
     .then (data) ->
       waitForSuccess context, manifestContext.skillId, 'update-skill'
     .then ->
       context.artifacts.save 'skill-manifest-assets-md5', manifestContext.assetsMd5
+    .catch (err) ->
+      logger.error err
 
 
 waitForSuccess = (context, skillId, operation) ->
   return new Promise (resolve, reject) ->
     checkStatus = ->
       logger.log "waiting for skill status after #{operation}"
-      callSMAPI context, 'get-skill-status', {
-        'skill-id': skillId
+      smapi.call {
+        askProfile
+        command: 'get-skill-status'
+        params: { 'skill-id': skillId }
+        logChannel: logger
       }
       .then (data) ->
         info = parseSkillInfo data
@@ -459,8 +409,11 @@ waitForSuccess = (context, skillId, operation) ->
 
 
 createSkill = (context, manifestContext) ->
-  callSMAPI context, 'create-skill', {
-    'file': manifestContext.manifestFilename
+  smapi.call {
+    askProfile
+    command: 'create-skill'
+    params: { 'file': manifestContext.manifestFilename }
+    logChannel: logger
   }
   .then (data) ->
     # dig out the skill id
@@ -551,8 +504,11 @@ waitForModelSuccess = (context, skillId, locale, operation) ->
   return new Promise (resolve, reject) ->
     checkStatus = ->
       logger.log "waiting for model #{locale} status after #{operation}"
-      callSMAPI context, 'get-skill-status', {
-        'skill-id': skillId
+      smapi.call {
+        askProfile
+        command: 'get-skill-status'
+        params: { 'skill-id': skillId }
+        logChannel: logger
       }
       .then (data) ->
         try
@@ -591,14 +547,19 @@ updateModelForLocale = (context, manifestContext, localeInfo) ->
   locale = localeInfo.code
 
   modelDeployStart = new Date
-  callSMAPI context, 'get-model', {
-    'skill-id': manifestContext.skillId
-    locale: locale
+  smapi.call {
+    askProfile
+    command: 'get-model'
+    params: {
+      'skill-id': manifestContext.skillId
+      locale: locale
+    }
+    logChannel: logger
   }
-  .catch (error) ->
+  .catch (err) ->
     # it's fine if it doesn't exist yet, we'll upload
-    unless error.code == 404
-      throw "Error while reading #{locale} model, #{error.code} #{error.error}"
+    unless err.code == 404
+      throw "Error while reading #{locale} model, #{err.code} #{err.message}"
     Promise.resolve "{}"
   .then (data) ->
     model = context.skill.toModelV2 locale
@@ -631,10 +592,15 @@ updateModelForLocale = (context, manifestContext, localeInfo) ->
       return Promise.resolve()
 
     logger.log "#{locale} model update beginning"
-    callSMAPI context, 'update-model', {
-      'skill-id': manifestContext.skillId
-      locale: locale
-      file: filename
+    smapi.call {
+      askProfile
+      command: 'update-model'
+      params: {
+        'skill-id': manifestContext.skillId
+        locale: locale
+        file: filename
+      }
+      logChannel: logger
     }
     .then ->
       waitForModelSuccess context, manifestContext.skillId, locale, 'update-model'
@@ -645,129 +611,9 @@ updateModelForLocale = (context, manifestContext, localeInfo) ->
 
 enableSkill = (context, manifestContext) ->
   logger.log "ensuring skill is enabled for testing"
-  callSMAPI context, 'enable-skill', {
-    'skill-id': manifestContext.skillId
+  smapi.call {
+    askProfile
+    command: 'enable-skill'
+    params: { 'skill-id': manifestContext.skillId }
+    logChannel: logger
   }
-
-loadIspData = (context, manifestContext) ->
-  logger.log "fetching isps from SMAPI"
-  callSMAPI context, 'list-isp-for-skill', {
-    'skill-id': manifestContext.skillId
-    'stage': 'development'
-  }
-  .then (data) ->
-    context.isps = {}
-    for isp in JSON.parse(data)
-      context.isps[isp.referenceName] = isp
-  .catch (err) ->
-    console.log "HERE"
-    unless err.code == 'ENOENT'
-      # ENOENT just means there is no ISP data on the server, that's fine
-      throw err
-    context.isps = {}
-
-createOrUpdateIspData = (context, manifestContext) ->
-
-  ispsPath = path.join context.projectRoot, 'isps'
-
-  unless fs.existsSync ispsPath
-    logger.log "no isp directory found at #{ispsPath}, skipping monetization upload"
-    return Promise.resolve()
-
-  logger.log "reconciling isp data from #{ispsPath}..."
-
-  localIsps = []
-  if fs.existsSync(ispsPath)
-    for f in fs.readdirSync(ispsPath) when fs.lstatSync(path.join(ispsPath, f)).isFile()
-      localIsp = {}
-      localIsp.filePath = path.join(ispsPath, f)
-      localIsp.data = JSON.parse fs.readFileSync(localIsp.filePath, 'utf8')
-      localIsps.push localIsp
-
-  promises = []
-  monetizationLog = {}
-
-  for localIsp in localIsps
-    remoteIsp = context.isps[localIsp.data.referenceName]
-
-    unless remoteIsp?
-
-      # create product if does not exist
-      promises.push new Promise (resolve, reject) ->
-        referenceName = localIsp.data.referenceName
-        logger.log "Creating isp #{referenceName} from #{localIsp.filePath}"
-        callSMAPI context, 'create-isp', {
-         'file': localIsp.filePath
-        }
-        .then (data) ->
-          productId = data.substring(data.search("amzn1"), data.search(" based"))
-          monetizationLog[referenceName] = {
-            'action': 'created'
-            'productId': productId
-          }
-          logger.log "Created isp from #{localIsp.filePath}"
-          Promise.resolve productId
-        .then (productId) ->
-          logger.log "Linking isp #{referenceName} to the skill #{manifestContext.skillId}"
-          callSMAPI context, 'associate-isp', {
-            'isp-id': productId
-            'skill-id': manifestContext.skillId
-          }
-          .then (data) ->
-            resolve()
-
-    else
-
-      # update existing product
-      promises.push new Promise (resolve, reject) ->
-        referenceName = localIsp.data.referenceName
-        productId = remoteIsp.productId
-        remoteIsp.action = "updating"
-
-        logger.log "Updating isp #{referenceName} from #{localIsp.filePath}"
-        callSMAPI context, 'update-isp', {
-          'isp-id': productId
-          'file': localIsp.filePath
-          'stage': 'development'
-        }
-        .then (data) ->
-          logger.log data
-          monetizationLog[referenceName] = {
-            'action': 'modified'
-            'productId': productId
-          }
-          resolve()
-
-
-  for k, v of context.isps
-    unless v.action?
-
-      # delete product if local file does not exist
-      promises.push new Promise (resolve, reject) ->
-        v.action = "deleting"
-        referenceName = v.referenceName
-        productId = v.productId
-        logger.log "Unlinking and Deleting isp #{referenceName}"
-        callSMAPI context, 'disassociate-isp', {
-          'isp-id': productId
-          'skill-id': manifestContext.skillId
-        }
-        .then (data) ->
-          logger.log data
-        .then (data) ->
-          callSMAPI context, 'delete-isp', {
-            'isp-id': productId
-            'stage': 'development'
-          }
-          .then (data) ->
-            logger.log data
-            monetizationLog[referenceName] = {
-              'action': 'deleted'
-              'productId': productId
-            }
-            resolve()
-
-  Promise.all promises
-  .then () ->
-    context.artifacts.save "monetization", monetizationLog
-    Promise.resolve()

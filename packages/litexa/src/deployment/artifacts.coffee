@@ -9,7 +9,7 @@
  * See the Agreement for the specific terms and conditions of the Agreement. Capitalized
  * terms not defined in this file have the meanings given to them in the Agreement.
  * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 
+
 ###
 
 
@@ -46,7 +46,8 @@ class Artifacts
     @flush()
 
   flush: ->
-    fs.writeFileSync @filename, JSON.stringify(@data, null, 2), 'utf8'
+    if @filename
+      fs.writeFileSync @filename, JSON.stringify(@data, null, 2), 'utf8'
 
   get: (key) ->
     unless @variantInfo?
@@ -67,4 +68,4 @@ exports.loadArtifacts = (context, logger) ->
     context.artifacts = new Artifacts filename, JSON.parse(data)
     context.artifacts.setVariant context.projectInfo.variant
 
-    logger.log "loaded artifacts.json"
+    logger.verbose "loaded artifacts.json"

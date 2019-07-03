@@ -9,7 +9,7 @@
  * See the Agreement for the specific terms and conditions of the Agreement. Capitalized
  * terms not defined in this file have the meanings given to them in the Agreement.
  * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 
+
 ###
 
 
@@ -19,4 +19,4 @@ preamble = require '../preamble.coffee'
 
 describe 'supports the gadgets API', ->
   it 'runs the gadgets-api integration test', ->
-    preamble.runSkill 'apl'
+    preamble.runSkill 'gadgets'

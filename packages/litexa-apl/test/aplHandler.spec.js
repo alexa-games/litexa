@@ -41,15 +41,15 @@ global.litexa = {
 
 describe('aplHandler', function() {
   let handler = undefined;
-  let warnSpy = undefined;
+  let warnStub = undefined;
 
   beforeEach(function() {
-    warnSpy = stub(logger, 'warn');
+    warnStub = stub(logger, 'warn');
     handler = aplHandler(context);
   });
 
   afterEach(function() {
-    warnSpy.restore();
+    warnStub.restore();
   });
 
   it('returns userFacing.isEnabled()', function() {
@@ -159,7 +159,7 @@ describe('aplHandler', function() {
     expect(context.say).to.deep.equal(['Speech1', 'Speech2', 'Speech3']);
 
     const expectedWarning = "say|soundEffects will play through outputSpeech BEFORE the APL command";
-    assert(warnSpy.calledWith(match(expectedWarning)), `Expected warning not logged: ${expectedWarning}`);
+    assert(warnStub.calledWith(match(expectedWarning)), `Expected warning not logged: ${expectedWarning}`);
   });
 
   it('removes conflicting Display.RenderTemplate directives in beforeFinalResponse()', function() {
@@ -207,8 +207,8 @@ describe('aplHandler', function() {
       ]
     });
 
-    expect(warnSpy.callCount).to.equal(2);
+    expect(warnStub.callCount).to.equal(2);
     const expectedWarning = "Found a Display.RenderTemplate directive alongside an APL directive!";
-    assert(warnSpy.alwaysCalledWith(match(expectedWarning)), `Expected warning not logged: ${expectedWarning}`);
+    assert(warnStub.alwaysCalledWith(match(expectedWarning)), `Expected warning not logged: ${expectedWarning}`);
   });
 });

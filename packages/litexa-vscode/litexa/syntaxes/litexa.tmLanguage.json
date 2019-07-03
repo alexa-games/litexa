@@ -3,6 +3,9 @@
 	"name": "Litexa",
 	"patterns": [
 		{
+			"include": "#regular_expressions"
+		},
+		{
 			"include": "#comment"
 		},
 		{
@@ -37,6 +40,14 @@
 		}
 	],
 	"repository": {
+		"regular_expressions": {
+			"patterns": [
+				{
+					"name": "string.regexp.litexa",
+					"match": "\/([a-zA-Z0-9|*+()='<>!:?., ]|-|\\\\|\\\/|(\\[wWdDsSbBtnr*+.?]))+\/[gi]*"
+				}
+			]
+		},
 		"variable": {
 			"patterns": [
 				{
@@ -91,7 +102,7 @@
 			"patterns": [
 				{
 					"name": "keyword.control.litexa",
-					"match": "\\b(END|LISTEN|card|screen|if|else|otherwise|with|local|wait|reprompt|directive|InputHandler|inputHandlerEvent|stopMusic|metric|stopInputHandler|soundEffect|unless|say|or|when|switch|then|log|for|in)\\b"
+					"match": "\\b(END|LISTEN|card|screen|if|else|otherwise|with|local|wait|reprompt|directive|InputHandler|inputHandlerEvent|stopMusic|metric|stopInputHandler|soundEffect|unless|say|or|when|switch|match|then|log|for|in)\\b"
 				},
 				{
 					"name": "markup.quote.say.litexa",

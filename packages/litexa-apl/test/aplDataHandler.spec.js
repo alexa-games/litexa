@@ -23,23 +23,23 @@ dataHandler.init({
 });
 
 describe('aplDataHandler', function() {
-  let errorSpy = undefined;
+  let errorStub = undefined;
   const errorPrefix = "This expected error wasn't logged: ";
 
   beforeEach(function() {
-    errorSpy = stub(logger, 'error');
+    errorStub = stub(logger, 'error');
     dataHandler.data = {};
   });
 
   afterEach(function() {
-    errorSpy.restore();
+    errorStub.restore();
   });
 
   it('rejects non-object and empty data', function() {
     let data = 'string';
     dataHandler.addData(data);
     const expectedError = `Tried adding a non-object or an array of type '${typeof data}'`;
-    assert(errorSpy.calledWith(match(expectedError)), `${errorPrefix}${expectedError}`);
+    assert(errorStub.calledWith(match(expectedError)), `${errorPrefix}${expectedError}`);
 
     data = {};
     dataHandler.addData(data);
