@@ -1,6 +1,6 @@
 {
   "name": "@litexa/integration-tests",
-  "version": "0.1.4",
+  "version": "0.1.6",
   "description": "Integration tests for the packages.",
   "scripts": {
     "build": "npm run clean && npm install",

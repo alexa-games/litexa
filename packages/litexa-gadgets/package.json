@@ -1,6 +1,6 @@
 {
   "name": "@litexa/gadgets",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "This module adds support for the Alexa Input Handlers and Set Light directives, parts of the Alexa Gadgets API. See [Alexa Gadgets] for  more information.",
   "scripts": {
     "build": "npm run clean && npm install",
