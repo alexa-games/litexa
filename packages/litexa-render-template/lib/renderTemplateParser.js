@@ -28,7 +28,7 @@ module.exports = function(lib) {
         attributes: this.attributes
       });
 
-      output.push(`context.screen = ${screenString}`);
+      output.push(`${indent}context.screen = ${screenString}`);
     }
 
     this.pushAttribute = function(location, key, value) {

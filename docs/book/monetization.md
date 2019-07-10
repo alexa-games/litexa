@@ -151,34 +151,45 @@ when AMAZON.NextIntent
 ```
 
 Also, don't mention products already owned by the user, by using `inSkillProductBought`.
-
 :::
 
 2. Example of handling a request for a specific product:
 
 ```coffeescript
-when "buy $product"
-  or "purchase $product"
-  or "give me $product"
-  with $product = MyPremiumProduct # or a slot builder of all your product names
+when "buy MyPremiumProduct"
+  or "purchase MyPremiumProduct"
+  or "give me MyPremiumProduct"
 
-  if inSkillProductBought($product)
-    say "It looks like you've already bought $product!"
+  if inSkillProductBought(context, "MyPremiumProduct")
+    say "It looks like you've already bought MyPremiumProduct!"
   else
-    buyInSkillProduct $product
-
+    buyInSkillProduct "MyPremiumProduct"
 ```
 
 :::tip buyInSkillProduct
 The above `buyInSkillProduct` statement automatically generates a purchase directive for the product
 indicated by its reference name. Doing so will initiate a purchase flow outside of your skill
-(temporarily exiting it). Once the purchase flow has finished, your skill will be relaunched.
+(temporarily exiting it), during which the purchasePromptDescription and price for the indicated
+product are shared with the user, allowing them to purchase the product.
 
 If necessary, you should take note of your user's progress in the skill before initiating a
 purchase, so you can gracefully resume the skill upon relaunch. For example, if you want to
 directly pick up from the state the user was in, you could save that state's name to a database
 variable and then add the necessary redirection logic to your `launch` state.
 :::
+
+An alternative to using `buyInSkillProduct` is the `upsellInSkillProduct` statement. The main
+difference between the two is that `upsellInSkillProduct` will first prompt the user with a
+specified upsell message, which should be formulated as a Yes/No question, as seen below:
+
+```coffeescript
+upsellInSkillProduct "MyPremiumProduct"
+  message: "A premium product is available. Would you like to learn more?"
+```
+
+If the user answers "Yes", the flow would proceed to present the same product prompt/price as
+`buyInSkillProduct`. If the user answers "No", the upsell flow would silently abort and relaunch
+the skill.
 
 ### Step 5: Support refund/cancellation
 
@@ -193,15 +204,14 @@ when "cancel purchase"
   # Ideally remind user of what they've purchased.
   say "Please specify which product you'd like to cancel."
 
-when "refund $product"
-  or "I want to return $product"
-  or "I want a refund for $product"
-  with $product = MyPremiumProduct # or a slot builder of all your product names
+when "refund MyPremiumProduct"
+  or "I want to return MyPremiumProduct"
+  or "I want a refund for MyPremiumProduct"
 
-  if inSkillProductBought($product)
-    cancelInSkillProduct $product
+  if inSkillProductBought(context, "MyPremiumProduct")
+    cancelInSkillProduct "MyPremiumProduct"
   else
-    say "It doesn't look like you currently own $product."
+    say "It doesn't look like you currently own MyPremiumProduct."
 ```
 
 :::tip cancelInSkillProduct
@@ -235,12 +245,17 @@ global
   when Connections.Response "Buy"    # handles return from buyInSkillProduct
     switch $purchaseResult
       == "ACCEPTED" then
-        say "You now own $referenceName!"
+        say "You now own {$newProduct.name}!"
       == "DECLINED" then
         # ...
       == "ALREADY_PURCHASED"  then
         # ...
       == "ERROR" then
+        # ...
+
+  when Connections.Response "Upsell" # handles return from upsellInSkillProduct
+    switch $purchaseResult
+      == "ACCEPTED" then
         # ...
 
   when Connections.Response "Cancel" # handles return from cancelInSkillProduct
@@ -249,11 +264,31 @@ global
         # ...
 ```
 
-:::tip $purchaseResult, $referenceName
-As seen in the above example, using a `when Connections.Response "Buy"|"Cancel"` listener
-will automatically create two shorthand [$](/reference/#variable-2) variables with the purchase
-result and the relevant product's reference name! These can then be handled in whichever way is
-required.
+:::tip $purchaseResult, $newProduct
+As seen in the above example, using a `when Connections.Response "Buy"|"Cancel"|"Upsell"` listener
+will automatically create two shorthand [$ variables](/reference/#variable-2) with the purchase
+result and the relevant product! These can then be handled in whichever way is required.
+`$newProduct` will have the following structure:
+
+```json
+{
+
+  "productId": "amzn1.adg.product.myProductsProductId",
+  "referenceName": "myProductsReferenceName",
+  "type": "ENTITLEMENT",
+  "name": "My Product Name",
+  "summary": "My product's summary.",
+  "entitled": "NOT_ENTITLED",
+  "entitlementReason": "NOT_PURCHASED",
+  "purchasable": "PURCHASABLE",
+  "activeEntitlementCount": 0,
+  "purchaseMode": "TEST"
+}
+```
+
+Further details on this product summary can be found in the
+[ASK InSkillProduct documentation](https://developer.amazon.com/docs/in-skill-purchase/in-skill-product-service.html#inskillproduct).
+
 :::
 
 ### Step 7: Handle bought products
@@ -263,19 +298,31 @@ user. This is done with the `inSkillProductBought` function:
 
 ```coffeescript
 startGame
-  if inSkillProductBought("MyPremiumProduct")
+  if inSkillProductBought(context, "MyPremiumProduct")
     say "Would you like to play the standard or premium edition?"
     # ...
   else
-    say "Would you like to play the free standard edition, or are you interested in purchasing the premium edition?"
+    say "Would you like to play the free standard edition, or
+      are you interested in purchasing the premium edition?"
     # ...
 ```
 
 ### Step 8: Testing ISP
 
 It is possible to test purchasing during skill development, without accruing any purchase charges.
-For instructions on how to do so, and how to reset existing entitlements, please refer to the
+For instructions on how to do so, and on how to reset existing entitlements through the ASK
+Developer Console, please refer to the
 [ISP Test Guide](https://developer.amazon.com/docs/in-skill-purchase/isp-test-guide.html).
+
+:::tip Litexa reset shortcut
+Resetting all test purchases for a skill in development can also be achieved with the following
+CLI command:
+
+```bash
+litexa reset isp
+```
+
+:::
 
 ### Step 9: Certifying your ISP skill
 

@@ -66,6 +66,7 @@ module.exports = {
           '/book/project-structure',
           '/book/testing',
           '/book/deployment',
+          '/book/extensions',
           '/book/backdoor',
           '/book/appendix-aws-permissions',
           '/book/appendix-default-aws-settings',

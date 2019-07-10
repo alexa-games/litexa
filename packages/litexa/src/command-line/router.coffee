@@ -322,6 +322,27 @@ module.exports.run = ->
         else
           console.error chalk.red("unknown data type '#{data}'. Currently supported data: isp")
 
+  program
+    .command 'reset [data]'
+    .description "resets specified data from local to the hosted skill via SMAPI. Currently
+      supports: isp (resets all in-skill products for testing)"
+    .option '-s --stage [stage]', "stage for which to reset skill data (either development or live)", 'development'
+    .action (data, cmd) ->
+      options =
+        root: root
+        stage: cmd.stage
+        verbose: cmd.parent.verbose
+
+      switch data
+        when 'isp'
+          try
+            await isp.init options
+            await isp.resetRemoteProductEntitlements()
+          catch err
+            console.error chalk.red("failed to reset in-skill product entitlements")
+        else
+          console.error chalk.red("unknown data type '#{data}'. Currently supported data: isp")
+
   program.on 'command:*', ->
     console.error """Invalid command: #{program.args.join(' ')}
       See --help for a list of available commands."""

@@ -17,39 +17,36 @@ lib = module.exports.lib = {}
 
 { ParserError } = require('./errors.coffee').lib
 { AssetName } = require('./assets.coffee').lib
-
-trimLineBreaks = (str, breakCharacter) ->
-  return "" unless str?
-  str.replace(/\n/g, breakCharacter)
-
+{ replaceNewlineCharacters, isEmptyContentString, isFirstOrLastItemOfArray, dedupeNonNewlineConsecutiveWhitespaces,
+cleanTrailingSpaces, cleanLeadingSpaces } = require('./utils.coffee').lib
 
 class lib.StringPart
   constructor: (text) ->
-    # markdown like line breaks:
-    #   line breaks are eliminated, a minimum space is introduced between lines
-    #   empty lines are considered a line break
-    split = text.split '\n'
-    lines = []
-    for l, idx in split
-      switch idx
-        when 0
-          l = l.replace /[ \t]+^/, ''
-        when lines.length - 1
-          l = l.replace /$[ \t]+/, ''
-        else
-          l = l.trim()
-      if l.length == 0
-        lines.push '\n' unless ( idx == 0 ) || ( idx == split.length - 1 )
-      else
-        lines.push l
+    # Whitespace and line break rules:
+    #   line breaks are converted to whitespaces
+    #   empty (or whitespace-only) lines are considered a line break
+    #   consecutive whitespaces are condensed to a single whitespace
+    splitLines = text.split('\n')
+    lines = splitLines.map((str, idx) ->
+      return '\n' if isEmptyContentString(str) and !isFirstOrLastItemOfArray(idx, splitLines)
+      return str.trim() unless isFirstOrLastItemOfArray(idx, splitLines)
+      return dedupeNonNewlineConsecutiveWhitespaces(str)
+    )
+
     @tagClosePos = null
-    if lines[0] and split.length > 1
+    if lines.length > 1
       @tagClosePos = lines[0].length + 1
       if lines[0] == '\n'
         @tagClosePos += 1
     @text = lines.join(' ')
-    @text = @text.replace /(\n[ \t]+)/g, '\n'
-    @text = @text.replace /([ \t]+\n)/g, '\n'
+    transformations = [
+      cleanTrailingSpaces,
+      cleanLeadingSpaces,
+      dedupeNonNewlineConsecutiveWhitespaces
+    ]
+    transformations.forEach((transformation) =>
+      @text = transformation(@text)
+    )
 
   toString: -> return @text
   toUtterance: -> return @text
@@ -57,18 +54,17 @@ class lib.StringPart
     # escape quotes
     str = @text.replace(/"/g, '\"')
     # escape line breaks
-    str = trimLineBreaks(str, '\\n')
+    str = replaceNewlineCharacters(str, '\\n')
     return '"' + str + '"'
   express: (context) ->
-    str = trimLineBreaks(@text, '\n')
-    return str
+    return @text
   toRegex: ->
     str = @text
     # escape regex control characters
     str = str.replace( /\?/g, '\\?' )
     str = str.replace( /\./g, '\\.' )
     # mirror the line break handling for the lambda
-    str = trimLineBreaks(str, '\\n')
+    str = replaceNewlineCharacters(str, '\\n')
     "(#{str})"
   toTestRegex: -> @toRegex()
   toTestScore: -> return 10

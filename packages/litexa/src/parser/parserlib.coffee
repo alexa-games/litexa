@@ -9,7 +9,7 @@
  * See the Agreement for the specific terms and conditions of the Agreement. Capitalized
  * terms not defined in this file have the meanings given to them in the Agreement.
  * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 
+
 ###
 
 
@@ -25,7 +25,6 @@ resetLib = ->
     for name, part of required.lib
       lib[name] = part
 
-
   mergeLib require("./errors.coffee")
   mergeLib require("./jsonValidator.coffee")
   mergeLib require("./dataTable.coffee")
@@ -39,6 +38,9 @@ resetLib = ->
   mergeLib require("./intent.coffee")
   mergeLib require("./state.coffee")
   mergeLib require("./monetization.coffee")
+
+  # reset the static index of all utterances
+  lib.Intent.unregisterUtterances()
 
 resetLib()
 

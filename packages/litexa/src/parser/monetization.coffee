@@ -20,7 +20,7 @@ class lib.BuyInSkillProductStatement
     @referenceName = referenceName
 
   toLambda: (output, indent, options) ->
-    # TODO: add warning if context.directives is not empty
+    # @TODO: add warning if context.directives is not empty
     # purchase directive must be the only directive in the response
     output.push "#{indent}buildBuyInSkillProductDirective(context, \"#{@referenceName}\");"
 
@@ -29,6 +29,25 @@ class lib.CancelInSkillProductStatement
     @referenceName = referenceName
 
   toLambda: (output, indent, options) ->
-    # TODO: add warning if context.directives is not empty
+    # @TODO: add warning if context.directives is not empty
     # purchase directive must be the only directive in the response
     output.push "#{indent}buildCancelInSkillProductDirective(context, \"#{@referenceName}\");"
+
+
+class lib.UpsellInSkillProductStatement
+  constructor: (referenceName) ->
+    @referenceName = referenceName
+    @attributes = { message: '' }
+
+  toLambda: (output, indent, options) ->
+    # @TODO: add warning if context.directives is not empty
+    # purchase directive must be the only directive in the response
+    output.push "#{indent}buildUpsellInSkillProductDirective(context, \"#{@referenceName}\", \"#{@attributes.message}\");"
+
+  pushAttribute: (location, key, value) ->
+    supportedKeys = [ 'message' ]
+
+    unless key in supportedKeys
+      throw new lib.ParserError(location, "Attribute '#{key}' not supported > supported keys are: #{JSON.stringify(supportedKeys)}")
+
+    @attributes[key] = value

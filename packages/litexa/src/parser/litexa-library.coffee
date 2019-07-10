@@ -354,6 +354,14 @@ getProductByReferenceName = (stateContext, referenceName) ->
       return p
   return null
 
+getProductByProductId = (stateContext, productId) ->
+  if stateContext.monetization.fetchEntitlements
+    await fetchEntitlements stateContext
+
+  for p in stateContext.monetization.inSkillProducts
+    if p.productId == productId
+      return p
+
 buildBuyInSkillProductDirective = (stateContext, referenceName) ->
   isp = await getProductByReferenceName stateContext, referenceName
   unless isp?
@@ -385,10 +393,13 @@ fetchEntitlements = (stateContext, ignoreCache = false) ->
       console.log "skipping fetchEntitlements, no https present"
       reject()
 
+    unless stateContext.event.context.System.apiAccessToken
+      # If there's no API access token, this is an offline test.
+      resolve()
+
     apiEndpoint = "api.amazonalexa.com"
     apiPath = "/v1/users/~current/skills/~current/inSkillProducts"
     token = "bearer " + stateContext.event.context.System.apiAccessToken
-    language = "en-US"
 
     options =
       host: apiEndpoint
@@ -396,7 +407,7 @@ fetchEntitlements = (stateContext, ignoreCache = false) ->
       method: 'GET'
       headers:
         "Content-Type": 'application/json'
-        "Accept-Language": language
+        "Accept-Language": stateContext.request.locale
         "Authorization": token
 
     req = https.get options, (res) =>
@@ -412,7 +423,6 @@ fetchEntitlements = (stateContext, ignoreCache = false) ->
       res.on 'end', () =>
         stateContext.monetization.inSkillProducts = JSON.parse(returnData).inSkillProducts
         stateContext.monetization.fetchEntitlements = false
-        # console.log("fetchEntitlements " + JSON.stringify(stateContext.monetization))
         stateContext.db.write "__monetization", stateContext.monetization
         resolve()
 
@@ -440,6 +450,27 @@ buildCancelInSkillProductDirective = (stateContext, referenceName) =>
         "InSkillProduct": {
           "productId": isp.productId
         }
+      }
+      "token": "bearer " + stateContext.event.context.System.apiAccessToken
+    }
+
+  stateContext.shouldEndSession = true
+
+buildUpsellInSkillProductDirective = (stateContext, referenceName, upsellMessage = '') =>
+  isp = await getProductByReferenceName(stateContext, referenceName)
+  unless isp?
+    console.log "buildUpsellInSkillProductDirective(): in-skill product \"#{referenceName}\" not
+      found."
+    return
+
+  stateContext.directives.push {
+      "type": "Connections.SendRequest"
+      "name": "Upsell"
+      "payload": {
+        "InSkillProduct": {
+          "productId": isp.productId
+        }
+        "upsellMessage": upsellMessage
       }
       "token": "bearer " + stateContext.event.context.System.apiAccessToken
     }

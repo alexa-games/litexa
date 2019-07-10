@@ -70,8 +70,8 @@ class lib.Skill
     # cache these to customize the handler
     @extendedEventNames = {}
     for extensionName, extensionInfo of @projectInfo.extensions
-      continue unless extensionInfo.compiler?.validIntentNames?
-      for eventName in extensionInfo.compiler?.validIntentNames
+      continue unless extensionInfo.compiler?.validEventNames?
+      for eventName in extensionInfo.compiler?.validEventNames
         @extendedEventNames[eventName] = true
     @extendedEventNames = ( e for e of @extendedEventNames )
 
@@ -257,7 +257,6 @@ class lib.Skill
       state.location = location
     return state
 
-
   pushIntent: (state, location, utterance, intentInfo) ->
     # scan for duplicates, we'll merge if we see them
     intent = state.pushOrGetIntent(location, utterance, intentInfo)
@@ -294,7 +293,6 @@ class lib.Skill
         previously defined type #{old.type}"
 
     @dbTypes[definition.name] = definition
-
 
   refreshAllFiles: ->
     litexaDirty = false

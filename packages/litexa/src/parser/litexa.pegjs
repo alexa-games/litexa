@@ -312,6 +312,7 @@ StateStatements
   /* MONETIZATION */
   / BuyInSkillProductStatement
   / CancelInSkillProductStatement
+  / UpsellInSkillProductStatement
 
 
 TestStatements
@@ -668,12 +669,12 @@ eligible as long as the expression resolve to a truthy value.
 ```coffeescript
 local someNumber = getNumber()
 switch
-  someNumber % 2 == 0 then
-    say "Your number is even!"
-  someNumber % 2 == 1 then
-    say "Your number is odd!"
+  someNumber * 2 == 10 then
+    say "Your number is 5!"
+  someNumber / 2 == 5 then
+    say "Your number is 10!"
   else
-    say "I'm not sure that's a number..."
+    say "Your number is neither 5 nor 10."
 ```
 
 */
@@ -1556,9 +1557,9 @@ The above would send the following directive:
   "type": "Connections.SendRequest",
   "name": "Buy",
   "payload": {
-      "InSkillProduct": {
-        "productId": "<MyProduct's productId>",
-      }
+    "InSkillProduct": {
+      "productId": "<MyProduct's productId>",
+    }
   },
   "token": "<apiAccessToken>"
 }
@@ -1587,9 +1588,9 @@ The above would send the following directive:
   "type": "Connections.SendRequest",
   "name": "Cancel",
   "payload": {
-      "InSkillProduct": {
-        "productId": "<MyProduct's productId>",
-      }
+    "InSkillProduct": {
+      "productId": "<MyProduct's productId>",
+    }
   },
   "token": "<apiAccessToken>"
 }
@@ -1598,6 +1599,41 @@ The above would send the following directive:
 CancelInSkillProductStatement
   = "cancelInSkillProduct" __ referenceName:QuotedString {
     pushCode(location(), new lib.CancelInSkillProductStatement(referenceName));
+  }
+
+/* litexa [upsellInSkillProduct]
+Requires a case sensitive in-skill product reference name as an argument, where
+the product must exist and be linked to the skill. Supports an upsell `message` string, to be
+communicated to the user prior to prompting a purchase (should be a Yes/No question).
+
+If the specified product exists, this sends an upsell directive *and* sets `shouldEndSession` to
+true for the pending response (required for a Connections.Response handoff directive).
+
+```coffeescript
+upsellInSkillProduct "MyProduct"
+  message: "My product's upsell message. Would you like to learn more?"
+```
+
+The above would send the following directive:
+
+```json
+{
+  "type": "Connections.SendRequest",
+  "name": "Upsell",
+  "payload": {
+    "InSkillProduct": {
+      "productId": "<MyProduct's productId>",
+    },
+    "upsellMessage": "My product's upsell message. Would you like to learn more?"
+  },
+  "token": "<apiAccessToken>"
+}
+```
+*/
+UpsellInSkillProductStatement
+  = "upsellInSkillProduct" __ referenceName:QuotedString {
+    // @TODO: pushSay is currently required for attributes: Why?!
+    pushSay(location(), new lib.UpsellInSkillProductStatement(referenceName));
   }
 
 

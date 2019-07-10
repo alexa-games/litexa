@@ -32,7 +32,9 @@ Note: if you are installing from the source monorepo, then you
 can use a local reference for installing instead. Switch to
 the litexa directory, then run:
 
-    npm install ./ -g
+```bash
+npm install ./ -g
+```
 
 Additional components of Litexa are provided as
 separate extension modules, with the intention that each
