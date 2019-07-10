@@ -27,7 +27,7 @@ module.exports = function(options, lib) {
           // no manifest requirements
         }
       },
-      validIntentNames: [
+      validEventNames: [
         'Alexa.Presentation.APL.UserEvent'
       ]
     },

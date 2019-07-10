@@ -25,7 +25,7 @@ module.exports = function(options, lib) {
           // no manifest requirements
         }
       },
-      validIntentNames: [
+      validEventNames: [
         'Display.ElementSelected' // triggered by touching ListTemplate items
       ]
     },

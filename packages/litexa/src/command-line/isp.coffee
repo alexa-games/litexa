@@ -92,6 +92,32 @@ module.exports =
         # ENOENT just meant there was no ISP data on the server -> ignore
         resolve([])
 
+  resetRemoteProductEntitlements: () ->
+    if @stage == 'live'
+      @logger.error "unable to modify remote in-skill products in 'live' stage -> please use 'development'"
+      return
+
+    remoteProducts = await @pullRemoteProductSummaries()
+    resetPromises = []
+
+    for remoteProduct in remoteProducts
+      resetPromises.push(
+        @smapi.call {
+          @askProfile
+          command: 'reset-isp-entitlement'
+          params: {
+            'isp-id': remoteProduct.productId
+          }
+        }
+      )
+
+    @logger.log "resetting in-skill product entitlements for skill ID '#{@skillId}' ..."
+
+    Promise.all(resetPromises)
+    .catch (err) =>
+      @logger.error "failed to call reset-isp-entitlement with error: #{err.message}"
+      Promise.reject(err)
+
   storeProductDefinitions: (products) ->
     return new Promise (resolve, reject) =>
       unless Array.isArray(products)
@@ -135,14 +161,14 @@ module.exports =
         reject(err)
 
   pushLocalProducts: () ->
+    if @stage == 'live'
+      @logger.error "unable to modify remote in-skill products in 'live' stage -> please use 'development'"
+      return
+
     localProducts = await @readLocalProducts()
     remoteProducts = await @pullRemoteProductSummaries()
 
     artifactSummary = {}
-
-    if @stage == 'live'
-      @logger.error "unable to modify remote in-skill products in 'live' stage -> please use 'development'"
-      return
 
     for product in localProducts
       if @listContainsProduct(remoteProducts, product)

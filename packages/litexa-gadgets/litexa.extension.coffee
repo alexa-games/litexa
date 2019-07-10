@@ -100,7 +100,7 @@ module.exports = (options, lib) ->
     """
 
   compiler =
-    validIntentNames: [
+    validEventNames: [
       'GameEngine.InputHandlerEvent'
     ]
     validators:

@@ -101,7 +101,7 @@ compilerStuff =
   # statements to accept these without complaint. Note, you
   # do NOT have to list names you intend to handle but not
   # expose to authors, e.g. CONNECTION.Response
-  validIntentNames: [
+  validEventNames: [
     'NAMESPACE.OtherIntent'
   ]
 
@@ -224,7 +224,7 @@ RuntimeFeature = (context) ->
       beforeFinalResponse: (response) ->
 
     # a list of additional requests that should be routed to "when"
-    # statements. This list is merged at runtime with the validIntentNames
+    # statements. This list is merged at runtime with the validEventNames
     # above. Note: you don't have to repeat those names here, and you
     # don't need to list every request type you intend to handle as
     # user facing up there.
