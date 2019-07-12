@@ -66,11 +66,12 @@ describe 'construct and deploy artifacts for manifest', ->
         toModelV2: -> undefined
     sampleArtifacts =
       lambdaARN: "dummyLambdaARN"
-      'required-assets':
-        'icon-108.png':
-          'url': 'dummyUrl'
-        'icon-512.png':
-          'url': 'dummyUrl'
+      'deployedIconAssets':
+        'default':
+          'icon-108.png':
+            'url': 'dummyUrl'
+          'icon-512.png':
+            'url': 'dummyUrl'
     errorThrown = false
     mkdirp.sync '.manifest-test'
     mkdirp.sync context.deployRoot
