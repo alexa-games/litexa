@@ -2,11 +2,10 @@
   "name": "lexical-scoping-integration-test",
   "version": "0.0.1",
   "description": "Test project to validate various scoping support in Litexa",
-  "main": "",
   "dependencies": {
     "logger": "file:../externals/logger"
   },
   "scripts": {},
-  "author": "Amazon.com",
+  "author": "Amazon",
   "license": "Apache-2.0"
 }

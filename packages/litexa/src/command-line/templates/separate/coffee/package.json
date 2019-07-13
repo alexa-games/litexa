@@ -1,7 +1,6 @@
 {
   "name": "{name}-lib",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "clean": "npx rimraf node_modules index.js **/*.js && npm install",
@@ -12,7 +11,7 @@
     "test:file:debug": "npx mocha debug --opts mocha.opts",
     "test:watch": "npx mocha --opts mocha.opts './{,!(node_modules)/**}/*.spec.coffee' --watch"
   },
-  "author": "",
+  "author": "Amazon",
   "license": "ISC",
   "devDependencies": {
     "chai": "4.2.0",

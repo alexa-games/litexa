@@ -1,14 +1,12 @@
 {
   "name": "wav-extension-integration-test",
   "version": "0.0.1",
-  "description": "",
-  "main": "",
   "dependencies": {
     "@litexa/assets-wav": "file:../../../packages/litexa-assets-wav"
   },
   "scripts": {
     "test": "echo \"Warning: no test specified\" && exit 0"
   },
-  "author": "Amazon.com",
+  "author": "Amazon",
   "license": "Apache-2.0"
 }

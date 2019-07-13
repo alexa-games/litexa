@@ -9,9 +9,8 @@
     "test": "npm run compile && litexa test",
     "test:watch": "npm run compile:watch | litexa test -w"
   },
-  "author": "",
+  "author": "Amazon",
   "license": "ISC",
-  "description": "",
   "devDependencies": {
     "@types/node": "10.12.18",
     "typescript": "3.2.4"

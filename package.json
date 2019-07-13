@@ -1,7 +1,5 @@
 {
   "name": "litexa",
-  "version": "0.0.1",
-  "description": "",
   "directories": {
     "doc": "docs"
   },
@@ -19,8 +17,8 @@
     "release": "npm run build && npm run coverage",
     "test": "npx lerna exec --concurrency 1 npm run test"
   },
-  "author": "Amazon.com",
-  "license": "SEE LICENSE IN LICENSE.TXT",
+  "author": "Amazon",
+  "license": "Apache-2.0",
   "keywords": [
     "Alexa",
     "Skills",
@@ -56,5 +54,5 @@
   },
   "repository": "github:alexa-games/litexa",
   "bugs": "https://github.com/alexa-games/litexa/issues",
-  "homepage": "https://litexa.games.alexa.a2z.com"
+  "homepage": "https://litexa.com"
 }
