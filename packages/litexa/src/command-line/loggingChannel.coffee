@@ -173,4 +173,3 @@ class LoggingChannel
   identity = (x) -> x
 
 module.exports = LoggingChannel
-
