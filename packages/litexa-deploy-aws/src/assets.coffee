@@ -13,6 +13,7 @@
 ###
 
 AWS = require 'aws-sdk'
+configureAWS = require './aws-config'
 
 {
   collectUploadInfo
@@ -28,7 +29,7 @@ module.exports = {
     skill = context.skill
     s3Context = null
 
-    await require('./aws-config')(context, logger, AWS)
+    await configureAWS(context, logger, AWS)
 
     context.assetDeploymentStart = new Date
 

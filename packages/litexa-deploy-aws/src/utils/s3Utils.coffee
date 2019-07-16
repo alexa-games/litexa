@@ -100,8 +100,8 @@ registerFileForUpload = ({ s3Context, fileDir, fileName, language }) ->
     needsUpload: true
   }
 
-  # If we're deploying icon asset files, track them so we can use them
-  # in case the user doesn't specify their own icon URIs in the manifest.
+  # If we're deploying icon asset files, track them so we can use them if the user doesn't
+  # specify their own icon URIs in the manifest.
   iconFileNames = [ 'icon-108.png', 'icon-512.png' ]
   if iconFileNames.includes(fileName)
     s3Context.deployedIconAssets[language] = s3Context.deployedIconAssets[language] ? {}
@@ -111,9 +111,8 @@ registerFileForUpload = ({ s3Context, fileDir, fileName, language }) ->
     }
 
 listBucketAndUploadAssets = ({ s3Context, skillContext, logger, startToken }) ->
-  # start by listing all the object in the bucket
-  # so we get their MD5 hashes, note we might have to
-  # page, so this function is recursive
+  # Start by listing all the objects in the bucket so we get their MD5 hashes.
+  # Note: Since we might have to page, this function is recursive.
   params = {
     Prefix: s3Context.baseLocation
     ContinuationToken: startToken ? undefined
@@ -127,16 +126,15 @@ listBucketAndUploadAssets = ({ s3Context, skillContext, logger, startToken }) ->
 
   skillContext.S3.listObjectsV2(params).promise()
   .then (data) ->
-    # now we can compare each file to upload against
-    # the existing ones and avoid spending time on
-    # redundant uploads
+    # Now we can compare each file to upload against existing uploads, to avoid spending time on
+    # redundant uploads.
     for obj in data.Contents
       continue unless obj.Key of s3Context.assets
       info = s3Context.assets[obj.Key]
       info.s3MD5 = JSON.parse obj.ETag
       info.needsUpload = info.s3MD5 != info.md5
 
-    # if we've paged, then also add the next page step
+    # If we've paged, then also add the next page step.
     if data.IsTruncated
       startToken = data.NextContinuationToken
       listBucketAndUploadAssets { s3Context, skillContext, logger, startToken }
@@ -160,9 +158,8 @@ uploadAssets = ({ s3Context, skillContext, logger }) ->
 
 
 uploadBatch = ({ s3Context, skillContext, logger }) ->
-  # upload in batches to limit connection, open
-  # file handles, and get a better idea of progress
-  # this function recurses until we're done
+  # Upload in batches to limit connection and open file handles, and get a better idea of progress.
+  # This function recurs until we're done.
   if s3Context.uploads.length == 0
     return endUploadAssets { s3Context, skillContext, logger }
 
