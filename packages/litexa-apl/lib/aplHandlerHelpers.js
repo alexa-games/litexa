@@ -37,12 +37,12 @@ module.exports = {
   },
 
   addDocument: function(obj) {
-    obj = this.replaceLocalFileReferences(obj);
+    obj = this.sanitizeAssetReferences(obj);
     documentHandler.addDocument(obj);
   },
 
   addData: function(obj) {
-    obj = this.replaceLocalFileReferences(obj);
+    obj = this.sanitizeAssetReferences(obj);
     dataHandler.addData(obj);
   },
 
@@ -50,20 +50,40 @@ module.exports = {
     commandHandler.addCommands(cmd);
   },
 
-  // This function does a quick and dirty replacement of any "assets://file_name" with the S3 URL of that file_name.
-  replaceLocalFileReferences: function(obj) {
+  // sanitization = clean up local file references + add unique suffixes to URLs
+  sanitizeAssetReferences: function(obj) {
     if (!isEmpty(obj)) {
       let str = JSON.stringify(obj);
-
-      const path = `${litexa.assetsRoot}${this.language}/`
-      const regex = /assets:\/\/([^"]*)/g;
-
-      str = str.replace(regex, `${path}$1`);
+      str = this.replaceLocalAssetReferences(str);
+      str = this.uniquifyAssetUrls(str);
 
       return(JSON.parse(str));
     } else {
       return obj;
     }
+  },
+
+  // This function does a quick and dirty replacement of any "assets://file_name" with the S3 URL
+  // of that file_name.
+  replaceLocalAssetReferences: function(str) {
+    const regex = /assets:\/\/([^"]*)/g;
+    const path = `${litexa.assetsRoot}${this.language}/`;
+
+    return str.replace(regex, `${path}$1`);
+  },
+
+  // This function adds a unique suffix to all all asset URLs, if shouldUniqueURLs is set (during
+  // development). This is done because Alexa otherwise skips re-downloading a file if the same
+  // file name is found in cache (there's no checksum comparison).
+  uniquifyAssetUrls: function(str) {
+    if (this.myData.shouldUniqueURLs === 'true') {
+      // @TODO: Might need to refine this regex to only check supported asset file extensions.
+      const regex = /(\"source\"\:\"[^"]*)/g;
+      const suffix = `#${new Date().getTime()}`;
+
+      str = str.replace(regex, `$1${suffix}`)
+    }
+    return str;
   },
 
   addSpeech: function(speech) {

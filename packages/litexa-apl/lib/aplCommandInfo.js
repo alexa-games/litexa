@@ -18,6 +18,16 @@ const COMMON_COMMAND_PARAMS = [
 ]
 
 const COMMAND_INFO = {
+  // animation commands
+  AnimateItem: [
+    'componentId', // required String; ID of the component to be animated
+    'duration',    // required Integer; duration of the animation (in milliseconds)
+    'value',       // required array of component transformations (opacity, translateX, translateY, rotate)
+    'easing',      // optional String; transformation curve ['linear', 'ease-in', custom] (default: linear)
+    'repeatCount', // optional Integer; number of times the animation will be repeated (default: 0)
+    'repeatMode',  // optional String; how repeated animations will play; one of ['restart', 'reverse'] (default: restart)
+  ],
+
   // Pager commands
   AutoPage: [
     'componentId', // required String; id of component to read

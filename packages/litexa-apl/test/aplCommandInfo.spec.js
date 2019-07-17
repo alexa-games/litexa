@@ -27,6 +27,7 @@ describe('aplCommandInfo', function() {
   it('returns valid command types', function() {
     const commands = commandInfo.getValidCmdTypes();
     const expectedCommandTypes = [
+      'AnimateItem',
       'AutoPage',
       'SetPage',
       'Parallel',
