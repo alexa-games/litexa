@@ -63,7 +63,7 @@ class Artifacts
 
 exports.Artifacts = Artifacts
 
-exports.loadArtifacts = (context, logger) ->
+exports.loadArtifacts = ({ context, logger }) ->
   filename = path.join context.projectRoot, 'artifacts.json'
   readFilePromise filename, 'utf8'
   .catch (err) ->

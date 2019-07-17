@@ -144,6 +144,7 @@ module.exports.run = ->
         watch: cmd.watch
         verbose: cmd.parent.verbose
         cache: cmd.cache
+        coreVersion: packageVersion
       await require('./deploy.coffee').run options
 
   program

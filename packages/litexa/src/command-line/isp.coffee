@@ -47,7 +47,7 @@ module.exports =
       @askProfile = context.deploymentOptions?.askProfile
       @ispDir = path.join skill.projectInfo?.root, 'isp'
 
-      await loadArtifacts context, @logger
+      await loadArtifacts { context, @logger }
       @artifacts = context.artifacts
       @skillId = @artifacts.get 'skillId'
 
