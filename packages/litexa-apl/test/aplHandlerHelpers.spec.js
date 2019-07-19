@@ -10,7 +10,7 @@
  */
 
 const {assert, expect} = require('chai');
-const {match, spy, stub} = require('sinon');
+const {match, spy, stub, useFakeTimers} = require('sinon');
 
 const helpers = require('../lib/aplHandlerHelpers');
 
@@ -21,12 +21,12 @@ global.litexa = {
   assetsRoot: '/mock/litexa/assets/root/'
 };
 
-describe('aplHandlerHelpers', function() {
-  const myTestData = {
-    language: 'de',
-    curSpeechIndex: 0
-  };
+const myTestData = {
+  language: 'de',
+  curSpeechIndex: 0
+};
 
+describe('aplHandlerHelpers', function() {
   let errorStub = undefined;
   let speakSpy = undefined;
 
@@ -214,5 +214,110 @@ describe('aplHandlerHelpers', function() {
       };
       expect(directive).to.deep.equal(expectedDirective);
     });
+  });
+});
+
+describe('sanitizeFileReferences', function() {
+  const now = new Date();
+  let clock = undefined;
+
+  beforeEach(function() {
+    helpers.init({
+      myData: myTestData
+    });
+    helpers.myData.shouldUniqueURLs = 'true';
+
+    // Let's fake the time, since uniquifyAssetUrls() uses Date().getTime() stamps.
+    clock = useFakeTimers(now.getTime());
+  });
+
+  this.afterEach(function() {
+    clock.restore();
+  });
+
+  it('properly sanitizes source URLs and local file references', function() {
+    const mockDocument = {
+      "type": "APL",
+      "version": "1.1",
+      "theme": "dark",
+      "import": [],
+      "mainTemplate": {
+        "parameters": [
+          "payload"
+        ],
+        "items": [
+          {
+            "type": "Container",
+            "width": "100vw",
+            "height": "100vh",
+            "items": [
+              {
+                "type": "Image",
+                "id": "mockImage1",
+                "source": "https://s3.us-east-1.amazonaws.com/filePath.jpg"
+              },
+              {
+                "type": "Container",
+                "items": [
+                  {
+                    "type": "Image",
+                    "id": "mockImage2",
+                    "source": "https://s3.us-east-1.amazonaws.com/filePath.png"
+                  },
+                  {
+                    "type": "Image",
+                    "id": "mockImage3",
+                    "source": "assets://myFile.bmp"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+
+    const expectedSanitizedDocument = {
+      "type": "APL",
+      "version": "1.1",
+      "theme": "dark",
+      "import": [],
+      "mainTemplate": {
+        "parameters": [
+          "payload"
+        ],
+        "items": [
+          {
+            "type": "Container",
+            "width": "100vw",
+            "height": "100vh",
+            "items": [
+              {
+                "type": "Image",
+                "id": "mockImage1",
+                "source": `https://s3.us-east-1.amazonaws.com/filePath.jpg#${clock.now}`
+              },
+              {
+                "type": "Container",
+                "items": [
+                  {
+                    "type": "Image",
+                    "id": "mockImage2",
+                    "source": `https://s3.us-east-1.amazonaws.com/filePath.png#${clock.now}`
+                  },
+                  {
+                    "type": "Image",
+                    "id": "mockImage3",
+                    "source": `/mock/litexa/assets/root/de/myFile.bmp#${clock.now}`
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+
+    expect(helpers.sanitizeAssetReferences(mockDocument)).to.deep.equal(expectedSanitizedDocument);
   });
 });

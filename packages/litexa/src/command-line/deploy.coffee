@@ -90,7 +90,7 @@ module.exports.run = (options) ->
   .then ->
     lastDeploymentInfo = context.artifacts.get 'lastDeployment'
     validateCoreVersion {
-      prevCoreVersion: lastDeploymentInfo.coreVersion
+      prevCoreVersion: lastDeploymentInfo?.coreVersion
       curCoreVersion: options.coreVersion
     }
   .then (proceed) ->
