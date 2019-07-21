@@ -1,16 +1,21 @@
 {
   "name": "@litexa/gadgets",
   "version": "0.1.6",
-  "description": "This module adds support for the Alexa Input Handlers and Set Light directives, parts of the Alexa Gadgets API. See [Alexa Gadgets] for  more information.",
+  "description": "This module adds support for GameEngine, GadgetController, and CustomInterfaceController directives and events.",
   "scripts": {
     "build": "npm run clean && npm install",
     "clean": "npx rimraf node_modules",
-    "coverage": "echo \"Missing coverage script.\" && exit 0"
+    "coverage": "npx nyc npm test && node ../../cacheCoverage.js",
+    "test": "npx mocha \"./test/**/*.spec.js\"",
+    "test:debug": "npx mocha debug \"./test/**/**.spec.js\"",
+    "test:file": "npx mocha",
+    "test:file:debug": "npx mocha debug"
   },
   "author": "Amazon.com",
   "keywords": [
     "Alexa",
     "Skill",
+    "Custom Interface",
     "Echo Buttons",
     "Game Engine",
     "Gadgets",

@@ -41,7 +41,7 @@ describe('aplValidators', function() {
         return obj['ALEXA_PRESENTATION_APL'] = true;
       }
     };
-    aplValidators.model(validator, undefined, mockSkill);
+    aplValidators.model({ validator, skill: mockSkill });
     expect(validator.errors).to.have.members([`When using the APL interface, you must implement the AMAZON.HelpIntent (i.e. have at least one 'when' statement handling the intent).`]);
 
     validator.errors = [];
@@ -51,7 +51,7 @@ describe('aplValidators', function() {
         samples: []
       }
     ];
-    aplValidators.model(validator, undefined, mockSkill);
+    aplValidators.model({ validator, skill: mockSkill });
     expect(validator.errors).to.deep.equal([]);
   });
 

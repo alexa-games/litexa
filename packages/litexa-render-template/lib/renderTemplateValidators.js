@@ -13,7 +13,7 @@ const {isEmpty} = require('./renderTemplateUtils');
 const {TEMPLATE_INFO, VALID_TEMPLATE_TYPES} = require('./renderTemplateInfo');
 
 module.exports = {
-  model: function(validator, manifest, skill) {
+  model: function({ validator, skill }) {
     let requiredAPIs = {};
     skill.collectRequiredAPIs(requiredAPIs);
 

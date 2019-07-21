@@ -94,7 +94,7 @@ The full incoming request, along with session and system information, is availab
   },
   "request": { // REQUEST DATA
     "type": "IntentRequest",
-    "requestId": "litexaRequestId.2f164393-f7c7-410d-8819-eccd49a7f26f",
+    "requestId": "amzn1.echo-api.request.2f164393-f7c7-410d-8819-eccd49a7f26f",
     "timestamp": "2017-10-01T22:02:10.000Z",
     "locale": "en-US",
     "intent": {

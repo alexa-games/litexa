@@ -105,7 +105,7 @@ describe('RenderTemplate HandlerHelpers', function() {
           type: 'RichText'
         }
       };
-      Object.keys(srcAttributes).forEach(function (key) {
+      Object.keys(srcAttributes).forEach(function(key) {
         const val = srcAttributes[key];
         helpers.addText(val, key, helpers.template);
       })
@@ -151,7 +151,7 @@ describe('RenderTemplate HandlerHelpers', function() {
           }
         ]
       };
-      ['image', 'backgroundImage'].forEach(function (type) {
+      ['image', 'backgroundImage'].forEach(function(type) {
         helpers.addImage(expectedImage.sources[0].url, type);
         expect(helpers.template[type]).to.deep.equal(expectedImage);
       });

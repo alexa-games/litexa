@@ -14,7 +14,7 @@ const {TEMPLATE_INFO, VALID_TEMPLATE_TYPES, VALID_DISPLAY_SPEECH_AS_TYPES} = req
 
 module.exports = function(lib) {
 
-  return function (title = '', background = undefined) {
+  return function(title = '', background = undefined) {
     this.attributes = {
       template: 'BodyTemplate1',
       title: title,

@@ -296,20 +296,20 @@ buildSkillManifest = (context, manifestContext) ->
   # dependencies they want to assert
   for extensionName, extension of context.projectInfo.extensions
     validator = new JSONValidator manifest
-    extension.compiler?.validators?.manifest validator, context.skill
+    extension.compiler?.validators?.manifest { validator, skill: context.skill }
     if validator.errors.length > 0
       logger.error e for e in validator.errors
-      throw new Error "Errors encountered with the manifest, cannot continue."
+      throw "Errors encountered with the manifest, cannot continue."
 
   # now that we have the manifest, we can also validate the models
   for region of manifest.manifest.publishingInformation.locales
     model = context.skill.toModelV2(region)
     validator = new JSONValidator model
     for extensionName, extension of context.projectInfo.extensions
-      extension.compiler?.validators?.model validator, manifest, context.skill
+      extension.compiler?.validators?.model { validator, skill: context.skill }
       if validator.errors.length > 0
         logger.error e for e in validator.errors
-        throw new Error "Errors encountered with model in #{region} language, cannot continue"
+        throw "Errors encountered with model in #{region} language, cannot continue"
 
   manifestContext.manifestFilename = path.join(context.deployRoot, 'skill.json')
   writeFilePromise manifestContext.manifestFilename, JSON.stringify(manifest, null, 2), 'utf8'

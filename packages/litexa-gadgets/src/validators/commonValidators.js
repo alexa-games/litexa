@@ -1,6 +1,4 @@
-
-###
-
+/*
  * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  * Copyright 2019 Amazon.com (http://amazon.com/), Inc. or its affiliates. All Rights Reserved.
  * These materials are licensed as "Restricted Program Materials" under the Program Materials
@@ -9,16 +7,17 @@
  * See the Agreement for the specific terms and conditions of the Agreement. Capitalized
  * terms not defined in this file have the meanings given to them in the Agreement.
  * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 
-###
+ */
 
+validateDirectiveType = function({ validator, directive, expectedType }) {
+  if (directive.type == null)
+    return;
 
-module.exports = (validator) ->
-  directive = validator.jsonObject
+  if (directive.type !== expectedType) {
+    validator.fail('type', `should be '${expectedType}'`);
+  }
+}
 
-  if directive.type != "GameEngine.StopInputHandler"
-    validator.fail 'type', "should be GameEngine.StopInputHandler"
-
-  validator.strictlyOnly [ 'type', 'originatingRequestId' ]
-
-
+module.exports = {
+  validateDirectiveType
+}

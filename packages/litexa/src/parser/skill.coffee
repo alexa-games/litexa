@@ -815,7 +815,7 @@ class lib.Skill
           remainingTests.push test
 
       for name, file of @files when file.isCode and file.fileCategory == 'test'
-        test = new testing.CodeTest file
+        test = new testing.lib.CodeTest file
         unless focusTest(file.filename(), null)
           test.filters = options.focusedFiles ? null
         remainingTests.push test

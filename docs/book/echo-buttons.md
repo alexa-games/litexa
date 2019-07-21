@@ -188,25 +188,25 @@ Each request may include multiple events, so you can
 all:
 
 ```coffeescript
-    when GameEngine.InputHandlerEvent
-      for event in $request.events
-        local result = processEvent(event)
+  when GameEngine.InputHandlerEvent
+    for event in $request.events
+      local result = processEvent(event)
 ```
 
 Alternatively, you could [switch](/reference/#switch) over
 the names and react to event names directly:
 
 ```coffeescript
-    when GameEngine.InputHandlerEvent
-      for event in $request.events
-        switch event.name
-          == "red" then
-            say "red was pressed!"
-          == "blue" then
-            say "blue was pressed!"
-          else
-            say "I didn't recognize event {event.name}"
-        local result = processEvent(event)
+  when GameEngine.InputHandlerEvent
+    for event in $request.events
+      switch event.name
+        == "red" then
+          say "red was pressed!"
+        == "blue" then
+          say "blue was pressed!"
+        else
+          say "I didn't recognize event {event.name}"
+      local result = processEvent(event)
 ```
 
 #### Filtered Handler
@@ -238,54 +238,74 @@ filtered version.
 ### Testing Support
 
 To test incoming Input Handler events, you can use the new
-`inputHandlerEvent` statement to generate an event matching
-the name of an event you've programmed into your
-`startInputHandler` directives.
+`inputHandlerEvent` statement to simulate an event by name.
+The tested event name should match an event programmed in the
+active `startInputHandler` directive.
 
 ```coffeescript
-    TEST "pressing buttons"
-      launch
-      inputHandlerEvent "button 1 pressed"
+TEST "pressing buttons"
+  launch
+  inputHandlerEvent "button 1 pressed"
 ```
 
-If you need more information in your test, e.g. a sequence
-of simulated button events in the history, then you can
-write a JSON file with just the contents of the `events` key
-in the [skill
-request](
-  https://developer.amazon.com/docs/gadget-skills/receive-echo-button-events.html#receive),
-and refer to that
-in the test instead.
+If your test requires more granularity and you need to test specific input events
+(with gadgetIds, actions, and button colors), there are two ways to do so:
+
+#### 1) Specify a test JSON file with a list of events
+
+You can write a JSON file with just the contents of the `events` key in the [InputHandlerEvent skill
+request](https://developer.amazon.com/docs/echo-button-skills/receive-echo-button-events.html#receive),
+and refer to that in the test instead of specifying the event name. For example:
 
 ```coffeescript
-    TEST "pressing buttons"
-      launch
-      inputHandlerEvent quickPress.json
+TEST "pressing buttons"
+  launch
+  inputHandlerEvent quickPress.json
 ```
 
-The `quickPress.json` file contents might look like:
+The `quickPress.json` should be located in the test locale's litexa directory, and should contain
+a JSON object of a single event, or an array of event objects. For instance:
 
 ```json
-    [
+[
+  {
+    "name": "button pressed",
+    "inputEvents": [
       {
-        "name": "button pressed",
-        "inputEvents": [
-          {
-            "gadgetId": "agadget",
-            "timestamp": "2017-08-18T01:32:40.027Z",
-            "action": "down",
-            "color": "FF0000"
-          },
-          {
-            "gadgetId": "agadget",
-            "timestamp": "2017-08-18T01:32:41.050Z",
-            "action": "up",
-            "color": "FF0000"
-          }
-        ]
+        "gadgetId": "someGadgetId",
+        "timestamp": "2017-08-18T01:32:40.027Z",
+        "action": "down",
+        "color": "FF0000"
+      },
+      {
+        "gadgetId": "someGadgetId",
+        "timestamp": "2017-08-18T01:32:41.050Z",
+        "action": "up",
+        "color": "FF0000"
       }
     ]
+  }
+]
 ```
+
+#### 2) Use `inputHandlerAction`s to trigger input events
+
+After using an `inputHandlerEvent` with just an event name, you can use the keyword
+`inputHandlerAction` to spawn input events for the active event:
+
+```coffeescript
+TEST "pressing buttons"
+  launch
+  inputHandlerEvent "new button"
+  # inputHandlerAction [gadgetId] [action] [color]
+  inputHandlerAction btn1 down FFFFFF
+  inputHandlerAction btn2 up 00000
+  # color is optional, and defaults to FFFFFF, if not specified
+  inputHandlerAction btn3 down
+```
+
+The above example would simulate 3 "new button" input events with the specified gadgetIds,
+actions, and button colors.
 
 :::warning Test events do not test Input Handler logic
 Test events in your Litexa tests are *fully disconnected*
@@ -515,7 +535,6 @@ in roll call. Here's what it looks like, for a four button game:
     "btn2",
     "btn3"
   ],
-  "maximumHistoryLength": 100,
   "recognizers": {
     "button pressed": {
       "type": "match",
@@ -690,7 +709,6 @@ gadgetId. In a four button game, it looks like:
 {
   "type": "GameEngine.StartInputHandler",
   "timeout": 31860,
-  "maximumHistoryLength": 100,
   "recognizers": {
     "winner": {
       "type": "match",

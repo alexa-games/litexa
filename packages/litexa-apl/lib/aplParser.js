@@ -12,7 +12,7 @@
 const stringBuilder = require('./aplParserHelpers').ObjectStringBuilder;
 
 module.exports = function(lib) {
-  return function (document = undefined) {
+  return function(document = undefined) {
     this.attributes = {
       document: document,
       data: undefined,
