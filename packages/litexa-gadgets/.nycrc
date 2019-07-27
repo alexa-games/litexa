@@ -1,9 +1,9 @@
 {
   "check-coverage": true,
-  "statements": 100,
-  "branches": 94,
-  "functions": 100,
-  "lines": 100,
+  "statements": 99,
+  "branches": 93,
+  "functions": 99,
+  "lines": 99,
   "cwd": "../../",
   "include": [
     "packages/litexa-gadgets/src/**/*.js"

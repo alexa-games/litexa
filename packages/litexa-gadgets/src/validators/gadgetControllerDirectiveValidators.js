@@ -11,7 +11,7 @@
 
 const { validateDirectiveType } = require('./commonValidators');
 
-const HEX_COLOR_REGEX = /^[A-F0-9]{6}$/;
+const COLOR_REGEX = /^[A-F0-9]{6}$/;
 
 setLightDirectiveValidator = function(validator) {
   const directive = validator.jsonObject;
@@ -145,8 +145,8 @@ validateAnimationSequenceStep = function(validator, step) {
   const requiredKeys = ['color', 'durationMs', 'blend'];
   validator.require(requiredKeys);
 
-  if (step.color != null && !HEX_COLOR_REGEX.exec(step.color)) {
-    validator.fail('color', 'must be a hex color string in the form 0xFFFFFF');
+  if (step.color != null && !COLOR_REGEX.exec(step.color)) {
+    validator.fail('color', 'must be a hex color string in the form FFFFFF');
   }
 
   if (step.durationMs != null) {

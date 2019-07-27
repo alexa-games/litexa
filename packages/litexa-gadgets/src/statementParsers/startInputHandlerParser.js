@@ -40,7 +40,7 @@ class StartInputHandlerParser {
       context.directives = context.directives.filter((directive) => {
         const isStartDirective = (directive.type === 'GameEngine.StartInputHandler');
         if (isStartDirective) {
-          console.error(`Encountered duplicate startInputHandler at line ${this.line}. The previous one will be removed.`);
+          console.warn(`WARNING: Encountered duplicate startInputHandler at line ${this.line}. The previous one will be removed.`);
         }
         return !isStartDirective;
       });

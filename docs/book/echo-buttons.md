@@ -299,7 +299,7 @@ TEST "pressing buttons"
   inputHandlerEvent "new button"
   # inputHandlerAction [gadgetId] [action] [color]
   inputHandlerAction btn1 down FFFFFF
-  inputHandlerAction btn2 up 00000
+  inputHandlerAction btn2 up 000000
   # color is optional, and defaults to FFFFFF, if not specified
   inputHandlerAction btn3 down
 ```

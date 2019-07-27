@@ -14,11 +14,13 @@ manifestValidatorForGadgets = function({ validator, skill }) {
   const requiredAPIs = {};
   skill.collectRequiredAPIs(requiredAPIs);
 
-  validator.require('manifest');
-  if (manifest.manifest != null) {
-    validator.push('manifest', function() {
-      validatePublishingInformation(validator, manifest.manifest);
-    });
+  if (requiredAPIs['GAME_ENGINE'] === true) {
+    validator.require('manifest');
+    if (manifest.manifest != null) {
+      validator.push('manifest', function() {
+        validatePublishingInformation(validator, manifest.manifest);
+      });
+    }
   }
 }
 

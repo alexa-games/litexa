@@ -109,7 +109,7 @@ describe('gadgetControllerDirectiveValidators', function () {
       ".parameters.triggerEventTimeMs: 'notANumber'; should be an integer between 0 and 65535, inclusive",
       ".parameters.animations[0].repeat: 'notANumber'; should be an integer between 0 and 255, inclusive",
       ".parameters.animations[0].targetLights: 'notAnArray'; should be an array",
-      ".parameters.animations[0].sequence[0].color: {}; must be a hex color string in the form 0xFFFFFF",
+      ".parameters.animations[0].sequence[0].color: {}; must be a hex color string in the form FFFFFF",
       ".parameters.animations[0].sequence[0].durationMs: 'notANumber'; should be an integer between 1 and 65535, inclusive",
       ".parameters.animations[0].sequence[0].blend: 'notABoolean'; should be true or false"
     ]);
@@ -148,7 +148,7 @@ describe('gadgetControllerDirectiveValidators', function () {
       ".parameters.animations[0].repeat: 256; should be between 0 and 255, inclusive",
       ".parameters.animations[0].targetLights[0]: '2'; should be exactly '1', to indicate the single light",
       ".parameters.animations[0].sequence[0].blend: undefined; missing required parameter",
-      ".parameters.animations[0].sequence[0].color: 'invalidColor'; must be a hex color string in the form 0xFFFFFF",
+      ".parameters.animations[0].sequence[0].color: 'invalidColor'; must be a hex color string in the form FFFFFF",
       ".parameters.animations[0].sequence[0].durationMs: 65536; should be between 1 and 65535, inclusive"
     ]);
   });
