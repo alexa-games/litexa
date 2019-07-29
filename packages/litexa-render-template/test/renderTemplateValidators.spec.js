@@ -59,7 +59,7 @@ describe('renderTemplateValidators', function() {
       }
     };
 
-    renderValidators.model(validator, undefined, mockSkill);
+    renderValidators.model({ validator, skill: mockSkill });
     expect(validator.errors).to.have.members([
       `When using the RenderTemplate interface, you must implement the intents [${requiredIntents.join(', ')}] (i.e. have at least one 'when' statement handling each intent).`
     ]);
@@ -71,7 +71,7 @@ describe('renderTemplateValidators', function() {
         samples: []
       });
     });
-    renderValidators.model(validator, undefined, mockSkill);
+    renderValidators.model({ validator, skill: mockSkill });
     expect(validator.errors).to.deep.equal([]);
   });
 

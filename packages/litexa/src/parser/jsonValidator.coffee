@@ -9,7 +9,7 @@
  * See the Agreement for the specific terms and conditions of the Agreement. Capitalized
  * terms not defined in this file have the meanings given to them in the Agreement.
  * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 
+
 ###
 
 
@@ -19,10 +19,12 @@ class ValidationError
   constructor: (@parameter, @message, @value) ->
 
   toString: ->
-    if @value?
-      "#{@parameter}: #{@value}, #{@message}"
+    if typeof(@value) == 'string'
+      "#{@parameter}: '#{@value}'; #{@message}"
+    else if typeof(@value) == 'object'
+      "#{@parameter}: #{JSON.stringify(@value)}; #{@message}"
     else
-      "#{@parameter}, #{@message}"
+      "#{@parameter}: #{@value}; #{@message}"
 
 
 formatParameter = (p) ->
@@ -30,7 +32,7 @@ formatParameter = (p) ->
     return ''
   if typeof(p) == 'number'
     return "[#{p}]"
-  p = ''  + p
+  p = '' + p
   if p.match /[\.\s]/g
     return "[\"#{p}\"]"
   return ".#{p}"
@@ -38,8 +40,10 @@ formatParameter = (p) ->
 
 class lib.JSONValidator
   # This class is  designed to discover and record problems with a JSON object
-
   constructor: (@jsonObject) ->
+    @reset()
+
+  reset: ->
     @prefix = ''
     @prefixStack = []
     @errors = []
@@ -53,17 +57,14 @@ class lib.JSONValidator
     else
       @fail prefix, "missing required object"
     @prefixStack.pop()
+    @prefix = ( formatParameter(p) for p in @prefixStack ).join ''
 
   fail: (parameter, message) ->
     loc = "#{@prefix}#{formatParameter parameter}"
     try
-      value = eval("this.jsonObject" + loc)
-      if value?
-        value = JSON.stringify( value )
-      else
-        value = "[undefined]"
+      value = eval("this.jsonObject#{loc}")
     catch
-      value = "[undefined]"
+      value = undefined
     @errors.push new ValidationError loc, message, value
 
   failNoValue: (parameter, message) ->
@@ -72,7 +73,7 @@ class lib.JSONValidator
 
   badKey: (parameter, key, message) ->
     loc = "this.jsonObject#{@prefix}#{formatParameter parameter}]"
-    @errors.push new ValidationError loc, message, '"' + key + '"'
+    @errors.push new ValidationError loc, message, "'#{key}'"
 
   strictlyOnly: (parameters) ->
     @require parameters
@@ -95,15 +96,11 @@ class lib.JSONValidator
     [loc, value] = @getValue('')
     for k, v of value
       unless k in parameters
-        @errors.push new ValidationError "#{loc}.#{k}", "unsupported parameter"
+        @errors.push new ValidationError "#{loc}.#{k}", 'unsupported parameter'
 
   integerBounds: (parameter, min, max) ->
     [loc, value] = @getValue(parameter)
     unless value? and typeof(value) == 'number' and Math.floor(value) == value
-      if value?
-        value = JSON.stringify(value)
-      else
-        value = '[undefined]'
       @errors.push new ValidationError loc, "should be an integer between #{min} and #{max}, inclusive", value
       return
     unless min <= value <= max
@@ -113,10 +110,9 @@ class lib.JSONValidator
   oneOf: (parameter, choices) ->
     [loc, value] = @getValue(parameter)
     unless value?
-      @errors.push new ValidationError loc, "missing parameter"
+      @errors.push new ValidationError loc, 'missing parameter'
       return
     unless value in choices
-      value = JSON.stringify(value)
       @errors.push new ValidationError loc, "should only be one of #{JSON.stringify(choices)}", value
 
   boolean: (parameter) ->

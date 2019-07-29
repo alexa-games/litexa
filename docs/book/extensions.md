@@ -219,7 +219,7 @@ module.exports = function(lib) {
     then, we'll return an initializer function or constructor, to be callable
     by the Litexa parser and accept whichever parameters we expect:
   */
-  return function (commandType = undefined) {
+  return function(commandType = undefined) {
     // our example matches newCommand with AND without a "type" -> handle both
     this.attributes = {
       commands: {type: commandType}
@@ -428,7 +428,7 @@ module.exports = function(context) {
     // Extensions can add request-type-specific handlers, which would
     // be invoked immediately upon receiving the specified requests.
     requests: {
-      'SYSTEM.MyExpectedIntent': function (request) {
+      'SYSTEM.MyExpectedIntent': function(request) {
         console.log("myExtension registered a SYSTEM.MyExpectedIntent request.");
       }
     }

@@ -200,11 +200,11 @@
     lead = spacing;
   }
 
-  var typeIs = function (type) {
+  var typeIs = function(type) {
     return stack[stack.length-1].target.isType(type);
   }
 
-  var pushStatement = function (statement) {
+  var pushStatement = function(statement) {
     var b = stack[stack.length-1];
   }
 

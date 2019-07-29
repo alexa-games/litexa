@@ -9,7 +9,7 @@
  * See the Agreement for the specific terms and conditions of the Agreement. Capitalized
  * terms not defined in this file have the meanings given to them in the Agreement.
  * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 
+
 ###
 
 
@@ -59,7 +59,6 @@ class Game
       type: "GameEngine.StartInputHandler"
       timeout: rollCallDuration
       proxies: proxies
-      maximumHistoryLength: 100
       recognizers:
         "button pressed":
           type: "match"
@@ -132,7 +131,6 @@ class Game
     inputHandler =
       type: "GameEngine.StartInputHandler"
       timeout: totalDuration
-      maximumHistoryLength: 100
       recognizers:
         "winner":
           type: "match"
@@ -349,7 +347,6 @@ class Game
       type: "GameEngine.StartInputHandler"
       timeout: rollCallDuration
       proxies: proxies
-      maximumHistoryLength: 100
       recognizers: recognizers
       events: events
 

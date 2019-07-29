@@ -13,7 +13,7 @@
 ###
 
 
-lib = module.exports.lib = {}
+lib = {}
 uuid = require 'uuid'
 fs = require 'fs'
 path = require 'path'
@@ -25,7 +25,6 @@ directiveValidators = {}
 directiveValidators['AudioPlayer.Play'] = -> []
 directiveValidators['AudioPlayer.Stop'] = -> []
 directiveValidators['Hint'] = -> []
-
 
 validateSSML = (skill, line) ->
   errors = []
@@ -195,14 +194,16 @@ findIntent = (skill, line) ->
   return candidates[0][1]
 
 
-padString = (str, len, ch) ->
-  str = str ? "MISSINGSTRING"
-  # insert ch into str so that its length is len
-  pre = Math.floor( (str.length - len) / 2 )
-  for i in [0...pre]
-    str = ch + str
-  while str.length < len
-    str += ch
+# Function that evenly left/right pads a String with a paddingChar, until targetLength is reached.
+padStringWithChars = ({ str, targetLength, paddingChar }) ->
+  str = str ? 'MISSING_STRING'
+
+  numCharsPreStr = Math.max(Math.floor((targetLength - str.length) / 2), 0)
+  str = "#{paddingChar.repeat(numCharsPreStr)}#{str}"
+
+  numCharsPostStr = Math.max(targetLength - str.length, 0)
+  str = "#{str}#{paddingChar.repeat(numCharsPostStr)}"
+
   return str
 
 
@@ -423,7 +424,7 @@ class lib.ExpectedDirective
       throw new ParserError @location, "response did not contain expected directive #{@name}, instead had [#{types}]"
 
 
-class ResponseGeneratingStep
+class lib.ResponseGeneratingStep
   constructor: ->
     @expectations = []
 
@@ -453,7 +454,7 @@ class ResponseGeneratingStep
       logs: []
     }
 
-  processEvent: (result, skill, lambda, context, resultCallback, exactText) ->
+  processEvent: ({ result, skill, lambda, context, resultCallback }) ->
     event = result.event
     event.session.attributes = context.attributes
     trap = null
@@ -499,59 +500,54 @@ class ResponseGeneratingStep
 
         for expectation in @expectations
           try
-            expectation.test( skill, context, result )
+            expectation.test(skill, context, result)
           catch ex
             result.errors.push ex.message
             result.expectationsMet = false
 
-        if trap.errors.length > 0
-          result.errors.push e for e in trap.errors
-          result.expectationsMet = false
-
         result.logs.push l for l in trap.logs
+        result.errors.push e for e in trap.errors
         result.shouldEndSession = result.data?.response?.shouldEndSession
-
-        if result.errors.length > 0
-          result.expectationsMet = false
-
         resultCallback null, result
 
     catch ex
-      trap.stop(true) if trap?
       result.err = ex
-      result.logs.push l for l in trap.logs
+      if trap?
+        trap.stop(true)
+        result.logs.push l for l in trap.logs
+        result.errors.push e for e in trap.errors
       resultCallback ex, result
 
-class RequestStep extends ResponseGeneratingStep
+class RequestStep extends lib.ResponseGeneratingStep
   constructor: (@location, @name, @source) ->
     super()
 
   isVoiceStep: true
 
-  run: (skill, lambda, context, resultCallback) ->
+  run: ({ skill, lambda, context, resultCallback }) ->
     result = @makeResult()
     context.attributes = {}
     result.intent = "LaunchRequest"
     event = makeBaseRequest( skill )
     event.request = { type: @name }
     result.event = event
-    @processEvent result, skill, lambda, context, resultCallback
+    @processEvent { result, skill, lambda, context, resultCallback }
 
-class LaunchStep extends ResponseGeneratingStep
+class LaunchStep extends lib.ResponseGeneratingStep
   constructor: (@location, @say, @intent) ->
     super()
 
   isVoiceStep: true
 
-  run: (skill, lambda, context, resultCallback) ->
+  run: ({ skill, lambda, context, resultCallback }) ->
     result = @makeResult()
     context.attributes = {}
     result.intent = "LaunchRequest"
     event = makeLaunchRequest( skill, context.time, skill.testLanguage )
     result.event = event
-    @processEvent result, skill, lambda, context, resultCallback
+    @processEvent { result, skill, lambda, context, resultCallback }
 
-class VoiceStep extends ResponseGeneratingStep
+class VoiceStep extends lib.ResponseGeneratingStep
   constructor: (@location, @say, @intent, values) ->
     super()
     @values = {}
@@ -574,7 +570,7 @@ class VoiceStep extends ResponseGeneratingStep
 
   isVoiceStep: true
 
-  run: (skill, lambda, context, resultCallback) ->
+  run: ({ skill, lambda, context, resultCallback }) ->
     result = @makeResult()
     if @intent?
       result.intent = @intent
@@ -599,8 +595,7 @@ class VoiceStep extends ResponseGeneratingStep
       return
 
     result.event = event
-    #console.log JSON.stringify event, null, 2
-    @processEvent result, skill, lambda, context, resultCallback
+    @processEvent { result, skill, lambda, context, resultCallback }
 
 
 class DBFixupStep
@@ -608,7 +603,7 @@ class DBFixupStep
 
   isDBFixupStep: true
 
-  run: (skill, lambda, context, resultCallback) ->
+  run: ({ skill, lambda, context, resultCallback }) ->
     try
       identity = makeHandlerIdentity(skill)
       data = context.db.getVariables(identity)
@@ -624,7 +619,7 @@ class WaitStep
 
   isWaitStep: true
 
-  run: (skill, lambda, context, resultCallback) ->
+  run: ({ skill, lambda, context, resultCallback }) ->
     context.time += @duration
     context.alreadyWaited = true
     resultCallback null, {}
@@ -638,7 +633,7 @@ class StopStep
 
   isStopStep: true
 
-  run: (skill, lambda, context, resultCallback) ->
+  run: ({ skill, lambda, context, resultCallback }) ->
     try
       event = makeSessionEndedRequest( skill, @requestReason, context.time, skill.testLanguage )
       lambda.handler event, {}, (err, data) =>
@@ -648,49 +643,46 @@ class StopStep
 
 class SetRegionStep
   constructor: (@region) ->
-  run: (skill, lambda, context, resultCallback) ->
+  run: ({ skill, lambda, context, resultCallback }) ->
     skill.testLanguage = @region
     resultCallback null, {}
-  report: (err, loc, sourceLine, step, output, result, context) ->
-    loc.push "setting region to #{step.region}"
+  report: ({ err, logs, sourceLine, step, output, result, context }) ->
+    logs.push "setting region to #{step.region}"
 
 
 class SetLogStateTraces
   constructor: (@location, @value) ->
-  run: (skill, lambda, context, resultCallback) ->
+  run: ({ skill, lambda, context, resultCallback }) ->
     skill.testLoggingTraceStates = @value
     resultCallback null, {}
-  report: (err, loc, sourceLine, step, output, result, context) ->
+  report: ({ err, logs, sourceLine, step, output, result, context }) ->
     if @value
-      loc.push "enabling state tracing"
+      logs.push "enabling state tracing"
     else
-      loc.push "disabling state tracing"
+      logs.push "disabling state tracing"
 
 
 class CaptureStateStep
   constructor: (@location, @name) ->
-  run: (skill, lambda, context, resultCallback) ->
+  run: ({ skill, lambda, context, resultCallback }) ->
     context.captures[@name] =
       db: context.db.getVariables(makeHandlerIdentity(skill))
       attr: JSON.stringify(context.attributes)
     resultCallback null, {}
-  report: (err, loc, sourceLine, step, output, result, context) ->
-    loc.push "#{sourceLine} captured state as '#{@name}'"
+  report: ({ err, logs, sourceLine, step, output, result, context }) ->
+    logs.push "#{sourceLine} captured state as '#{@name}'"
 
 class ResumeStateStep
   constructor: (@location, @name) ->
-  run: (skill, lambda, context, resultCallback) ->
+  run: ({ skill, lambda, context, resultCallback }) ->
     unless @name of context.captures
       throw new ParserError @location, "No state named #{@name} to resume here"
     state = context.captures[@name]
     context.db.setVariables(makeHandlerIdentity(skill),state.db)
     context.attributes = JSON.parse state.attr
     resultCallback null, {}
-  report: (err, loc, sourceLine, step, output, result, context) ->
-    loc.push "#{sourceLine} resumed from state '#{@name}'"
-
-
-
+  report: ({ err, logs, sourceLine, step, output, result, context }) ->
+    logs.push "#{sourceLine} resumed from state '#{@name}'"
 
 
 validateDirective = (directive, context) ->
@@ -726,11 +718,11 @@ abbreviateTestOutput = (line, context) ->
   # audio src=
   audioFinderRegex = "<audio\\s+src='#{cleanedBucket}([\\w\\/\\-_\\.]*)\\.mp3'/>"
   line = abbreviateRegexReplacer line, audioFinderRegex, "<", ".mp3>"
-  
+
   # SFX URLs/soundbanks
   audioUrlFinderRegex = "<audio\\s+src=['\"]([a-zA-Z0-9_\\-\\.\\/\\:]*)['\"]/>"
   line = abbreviateRegexReplacer line, audioUrlFinderRegex
-  
+
   # SFX shorthand
   sfxUrlFinderRegex = "<sfx\\s+['\"]?([a-zA-Z0-9_\\-\\.\\/\\:]*)['\"]?>"
   line = abbreviateRegexReplacer line, sfxUrlFinderRegex
@@ -820,7 +812,7 @@ class TestLibrary
       @report "#{title} OK"
 
 
-class module.exports.CodeTest
+class lib.CodeTest
   constructor: (@file) ->
 
   test: (testContext, output, resultCallback) ->
@@ -904,9 +896,9 @@ class module.exports.CodeTest
 class lib.TestContext
   constructor: (@skill, @options) ->
     @output =
-      log:[]
-      cards:[]
-      directives:[]
+      log: []
+      cards: []
+      directives: []
 
   collectAllSays: ->
     @allSays = collectSays @skill, @lambda
@@ -970,12 +962,12 @@ class lib.Test
   pushSetLogStateTraces: (location, value) ->
     @steps.push new SetLogStateTraces(location, value)
 
-  reportEndpointResponses: (result, context, output, loc) ->
+  reportEndpointResponses: ({ result, context, output, logs }) ->
     success = true
     skill = context.skill
 
     rawObject =
-      ref: loc?[loc.length-1]
+      ref: logs?[logs.length - 1]
       request: result?.event ? {}
       response: result?.data ? {}
       db: context.db.getVariables(makeHandlerIdentity(skill))
@@ -991,18 +983,22 @@ class lib.Test
 
     if result.err
       rawObject.error = result.err.stack ? '' + result.err
-      loc.push "   ✘ handler error: #{result.err}"
+      logs.push "   ✘ handler error: #{result.err}"
       if result.err.stack?
         stack = '' + result.err.stack
         lines = stack.split '\n'
         for l in lines
           l = l.replace /\([^\)]*\)/g, ''
-          loc.push "     #{l}"
+          logs.push "     #{l}"
           if l.indexOf('processIntents') >= 0
             break
       success = false
     else if result.event
-      state = "◖#{padString(context.attributes.state ? "", skill.maxStateNameLength, '-')}◗"
+      state = "◖#{padStringWithChars({
+        str: context.attributes.state ? ""
+        targetLength: skill.maxStateNameLength
+        paddingChar: '-'
+      })}◗"
 
       if skill.abbreviateTestOutput
         speech = abbreviateTestOutput( result.speech, context )
@@ -1025,9 +1021,9 @@ class lib.Test
         reprompt = "NO REPROMPT"
 
       if result.expectationsMet
-        loc.push "     #{state} #{speech} ... #{reprompt}"
+        logs.push "     #{state} #{speech} ... #{reprompt}"
       else
-        loc.push "   ✘ #{state} #{speech} ... #{reprompt}"
+        logs.push "   ✘ #{state} #{speech} ... #{reprompt}"
         success = false
 
       do =>
@@ -1036,42 +1032,42 @@ class lib.Test
           if errors.length > 0
             success = false
             for error in errors
-              loc.push "      ✘ #{key}: #{error}"
+              logs.push "      ✘ #{key}: #{error}"
         check 'speech'
         check 'reprompt'
 
       if result.card?
         index = output.cards.length
         output.cards.push result.card
-        loc.push "                          [CARD #{index}] #{result.cardReference}"
+        logs.push "                          [CARD #{index}] #{result.cardReference}"
 
       if result.directives?
         for directive in result.directives
           index = output.directives.length
           output.directives.push directive
-          loc.push "                          [DIRECTIVE #{index}] #{directive.type}"
+          logs.push "                          [DIRECTIVE #{index}] #{directive.type}"
           validationErrors = validateDirective(directive, context)
           if validationErrors
             for error in validationErrors
-              loc.push "      ✘ #{error}"
+              logs.push "      ✘ #{error}"
             success = false
 
       if result.shouldEndSession
-        loc.push "  ◣  Voice session ended"
+        logs.push "  ◣  Voice session ended"
 
     if result.errors?
       for e in result.errors
-        loc.push "     ✘ #{e}"
+        logs.push "     ✘ #{e}"
 
     if result.logs?
       for l in result.logs
-        loc.push "     ! #{l}"
+        logs.push "     ! #{l}"
 
     return success
 
   test: (testContext, output, resultCallback) ->
     { skill, db, lambda } = testContext
-    loc = []
+    logs = []
     db.captures = db.captures ? {}
 
     context =
@@ -1100,10 +1096,10 @@ class lib.Test
       if remainingSteps.length == 0
         unless testContext.options.singleStep
           if success
-            loc.unshift "✔ test: #{@name}"
+            logs.unshift "✔ test: #{@name}"
           else
-            loc.unshift "✘ test: #{@name}"
-        output.log.push loc.join('\n')
+            logs.unshift "✘ test: #{@name}"
+        output.log.push logs.join('\n')
         successCount = 0
         failCount = 0
         if success
@@ -1126,7 +1122,7 @@ class lib.Test
           context.time += step.testingTimeIncrement ? 65 * 1000
           context.alreadyWaited = false
 
-      step.run skill, lambda, context, (err, result) =>
+      step.run { skill, lambda, context, resultCallback: (err, result) =>
         if err? or result?.err?
           success = false
 
@@ -1136,23 +1132,23 @@ class lib.Test
         switch
           when step.isStopStep
             if err
-              loc.push "     ✘ processed #{step.requestReason} session end with error: #{err}"
+              logs.push "     ✘ processed #{step.requestReason} session end with error: #{err}"
             else
-              loc.push "     • processed #{step.requestReason} session end without errors"
+              logs.push "     • processed #{step.requestReason} session end without errors"
 
           when step.isDBFixupStep
             if err
-              loc.push "     ✘ db fixup error: @#{step.reference}, #{err}"
+              logs.push "     ✘ db fixup error: @#{step.reference}, #{err}"
             else
-              loc.push "     • db fixup @#{step.reference}"
+              logs.push "     • db fixup @#{step.reference}"
 
           when step.isWaitStep
             minutes = step.duration / 1000 / 60
-            loc.push "     • waited #{minutes.toFixed(2)} minutes"
+            logs.push "     • waited #{minutes.toFixed(2)} minutes"
 
           when step.isVoiceStep
             if err
-              loc.push "#{sourceLine}  ❢ Voice intent error: #{err}"
+              logs.push "#{sourceLine}  ❢ Voice intent error: #{err}"
             else
               result = result ? {}
               time = (new Date(context.time)).toLocaleTimeString()
@@ -1165,27 +1161,42 @@ class lib.Test
                 paddedIntent = result.intent[0...skill.maxStateNameLength+2]
               else
                 paddedIntent = "ERROR"
-              paddedIntent = padString(paddedIntent, skill.maxStateNameLength+2, ' ')
+              paddedIntent = padStringWithChars({
+                str: paddedIntent
+                targetLength: skill.maxStateNameLength + 2
+                paddingChar: ' '
+              })
 
               input = ""
               #input = "\"#{result.expressed ? step.intent ? "launch"}\" -- "
-              loc.push "#{sourceLine}  ❢ #{paddedIntent} #{input}#{textSlots} @ #{time}"
+              logs.push "#{sourceLine}  ❢ #{paddedIntent} #{input}#{textSlots} @ #{time}"
 
             if result?
-              unless @reportEndpointResponses result, context, output, loc
+              unless @reportEndpointResponses { result, context, output, logs }
                 success = false
 
           when step.report?
-            step.report(err, loc, sourceLine,
-              step, output, result, context)
+            step.report({ err, logs, sourceLine, step, output, result, context })
 
             if result?
-              unless @reportEndpointResponses result, context, output, loc
+              unless @reportEndpointResponses { result, context, output, logs }
                 success = false
 
           else
             throw new Error "unexpected step"
 
         nextStep()
+      }
 
     nextStep()
+
+lib.TestUtils = {
+  makeBaseRequest
+  makeHandlerIdentity
+  makeRequestId
+  padStringWithChars
+}
+
+module.exports = {
+  lib
+}
