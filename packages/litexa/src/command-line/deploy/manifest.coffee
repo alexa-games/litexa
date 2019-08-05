@@ -521,8 +521,8 @@ writeDefaultManifest = (context, filename) ->
 
           locales:
             "en-US":
-              privacyPolicyUrl: "http://yoursite/privacy.html",
-              termsOfUseUrl: "http://yoursite/terms.html"
+              privacyPolicyUrl: "https://www.example.com/privacy.html",
+              termsOfUseUrl: "https://www.example.com/terms.html"
   """
 
   fs.writeFileSync filename, manifest, 'utf8'

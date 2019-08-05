@@ -63,8 +63,8 @@
       "allowsPurchases": false,
       "locales": {
         "en-US": {
-          "termsOfUseUrl": "http://yoursite/terms.html",
-          "privacyPolicyUrl": "http://yoursite/privacy.html"
+          "termsOfUseUrl": "https://www.example.com/terms.html",
+          "privacyPolicyUrl": "https://www.example.com/privacy.html"
         }
       },
       "isExportCompliant": true,

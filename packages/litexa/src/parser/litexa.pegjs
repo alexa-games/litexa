@@ -1035,8 +1035,18 @@ ResponseSpacingStatement
 
 
 AttributeStatement
-  = key:ExistingIdentifier __ ":" __ value:(Number / AssetURL / JsonFileName / AssetName / BooleanLiteral / VariableReference / ScreenString / QuotedString / ExpressionString) {
-    var target = getTarget();
+  = key:"message" __ ":" __ value:QuotedString {
+    // @TODO: This is an edge case for the upsellInSkillProduct statement, so that the <upsell> tag
+    // won't be treated as a "ScreenString" tag. Ultimately, we should handle this more cleanly.
+    const target = getTarget();
+    if (target && target.pushAttribute) {
+      target.pushAttribute(location(), key, value);
+    } else {
+      throw new ParserError(location(), "Couldn't find anything to add an attribute to here");
+    }
+  }
+  / key:ExistingIdentifier __ ":" __ value:(Number / AssetURL / JsonFileName / AssetName / BooleanLiteral / VariableReference / ScreenString / QuotedString / ExpressionString) {
+    const target = getTarget();
     if (target && target.pushAttribute) {
       target.pushAttribute(location(), key, value);
     } else {

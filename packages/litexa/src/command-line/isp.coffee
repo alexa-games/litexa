@@ -26,6 +26,7 @@ module.exports =
     @artifacts = args.artifacts
     @root = args.root
     @skillId = args.skillId
+    @deployment = args.deployment
     @stage = args.stage
     @smapi = args.smapi || smapi
 
@@ -35,17 +36,17 @@ module.exports =
     unless @artifacts and @skillId
       # Build the skill so we can retrieve the skill ID.
       skill = await skillBuilder.build(@root)
-      skill.projectInfo.variant = @stage
+      skill.projectInfo.variant = @deployment
 
       context = {
         projectInfo: skill.projectInfo
         projectRoot: skill.projectInfo?.root
-        deploymentName: @stage
-        deploymentOptions: skill.projectInfo.deployments[@stage]
+        deploymentName: @deployment
+        deploymentOptions: skill.projectInfo.deployments[@deployment]
       }
 
       @askProfile = context.deploymentOptions?.askProfile
-      @ispDir = path.join skill.projectInfo?.root, 'isp'
+      @ispDir = path.join skill.projectInfo?.root, 'isp', @deployment
 
       await loadArtifacts { context, @logger }
       @artifacts = context.artifacts
