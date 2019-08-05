@@ -285,7 +285,7 @@ module.exports.run = ->
     .command 'pull [data]'
     .description "downloads specified data from the hosted skill via SMAPI. Currently supported for:
       isp (downloads remote in-skill products, and ovewrites local product files)"
-    .option '-d --deployment [deployment]', "which deployment to pull logs from, using the name from the deployments map in the Litexa configuration file.", 'development'
+    .option '-d --deployment [deployment]', "which deployment target to download specified data from, using the name from the deployments map in the Litexa configuration file.", 'development'
     .option '-s --stage [stage]', "stage for which to pull skill data (either development or live)", 'development'
     .action (data, cmd) ->
       options =
@@ -308,7 +308,7 @@ module.exports.run = ->
     .command 'push [data]'
     .description "pushes specified data from local to the hosted skill via SMAPI. Currently
       supports: isp (uploads local in-skill product files, and overrides remote products)"
-    .option '-d --deployment [deployment]', "which deployment to pull logs from, using the name from the deployments map in the Litexa configuration file.", 'development'
+    .option '-d --deployment [deployment]', "which deployment target to push specified data to, using the name from the deployments map in the Litexa configuration file.", 'development'
     .option '-s --stage [stage]', "stage for which to push skill data (either development or live)", 'development'
     .action (data, cmd) ->
       options =
@@ -331,7 +331,7 @@ module.exports.run = ->
     .command 'reset [data]'
     .description "resets specified data from local to the hosted skill via SMAPI. Currently
       supports: isp (resets all in-skill products for testing)"
-    .option '-d --deployment [deployment]', "which deployment to pull logs from, using the name from the deployments map in the Litexa configuration file.", 'development'
+    .option '-d --deployment [deployment]', "which deployment target to reset specified data for, using the name from the deployments map in the Litexa configuration file.", 'development'
     .option '-s --stage [stage]', "stage for which to reset skill data (either development or live)", 'development'
     .action (data, cmd) ->
       options =

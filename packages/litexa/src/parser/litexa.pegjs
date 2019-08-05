@@ -1036,6 +1036,8 @@ ResponseSpacingStatement
 
 AttributeStatement
   = key:"message" __ ":" __ value:QuotedString {
+    // @TODO: This is an edge case for the upsellInSkillProduct statement, so that the <upsell> tag
+    // won't be treated as a "ScreenString" tag. Ultimately, we should handle this more cleanly.
     const target = getTarget();
     if (target && target.pushAttribute) {
       target.pushAttribute(location(), key, value);

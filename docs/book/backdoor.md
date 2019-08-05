@@ -398,6 +398,33 @@ See the [chapter on testing](/book/testing.html) for more
 information on tools you have available to help trap and
 correct any errors.
 
-## Modifying The Language Model
+## Modifying the Language Model
 
 Coming soon!
+
+## Customizing the DB Key
+
+By default, Litexa keys any DB entries by the skill session's device ID. If required, this DB key
+can be overridden by adding the following function anywhere in the skill's inline code.
+
+```js
+// The global `litexa` namespace contains compilation-time objects at runtime.
+// `overridableFunctions` can be redefined by assigning them to new functionality.
+litexa.overridableFunctions = litexa.overridableFunctions
+                              ? litexa.overridableFunctions
+                              : {};
+
+/* The `identity` parameter will have the following structure:
+{
+  requestAppId,  // = System.application.applicationId
+  userId,        // = System.user.userId
+  deviceId,      // = System.device.deviceId
+  litexaLanguage // = Litexa language (e.g. 'default') for request's locale
+}
+*/
+// Now, let's override the DB key generation.
+litexa.overridableFunctions.generateDBKey = function(identity) {
+  // Create and return the desired DB key.
+  return `${identity.deviceId}|${identity.litexaLanguage}`;
+};
+```
