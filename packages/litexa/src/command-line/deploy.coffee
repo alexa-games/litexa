@@ -83,7 +83,7 @@ module.exports.run = (options) ->
       JSONValidator: require('../parser/jsonValidator').lib.JSONValidator
 
   catch err
-    logger.error err.message
+    logger.error err.message ? err
     return
 
   require('../deployment/artifacts.coffee').loadArtifacts { context, logger }
