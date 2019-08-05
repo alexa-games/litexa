@@ -333,6 +333,13 @@ class lib.Skill
       source = coffee.compile(source, {bare: true})
       @libraryCode.push source
 
+    # some functions we'd like to allow developers to override
+    @libraryCode.push "litexa.overridableFunctions = {"
+    @libraryCode.push "  generateDBKey: function(identity) {"
+    @libraryCode.push "    return `${identity.deviceId}`;"
+    @libraryCode.push "  }"
+    @libraryCode.push "};"
+
     librarySource = fs.readFileSync(__dirname + '/litexa-library.coffee', 'utf8')
     librarySource = coffee.compile(librarySource, {bare: true})
     @libraryCode.push librarySource

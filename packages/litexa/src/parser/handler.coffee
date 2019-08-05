@@ -119,7 +119,9 @@ handlerSteps.checkFastExit = (event, handlerContext) ->
   # that needs to cleanup on skill exist that result in a BD write
   new Promise (resolve, reject) ->
     tryToClose = ->
-      db.fetchDB handlerContext.identity, (err, dbObject) ->
+      dbKey = litexa.overridableFunctions.generateDBKey(handlerContext.identity)
+
+      db.fetchDB { identity: handlerContext.identity, dbKey, fetchCallback: (err, dbObject) ->
         if err?
           return reject(err)
 
@@ -139,6 +141,7 @@ handlerSteps.checkFastExit = (event, handlerContext) ->
             tryToClose()
           else
             return resolve(false)
+      }
     tryToClose()
 
 
@@ -163,13 +166,16 @@ handlerSteps.runConcurrencyLoop = (event, handlerContext) ->
         language = langCode
 
     litexa.language = language
+    handlerContext.identity.litexaLanguage = language
 
     runHandler = ->
       numberOfTries += 1
       if numberOfTries > 1
         exports.Logging.log "CONCURRENCY LOOP iteration #{numberOfTries}, denied db write"
 
-      db.fetchDB handlerContext.identity, (err, dbObject) ->
+      dbKey = litexa.overridableFunctions.generateDBKey(handlerContext.identity)
+
+      db.fetchDB { identity: handlerContext.identity, dbKey, fetchCallback: (err, dbObject) ->
         # build the context object for the state machine
         try
 
@@ -210,6 +216,7 @@ handlerSteps.runConcurrencyLoop = (event, handlerContext) ->
 
         catch err
           reject err
+      }
 
     # kick off the first one
     await runHandler()

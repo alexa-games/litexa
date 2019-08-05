@@ -1035,8 +1035,16 @@ ResponseSpacingStatement
 
 
 AttributeStatement
-  = key:ExistingIdentifier __ ":" __ value:(Number / AssetURL / JsonFileName / AssetName / BooleanLiteral / VariableReference / ScreenString / QuotedString / ExpressionString) {
-    var target = getTarget();
+  = key:"message" __ ":" __ value:QuotedString {
+    const target = getTarget();
+    if (target && target.pushAttribute) {
+      target.pushAttribute(location(), key, value);
+    } else {
+      throw new ParserError(location(), "Couldn't find anything to add an attribute to here");
+    }
+  }
+  / key:ExistingIdentifier __ ":" __ value:(Number / AssetURL / JsonFileName / AssetName / BooleanLiteral / VariableReference / ScreenString / QuotedString / ExpressionString) {
+    const target = getTarget();
     if (target && target.pushAttribute) {
       target.pushAttribute(location(), key, value);
     } else {

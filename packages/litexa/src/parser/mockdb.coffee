@@ -9,7 +9,7 @@
  * See the Agreement for the specific terms and conditions of the Agreement. Capitalized
  * terms not defined in this file have the meanings given to them in the Agreement.
  * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 
+
 ###
 
 
@@ -32,7 +32,7 @@ module.exports = class MockDB
     DBKEY = "#{identity.deviceId}|#{identity.requestAppId}"
     @identities[DBKEY] = JSON.parse(JSON.stringify(data))
 
-  fetchDB: (identity, fetchCallback) ->
+  fetchDB: ({ identity, fetchCallback }) ->
     DBKEY = "#{identity.deviceId}|#{identity.requestAppId}"
     database = new DBInterface
     if DBKEY of @identities

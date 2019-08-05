@@ -9,7 +9,7 @@
  * See the Agreement for the specific terms and conditions of the Agreement. Capitalized
  * terms not defined in this file have the meanings given to them in the Agreement.
  * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 
+
 ###
 
 
@@ -36,7 +36,7 @@ cloudWatch = new AWS.CloudWatch({
 })
 
 db =
-  fetchDB: (identity, fetchCallback) ->
+  fetchDB: ({ identity, dbKey, fetchCallback }) ->
 
     if true
       tableName = process?.env?.dynamoTableName
@@ -46,7 +46,7 @@ db =
 
       # we're using per application tables, already partitioned by deployment
       # so all we need here is the device identifier
-      DBKEY = "#{identity.deviceId}"
+      DBKEY = dbKey ? "#{identity.deviceId}"
 
       params =
         Key:
