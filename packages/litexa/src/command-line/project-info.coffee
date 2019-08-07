@@ -52,7 +52,7 @@ class ProjectInfo
 
     debug "beginning languages parse"
     @languages = {}
-    @languages.default = @parseLanguage @litexaRoot
+    @languages.default = @parseLanguage(@litexaRoot, 'default')
     @languagesRoot = path.join @litexaRoot, 'languages'
     if fs.existsSync @languagesRoot
       filter = (f) =>
@@ -62,7 +62,7 @@ class ProjectInfo
         return true
       languages = ( f for f in fs.readdirSync(@languagesRoot) when filter(f) )
       for lang in languages
-        @languages[lang] = @parseLanguage path.join(@languagesRoot, lang)
+        @languages[lang] = @parseLanguage(path.join(@languagesRoot, lang), lang)
 
   parseExtensions: ->
     @extensions = {}
@@ -144,12 +144,12 @@ class ProjectInfo
       globalModulesPath
     ]
 
-  parseLanguage: (root) ->
+  parseLanguage: (root, lang) ->
     debug "parsing language at #{root}"
     def =
       assetProcessors: {}
       convertedAssets:
-        root: path.join @root, '.deploy', 'converted-assets'
+        root: path.join @root, '.deploy', 'converted-assets', lang
         files: []
       assets:
         root: path.join root, 'assets'
@@ -199,18 +199,22 @@ class ProjectInfo
     for kind, info of @extensions
       continue unless info.assetPipeline?
       for proc, procIndex in info.assetPipeline
-        # todo: validate processor here?
+        # @TODO: Validate processor here?
 
-        name = proc.name ? "#{kind}[#{procIndex}]"
+        # Create a clone of our processor, so as not to override previous languages' inputs/outputs.
+        clone = {}
+        Object.assign(clone, proc)
 
-        unless proc.listOutputs?
+        name = clone.name ? "#{kind}[#{procIndex}]"
+
+        unless clone.listOutputs?
           throw new Error "asset processor #{procIndex} from extension #{kind} doesn't
             have a listOutputs function."
 
-        def.assetProcessors[name] = proc
-        proc.inputs = []
-        proc.outputs = []
-        proc.options = @plugins?[kind]
+        def.assetProcessors[name] = clone
+        clone.inputs = []
+        clone.outputs = []
+        clone.options = @plugins?[kind]
 
     # collect all the assets
     if fs.existsSync def.assets.root
