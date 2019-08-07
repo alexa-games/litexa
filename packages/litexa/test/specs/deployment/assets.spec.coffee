@@ -9,7 +9,7 @@
  * See the Agreement for the specific terms and conditions of the Agreement. Capitalized
  * terms not defined in this file have the meanings given to them in the Agreement.
  * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 
+
 ###
 
 
@@ -46,14 +46,22 @@ describe 'converts assets', ->
             assetProcessors:
               'wav to mp3 converter':
                 process: assetProcessor
-                inputs: [ 'someFile.wav']
+                inputs: [ 'someFile.wav' ]
             assets:
               root: './litexa/assets'
           'de-DE':
             assetProcessors:
               'wav to mp3 converter':
                 process: assetProcessor
-                inputs: [ 'anotherFile.wav']
+                inputs: [ 'anotherFile.wav' ]
+                options: {}
+            assets:
+              root: './litexa/de-DE/assets'
+          'fr-FR':
+            assetProcessors:
+              'wav to mp3 converter':
+                process: assetProcessor
+                inputs: []
                 options: {}
             assets:
               root: './litexa/de-DE/assets'
@@ -66,6 +74,6 @@ describe 'converts assets', ->
     logSpy = spy(loggerInterface, 'log')
     await Assets.convertAssets(context, loggerInterface)
     assert(fs.existsSync(path.join context.sharedDeployRoot, 'converted-assets'), 'converted-assets directory exists')
-    assert(fs.existsSync(path.join context.sharedDeployRoot, 'converted-assets', 'someFile.wav.mp3'), 'converted asset for default exists')
-    assert(fs.existsSync(path.join context.sharedDeployRoot, 'converted-assets', 'anotherFile.wav.mp3'), 'converted asset for other locales exists')
+    assert(fs.existsSync(path.join context.sharedDeployRoot, 'converted-assets', 'default', 'someFile.wav.mp3'), 'converted asset for default exists')
+    assert(fs.existsSync(path.join context.sharedDeployRoot, 'converted-assets', 'de-DE', 'anotherFile.wav.mp3'), 'converted asset for other locales exists')
     assert(logSpy.calledOnceWith(match('conversion complete')), 'conversion process finished')

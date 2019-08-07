@@ -9,7 +9,7 @@
  * See the Agreement for the specific terms and conditions of the Agreement. Capitalized
  * terms not defined in this file have the meanings given to them in the Agreement.
  * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 
+
 ###
 
 
@@ -23,16 +23,17 @@ exports.convertAssets = (context, logger) ->
   promises = []
 
   cacheRoot = path.join context.sharedDeployRoot, 'converted-assets'
-  mkdirp.sync cacheRoot
   debug "assets conversion cache at #{cacheRoot}"
 
   for languageName, languageInfo of context.projectInfo.languages
+    languageCacheRoot = path.join cacheRoot, languageName
+    mkdirp.sync languageCacheRoot
     for kind, proc of languageInfo.assetProcessors
       for input in proc.inputs
         promises.push proc.process
           assetName: input
           assetsRoot: languageInfo.assets.root
-          targetsRoot: cacheRoot
+          targetsRoot: languageCacheRoot
           options: proc.options
           logger: logger
 
