@@ -18,6 +18,12 @@ const {
   setLightDirectiveValidator
 } = require('./src/validators/gadgetControllerDirectiveValidators');
 
+const {
+  sendDirectiveValidator,
+  startEventHandlerDirectiveValidator,
+  stopEventHandlerDirectiveValidator
+} = require('./src/validators/customInterfaceDirectiveValidators');
+
 const { modelValidatorForGadgets } = require('./src/validators/modelValidator');
 const { manifestValidatorForGadgets } = require('./src/validators/manifestValidator');
 
@@ -33,13 +39,18 @@ module.exports = function(options, lib) {
       directives: {
         'GameEngine.StartInputHandler': startInputHandlerDirectiveValidator,
         'GameEngine.StopInputHandler': stopInputHandlerDirectiveValidator,
-        'GadgetController.SetLight': setLightDirectiveValidator
+        'GadgetController.SetLight': setLightDirectiveValidator,
+        'CustomInterfaceController.SendDirective': sendDirectiveValidator,
+        'CustomInterfaceController.StartEventHandler': startEventHandlerDirectiveValidator,
+        'CustomInterfaceController.StopEventHandler': stopEventHandlerDirectiveValidator
       },
       model: modelValidatorForGadgets,
       manifest: manifestValidatorForGadgets
     },
     validEventNames: [
-      'GameEngine.InputHandlerEvent'
+      'GameEngine.InputHandlerEvent',
+      'CustomInterfaceController.EventsReceived',
+      'CustomInterfaceController.Expired'
     ]
   }
 
@@ -67,6 +78,19 @@ module.exports = function(options, lib) {
             const intent = pushIntent(location(), 'GameEngine.InputHandlerEvent', {class:lib.InputHandlerEventIntent});
             intent.setCurrentEventName('__');
           }`
+      },
+      WhenCustomInterfaceControllerEvents: {
+        parser: `WhenCustomInterfaceControllerEvents
+          = 'when' ___ 'CustomInterfaceController.' event:customInterfaceEventTail ___ name:QuotedString {
+            const intent = pushIntent(location(), 'CustomInterfaceController.' + event, {class:lib.NamedIntent});
+            intent.setCurrentIntentName(name);
+          }
+          / 'when' ___ 'CustomInterfaceController.' event:customInterfaceEventTail {
+            const intent = pushIntent(location(), 'CustomInterfaceController.' + event, {class:lib.NamedIntent});
+            intent.setCurrentIntentName('__');
+          }
+
+          customInterfaceEventTail = 'EventsReceived' / 'Expired'`
       }
     },
     testStatements: {
