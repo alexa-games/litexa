@@ -44,7 +44,10 @@ lib.normalizeIndentForStringifiedFunction = (funcString, indent) ->
   if indentMatch?
     callbackIndent = indentMatch[0].length - 3 # 3 = newline char (1) + second line indentation (2)
 
+    # normalize the indent
     indentRegex = new RegExp("\n {#{callbackIndent}}", 'g')
-    return funcString.replace(indentRegex, "\n#{indent}")
+    funcString = funcString.replace(indentRegex, "\n#{indent}")
+    # normalize the function/parentheses spacing (varies between different OSs)
+    funcString = funcString.replace(/function\s+\(\)/, 'function()')
   else
     return funcString

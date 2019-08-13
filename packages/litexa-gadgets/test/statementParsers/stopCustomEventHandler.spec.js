@@ -13,10 +13,10 @@ const { expect, should } = require('chai');
 should();
 const { stub } = require('sinon');
 
-const { StopInputHandlerParser } = require('../../src/statementParsers/stopInputHandlerParser');
+const { StopCustomEventHandlerParser } = require('../../src/statementParsers/stopCustomEventHandler');
 
-describe('stopInputHandlerParser', function() {
-  const parserInstance = new StopInputHandlerParser();
+describe('stopCustomEventHandlerParser', function() {
+  const parserInstance = new StopCustomEventHandlerParser();
   const indent = '  ';
 
   const context = {
@@ -38,40 +38,23 @@ describe('stopInputHandlerParser', function() {
     beforeEach(function() {
       logStub = stub(console, 'log');
 
-      context.db.__lastInputHandler = undefined;
+      context.db.__lastCustomEventHandlerToken = undefined;
       context.directives = [];
       output = [];
 
       testDirective = {
-        type: "GameEngine.StopInputHandler",
-        timeout: 1,
-        recognizers: {
-          "button pressed": {
-            type: "match",
-            fuzzy: false,
-            anchor: "end",
-            pattern: [{ action: 'down' }]
-          }
-        },
-        events: {
-          "NewButton": {
-            meets: ["button pressed"],
-            reports: "history",
-            maximumInvocations: 4,
-            shouldEndInputHandler: false
-          }
-        }
-      }
+        type: "CustomInterfaceController.StopEventHandler"
+      };
     });
 
     afterEach(function() {
       logStub.restore();
     });
 
-    it('does nothing if existing StopInputHandler directive is found in context', async function() {
+    it('does nothing if existing StopCustomEventHandler directive is found in context', async function() {
       const directive = {
-        type: 'GameEngine.StopInputHandler',
-        originatingRequestId: 'fakeOriginatingRequestId'
+        type: 'CustomInterfaceController.StopEventHandler',
+        token: 'fakeToken'
       }
       context.directives.push(directive);
 
@@ -84,7 +67,7 @@ describe('stopInputHandlerParser', function() {
       expect(context.directives).to.deep.equal([ directive ]);
     });
 
-    it('does nothing if no __lastInputHandler entry found in DB', async function() {
+    it('does nothing if no __lastCustomEventHandlerToken found in DB', async function() {
       parserInstance.toLambda(output, indent);
       const lambdaCode = output[0];
       await eval(`(async function(){${lambdaCode}})()`);
@@ -92,12 +75,12 @@ describe('stopInputHandlerParser', function() {
       expect(context.directives).to.deep.equal([]);
       expect(logStub.callCount).to.equal(1);
       expect(logStub.firstCall.args[0]).to.deep.equal(
-        'WARNING: Did not send GameEngine.StopInputHandler because no current originatingRequestId was found in the database.'
+        'WARNING: Did not send CustomInterfaceController.StopEventHandler because no current handler token was found in the database.'
       );
     });
 
-    it('does nothing if __lastInputHandler in DB was previously cleared', async function() {
-      context.__lastInputHandler = 'cleared';
+    it('does nothing if __lastCustomEventHandlerToken in DB was previously cleared', async function() {
+      context.__lastCustomEventHandlerToken = 'cleared';
       parserInstance.toLambda(output, indent);
       const lambdaCode = output[0];
       await eval(`(async function(){${lambdaCode}})()`);
@@ -105,31 +88,31 @@ describe('stopInputHandlerParser', function() {
       expect(context.directives).to.deep.equal([]);
       expect(logStub.callCount).to.equal(1);
       expect(logStub.firstCall.args[0]).to.deep.equal(
-        'WARNING: Did not send GameEngine.StopInputHandler because no current originatingRequestId was found in the database.'
+        'WARNING: Did not send CustomInterfaceController.StopEventHandler because no current handler token was found in the database.'
       );
     });
 
-    it('adds a GameEngine.StopInputHandler directive and clears __lastInputHandler, if all is fine', async function() {
-      context.db.__lastInputHandler = 'fakeRequestId';
+    it('adds a CustomInterfaceController.StopEventHandler directive and clears __lastCustomEventHandlerToken, if all is fine', async function() {
+      context.db.__lastCustomEventHandlerToken = 'fakeRequestId';
       parserInstance.toLambda(output, indent);
       const lambdaCode = output[0];
       await eval(`(async function(){${lambdaCode}})()`);
 
       const expectedDirective = {
-        type: 'GameEngine.StopInputHandler',
-        originatingRequestId: 'fakeRequestId'
+        type: 'CustomInterfaceController.StopEventHandler',
+        token: 'fakeRequestId'
       }
 
       expect(context.directives).to.deep.equal([ expectedDirective ]);
-      expect(context.db.__lastInputHandler).to.equal('cleared');
+      expect(context.db.__lastCustomEventHandlerToken).to.equal('cleared');
     });
   });
 
   describe('collectRequiredAPIs()', function() {
-    it('adds the GAME_ENGINE api', function() {
+    it('adds the CUSTOM_INTERFACE api', function() {
       let apis = {};
       parserInstance.collectRequiredAPIs(apis);
-      apis['GAME_ENGINE'].should.be.true;
+      apis['CUSTOM_INTERFACE'].should.be.true;
     });
   });
 });

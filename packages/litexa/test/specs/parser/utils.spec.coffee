@@ -56,9 +56,9 @@ describe 'performs string manipulation and checking functions', ->
         test: 'This is a test.'
       }
 
-    expectedFuncString = "function () {\n  return {\n    test: 'This is a test.'\n  };\n}"
+    expectedFuncString = "function() {\n  return {\n    test: 'This is a test.'\n  };\n}"
     expect(Utils.stringifyFunction(func)).to.equal(expectedFuncString)
 
     indent = '  '
-    expectedFuncString = "function () {\n    return {\n      test: 'This is a test.'\n    };\n  }"
+    expectedFuncString = "function() {\n    return {\n      test: 'This is a test.'\n    };\n  }"
     expect(Utils.stringifyFunction(func, indent)).to.equal(expectedFuncString)
