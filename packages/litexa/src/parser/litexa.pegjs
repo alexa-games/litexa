@@ -1159,15 +1159,35 @@ IntentStatement
     throw new ParserError(location(), "intent identifiers must begin with a letter, upper or lower case");
   }
   / "when" ___ "Connections.Response" ___ name:QuotedString {
-    const intent = pushIntent(location(), 'Connections.Response', {class:lib.NamedIntent});
-    intent.setCurrentIntentName(name);
+    const intent = pushIntent(location(), 'Connections.Response', {class:lib.FilteredEvent});
+
+    intent.setCurrentIntentFilter({
+      name,
+      data: { name }, // Persist "name" for the filter to have access to it at runtime.
+      filter: function(event, data) {
+        return (context.event.request.name === data.name);
+      },
+      callback: async function() {
+        // If this Connections.Response is filtered by monetization events, let's add two
+        // shorthand accessors for $purchaseResult and $newProduct.
+        const monetizationResponses = [ 'Buy', 'Cancel', 'Upsell' ];
+        if (monetizationResponses.includes(context.event.request.name)) {
+          const __payload = context.event.request.payload;
+
+          if (__payload && __payload.purchaseResult && __payload.productId) {
+            context.slots.purchaseResult = __payload.purchaseResult;
+            context.slots.newProduct = await getProductByProductId(context, __payload.productId);
+          }
+        }
+      }
+    });
   }
   / "when" ___ "Connections.Response" {
-    const intent = pushIntent(location(), 'Connections.Response', {class:lib.NamedIntent});
-    intent.setCurrentIntentName('__');
+    const intent = pushIntent(location(), 'Connections.Response', {class:lib.FilteredEvent});
+    intent.setCurrentIntentFilter('__');
   }
   / "when" ___ utterance:(UtteranceString / DottedIdentifier) {
-    var intent = pushIntent(location(), utterance, false);
+    const intent = pushIntent(location(), utterance, false);
   }
 
 /* litexa [or]

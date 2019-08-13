@@ -10,25 +10,22 @@
  */
 
 sendDirectiveValidator = function(validator) {
-  let directive = validator.jsonObject;
-
-  console.log(`Validator for CustomInterfaceController.SendDirective: ${directive}`);
+  const directive = validator.jsonObject;
+  // @TODO: Add more validation here.
   const requiredKeys = ['type', 'header', 'endpoint', 'payload'];
   validator.require(requiredKeys);
 },
 
 startEventHandlerDirectiveValidator = function(validator) {
-  let directive = validator.jsonObject;
-
-  console.log(`Validator for CustomInterfaceController.StartEventHandler: ${directive}`);
+  const directive = validator.jsonObject;
+  // @TODO: Add more validation here.
   const requiredKeys = ['type', 'token', 'eventFilter', 'expiration'];
   validator.require(requiredKeys);
 },
 
 stopEventHandlerDirectiveValidator = function(validator) {
-  let directive = validator.jsonObject;
-
-  console.log(`Validator for CustomInterfaceController.StopEventHandler: ${directive}`);
+  const directive = validator.jsonObject;
+  // @TODO: Add more validation here.
   const requiredKeys = ['type', 'token'];
   validator.require(requiredKeys);
 }

@@ -9,7 +9,7 @@
  * See the Agreement for the specific terms and conditions of the Agreement. Capitalized
  * terms not defined in this file have the meanings given to them in the Agreement.
  * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 
+
 ###
 
 lib = module.exports.lib = {}
@@ -32,3 +32,19 @@ lib.cleanTrailingSpaces = (str) ->
 
 lib.dedupeNonNewlineConsecutiveWhitespaces = (str) ->
   return str.replace /[ \t][ \t]+/g, ' '
+
+# Method that stringifies a function and normalizes the indentation.
+lib.stringifyFunction = (func, indent = '') ->
+  funcString = func.toString()
+  return lib.normalizeIndentForStringifiedFunction(funcString, indent)
+
+lib.normalizeIndentForStringifiedFunction = (funcString, indent) ->
+  # First, let's check our stringified function's indent.
+  indentMatch = funcString.match(/\n[ ]*/)
+  if indentMatch?
+    callbackIndent = indentMatch[0].length - 3 # 3 = newline char (1) + second line indentation (2)
+
+    indentRegex = new RegExp("\n {#{callbackIndent}}", 'g')
+    return funcString.replace(indentRegex, "\n#{indent}")
+  else
+    return funcString

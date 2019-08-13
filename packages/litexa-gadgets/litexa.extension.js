@@ -27,7 +27,6 @@ const {
 const { modelValidatorForGadgets } = require('./src/validators/modelValidator');
 const { manifestValidatorForGadgets } = require('./src/validators/manifestValidator');
 
-const initInputHandlerEventParser = require('./src/statementParsers/inputHandlerEventParser');
 const { StartInputHandlerParser } = require('./src/statementParsers/startInputHandlerParser');
 const { StopInputHandlerParser } = require('./src/statementParsers/stopInputHandlerParser');
 
@@ -71,23 +70,43 @@ module.exports = function(options, lib) {
       WhenGameEngineInputHandlerEvent: {
         parser: `WhenGameEngineInputHandlerEvent
           = 'when' ___ 'GameEngine.InputHandlerEvent' __ name:QuotedString {
-            const intent = pushIntent(location(), 'GameEngine.InputHandlerEvent', {class:lib.InputHandlerEventIntent});
-            intent.setCurrentEventName(name);
+            const intent = pushIntent(location(), 'GameEngine.InputHandlerEvent', {class:lib.FilteredEvent});
+
+            intent.setCurrentIntentFilter({
+              name,
+              data: { name },
+              filter: function(event, data) { return event.name === data.name; },
+              callback: async function() {
+                if (context.db.read('__lastInputHandler') != context.request.originatingRequestId) {
+                  context.shouldDropSession = true;
+                  return;
+                }
+              }
+            });
           }
           / 'when' ___ 'GameEngine.InputHandlerEvent' {
-            const intent = pushIntent(location(), 'GameEngine.InputHandlerEvent', {class:lib.InputHandlerEventIntent});
-            intent.setCurrentEventName('__');
+            const intent = pushIntent(location(), 'GameEngine.InputHandlerEvent', {class:lib.FilteredEvent});
+            intent.setCurrentIntentFilter({
+              name: '__'
+            });
           }`
       },
       WhenCustomInterfaceControllerEvents: {
         parser: `WhenCustomInterfaceControllerEvents
-          = 'when' ___ 'CustomInterfaceController.' event:customInterfaceEventTail ___ name:QuotedString {
-            const intent = pushIntent(location(), 'CustomInterfaceController.' + event, {class:lib.NamedIntent});
-            intent.setCurrentIntentName(name);
+          = 'when' ___ 'CustomInterfaceController.' event:customInterfaceEventTail ___ namespace:QuotedString {
+            const intent = pushIntent(location(), 'CustomInterfaceController.' + event, {class:lib.FilteredEvent});
+
+            intent.setCurrentIntentFilter({
+              name: namespace,
+              data: { namespace },
+              filter: function(event, data) { return event.header.namespace === data.namespace; },
+            })
           }
           / 'when' ___ 'CustomInterfaceController.' event:customInterfaceEventTail {
-            const intent = pushIntent(location(), 'CustomInterfaceController.' + event, {class:lib.NamedIntent});
-            intent.setCurrentIntentName('__');
+            const intent = pushIntent(location(), 'CustomInterfaceController.' + event, {class:lib.FilteredEvent});
+            intent.setCurrentIntentFilter({
+              name: '__'
+            });
           }
 
           customInterfaceEventTail = 'EventsReceived' / 'Expired'`
@@ -132,7 +151,6 @@ module.exports = function(options, lib) {
     lib: {
       StartInputHandler: StartInputHandlerParser,
       StopInputHandler: StopInputHandlerParser,
-      InputHandlerEventIntent: initInputHandlerEventParser(lib),
       InputHandlerEventTestStep: initInputHandlerEventTester(lib)
     }
   }

@@ -18,29 +18,31 @@ lib = module.exports.lib = {}
 { Function, FunctionMap } = require("./function.coffee").lib
 { ParserError, formatLocationStart } = require("./errors.coffee").lib
 { LocalizationContext } = require('./localization.coffee')
+Utils = require('@src/parser/utils').lib
 
 
 builtInIntents = [
-  "AMAZON.NoIntent"
-  "AMAZON.YesIntent"
   "AMAZON.CancelIntent"
-  "AMAZON.StopIntent"
+  "AMAZON.FallbackIntent"
   "AMAZON.HelpIntent"
-  "AMAZON.StartOverIntent"
-  "AMAZON.RepeatIntent"
-  "AMAZON.PauseIntent"
-  "AMAZON.PreviousIntent"
-  "AMAZON.NextIntent"
-  "AMAZON.ScrollUpIntent"
-  "AMAZON.ScrollLeftIntent"
-  "AMAZON.ScrollDownIntent"
-  "AMAZON.ScrollRightIntent"
-  "AMAZON.PageUpIntent"
-  "AMAZON.PageDownIntent"
   "AMAZON.MoreIntent"
   "AMAZON.NavigateHomeIntent"
   "AMAZON.NavigateSettingsIntent"
-  "AMAZON.FallbackIntent"
+  "AMAZON.NextIntent"
+  "AMAZON.NoIntent"
+  "AMAZON.PageDownIntent"
+  "AMAZON.PageUpIntent"
+  "AMAZON.PauseIntent"
+  "AMAZON.PreviousIntent"
+  "AMAZON.RepeatIntent"
+  "AMAZON.ResumeIntent"
+  "AMAZON.ScrollDownIntent"
+  "AMAZON.ScrollLeftIntent"
+  "AMAZON.ScrollRightIntent"
+  "AMAZON.ScrollUpIntent"
+  "AMAZON.StartOverIntent"
+  "AMAZON.StopIntent"
+  "AMAZON.YesIntent"
 ]
 
 builtInSlotTypes = [
@@ -427,85 +429,59 @@ class lib.Intent
     if @startFunction?
       @startFunction.toLocalization(result, context)
 
-# Subset of intents that can be scoped to individual events.
-class lib.EventIntent extends lib.Intent
+# Class that supports intent filtering.
+class lib.FilteredEvent extends lib.Intent
   constructor: (args) ->
     super args
     @startFunction = new FunctionMap
-    @hasEventNames = false
+    @eventFilters = {}
 
-  setCurrentEventName: (name) ->
+  # Method to filter intents via a passed filter function; can trigger optional callbacks.
+  # @param name ... name used for scoping
+  # @param data ... this is filter data that can be used to persist pegjs pattern data
+  # @param filter ... function(event) that returns true/false for the event per some conditions
+  # @param callback ... lambda code that can be run if a filtered event is found
+  setCurrentIntentFilter: ({ name, data, filter, callback }) ->
     @startFunction.setCurrentName name
-    @hasEventNames = true unless name == '__'
+
+    @eventFilters[name] = {
+      data
+      filter
+      callback
+    }
 
   toLambda: (output, options) ->
-    indent = "    "
+    indent = '    '
 
-    if @startFunction?
+    # '__' is our catch-all default -> do not apply any filter
+    if @eventFilters['__']
       options.scopeManager.pushScope @location, @name
-      output.push "#{indent}// Event-unrelated intent handler logic."
+      output.push "#{indent}// Unfiltered event handling logic."
       @startFunction.toLambda(output, indent, options, '__')
       options.scopeManager.popScope @location
+      delete @eventFilters['__'] # remove default, so we can easily check if any filters remain
 
-    if @hasEventNames
-      output.push "#{indent}// Event-specific intent handler logic."
-      output.push "#{indent}for (let __eventIndex = 0; __eventIndex < context.slots.request.events.length; ++__eventIndex) {"
-      output.push "#{indent}  const __event = context.slots.request.events[__eventIndex];"
+    if Object.keys(@eventFilters).length > 0
+      output.push "#{indent}// Filtered event handling logic."
+      output.push "#{indent}for (const __event of context.slots.request.events) {"
       output.push "#{indent}  context.slots.event = __event;"
-      for eventName, func of @startFunction.functions
-        continue if eventName == '__'
-        options.scopeManager.pushScope @location, "#{@name}:#{eventName}"
-        output.push "#{indent}  if (__event.name === '#{eventName}') {"
-        @startFunction.toLambda(output, "#{indent}    ", options, eventName)
+      output.push "#{indent}  let __filter;"
+
+      for eventFilterName, eventFilter of @eventFilters
+        continue unless eventFilter
+        options.scopeManager.pushScope @location, "#{@name}:#{eventFilterName}"
+        filterFuncString = Utils.stringifyFunction(eventFilter.filter, "#{indent}    ")
+        output.push "#{indent}  __filter = #{filterFuncString}"
+        output.push "#{indent}  if (__filter(__event, #{JSON.stringify(eventFilter.data)})) {"
+
+        # If the filter specified a callback, run it before proceeding to in-skill event handler.
+        if eventFilter.callback?
+          callbackString = Utils.stringifyFunction(eventFilter.callback, "#{indent}      ")
+          output.push "#{indent}    (await #{callbackString})();"
+
+        # Insert the in-skill event handler.
+        @startFunction.toLambda(output, "#{indent}    ", options, eventFilterName)
+
         output.push "#{indent}  }"
         options.scopeManager.popScope @location
       output.push "#{indent}};"
-
-# Subset of intents that can be scoped to individual intent "name"s.
-class lib.NamedIntent extends lib.Intent
-  constructor: (args) ->
-    super args
-    @startFunction = new FunctionMap
-    @hasIntentNames = false
-
-  setCurrentIntentName: (name) ->
-    @startFunction.setCurrentName name
-    @hasIntentNames = true unless name == '__'
-
-  toLambda: (output, options) ->
-    indent = "    "
-
-    if @startFunction?
-      options.scopeManager.pushScope @location, @name
-      output.push "#{indent}// Name-unrelated intent handler logic."
-      @startFunction.toLambda(output, indent, options, '__')
-      options.scopeManager.popScope @location
-
-    if @hasIntentNames
-      output.push "#{indent}// Name-specific intent handler logic."
-      output.push "#{indent}const __name = context.event.request.name;"
-      output.push "#{indent}const __payload = context.event.request.payload;"
-
-      for intentName, func of @startFunction.functions
-        continue if intentName == '__'
-
-        options.scopeManager.pushScope @location, "#{@name}:#{intentName}"
-        output.push "#{indent}if (__name === '#{intentName}') {"
-
-        # Logic for monetization-specific intent names.
-        monetizationIntents = [ 'Buy', 'Cancel', 'Upsell' ]
-        if monetizationIntents.includes(intentName)
-          output.push "#{indent}  if (__payload &&
-                                      __payload.purchaseResult &&
-                                      __payload.productId) {"
-          # Add shorthand $purchaseResult and $newProduct slot variables.
-          output.push "#{indent}    context.slots.purchaseResult = __payload.purchaseResult"
-          output.push "#{indent}    context.slots.newProduct =
-                                      await getProductByProductId(context, __payload.productId)"
-          @startFunction.toLambda(output, "#{indent}    ", options, intentName)
-          output.push "#{indent}  }"
-        else
-          @startFunction.toLambda(output, "#{indent}  ", options, intentName)
-
-        output.push "#{indent}}"
-        options.scopeManager.popScope @location
