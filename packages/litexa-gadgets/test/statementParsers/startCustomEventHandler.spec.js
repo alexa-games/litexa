@@ -13,37 +13,38 @@ const { expect, should } = require('chai');
 should();
 const { stub } = require('sinon');
 
-const { StartInputHandlerParser } = require('../../src/statementParsers/startInputHandlerParser');
+const { StartCustomEventHandlerParser } = require('../../src/statementParsers/startCustomEventHandler');
 
-describe('startInputHandlerParser', function() {
-  const indent = '  ';
-
-  const context = {
-    directives: [],
-    db: {
-      write: function(key, value) {
-        this[`${key}`] = value;
-      },
-      read: function(key) {
-        return this[`${key}`];
-      }
-    },
-    requestId: 'fakeRequestId'
-  };
-
-  const expression = {
-    toLambda: function(options) {
-      return JSON.stringify(testDirective);
-    }
-  }
-
-  let errorStub = undefined;
-  let location = undefined;
-  let output = undefined;
+describe('startCustomEventHandlerParser', function() {
   let parserInstance = undefined;
-  let testDirective = undefined;
+  let location = undefined;
 
   describe('toLambda()', function() {
+    const indent = '  ';
+
+    const context = {
+      directives: [],
+      db: {
+        write: function(key, value) {
+          this[`${key}`] = value;
+        },
+        read: function(key) {
+          return this[`${key}`];
+        }
+      },
+      requestId: 'fakeRequestId'
+    };
+
+    const expression = {
+      toLambda: function(options) {
+        return JSON.stringify(testDirective);
+      }
+    }
+
+    let errorStub = undefined;
+    let output = undefined;
+    let testDirective = undefined;
+
     beforeEach(function() {
       errorStub = stub(console, 'error');
       location = {
@@ -52,32 +53,13 @@ describe('startInputHandlerParser', function() {
         }
       }
 
-      context.db.__lastInputHandler = undefined;
+      context.db.__lastCustomEventHandlerToken = undefined;
       context.directives = [];
       output = [];
 
-      testDirective = {
-        type: "GameEngine.StartInputHandler",
-        timeout: 1,
-        recognizers: {
-          "button pressed": {
-            type: "match",
-            fuzzy: false,
-            anchor: "end",
-            pattern: [{ action: 'down' }]
-          }
-        },
-        events: {
-          "NewButton": {
-            meets: ["button pressed"],
-            reports: "history",
-            maximumInvocations: 4,
-            shouldEndInputHandler: false
-          }
-        }
-      }
+      testDirective = {};
 
-      parserInstance = new StartInputHandlerParser(location, expression);
+      parserInstance = new StartCustomEventHandlerParser(location, expression);
     });
 
     afterEach(function() {
@@ -87,25 +69,25 @@ describe('startInputHandlerParser', function() {
     it('sets correct line attribute', async function() {
       expect(parserInstance.line).to.equal(3);
       location = undefined;
-      parserInstance = new StartInputHandlerParser(location, expression);
+      parserInstance = new StartCustomEventHandlerParser(location, expression);
       expect(parserInstance.line).to.equal('[undefined]');
 
       location = {};
-      parserInstance = new StartInputHandlerParser(location, expression);
+      parserInstance = new StartCustomEventHandlerParser(location, expression);
       expect(parserInstance.line).to.equal('[undefined]');
     });
 
-    it('adds valid StartInputHandler logic to output', async function() {
+    it('adds valid StartEventHandler logic to output', async function() {
       parserInstance.toLambda(output, indent);
 
       expect(output.length).to.equal(1);
       const lambdaCode = output[0];
       await eval(`(async function(){${lambdaCode}})()`);
 
-      expect(context.db['__lastInputHandler']).to.equal('fakeRequestId');
+      expect(context.db['__lastCustomEventHandlerToken']).to.equal('fakeRequestId');
     });
 
-    it('fails on missing StartInputHandler directive', async function() {
+    it('fails on missing StartEventHandler directive', async function() {
       testDirective = undefined;
       parserInstance.toLambda(output, indent);
 
@@ -114,11 +96,11 @@ describe('startInputHandlerParser', function() {
 
       expect(errorStub.callCount).to.equal(1);
       expect(errorStub.firstCall.args[0]).to.deep.equal(
-        "Expression at line 3 did not return anything: It should return an object definition for a single 'GameEngine.StartInputHandler' directive."
+        "Expression at line 3 did not return anything: It should return an object definition for a single 'CustomInterfaceController.StartEventHandler' directive."
       )
     });
 
-    it('fails on invalid StartInputHandler directive type', async function() {
+    it('fails on invalid StartEventHandler directive type', async function() {
       testDirective = 'invalidDirective';
       parserInstance.toLambda(output, indent);
 
@@ -127,33 +109,30 @@ describe('startInputHandlerParser', function() {
 
       expect(errorStub.callCount).to.equal(1);
       expect(errorStub.firstCall.args[0]).to.deep.equal(
-        "Expression at line 3 didn't return an object: It should return an object definition for a single 'GameEngine.StartInputHandler' directive."
+        "Expression at line 3 didn't return an object: It should return an object definition for a single 'CustomInterfaceController.StartEventHandler' directive."
       )
     });
 
-    it('fails on invalid directive data type', async function() {
+    it('adds directive type, if missing or incorrect', async function() {
       testDirective.type = 'InvalidType';
       parserInstance.toLambda(output, indent);
 
       const lambdaCode = output[0];
       await eval(`(async function(){${lambdaCode}})()`);
 
-      expect(errorStub.callCount).to.equal(1);
-      expect(errorStub.firstCall.args[0]).to.deep.equal(
-        "Object returned at line 3 at directive type 'InvalidType': It should have the type 'GameEngine.StartInputHandler'."
-      )
+      expect(context.directives[0].type).to.equal('CustomInterfaceController.StartEventHandler');
     });
   });
 
   describe('collectRequiredAPIs()', function() {
     beforeEach(function() {
-      parserInstance = new StartInputHandlerParser(location);
+      parserInstance = new StartCustomEventHandlerParser(location);
     });
 
-    it('adds the GAME_ENGINE api', function() {
+    it('adds the CUSTOM_INTERFACE api', function() {
       let apis = {};
       parserInstance.collectRequiredAPIs(apis);
-      apis['GAME_ENGINE'].should.be.true;
+      apis['CUSTOM_INTERFACE'].should.be.true;
     });
   });
 });

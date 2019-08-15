@@ -9,20 +9,19 @@
  * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
 
-class StopInputHandlerParser {
-  constructor() {}
-
+class StopCustomEventHandlerParser {
   collectRequiredAPIs(apis) {
-    return apis['GAME_ENGINE'] = true;
+    return apis['CUSTOM_INTERFACE'] = true;
   }
 
   toLambda(output, indent, options) {
     /*
-    stopInputHandler:
-      Checks the DB for the originatingRequestId of the last startInputHandler statement.
-      1) If no request ID is found, or the last requestId was already cleared by a stopInputHandler,
-      warning is logged and no action is taken.
-      2) If a valid request ID is found, a GameEngine.StopInputHandler directive is sent for that ID.
+    stopCustomEventHandler:
+      Checks the DB for the token of the last startCustomEventHandler statement.
+      1) If no token is found or the most recent token was already cleared by a
+      stopCustomEventHandler, warning is logged and no action is taken.
+      2) If a valid token is found, a CustomInterfaceController.StopEventHandler directive is sent
+      for that token.
      */
 
     // Istanbul needs to ignore this function, because nyc will otherwise insert cov_(...)[]++
@@ -30,19 +29,19 @@ class StopInputHandlerParser {
     /* istanbul ignore next */
     const lambdaCode = async function(context) {
       const __directive = context.directives.find((directive) => {
-        directive.type === 'GameEngine.StopInputHandler';
+        directive.type === 'CustomInterfaceController.StopEventHandler';
       })
       if (__directive === undefined) {
         // We haven't already sent a StopInputHandler, so send one now.
-        const lastId = context.db.read('__lastInputHandler');
-        if (lastId != null && lastId !== 'cleared') {
+        const lastToken = context.db.read('__lastCustomEventHandlerToken');
+        if (lastToken != null && lastToken !== 'cleared') {
           context.directives.push({
-            type:'GameEngine.StopInputHandler',
-            originatingRequestId: lastId
+            type:'CustomInterfaceController.StopEventHandler',
+            token: lastToken
           });
-          context.db.write('__lastInputHandler', 'cleared');
+          context.db.write('__lastCustomEventHandlerToken', 'cleared');
         } else {
-          console.log('WARNING: Did not send GameEngine.StopInputHandler because no current originatingRequestId was found in the database.');
+          console.log('WARNING: Did not send CustomInterfaceController.StopEventHandler because no current handler token was found in the database.');
         }
       }
     };
@@ -57,5 +56,5 @@ class StopInputHandlerParser {
 };
 
 module.exports = {
-  StopInputHandlerParser
+  StopCustomEventHandlerParser
 }

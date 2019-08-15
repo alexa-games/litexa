@@ -13,28 +13,29 @@ const { expect, should } = require('chai');
 should();
 const { stub } = require('sinon');
 
-const { StopInputHandlerParser } = require('../../src/statementParsers/stopInputHandlerParser');
+const { StopInputHandlerParser } = require('../../src/statementParsers/stopInputHandler');
 
 describe('stopInputHandlerParser', function() {
   const parserInstance = new StopInputHandlerParser();
-  const indent = '  ';
-
-  const context = {
-    directives: [],
-    db: {
-      write: function(key, value) {
-        this[`${key}`] = value;
-      },
-      read: function(key) {
-        return this[`${key}`];
-      }
-    }
-  };
-
-  let logStub = undefined;
-  let output = undefined;
 
   describe('toLambda()', function() {
+    const indent = '  ';
+
+    const context = {
+      directives: [],
+      db: {
+        write: function(key, value) {
+          this[`${key}`] = value;
+        },
+        read: function(key) {
+          return this[`${key}`];
+        }
+      }
+    };
+
+    let logStub = undefined;
+    let output = undefined;
+
     beforeEach(function() {
       logStub = stub(console, 'log');
 

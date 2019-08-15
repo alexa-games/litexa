@@ -9,7 +9,7 @@
  * See the Agreement for the specific terms and conditions of the Agreement. Capitalized
  * terms not defined in this file have the meanings given to them in the Agreement.
  * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 
+
 ###
 
 
@@ -49,3 +49,16 @@ describe 'performs string manipulation and checking functions', ->
   it 'dedupes whitespace for each line', ->
     expect(Utils.dedupeNonNewlineConsecutiveWhitespaces('Hello hello.\n Hi hi. \nMeow. \t')).to.equal('Hello hello.\n Hi hi. \nMeow. ')
     expect(Utils.dedupeNonNewlineConsecutiveWhitespaces('  M e o o\to   w www w w  w\t\t\t  \t \thi.')).to.equal(' M e o o\to w www w w w hi.')
+
+  it 'stringifies a function with expected indent normalization', ->
+    func = () ->
+      return {
+        test: 'This is a test.'
+      }
+
+    expectedFuncString = "function() {\n  return {\n    test: 'This is a test.'\n  };\n}"
+    expect(Utils.stringifyFunction(func)).to.equal(expectedFuncString)
+
+    indent = '  '
+    expectedFuncString = "function() {\n    return {\n      test: 'This is a test.'\n    };\n  }"
+    expect(Utils.stringifyFunction(func, indent)).to.equal(expectedFuncString)

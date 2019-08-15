@@ -25,6 +25,7 @@ describe('inputHandlerEventTester', function() {
     },
     time: new Date().getTime()
   }
+
   const location = {
     start: {
       line: 3 // arbitrary line number
