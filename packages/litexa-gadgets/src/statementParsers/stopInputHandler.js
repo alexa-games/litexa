@@ -10,8 +10,6 @@
  */
 
 class StopInputHandlerParser {
-  constructor() {}
-
   collectRequiredAPIs(apis) {
     return apis['GAME_ENGINE'] = true;
   }

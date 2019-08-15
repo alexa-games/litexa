@@ -16,34 +16,35 @@ const { stub } = require('sinon');
 const { StartCustomEventHandlerParser } = require('../../src/statementParsers/startCustomEventHandler');
 
 describe('startCustomEventHandlerParser', function() {
-  const indent = '  ';
-
-  const context = {
-    directives: [],
-    db: {
-      write: function(key, value) {
-        this[`${key}`] = value;
-      },
-      read: function(key) {
-        return this[`${key}`];
-      }
-    },
-    requestId: 'fakeRequestId'
-  };
-
-  const expression = {
-    toLambda: function(options) {
-      return JSON.stringify(testDirective);
-    }
-  }
-
-  let errorStub = undefined;
-  let location = undefined;
-  let output = undefined;
   let parserInstance = undefined;
-  let testDirective = undefined;
+  let location = undefined;
 
   describe('toLambda()', function() {
+    const indent = '  ';
+
+    const context = {
+      directives: [],
+      db: {
+        write: function(key, value) {
+          this[`${key}`] = value;
+        },
+        read: function(key) {
+          return this[`${key}`];
+        }
+      },
+      requestId: 'fakeRequestId'
+    };
+
+    const expression = {
+      toLambda: function(options) {
+        return JSON.stringify(testDirective);
+      }
+    }
+
+    let errorStub = undefined;
+    let output = undefined;
+    let testDirective = undefined;
+
     beforeEach(function() {
       errorStub = stub(console, 'error');
       location = {

@@ -17,24 +17,25 @@ const { StopInputHandlerParser } = require('../../src/statementParsers/stopInput
 
 describe('stopInputHandlerParser', function() {
   const parserInstance = new StopInputHandlerParser();
-  const indent = '  ';
-
-  const context = {
-    directives: [],
-    db: {
-      write: function(key, value) {
-        this[`${key}`] = value;
-      },
-      read: function(key) {
-        return this[`${key}`];
-      }
-    }
-  };
-
-  let logStub = undefined;
-  let output = undefined;
 
   describe('toLambda()', function() {
+    const indent = '  ';
+
+    const context = {
+      directives: [],
+      db: {
+        write: function(key, value) {
+          this[`${key}`] = value;
+        },
+        read: function(key) {
+          return this[`${key}`];
+        }
+      }
+    };
+
+    let logStub = undefined;
+    let output = undefined;
+
     beforeEach(function() {
       logStub = stub(console, 'log');
 

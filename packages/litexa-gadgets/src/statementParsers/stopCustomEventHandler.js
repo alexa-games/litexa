@@ -10,8 +10,6 @@
  */
 
 class StopCustomEventHandlerParser {
-  constructor() {}
-
   collectRequiredAPIs(apis) {
     return apis['CUSTOM_INTERFACE'] = true;
   }

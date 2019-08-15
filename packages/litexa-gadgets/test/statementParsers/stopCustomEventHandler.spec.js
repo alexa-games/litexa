@@ -17,24 +17,25 @@ const { StopCustomEventHandlerParser } = require('../../src/statementParsers/sto
 
 describe('stopCustomEventHandlerParser', function() {
   const parserInstance = new StopCustomEventHandlerParser();
-  const indent = '  ';
-
-  const context = {
-    directives: [],
-    db: {
-      write: function(key, value) {
-        this[`${key}`] = value;
-      },
-      read: function(key) {
-        return this[`${key}`];
-      }
-    }
-  };
-
-  let logStub = undefined;
-  let output = undefined;
 
   describe('toLambda()', function() {
+    const indent = '  ';
+
+    const context = {
+      directives: [],
+      db: {
+        write: function(key, value) {
+          this[`${key}`] = value;
+        },
+        read: function(key) {
+          return this[`${key}`];
+        }
+      }
+    };
+
+    let logStub = undefined;
+    let output = undefined;
+
     beforeEach(function() {
       logStub = stub(console, 'log');
 
