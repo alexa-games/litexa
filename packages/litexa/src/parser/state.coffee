@@ -16,7 +16,7 @@
 lib = module.exports.lib = {}
 
 { Function } = require('./function.coffee').lib
-{ Intent, FilteredEvent } = require('./intent.coffee').lib
+{ Intent, FilteredIntent } = require('./intent.coffee').lib
 { LocalizationContext } = require('./localization.coffee')
 { ParserError } = require("./errors.coffee").lib
 
@@ -150,7 +150,7 @@ class lib.State
         collection[key] = new Intent({ location, utterance })
     else if !collection[key].defaultedResetOnGet and key != '--default--'
       # only allow repeat intents if they are events that can be filtered
-      if collection[key] not instanceof FilteredEvent
+      if collection[key] not instanceof FilteredIntent
         throw new ParserError location, "Not allowed to redefine intent `#{key}` in state `#{@name}`"
     intent = collection[key]
 

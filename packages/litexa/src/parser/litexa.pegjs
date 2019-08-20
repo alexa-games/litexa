@@ -1159,13 +1159,13 @@ IntentStatement
     throw new ParserError(location(), "intent identifiers must begin with a letter, upper or lower case");
   }
   / "when" ___ "Connections.Response" ___ name:QuotedString {
-    const intent = pushIntent(location(), 'Connections.Response', {class:lib.FilteredEvent});
+    const intent = pushIntent(location(), 'Connections.Response', {class:lib.FilteredIntent});
 
     intent.setCurrentIntentFilter({
       name,
       data: { name }, // Persist "name" for the filter to have access to it at runtime.
-      filter: function(event, data) {
-        return (context.event.request.name === data.name);
+      filter: function(request, data) {
+        return (request.name === data.name);
       },
       callback: async function() {
         // If this Connections.Response is filtered by monetization events, let's add two
@@ -1183,8 +1183,8 @@ IntentStatement
     });
   }
   / "when" ___ "Connections.Response" {
-    const intent = pushIntent(location(), 'Connections.Response', {class:lib.FilteredEvent});
-    intent.setCurrentIntentFilter('__');
+    const intent = pushIntent(location(), 'Connections.Response', {class:lib.FilteredIntent});
+    intent.setCurrentIntentFilter({ name: '__' });
   }
   / "when" ___ utterance:(UtteranceString / DottedIdentifier) {
     const intent = pushIntent(location(), utterance, false);
