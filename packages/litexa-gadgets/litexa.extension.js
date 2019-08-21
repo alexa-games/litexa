@@ -92,12 +92,22 @@ module.exports = function(options, lib) {
       WhenGameEngineInputHandlerEvent: {
         parser: `WhenGameEngineInputHandlerEvent
           = 'when' ___ 'GameEngine.InputHandlerEvent' __ name:QuotedString {
-            const intent = pushIntent(location(), 'GameEngine.InputHandlerEvent', {class:lib.FilteredEvent});
+            const intent = pushIntent(location(), 'GameEngine.InputHandlerEvent', {class:lib.FilteredIntent});
 
             intent.setCurrentIntentFilter({
               name,
               data: { name },
-              filter: function(event, data) { return event.name === data.name; },
+              filter: function(request, data) {
+                if (request.events != null) {
+                  for (const __event of request.events) {
+                    if (__event.name === data.name) {
+                      context.slots.event = __event;
+                      return true;
+                    }
+                  }
+                  return false;
+                }
+              },
               callback: async function() {
                 if (context.db.read('__lastInputHandler') != context.request.originatingRequestId) {
                   context.shouldDropSession = true;
@@ -107,7 +117,7 @@ module.exports = function(options, lib) {
             });
           }
           / 'when' ___ 'GameEngine.InputHandlerEvent' {
-            const intent = pushIntent(location(), 'GameEngine.InputHandlerEvent', {class:lib.FilteredEvent});
+            const intent = pushIntent(location(), 'GameEngine.InputHandlerEvent', {class:lib.FilteredIntent});
             intent.setCurrentIntentFilter({
               name: '__'
             });
@@ -116,22 +126,32 @@ module.exports = function(options, lib) {
       WhenCustomInterfaceControllerEvents: {
         parser: `WhenCustomInterfaceControllerEvents
           = 'when' ___ 'CustomInterfaceController.EventsReceived' ___ namespace:QuotedString {
-            const intent = pushIntent(location(), 'CustomInterfaceController.EventsReceived', {class:lib.FilteredEvent});
+            const intent = pushIntent(location(), 'CustomInterfaceController.EventsReceived', {class:lib.FilteredIntent});
 
             intent.setCurrentIntentFilter({
               name: namespace,
               data: { namespace },
-              filter: function(event, data) { return event.header.namespace === data.namespace; },
+              filter: function(request, data) {
+                if (request.events != null) {
+                  for (const __event of request.events) {
+                    if (__event.header.namespace === data.namespace) {
+                      context.slots.event = __event;
+                      return true;
+                    }
+                  }
+                  return false;
+                }
+              },
               callback: async function() {
                 if (context.db.read('__lastCustomEventHandlerToken') != context.request.token) {
                   context.shouldDropSession = true;
                   return;
                 }
               }
-            })
+            });
           }
           / 'when' ___ 'CustomInterfaceController.EventsReceived' {
-            const intent = pushIntent(location(), 'CustomInterfaceController.EventsReceived', {class:lib.FilteredEvent});
+            const intent = pushIntent(location(), 'CustomInterfaceController.EventsReceived', {class:lib.FilteredIntent});
             intent.setCurrentIntentFilter({
               name: '__'
             });

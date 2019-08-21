@@ -430,21 +430,21 @@ class lib.Intent
       @startFunction.toLocalization(result, context)
 
 # Class that supports intent filtering.
-class lib.FilteredEvent extends lib.Intent
+class lib.FilteredIntent extends lib.Intent
   constructor: (args) ->
     super args
     @startFunction = new FunctionMap
-    @eventFilters = {}
+    @intentFilters = {}
 
   # Method to filter intents via a passed filter function; can trigger optional callbacks.
   # @param name ... name used for scoping
   # @param data ... this is filter data that can be used to persist pegjs pattern data
-  # @param filter ... function(event) that returns true/false for the event per some conditions
-  # @param callback ... lambda code that can be run if a filtered event is found
+  # @param filter ... function(request, data) that returns true/false for the incoming request
+  # @param callback ... lambda code that can be run if a filtered intent is found
   setCurrentIntentFilter: ({ name, data, filter, callback }) ->
     @startFunction.setCurrentName name
 
-    @eventFilters[name] = {
+    @intentFilters[name] = {
       data
       filter
       callback
@@ -454,34 +454,30 @@ class lib.FilteredEvent extends lib.Intent
     indent = '    '
 
     # '__' is our catch-all default -> do not apply any filter
-    if @eventFilters['__']
+    if @intentFilters['__']
       options.scopeManager.pushScope @location, @name
-      output.push "#{indent}// Unfiltered event handling logic."
+      output.push "#{indent}// Unfiltered intent handling logic."
       @startFunction.toLambda(output, indent, options, '__')
       options.scopeManager.popScope @location
-      delete @eventFilters['__'] # remove default, so we can easily check if any filters remain
+      delete @intentFilters['__'] # remove default, so we can easily check if any filters remain
 
-    if Object.keys(@eventFilters).length > 0
-      output.push "#{indent}// Filtered event handling logic."
-      output.push "#{indent}for (const __event of context.slots.request.events) {"
-      output.push "#{indent}  context.slots.event = __event;"
-      output.push "#{indent}  let __filter;"
+    if Object.keys(@intentFilters).length > 0
+      output.push "#{indent}// Filtered intent handling logic."
+      output.push "#{indent}let __intentFilter;"
 
-      for eventFilterName, eventFilter of @eventFilters
-        continue unless eventFilter
-        options.scopeManager.pushScope @location, "#{@name}:#{eventFilterName}"
-        filterFuncString = Utils.stringifyFunction(eventFilter.filter, "#{indent}    ")
-        output.push "#{indent}  __filter = #{filterFuncString}"
-        output.push "#{indent}  if (__filter(__event, #{JSON.stringify(eventFilter.data)})) {"
+      for intentFilterName, intentFilter of @intentFilters
+        continue unless intentFilter
+        options.scopeManager.pushScope @location, "#{@name}:#{intentFilterName}"
+        filterFuncString = Utils.stringifyFunction(intentFilter.filter, "#{indent}  ")
+        output.push "#{indent}__intentFilter = #{filterFuncString}"
+        output.push "#{indent}if (__intentFilter(context.event.request, #{JSON.stringify(intentFilter.data)})) {"
 
-        # If the filter specified a callback, run it before proceeding to in-skill event handler.
-        if eventFilter.callback?
-          callbackString = Utils.stringifyFunction(eventFilter.callback, "#{indent}      ")
-          output.push "#{indent}    (await #{callbackString})();"
+        # If the filter specified a callback, run it before proceeding to the intent handler.
+        if intentFilter.callback?
+          callbackString = Utils.stringifyFunction(intentFilter.callback, "#{indent}    ")
+          output.push "#{indent}  await (#{callbackString})();"
 
-        # Insert the in-skill event handler.
-        @startFunction.toLambda(output, "#{indent}    ", options, eventFilterName)
-
-        output.push "#{indent}  }"
+        # Inject the filtered intent handler.
+        @startFunction.toLambda(output, "#{indent}  ", options, intentFilterName)
+        output.push "#{indent}}"
         options.scopeManager.popScope @location
-      output.push "#{indent}};"
