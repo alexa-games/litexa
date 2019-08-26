@@ -342,8 +342,7 @@ class DBTypeWrapper
 # Monetization
 inSkillProductBought = (stateContext, referenceName) ->
   isp = await getProductByReferenceName(stateContext, referenceName)
-  return false unless isp?
-  return isp.entitled == "ENTITLED"
+  return (isp?.entitled == 'ENTITLED')
 
 getProductByReferenceName = (stateContext, referenceName) ->
   if stateContext.monetization.fetchEntitlements
@@ -361,6 +360,7 @@ getProductByProductId = (stateContext, productId) ->
   for p in stateContext.monetization.inSkillProducts
     if p.productId == productId
       return p
+  return null
 
 buildBuyInSkillProductDirective = (stateContext, referenceName) ->
   isp = await getProductByReferenceName stateContext, referenceName
@@ -393,11 +393,14 @@ fetchEntitlements = (stateContext, ignoreCache = false) ->
       console.log "skipping fetchEntitlements, no https present"
       reject()
 
-    unless stateContext.event.context.System.apiAccessToken
-      # If there's no API access token, this is an offline test.
+    unless stateContext.event.context.System.apiEndpoint
+      # If there's no API endpoint this is an offline test.
       resolve()
 
-    apiEndpoint = "api.amazonalexa.com"
+    # endpoint is region-specific:
+    # e.g. https://api.amazonalexa.com vs. https://api.eu.amazonalexa.com
+    apiEndpoint = stateContext.event.context.System.apiEndpoint
+    apiEndpoint = apiEndpoint.replace("https://", "")
     apiPath = "/v1/users/~current/skills/~current/inSkillProducts"
     token = "bearer " + stateContext.event.context.System.apiAccessToken
 
@@ -421,13 +424,14 @@ fetchEntitlements = (stateContext, ignoreCache = false) ->
         returnData += chunk
 
       res.on 'end', () =>
-        stateContext.monetization.inSkillProducts = JSON.parse(returnData).inSkillProducts
+        console.log("fetchEntitlements() returned: #{returnData}")
+        stateContext.monetization.inSkillProducts = JSON.parse(returnData).inSkillProducts ? []
         stateContext.monetization.fetchEntitlements = false
         stateContext.db.write "__monetization", stateContext.monetization
         resolve()
 
     req.on 'error', (e) ->
-      console.log 'Error calling InSkillProducts API: ' + e
+      console.log "Error while querying inSkillProducts: #{e}"
       reject(e)
 
 getReferenceNameByProductId = (stateContext, productId) ->
