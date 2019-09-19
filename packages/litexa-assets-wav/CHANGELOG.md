@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.2.0](https://github.com/alexa-games/litexa/compare/v0.1.6...v0.2.0) (2019-09-19)
+
+
+### Bug Fixes
+
+* Addressed an issue when using @litexa/assets-wav alongside localization. ([#32](https://github.com/alexa-games/litexa/issues/32)) ([8f48b7c](https://github.com/alexa-games/litexa/commit/8f48b7c))
+
+
+
+
+
 ## [0.1.6](https://github.com/alexa-games/litexa/compare/v0.1.5...v0.1.6) (2019-07-04)
 
 

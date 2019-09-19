@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.2.0](https://github.com/alexa-games/litexa/compare/v0.1.6...v0.2.0) (2019-09-19)
+
+
+### Features
+
+* Added initial support for Custom Interfaces to @litexa/gadgets. ([#36](https://github.com/alexa-games/litexa/issues/36)) ([c1acbff](https://github.com/alexa-games/litexa/commit/c1acbff)), closes [#37](https://github.com/alexa-games/litexa/issues/37)
+* Cleaned up @litexa/gadgets extension and added test coverage. ([#28](https://github.com/alexa-games/litexa/issues/28)) ([df4f2ad](https://github.com/alexa-games/litexa/commit/df4f2ad))
+* Up-sell Support for In-Skill Purchasing. Bugfixes and Documentation Updates. ([085fa79](https://github.com/alexa-games/litexa/commit/085fa79))
+
+
+
+
+
 ## [0.1.6](https://github.com/alexa-games/litexa/compare/v0.1.5...v0.1.6) (2019-07-04)
 
 

@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.2.0](https://github.com/alexa-games/litexa/compare/v0.1.6...v0.2.0) (2019-09-19)
+
+
+### Features
+
+* Added support for locale-specific skill icons, and common assets. ([#18](https://github.com/alexa-games/litexa/issues/18)) ([6e19874](https://github.com/alexa-games/litexa/commit/6e19874))
+* Added support for overriding DB key specification. ([#29](https://github.com/alexa-games/litexa/issues/29)) ([46c0a97](https://github.com/alexa-games/litexa/commit/46c0a97)), closes [#30](https://github.com/alexa-games/litexa/issues/30)
+
+
+
+
+
 ## [0.1.6](https://github.com/alexa-games/litexa/compare/v0.1.5...v0.1.6) (2019-07-04)
 
 

@@ -1,7 +1,7 @@
 {
   "name": "@litexa/assets-wav",
   "author": "Amazon.com",
-  "version": "0.1.6",
+  "version": "0.2.0",
   "license": "SEE LICENSE IN LICENSE.TXT",
   "description": "This module adds automatic support for WAV files in the asset pipeline of a Litexa project.",
   "keywords": [
