@@ -147,7 +147,7 @@ describe('aplDataHandler', function() {
       [`${custPrefix}SpeechObject${custSuffix}`]: {
         type: 'object',
         properties: {
-          [`${custPrefix}SSML${custSuffix}`]: testSpeech
+          [`${custPrefix}SSML${custSuffix}`]: `<speak>${testSpeech}</speak>`
         },
         transformers: [
           {

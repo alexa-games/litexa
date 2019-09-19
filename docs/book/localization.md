@@ -197,7 +197,7 @@ waitForPlayers
     or "playing with $count people"
     with $count = AMAZON.PLAYERS
   ...
-  
+
 ```
 
 The default skill model contains this:
@@ -278,7 +278,7 @@ waitForAnswer
   when AnimalsIntent
     or "the animal is $animal"
     with $animal = animals.build.js:slotBuilder
-  
+
   otherwise
     say "Here is your question again."
     ...
@@ -291,7 +291,7 @@ waitForAnswer
   when PlantsIntent
     or "the plant is $plant"
     with $plant = plants.build.js:slotBuilder
-  
+
   otherwise
     say "Here is your question again."
     ...

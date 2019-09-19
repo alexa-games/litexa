@@ -164,21 +164,14 @@ buildSkillManifest = (context, manifestContext) ->
           throw "skill.json is missing locales in publishingInformation.
             Has it been corrupted?"
 
-        # apply the default icon location, unless intentionally overriden
-        requiredAssets = context.artifacts.get('required-assets') ? {}
-        manifestContext.assetsMd5 = ""
-        iconURLs = for name in ['icon-108.png', 'icon-512.png']
-          assetInfo = requiredAssets[name]
-          unless assetInfo?
-            throw "Missing #{name} in the assets directory, or you haven't deployed it with the
-              assets yet. Please remedy and try again."
-          manifestContext.assetsMd5 += assetInfo.md5
-          assetInfo.url
-
-
         # dig through specified locales. TODO: compare with code language support?
         manifest.publishingInformation.locales = {}
         manifestContext.locales = []
+
+        # check for icon files that were deployed via 'assets' directories
+        deployedIconAssets = context.artifacts.get('deployedIconAssets') ? {}
+        manifestContext.deployedIconAssetsMd5Sum = ''
+
         for locale, data of info.publishingInformation.locales
           # copy over kosher keys, ignore the rest
           whitelist = ['name', 'summary', 'description'
@@ -187,8 +180,41 @@ buildSkillManifest = (context, manifestContext) ->
           copy = {}
           for k in whitelist
             copy[k] = data[k]
-          copy.smallIconUri = copy.smallIconUri ? iconURLs[0]
-          copy.largeIconUri = copy.largeIconUri ? iconURLs[1]
+
+          # check for language-specific skill icon files that were deployed via 'assets'
+          localeIconAssets = deployedIconAssets[locale] ? deployedIconAssets[locale[0..1]]
+          # fallback to default skill icon files, if no locale-specific icons found
+          unless localeIconAssets?
+            localeIconAssets = deployedIconAssets.default
+
+          # Unless user specified their own icon URIs, use the deployed asset icons.
+          # If neither a URI is specified nor an asset icon is deployed, throw an error.
+          if copy.smallIconUri?
+            copy.smallIconUri = copy.smallIconUri
+          else
+            smallIconFileName = 'icon-108.png'
+            if localeIconAssets? and localeIconAssets[smallIconFileName]?
+              smallIcon = localeIconAssets[smallIconFileName]
+              manifestContext.deployedIconAssetsMd5Sum += smallIcon.md5
+              copy.smallIconUri = smallIcon.url
+            else
+              throw "Required smallIconUri not found for locale #{locale}. Please specify a
+                'smallIconUri' in the skill manifest, or deploy an '#{smallIconFileName}' image via
+                assets."
+
+          if copy.largeIconUri?
+            copy.largeIconUri = copy.largeIconUri
+          else
+            largeIconFileName = 'icon-512.png'
+            if localeIconAssets? and localeIconAssets[largeIconFileName]?
+              largeIcon = localeIconAssets[largeIconFileName]
+              manifestContext.deployedIconAssetsMd5Sum += largeIcon.md5
+              copy.largeIconUri = largeIcon.url
+            else
+              throw "Required largeIconUri not found for locale #{locale}. Please specify a
+                'smallIconUri' in the skill manifest, or deploy an '#{largeIconFileName}' image via
+                assets."
+
           manifest.publishingInformation.locales[locale] = copy
 
           invocationName = context.deploymentOptions.invocation?[locale] ? data.invocation ? data.name
@@ -270,20 +296,20 @@ buildSkillManifest = (context, manifestContext) ->
   # dependencies they want to assert
   for extensionName, extension of context.projectInfo.extensions
     validator = new JSONValidator manifest
-    extension.compiler?.validators?.manifest validator, context.skill
+    extension.compiler?.validators?.manifest { validator, skill: context.skill }
     if validator.errors.length > 0
       logger.error e for e in validator.errors
-      throw new Error "Errors encountered with the manifest, cannot continue."
+      throw "Errors encountered with the manifest, cannot continue."
 
   # now that we have the manifest, we can also validate the models
   for region of manifest.manifest.publishingInformation.locales
     model = context.skill.toModelV2(region)
     validator = new JSONValidator model
     for extensionName, extension of context.projectInfo.extensions
-      extension.compiler?.validators?.model validator, manifest, context.skill
+      extension.compiler?.validators?.model { validator, skill: context.skill }
       if validator.errors.length > 0
         logger.error e for e in validator.errors
-        throw new Error "Errors encountered with model in #{region} language, cannot continue"
+        throw "Errors encountered with model in #{region} language, cannot continue"
 
   manifestContext.manifestFilename = path.join(context.deployRoot, 'skill.json')
   writeFilePromise manifestContext.manifestFilename, JSON.stringify(manifest, null, 2), 'utf8'
@@ -336,7 +362,7 @@ updateSkill = (context, manifestContext) ->
         account. Have you deleted it manually in the dev console? If so, please delete it from the
         artifacts.json and try again."
     else
-      Promise.reject err.message
+      Promise.reject err
   .then (data) ->
     needsUpdating = false
     info = parseSkillInfo data
@@ -351,7 +377,7 @@ updateSkill = (context, manifestContext) ->
         logger.log "skill manifest mismatch"
         needsUpdating = true
 
-    unless context.artifacts.get('skill-manifest-assets-md5') == manifestContext.assetsMd5
+    unless context.artifacts.get('skill-manifest-assets-md5') == manifestContext.deployedIconAssetsMd5Sum
       logger.log "skill icons changed since last update"
       needsUpdating = true
 
@@ -372,9 +398,9 @@ updateSkill = (context, manifestContext) ->
     .then (data) ->
       waitForSuccess context, manifestContext.skillId, 'update-skill'
     .then ->
-      context.artifacts.save 'skill-manifest-assets-md5', manifestContext.assetsMd5
+      context.artifacts.save 'skill-manifest-assets-md5', manifestContext.deployedIconAssetsMd5Sum
     .catch (err) ->
-      logger.error err
+      Promise.reject err
 
 
 waitForSuccess = (context, skillId, operation) ->
@@ -430,6 +456,8 @@ createSkill = (context, manifestContext) ->
     logger.log "in progress skill id #{skillId}"
     manifestContext.skillId = skillId
     waitForSuccess context, skillId, 'create-skill'
+  .catch (err) ->
+    Promise.reject err
 
 
 writeDefaultManifest = (context, filename) ->
@@ -493,8 +521,8 @@ writeDefaultManifest = (context, filename) ->
 
           locales:
             "en-US":
-              privacyPolicyUrl: "http://yoursite/privacy.html",
-              termsOfUseUrl: "http://yoursite/terms.html"
+              privacyPolicyUrl: "https://www.example.com/privacy.html",
+              termsOfUseUrl: "https://www.example.com/terms.html"
   """
 
   fs.writeFileSync filename, manifest, 'utf8'
@@ -533,6 +561,8 @@ waitForModelSuccess = (context, skillId, locale, operation) ->
             logger.verbose data
             return reject "unknown skill state: #{info.status} while waiting on SMAPI"
         Promise.resolve()
+      .catch (err) ->
+        reject(err)
     checkStatus()
 
 
@@ -559,7 +589,7 @@ updateModelForLocale = (context, manifestContext, localeInfo) ->
   .catch (err) ->
     # it's fine if it doesn't exist yet, we'll upload
     unless err.code == 404
-      throw "Error while reading #{locale} model, #{err.code} #{err.message}"
+      Promise.reject err
     Promise.resolve "{}"
   .then (data) ->
     model = context.skill.toModelV2 locale
@@ -607,7 +637,8 @@ updateModelForLocale = (context, manifestContext, localeInfo) ->
     .then ->
       dt = (new Date) - modelDeployStart
       logger.log "#{locale} model update complete, total time #{dt}ms"
-
+    .catch (err) ->
+      Promise.reject err
 
 enableSkill = (context, manifestContext) ->
   logger.log "ensuring skill is enabled for testing"
@@ -617,3 +648,5 @@ enableSkill = (context, manifestContext) ->
     params: { 'skill-id': manifestContext.skillId }
     logChannel: logger
   }
+  .catch (err) ->
+    Promise.reject err

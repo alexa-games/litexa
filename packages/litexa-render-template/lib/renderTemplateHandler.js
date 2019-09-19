@@ -44,7 +44,7 @@ module.exports = function(context) {
       }
     },
     events: {
-      afterStateMachine: function () {
+      afterStateMachine: function() {
         if (context.screen && myData.hasDisplay()) {
           let screen = context.screen;
 

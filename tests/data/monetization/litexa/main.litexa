@@ -1,9 +1,9 @@
 launch
-  if inSkillProductBought(context, 'MyProduct')
-    say "You're entitled to use MyProduct."
+  if inSkillProductBought(context, "MyProduct")
+    say "You're entitled to use My Product."
     -> listen
   else
-    say "You're not entitled to use MyProduct."
+    say "You're not entitled to use My Product."
     -> listen
 
 listen
@@ -13,20 +13,31 @@ listen
   when "cancel"
     cancelInSkillProduct "MyProduct"
 
+  when "upsell"
+    upsellInSkillProduct "MyProduct"
+      message: "This is my upsell message."
+
 global
   when Connections.Response "Buy"
     switch $purchaseResult
       == "ACCEPTED" then
-        say "Looks like you now own $referenceName."
+        say "Looks like you now own {$newProduct.name}."
       == "DECLINED" then
-        say "Looks like you opted not to purchase $referenceName. Maybe next time!"
+        say "Looks like you opted not to purchase {$newProduct.name}. Maybe next time!"
 
   when Connections.Response "Cancel"
     switch $purchaseResult
       == "ACCEPTED" then
-        say "Looks like you've canceled $referenceName."
+        say "Looks like you've canceled {$newProduct.name}."
       == "DECLINED" then
-        say "Looks like you opted out of cancelling $referenceName."
+        say "Looks like you opted out of cancelling {$newProduct.name}."
+
+  when Connections.Response "Upsell"
+    switch $purchaseResult
+      == "ACCEPTED" then
+        say "Looks like you accepted upsell for {$newProduct.name}."
+      == "DECLINED" then
+        say "Looks like you declined upsell for {$newProduct.name}."
 
   when AMAZON.HelpIntent
     say "Please say buy or cancel."

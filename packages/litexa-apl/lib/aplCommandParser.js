@@ -18,7 +18,7 @@ const {
 } = require('./aplCommandInfo');
 
 module.exports = function(lib) {
-  return function (commandType = undefined) {
+  return function(commandType = undefined) {
     this.attributes = {
       commands: {type: commandType}
     };

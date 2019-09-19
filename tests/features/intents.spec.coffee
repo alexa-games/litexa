@@ -175,9 +175,82 @@ describe 'supports intent statements', ->
       when Connections.Response
         say "Connections.Response"
 
+      when Connections.Response "Buy"
+        say "upsell Connections.Response"
+
+      when Connections.Response "Cancel"
+        say "upsell Connections.Response"
+
       when Connections.Response "Upsell"
         say "upsell Connections.Response"
 
       when Connections.Response "Unknown"
         say "unknown Connections.Response"
     """
+
+  it 'does not allow plain utterances being reused in different intent handlers', ->
+    # when <utterance> + or <utterance>
+    expectFailParse """
+    global
+      when "walk"
+        or "run"
+        say "moving"
+
+      when "run"
+        say "running"
+    """, "utterance 'run' in the intent handler for 'RUN' was already handled by the intent
+      'WALK'"
+
+    # or <utterance> + or <utterance>
+    expectFailParse """
+    global
+      when "walk"
+        or "run"
+        say "moving"
+
+      when "sprint"
+        or "run"
+        say "running"
+    """, "utterance 'run' in the intent handler for 'SPRINT' was already handled by the intent
+      'WALK'"
+
+    #  or <Utterance> + or <uTTERANCE>
+    expectFailParse """
+    global
+      when "walk"
+        or "Run"
+        say "moving"
+
+      when "sprint"
+        or "rUN"
+        say "running"
+    """, "utterance 'run' in the intent handler for 'SPRINT' was already handled by the intent
+      'WALK'"
+
+  it 'does allow reusing otherwise identical utterances with different slot variables', ->
+    expectParse """
+    global
+      when "wander"
+        or "walk the $cheagle today"
+        with $cheagle = "Coco"
+        say "walking"
+
+      when "stroll"
+        or "walk the $poodle today"
+        with $poodle = "Princess"
+        say "running"
+    """
+
+  it 'does not allow reusing identical utterances with identical slot variables', ->
+    expectFailParse """
+    global
+      when "wander"
+        or "walk the $Dog today"
+        with $Dog = "Lassie"
+        say "walking"
+
+      when "stroll"
+        or "walk the $Dog today"
+        say "running"
+    """, "utterance 'walk the $Dog today' in the intent handler for 'STROLL' was already handled by
+      the intent 'WANDER'"

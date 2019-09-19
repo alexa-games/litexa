@@ -208,7 +208,7 @@ describe 'interpolates on-screen strings', ->
       expectScreenString """<center>center but not
         this part""", "<div align='center'>center but not</div> this part"
       expectScreenString """<center>first line
-        <center>second line""", "<div align='center'>first line</div><div align='center'>second line</div>"
+        <center>second line""", "<div align='center'>first line</div> <div align='center'>second line</div>"
     ]
 
   it 'does italics', ->
@@ -238,7 +238,7 @@ describe 'interpolates on-screen strings', ->
       expectScreenString """<center><b>centered and bold
         neither
         <b><f7>bold and large
-        """, "<div align='center'><b>centered and bold</b></div> neither<b><font size='7'>bold and large</font></b>"
+        """, "<div align='center'><b>centered and bold</b></div> neither <b><font size='7'>bold and large</font></b>"
 
       expectScreenString """<center><b>title part
 
@@ -254,3 +254,22 @@ describe 'randomizes say statement variants', ->
     for i in [1...lines.length]
       if lines[i] == lines[i - 1]
         throw "duplicate encountered: #{lines[i]} == #{lines[i - 1]}"
+
+describe 'formats say statements with interpolation properly', ->
+  it 'runs the say-formatting integration test', ->
+    preamble.runSkill 'say-formatting'
+    .then (result) ->
+      response = result.raw[1].response.response
+      directives = response.directives
+      assert.equal directives.length, 2
+      assert.equal directives[0].type, 'Display.RenderTemplate'
+      assert.equal directives[1].type, 'Hint'
+      assert.equal directives[0].template.textContent.primaryText.text, "<b> this is one</b> continuous line on <div align='center'>a screen. But this is</div><br/>not a continuous line."
+      response = result.raw[2].response.response
+      directives = response.directives
+      assert.equal directives[0].type, 'Display.RenderTemplate'
+      assert.equal directives[0].template.textContent.primaryText.text, "This is a <b>line.</b>"
+      response = result.raw[3].response.response
+      directives = response.directives
+      assert.equal directives[0].type, 'Display.RenderTemplate'
+      assert.equal directives[0].template.textContent.primaryText.text, "start<br/>end"

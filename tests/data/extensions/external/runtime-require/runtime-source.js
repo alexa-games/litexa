@@ -9,7 +9,7 @@
  * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
 
-module.exports = function (context) {
+module.exports = function(context) {
 
   console.log("Runtime require was constructed");
 
@@ -21,13 +21,13 @@ module.exports = function (context) {
 
     userFacing: {
       secret: 7,
-      hello: function () {
+      hello: function() {
         return `runtime says, ${myData.greeting}.`;
       }
     },
 
     events: {
-      afterStateMachine: function () {
+      afterStateMachine: function() {
         context.say.push("Runtime require here, after state machine.");
         console.log("Runtime require peeping after state machine")
       },

@@ -102,6 +102,6 @@ module.exports = {
           stderr
         }
 
-      spawnedProcess.on('exit', resolver);
-      spawnedProcess.on('close', resolver);
+      spawnedProcess.on('exit', resolver)
+      spawnedProcess.on('close', resolver)
 }

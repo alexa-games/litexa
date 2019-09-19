@@ -15,57 +15,57 @@ aplHandler = require('./dist/handler')
 aplValidators = require('./lib/aplValidators')
 
 module.exports = function(options, lib) {
-  return {
-    compiler: {
-      validators: {
-        directives: {
-          'Alexa.Presentation.APL.RenderDocument': aplValidators.renderDocumentDirective,
-          'Alexa.Presentation.APL.ExecuteCommands': aplValidators.executeCommandsDirective
-        },
-        model: aplValidators.model,
-        manifest: function(validator, skill) {
-          // no manifest requirements
-        }
+  const compiler = {
+    validators: {
+      directives: {
+        'Alexa.Presentation.APL.RenderDocument': aplValidators.renderDocumentDirective,
+        'Alexa.Presentation.APL.ExecuteCommands': aplValidators.executeCommandsDirective
       },
-      validIntentNames: [
-        'Alexa.Presentation.APL.UserEvent'
-      ]
-    },
-
-    language: {
-      statements: {
-        aplcommand: {
-          parser: `aplcommand
-            = 'aplcommand' __ type:QuotedString {
-              pushSay(location(), new lib.APLCommandParser(type));
-            }
-            / 'aplcommand' {
-              pushSay(location(), new lib.APLCommandParser());
-            }`
-        },
-        apl: {
-          parser: `apl
-            = 'apl' __ document:JsonFileName {
-              pushSay(location(), new lib.APLParser(document));
-            }
-            / 'apl' __ document:VariableReference {
-              pushSay(location(), new lib.APLParser(document));
-            }
-            / 'apl' {
-              pushSay(location(), new lib.APLParser());
-            }`
-        }
-      },
-      testStatements: {},
-      lib: {
-        APLParser: aplParser(lib),
-        APLCommandParser: aplCommandParser(lib)
+      model: aplValidators.model,
+      manifest: function({ validator, skill }) {
+        // no manifest requirements
       }
     },
+    validEventNames: [
+      'Alexa.Presentation.APL.UserEvent'
+    ]
+  }
 
-    runtime: {
-      apiName: 'APL',
-      source: aplHandler
+  const language = {
+    statements: {
+      aplcommand: {
+        parser: `aplcommand
+          = 'aplcommand' __ type:QuotedString {
+            pushSay(location(), new lib.APLCommandParser(type));
+          }
+          / 'aplcommand' {
+            pushSay(location(), new lib.APLCommandParser());
+          }`
+      },
+      apl: {
+        parser: `apl
+          = 'apl' __ document:JsonFileName {
+            pushSay(location(), new lib.APLParser(document));
+          }
+          / 'apl' __ document:VariableReference {
+            pushSay(location(), new lib.APLParser(document));
+          }
+          / 'apl' {
+            pushSay(location(), new lib.APLParser());
+          }`
+      }
+    },
+    testStatements: {},
+    lib: {
+      APLParser: aplParser(lib),
+      APLCommandParser: aplCommandParser(lib)
     }
   }
+
+  const runtime = {
+    apiName: 'APL',
+    source: aplHandler
+  }
+
+  return { compiler, language, runtime };
 }

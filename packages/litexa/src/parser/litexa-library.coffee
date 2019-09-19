@@ -342,8 +342,7 @@ class DBTypeWrapper
 # Monetization
 inSkillProductBought = (stateContext, referenceName) ->
   isp = await getProductByReferenceName(stateContext, referenceName)
-  return false unless isp?
-  return isp.entitled == "ENTITLED"
+  return (isp?.entitled == 'ENTITLED')
 
 getProductByReferenceName = (stateContext, referenceName) ->
   if stateContext.monetization.fetchEntitlements
@@ -351,6 +350,15 @@ getProductByReferenceName = (stateContext, referenceName) ->
 
   for p in stateContext.monetization.inSkillProducts
     if p.referenceName == referenceName
+      return p
+  return null
+
+getProductByProductId = (stateContext, productId) ->
+  if stateContext.monetization.fetchEntitlements
+    await fetchEntitlements stateContext
+
+  for p in stateContext.monetization.inSkillProducts
+    if p.productId == productId
       return p
   return null
 
@@ -385,10 +393,16 @@ fetchEntitlements = (stateContext, ignoreCache = false) ->
       console.log "skipping fetchEntitlements, no https present"
       reject()
 
-    apiEndpoint = "api.amazonalexa.com"
+    unless stateContext.event.context.System.apiEndpoint
+      # If there's no API endpoint this is an offline test.
+      resolve()
+
+    # endpoint is region-specific:
+    # e.g. https://api.amazonalexa.com vs. https://api.eu.amazonalexa.com
+    apiEndpoint = stateContext.event.context.System.apiEndpoint
+    apiEndpoint = apiEndpoint.replace("https://", "")
     apiPath = "/v1/users/~current/skills/~current/inSkillProducts"
     token = "bearer " + stateContext.event.context.System.apiAccessToken
-    language = "en-US"
 
     options =
       host: apiEndpoint
@@ -396,7 +410,7 @@ fetchEntitlements = (stateContext, ignoreCache = false) ->
       method: 'GET'
       headers:
         "Content-Type": 'application/json'
-        "Accept-Language": language
+        "Accept-Language": stateContext.request.locale
         "Authorization": token
 
     req = https.get options, (res) =>
@@ -410,14 +424,14 @@ fetchEntitlements = (stateContext, ignoreCache = false) ->
         returnData += chunk
 
       res.on 'end', () =>
-        stateContext.monetization.inSkillProducts = JSON.parse(returnData).inSkillProducts
+        console.log("fetchEntitlements() returned: #{returnData}")
+        stateContext.monetization.inSkillProducts = JSON.parse(returnData).inSkillProducts ? []
         stateContext.monetization.fetchEntitlements = false
-        # console.log("fetchEntitlements " + JSON.stringify(stateContext.monetization))
         stateContext.db.write "__monetization", stateContext.monetization
         resolve()
 
     req.on 'error', (e) ->
-      console.log 'Error calling InSkillProducts API: ' + e
+      console.log "Error while querying inSkillProducts: #{e}"
       reject(e)
 
 getReferenceNameByProductId = (stateContext, productId) ->
@@ -440,6 +454,27 @@ buildCancelInSkillProductDirective = (stateContext, referenceName) =>
         "InSkillProduct": {
           "productId": isp.productId
         }
+      }
+      "token": "bearer " + stateContext.event.context.System.apiAccessToken
+    }
+
+  stateContext.shouldEndSession = true
+
+buildUpsellInSkillProductDirective = (stateContext, referenceName, upsellMessage = '') =>
+  isp = await getProductByReferenceName(stateContext, referenceName)
+  unless isp?
+    console.log "buildUpsellInSkillProductDirective(): in-skill product \"#{referenceName}\" not
+      found."
+    return
+
+  stateContext.directives.push {
+      "type": "Connections.SendRequest"
+      "name": "Upsell"
+      "payload": {
+        "InSkillProduct": {
+          "productId": isp.productId
+        }
+        "upsellMessage": upsellMessage
       }
       "token": "bearer " + stateContext.event.context.System.apiAccessToken
     }

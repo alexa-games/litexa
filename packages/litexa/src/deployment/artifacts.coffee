@@ -41,6 +41,13 @@ class Artifacts
     @variantInfo[key] = value
     @flush()
 
+  delete: (key) ->
+    unless @variantInfo?
+      throw "failed to remove artifact because no variant is currently set"
+    if @variantInfo[key]?
+      delete @variantInfo[key]
+      @flush()
+
   saveGlobal: (key, value) ->
     @data.globals[key] = value
     @flush()
@@ -56,7 +63,7 @@ class Artifacts
 
 exports.Artifacts = Artifacts
 
-exports.loadArtifacts = (context, logger) ->
+exports.loadArtifacts = ({ context, logger }) ->
   filename = path.join context.projectRoot, 'artifacts.json'
   readFilePromise filename, 'utf8'
   .catch (err) ->

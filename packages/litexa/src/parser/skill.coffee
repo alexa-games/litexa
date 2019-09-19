@@ -70,8 +70,8 @@ class lib.Skill
     # cache these to customize the handler
     @extendedEventNames = {}
     for extensionName, extensionInfo of @projectInfo.extensions
-      continue unless extensionInfo.compiler?.validIntentNames?
-      for eventName in extensionInfo.compiler?.validIntentNames
+      continue unless extensionInfo.compiler?.validEventNames?
+      for eventName in extensionInfo.compiler?.validEventNames
         @extendedEventNames[eventName] = true
     @extendedEventNames = ( e for e of @extendedEventNames )
 
@@ -257,7 +257,6 @@ class lib.Skill
       state.location = location
     return state
 
-
   pushIntent: (state, location, utterance, intentInfo) ->
     # scan for duplicates, we'll merge if we see them
     intent = state.pushOrGetIntent(location, utterance, intentInfo)
@@ -294,7 +293,6 @@ class lib.Skill
         previously defined type #{old.type}"
 
     @dbTypes[definition.name] = definition
-
 
   refreshAllFiles: ->
     litexaDirty = false
@@ -334,6 +332,13 @@ class lib.Skill
       source = fs.readFileSync(__dirname + '/lambda-preamble.coffee', 'utf8')
       source = coffee.compile(source, {bare: true})
       @libraryCode.push source
+
+    # some functions we'd like to allow developers to override
+    @libraryCode.push "litexa.overridableFunctions = {"
+    @libraryCode.push "  generateDBKey: function(identity) {"
+    @libraryCode.push "    return `${identity.deviceId}`;"
+    @libraryCode.push "  }"
+    @libraryCode.push "};"
 
     librarySource = fs.readFileSync(__dirname + '/litexa-library.coffee', 'utf8')
     librarySource = coffee.compile(librarySource, {bare: true})
@@ -817,7 +822,7 @@ class lib.Skill
           remainingTests.push test
 
       for name, file of @files when file.isCode and file.fileCategory == 'test'
-        test = new testing.CodeTest file
+        test = new testing.lib.CodeTest file
         unless focusTest(file.filename(), null)
           test.filters = options.focusedFiles ? null
         remainingTests.push test

@@ -9,7 +9,7 @@
  * See the Agreement for the specific terms and conditions of the Agreement. Capitalized
  * terms not defined in this file have the meanings given to them in the Agreement.
  * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 
+
 ###
 
 
@@ -67,5 +67,5 @@ module.exports =
 
       locales:
         "en-US":
-          privacyPolicyUrl: "http://yoursite/privacy.html",
-          termsOfUseUrl: "http://yoursite/terms.html"
+          privacyPolicyUrl: "https://www.example.com/privacy.html",
+          termsOfUseUrl: "https://www.example.com/terms.html"

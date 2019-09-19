@@ -9,23 +9,23 @@
  * See the Agreement for the specific terms and conditions of the Agreement. Capitalized
  * terms not defined in this file have the meanings given to them in the Agreement.
  * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 
+
 ###
 
 
 pulseButtons = ->
-  directive = 
+  directive =
     type: "GadgetController.SetLight"
     version: 1
     targetGadgets: []
     parameters:
       triggerEvent: 'none'
       triggerEventTimeMs: 0
-      animations: [ 
+      animations: [
         {
           repeat: 40
           targetLights: [ '1' ]
-          sequence: [ 
+          sequence: [
             {
               durationMs: 500
               blend: true
@@ -41,12 +41,11 @@ pulseButtons = ->
       ]
   [ directive ]
 
-anyButtonHandler = -> 
+anyButtonHandler = ->
   type: "GameEngine.StartInputHandler"
   timeout: 1000 * 10
   proxies: [ 'one', 'two', 'three', 'four' ]
-  maximumHistoryLength: 256
-  recognizers: 
+  recognizers:
     'one pressed':
       type: 'match'
       fuzzy: false
@@ -67,21 +66,20 @@ anyButtonHandler = ->
           action: 'down'
         }
       ]
-  events: 
-    'button1': 
+  events:
+    'button1':
       meets: [ 'one pressed' ]
       reports: 'matches'
       maximumInvocations: 100
       shouldEndInputHandler: false
 
-    'button2': 
+    'button2':
       meets: [ 'twopressed' ]
       reports: 'matches'
       maximumInvocations: 100
       shouldEndInputHandler: false
 
-    'finished': 
+    'finished':
       meets: [ 'timed out' ]
       reports: 'nothing'
       shouldEndInputHandler: true
-

@@ -40,7 +40,7 @@ module.exports = {
       [`${this.prefix}SpeechObject${suffix}`]: {
         type: 'object',
         properties: {
-          [`${this.prefix}SSML${suffix}`]: speech
+          [`${this.prefix}SSML${suffix}`]: `<speak>${speech}</speak>`
         },
         transformers: [
           {

@@ -4,7 +4,6 @@
 # * says goodbye
 
 initialize
-  log "here"
   set resetOnLaunch = false
 
 launch

@@ -14,3 +14,14 @@ launch
   when UPPERCASE
   when  eh
   when   "eh?"
+  when "UPPER CASE UTTERANCE"
+    say "heard upper"
+  when "lower case utterance"
+    say "heard lower"
+
+TEST "capitalization mismatch doesn't matter between intent handler and 'user:' statement"
+  launch
+  user: "upper case utterance"
+  alexa: launch, e"heard upper"
+  user: "LOWER CASE UTTERANCE"
+  alexa: launch, e"heard lower"

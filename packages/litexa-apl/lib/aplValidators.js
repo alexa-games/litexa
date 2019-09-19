@@ -15,7 +15,7 @@ const {areValidCommands} = require('./aplCommandHandler');
 
 
 module.exports = {
-  model: function(validator, manifest, skill) {
+  model: function({ validator, skill }) {
     let requiredAPIs = {};
     skill.collectRequiredAPIs(requiredAPIs);
 

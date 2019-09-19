@@ -1,0 +1,79 @@
+launch
+  say "There should be
+    a space    between   
+    word and salad here: word {'salad'}."
+  say " There   
+    is   
+    {'1'}   
+    space     
+    {'between'}    
+    each  
+    word. 
+    {'hi'}"
+  say "There should also be a space between space and cats here: {'space'}  {'cats'}."
+  
+  when AIntent
+    or "a"
+    say "{'Interpolated text'} begins this sentence."
+    say "    <...200ms>Please make sure to
+      chew {'and'}
+      swallow your food."
+    say "{'Interpolated text'} begins this sentence."
+
+    screen
+      template: BodyTemplate2
+      title: "Say spacing test"
+      primaryText: "<b> this is one
+        continuous {'line'} {'on'}
+        <center>a screen. But this is
+        
+        not a continuous line."
+      displaySpeechAs: "secondaryText"
+      hint: "some hint"
+
+  when BIntent
+    or "b"
+    or "b $slotBa b $slotBb"
+    with $slotBa = "b"
+    with $slotBb = "bb1", "bb8"
+    log $request
+    say "Please make sure to
+      chew
+      {'and'} swallow your food."
+    screen
+      primaryText: "This
+        is a
+        <b>line."
+
+  when CIntent
+    or "c"
+    say "{'Start'}
+      middle   
+      end."
+    say "Start
+      {'middle'}   
+      end."
+    say "Start
+      middle   
+      {'end.'}"
+    screen
+      primaryText: "{'start'}
+      
+      {'end'}"
+  
+  when DIntent
+    or "d"
+    say "{'There'} should be a space
+      between 'there' and 'should'."
+
+TEST "say statement"
+  launch
+  alexa: launch, /here: word salad\..*space cats\./
+  user: "a"
+  alexa: launch, /text begins.*to chew and swallow your food.*text begins/
+  user: "b b b bb1"
+  alexa: launch, /to chew and swallow your food/
+  user: "c"
+  alexa: launch, /Start middle end\. Start middle end\. Start middle end\./
+  user: "d"
+  alexa: launch, /There should be a space between 'there' and 'should'\./i

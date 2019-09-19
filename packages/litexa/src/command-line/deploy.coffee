@@ -18,7 +18,8 @@ mkdirp = require 'mkdirp'
 path = require 'path'
 
 LoggingChannel = require './loggingChannel'
-{ formatLocationStart } = require("../parser/errors.coffee").lib
+{ formatLocationStart } = require('../parser/errors').lib
+{ validateCoreVersion } = require('./deploy/validators')
 
 module.exports.run = (options) ->
 
@@ -82,19 +83,30 @@ module.exports.run = (options) ->
       JSONValidator: require('../parser/jsonValidator').lib.JSONValidator
 
   catch err
-    logger.error err.message
+    logger.error err.message ? err
     return
 
-  require('../deployment/artifacts.coffee').loadArtifacts context, logger
+  require('../deployment/artifacts.coffee').loadArtifacts { context, logger }
+  .then ->
+    lastDeploymentInfo = context.artifacts.get 'lastDeployment'
+    validateCoreVersion {
+      prevCoreVersion: lastDeploymentInfo?.coreVersion
+      curCoreVersion: options.coreVersion
+    }
+  .then (proceed) ->
+    if !proceed
+      logger.log "canceled deployment"
+      process.exit(0)
   .then ->
     require('../deployment/git.coffee').getCurrentState()
-    .then (info) ->
-      context.artifacts.save "lastDeployment", {
-        date: (new Date).toLocaleString()
-        deploymentTypes: deploymentTypes
-        git: info
-      }
-      Promise.resolve()
+  .then (info) ->
+    context.artifacts.save "lastDeployment", {
+      date: (new Date).toLocaleString()
+      deploymentTypes: deploymentTypes
+      git: info
+      coreVersion: options.coreVersion
+    }
+    Promise.resolve()
   .then ->
     # neither of these rely on the other, let them interleave
     step1 = []

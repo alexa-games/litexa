@@ -9,7 +9,7 @@
  * See the Agreement for the specific terms and conditions of the Agreement. Capitalized
  * terms not defined in this file have the meanings given to them in the Agreement.
  * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 
+
 ###
 
 
@@ -193,11 +193,6 @@ render = ->
       level -= 1
 
     html = html.replace '{toc}', tocHTML.join '\n'
-
-
-  do ->
-    outputFilename = path.join moduleRoot, '..', 'documentation.html'
-    fs.writeFileSync outputFilename, html, 'utf8'
 
 
   do ->

@@ -16,7 +16,7 @@
 lib = module.exports.lib = {}
 
 { Function } = require('./function.coffee').lib
-{ Intent, EventIntent, NamedIntent } = require('./intent.coffee').lib
+{ Intent, FilteredIntent } = require('./intent.coffee').lib
 { LocalizationContext } = require('./localization.coffee')
 { ParserError } = require("./errors.coffee").lib
 
@@ -98,14 +98,12 @@ class lib.State
     for name, intent of workingIntents
       intent.validateSlotTypes customSlotTypes
 
-
   validateTransitions: (allStateNames, language) ->
     @startFunction?.validateStateTransitions(allStateNames, language)
     for name, intent of @intents
       intent.validateStateTransitions allStateNames, language
     for name, intent of @languages[language]
       intent.validateStateTransitions allStateNames, language
-
 
   hasIntent: (name, language) ->
     workingIntents = @collectIntentsForLanguage language
@@ -120,7 +118,6 @@ class lib.State
       continue if name == '--default--'
       report = intent.report()
       output[report] = true
-
 
   getIntentInLanguage: (language, intentName) ->
     if language == 'default'
@@ -137,7 +134,7 @@ class lib.State
         throw new ParserError location, "cannot add a new intent handler to the state `#{@name}` at
           this location. Have you already added state exit code before here? Check your indentation."
     try
-      key = Intent.utteranceToName(utterance)
+      key = Intent.utteranceToName(location, utterance)
     catch err
       throw new ParserError location, "Cannot create intent name from `#{utterance}`: #{err}"
     language = location?.language ? 'default'
@@ -152,8 +149,8 @@ class lib.State
       else
         collection[key] = new Intent({ location, utterance })
     else if !collection[key].defaultedResetOnGet and key != '--default--'
-      # event-specific intents and name-specific intents should aggregate
-      if collection[key] not instanceof EventIntent and collection[key] not instanceof NamedIntent
+      # only allow repeat intents if they are events that can be filtered
+      if collection[key] not instanceof FilteredIntent
         throw new ParserError location, "Not allowed to redefine intent `#{key}` in state `#{@name}`"
     intent = collection[key]
 
@@ -281,7 +278,6 @@ class lib.State
     output.push "};"
 
     output.push ""
-
 
   hasStatementsOfType: (types) ->
     if @startFunction?

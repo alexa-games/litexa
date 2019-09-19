@@ -9,13 +9,13 @@
  * See the Agreement for the specific terms and conditions of the Agreement. Capitalized
  * terms not defined in this file have the meanings given to them in the Agreement.
  * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 
+
 ###
 
 
-module.exports = 
-  manifest: 
-    publishingInformation: 
+module.exports =
+  manifest:
+    publishingInformation:
       isAvailableWorldwide: false,
       distributionCountries: [ 'US' ]
       distributionMode: 'PUBLIC'
@@ -23,12 +23,12 @@ module.exports =
       testingInstructions: "replace with testing instructions"
 
 
-      locales: 
+      locales:
         "en-US":
           name: "monetization test"
           invocation: "monetization test"
           summary: "replace with brief description, no longer than 120 characters"
-          description: """Longer description, goes to the skill store. 
+          description: """Longer description, goes to the skill store.
 
             Line breaks are supported."""
           examplePhrases: [
@@ -36,19 +36,18 @@ module.exports =
             "Alexa, open test monetization"
             "Alexa, play test monetization"
           ]
-          keywords: [ 
+          keywords: [
             'monetization'
           ]
 
-    privacyAndCompliance: 
+    privacyAndCompliance:
       allowsPurchases: false
       usesPersonalInfo: false
       isChildDirected: false
       isExportCompliant: true
       containsAds: false
 
-      locales: 
-        "en-US": 
-          privacyPolicyUrl: "http://yoursite/privacy.htm",
-          termsOfUseUrl: "http://yoursite/terms.htm"
-
+      locales:
+        "en-US":
+          privacyPolicyUrl: "https://www.example.com/privacy.htm",
+          termsOfUseUrl: "https://www.example.com/terms.htm"

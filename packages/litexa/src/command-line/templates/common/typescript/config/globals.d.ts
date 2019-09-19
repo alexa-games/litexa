@@ -19,9 +19,9 @@ interface PluginCollection {
 interface DeploymentCollection {
     [key: string]: Deployment;
 }
-interface InvocationCollection {
-    [key: Region | Locale]: string;
-}
+
+type InvocationCollection = {[key in Region | Locale]: string}
+
 interface LambdaSettings {
     Environment?: {
         Variables?: {
@@ -38,7 +38,7 @@ interface Deployment {
     askProfile: string;
     awsProfile: string;
     invocationSuffix?: string;
-    invocation?: InvocationMap;
+    invocation?: InvocationCollection;
     lambdaConfiguration?: LambdaSettings;
 }
 

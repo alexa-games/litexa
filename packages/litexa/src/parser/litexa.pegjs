@@ -200,11 +200,11 @@
     lead = spacing;
   }
 
-  var typeIs = function (type) {
+  var typeIs = function(type) {
     return stack[stack.length-1].target.isType(type);
   }
 
-  var pushStatement = function (statement) {
+  var pushStatement = function(statement) {
     var b = stack[stack.length-1];
   }
 
@@ -312,6 +312,7 @@ StateStatements
   /* MONETIZATION */
   / BuyInSkillProductStatement
   / CancelInSkillProductStatement
+  / UpsellInSkillProductStatement
 
 
 TestStatements
@@ -668,12 +669,12 @@ eligible as long as the expression resolve to a truthy value.
 ```coffeescript
 local someNumber = getNumber()
 switch
-  someNumber % 2 == 0 then
-    say "Your number is even!"
-  someNumber % 2 == 1 then
-    say "Your number is odd!"
+  someNumber * 2 == 10 then
+    say "Your number is 5!"
+  someNumber / 2 == 5 then
+    say "Your number is 10!"
   else
-    say "I'm not sure that's a number..."
+    say "Your number is neither 5 nor 10."
 ```
 
 */
@@ -1034,8 +1035,18 @@ ResponseSpacingStatement
 
 
 AttributeStatement
-  = key:ExistingIdentifier __ ":" __ value:(Number / AssetURL / JsonFileName / AssetName / BooleanLiteral / VariableReference / ScreenString / QuotedString / ExpressionString) {
-    var target = getTarget();
+  = key:"message" __ ":" __ value:QuotedString {
+    // @TODO: This is an edge case for the upsellInSkillProduct statement, so that the <upsell> tag
+    // won't be treated as a "ScreenString" tag. Ultimately, we should handle this more cleanly.
+    const target = getTarget();
+    if (target && target.pushAttribute) {
+      target.pushAttribute(location(), key, value);
+    } else {
+      throw new ParserError(location(), "Couldn't find anything to add an attribute to here");
+    }
+  }
+  / key:ExistingIdentifier __ ":" __ value:(Number / AssetURL / JsonFileName / AssetName / BooleanLiteral / VariableReference / ScreenString / QuotedString / ExpressionString) {
+    const target = getTarget();
     if (target && target.pushAttribute) {
       target.pushAttribute(location(), key, value);
     } else {
@@ -1148,15 +1159,35 @@ IntentStatement
     throw new ParserError(location(), "intent identifiers must begin with a letter, upper or lower case");
   }
   / "when" ___ "Connections.Response" ___ name:QuotedString {
-    const intent = pushIntent(location(), 'Connections.Response', {class:lib.NamedIntent});
-    intent.setCurrentIntentName(name);
+    const intent = pushIntent(location(), 'Connections.Response', {class:lib.FilteredIntent});
+
+    intent.setCurrentIntentFilter({
+      name,
+      data: { name }, // Persist "name" for the filter to have access to it at runtime.
+      filter: function(request, data) {
+        return (request.name === data.name);
+      },
+      callback: async function() {
+        // If this Connections.Response is filtered by monetization events, let's add two
+        // shorthand accessors for $purchaseResult and $newProduct.
+        const monetizationResponses = [ 'Buy', 'Cancel', 'Upsell' ];
+        if (monetizationResponses.includes(context.event.request.name)) {
+          const __payload = context.event.request.payload;
+
+          if (__payload && __payload.purchaseResult && __payload.productId) {
+            context.slots.purchaseResult = __payload.purchaseResult;
+            context.slots.newProduct = await getProductByProductId(context, __payload.productId);
+          }
+        }
+      }
+    });
   }
   / "when" ___ "Connections.Response" {
-    const intent = pushIntent(location(), 'Connections.Response', {class:lib.NamedIntent});
-    intent.setCurrentIntentName('__');
+    const intent = pushIntent(location(), 'Connections.Response', {class:lib.FilteredIntent});
+    intent.setCurrentIntentFilter({ name: '__' });
   }
   / "when" ___ utterance:(UtteranceString / DottedIdentifier) {
-    var intent = pushIntent(location(), utterance, false);
+    const intent = pushIntent(location(), utterance, false);
   }
 
 /* litexa [or]
@@ -1556,9 +1587,9 @@ The above would send the following directive:
   "type": "Connections.SendRequest",
   "name": "Buy",
   "payload": {
-      "InSkillProduct": {
-        "productId": "<MyProduct's productId>",
-      }
+    "InSkillProduct": {
+      "productId": "<MyProduct's productId>",
+    }
   },
   "token": "<apiAccessToken>"
 }
@@ -1587,9 +1618,9 @@ The above would send the following directive:
   "type": "Connections.SendRequest",
   "name": "Cancel",
   "payload": {
-      "InSkillProduct": {
-        "productId": "<MyProduct's productId>",
-      }
+    "InSkillProduct": {
+      "productId": "<MyProduct's productId>",
+    }
   },
   "token": "<apiAccessToken>"
 }
@@ -1598,6 +1629,41 @@ The above would send the following directive:
 CancelInSkillProductStatement
   = "cancelInSkillProduct" __ referenceName:QuotedString {
     pushCode(location(), new lib.CancelInSkillProductStatement(referenceName));
+  }
+
+/* litexa [upsellInSkillProduct]
+Requires a case sensitive in-skill product reference name as an argument, where
+the product must exist and be linked to the skill. Supports an upsell `message` string, to be
+communicated to the user prior to prompting a purchase (should be a Yes/No question).
+
+If the specified product exists, this sends an upsell directive *and* sets `shouldEndSession` to
+true for the pending response (required for a Connections.Response handoff directive).
+
+```coffeescript
+upsellInSkillProduct "MyProduct"
+  message: "My product's upsell message. Would you like to learn more?"
+```
+
+The above would send the following directive:
+
+```json
+{
+  "type": "Connections.SendRequest",
+  "name": "Upsell",
+  "payload": {
+    "InSkillProduct": {
+      "productId": "<MyProduct's productId>",
+    },
+    "upsellMessage": "My product's upsell message. Would you like to learn more?"
+  },
+  "token": "<apiAccessToken>"
+}
+```
+*/
+UpsellInSkillProductStatement
+  = "upsellInSkillProduct" __ referenceName:QuotedString {
+    // @TODO: pushSay is currently required for attributes: Why?!
+    pushSay(location(), new lib.UpsellInSkillProductStatement(referenceName));
   }
 
 

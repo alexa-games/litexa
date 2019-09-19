@@ -26,6 +26,7 @@ module.exports =
     @artifacts = args.artifacts
     @root = args.root
     @skillId = args.skillId
+    @deployment = args.deployment
     @stage = args.stage
     @smapi = args.smapi || smapi
 
@@ -35,19 +36,19 @@ module.exports =
     unless @artifacts and @skillId
       # Build the skill so we can retrieve the skill ID.
       skill = await skillBuilder.build(@root)
-      skill.projectInfo.variant = @stage
+      skill.projectInfo.variant = @deployment
 
       context = {
         projectInfo: skill.projectInfo
         projectRoot: skill.projectInfo?.root
-        deploymentName: @stage
-        deploymentOptions: skill.projectInfo.deployments[@stage]
+        deploymentName: @deployment
+        deploymentOptions: skill.projectInfo.deployments[@deployment]
       }
 
       @askProfile = context.deploymentOptions?.askProfile
-      @ispDir = path.join skill.projectInfo?.root, 'isp'
+      @ispDir = path.join skill.projectInfo?.root, 'isp', @deployment
 
-      await loadArtifacts context, @logger
+      await loadArtifacts { context, @logger }
       @artifacts = context.artifacts
       @skillId = @artifacts.get 'skillId'
 
@@ -92,6 +93,32 @@ module.exports =
         # ENOENT just meant there was no ISP data on the server -> ignore
         resolve([])
 
+  resetRemoteProductEntitlements: () ->
+    if @stage == 'live'
+      @logger.error "unable to modify remote in-skill products in 'live' stage -> please use 'development'"
+      return
+
+    remoteProducts = await @pullRemoteProductSummaries()
+    resetPromises = []
+
+    for remoteProduct in remoteProducts
+      resetPromises.push(
+        @smapi.call {
+          @askProfile
+          command: 'reset-isp-entitlement'
+          params: {
+            'isp-id': remoteProduct.productId
+          }
+        }
+      )
+
+    @logger.log "resetting in-skill product entitlements for skill ID '#{@skillId}' ..."
+
+    Promise.all(resetPromises)
+    .catch (err) =>
+      @logger.error "failed to call reset-isp-entitlement with error: #{err.message}"
+      Promise.reject(err)
+
   storeProductDefinitions: (products) ->
     return new Promise (resolve, reject) =>
       unless Array.isArray(products)
@@ -135,14 +162,14 @@ module.exports =
         reject(err)
 
   pushLocalProducts: () ->
+    if @stage == 'live'
+      @logger.error "unable to modify remote in-skill products in 'live' stage -> please use 'development'"
+      return
+
     localProducts = await @readLocalProducts()
     remoteProducts = await @pullRemoteProductSummaries()
 
     artifactSummary = {}
-
-    if @stage == 'live'
-      @logger.error "unable to modify remote in-skill products in 'live' stage -> please use 'development'"
-      return
 
     for product in localProducts
       if @listContainsProduct(remoteProducts, product)

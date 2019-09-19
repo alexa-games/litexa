@@ -63,6 +63,6 @@ exports.ObjectStringBuilder = {
       return `${this.indent}  ${key}: ${this.destObj[key]}`
     });
 
-    return `{\n  ${lines.join(',\n  ')}\n  }`;
+    return `{\n  ${lines.join(',\n  ')}\n${this.indent}  }`;
   }
 }

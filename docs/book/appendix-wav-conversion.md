@@ -26,7 +26,7 @@ npm install -g node-gyp
 Additionally, you will need to install build tools to compile the 'lame' dependency:
 
 :::danger
-As of July 2019, there is a [known issue](https://github.com/TooTallNate/node-lame/issues/92) with installing `lame` on 
+As of July 2019, there is a [known issue](https://github.com/TooTallNate/node-lame/issues/92) with installing `lame` on
 Node version 12+. To use this extension, we recommend using an LTS version of Node (either 8 or 10).
 :::
 
@@ -153,5 +153,5 @@ If you are using the `@litexa/deploy-aws` module for
 deployment, it will deploy them to your assets S3 bucket,
 following the same steps of non-converted assets. See the
 [Deployment
-section](http://localhost:8080/book/deployment.html#s3bucketname)
+section](deployment.html#s3bucketname)
 for details.

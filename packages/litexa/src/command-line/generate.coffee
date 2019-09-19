@@ -33,7 +33,7 @@ config = require './project-config'
 module.exports.run = (options) ->
   logger = new LoggingChannel({
       logStream: options.logger ? console
-      logPrefix:'generator'
+      logPrefix: 'generator'
       verbose: options.verbose
     })
   # absent any other options, generate all assets that don't exist

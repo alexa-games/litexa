@@ -9,35 +9,35 @@
  * See the Agreement for the specific terms and conditions of the Agreement. Capitalized
  * terms not defined in this file have the meanings given to them in the Agreement.
  * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 
+
 ###
 
 
 module.exports = (options, lib) ->
-  compiler: 
-    validIntentNames: [ 'TotallyNot.RealIntent' ]
+  compiler:
+    validEventNames: [ 'TotallyNot.RealIntent' ]
 
-  runtime: 
-    apiName: "RuntimeInline"  
+  runtime:
+    apiName: "RuntimeInline"
     source: runtime.toString()
 
 
 runtime = (context) ->
   console.log "Runtime inline was constructed"
 
-  myData = 
+  myData =
     greeting: "Hello world. love, runtime inline"
 
-  return 
-    userFacing: 
+  return
+    userFacing:
       secret: 13
-      hello: -> 
+      hello: ->
         await new Promise (resolve, reject) ->
           done = ->
             resolve("runtime says, #{myData.greeting}.")
           setTimeout done, 100
-    
-    events: 
+
+    events:
       afterStateMachine: ->
         await new Promise (resolve, reject) ->
           done = ->
@@ -51,6 +51,6 @@ runtime = (context) ->
         response.flags.runtimeInlineApproved = true
         console.log "Runtime inline checked final response"
 
-    requests: 
+    requests:
       'SYSTEM.NotRealIntent': (request) ->
         console.log "psst, saw #{JSON.stringify request}"
