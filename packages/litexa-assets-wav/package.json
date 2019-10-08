@@ -23,6 +23,9 @@
     "coverage": "echo \"Missing coverage script.\" && exit 0",
     "test": "echo \"Missing test script.\" && exit 0"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": "github:alexa-games/litexa",
   "bugs": "https://github.com/alexa-games/litexa/issues",
   "homepage": "https://litexa.games.alexa.a2z.com"
