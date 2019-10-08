@@ -10,6 +10,9 @@ Specifically it requires node version 8.x or greater, for the `async` support.
 
 Full documentation is available at <https://litexa.games.alexa.a2z.com>
 
+**Disclaimer:**
+*Hello! Litexa is an open source tech sharing initiative, from the Alexa Games team at Amazon. We (Alexa Games) have used Litexa to develop and ship over 20 Alexa skills. Your feedback is welcome and we are happy to consider contributions. Otherwise, you are free to use and modify this software as needed. As with all open-source packages, please use them in accordance with the licenses assigned to each package. Thanks and enjoy!*
+
 ## Packages
 
 The following packages are in this repo.
