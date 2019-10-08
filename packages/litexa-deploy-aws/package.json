@@ -1,7 +1,7 @@
 {
   "name": "@litexa/deploy-aws",
   "version": "0.2.1",
-  "description": "Implements deployment for litexa to AWS Lambda, DynamoDB and S3.",
+  "description": "Implements deployment for Litexa to AWS Lambda, DynamoDB and S3.",
   "main": "index.js",
   "scripts": {
     "build": "npm run clean && npm install",
@@ -12,8 +12,8 @@
     "test:file": "npx mocha",
     "test:file:debug": "npx mocha debug"
   },
-  "author": "Amazon.com",
-  "license": "SEE LICENSE IN LICENSE.TXT",
+  "author": "Amazon",
+  "license": "Apache-2.0",
   "keywords": [
     "Alexa",
     "Skill",
@@ -33,5 +33,5 @@
   },
   "repository": "github:alexa-games/litexa",
   "bugs": "https://github.com/alexa-games/litexa/issues",
-  "homepage": "https://litexa.games.alexa.a2z.com"
+  "homepage": "https://litexa.com"
 }

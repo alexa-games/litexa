@@ -1,7 +1,6 @@
 {
   "name": "{name}",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "clean": "npx rimraf ./node_modules && npm install",
@@ -10,6 +9,6 @@
   "dependencies": {
     "{name}-lib": "file:../lib"
   },
-  "author": "",
+  "author": "Amazon",
   "license": "ISC"
 }

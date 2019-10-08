@@ -64,7 +64,6 @@ bye
 
   END
 
-
 global
   when AMAZON.HelpIntent
     say "Introduce yourself by saying something like my name is Jane. "
