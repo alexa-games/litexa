@@ -86,7 +86,7 @@ findAndRegisterFilesToUpload = ({ s3Context, languageInfo, logger }) ->
 
 
 registerFileForUpload = ({ s3Context, fileDir, fileName, language }) ->
-  sourceFilePath = path.join(fileDir, fileName)
+  sourceFilePath = "#{fileDir}/#{fileName}"
   s3Context.assetCount += 1
   s3Key = "#{s3Context.baseLocation}/#{language}/#{fileName}"
   validateS3PathName(s3Key)
