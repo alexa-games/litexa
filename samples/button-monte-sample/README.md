@@ -1,6 +1,7 @@
 # button-monte-sample
 
-This is an Echo Button version of the classic shell game, or three card monte. It is written using the Litexa framework. This sample code will demonstrate the following concepts:
+This is an Echo Button version of the classic shell game, or three card monte. It is written using the Litexa framework.
+This sample code will demonstrate the following concepts:
 
 * how to write and test an Alexa Skill in the Litexa framework
 * how to use the Input Handler Litexa extension

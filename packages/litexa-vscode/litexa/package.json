@@ -1,36 +1,35 @@
 {
-    "name": "litexa",
-    "displayName": "litexa",
-    "description": "",
-    "version": "0.1.0",
-    "publisher": "Amazon.com",
-    "engines": {
-        "vscode": "^1.23.0"
-    },
-    "license": "SEE LICENSE IN LICENSE.TXT",
-    "categories": [
-        "Programming Languages"
-    ],
-    "contributes": {
-        "languages": [
-            {
-                "id": "litexa",
-                "aliases": [
-                    "Litexa",
-                    "litexa"
-                ],
-                "extensions": [
-                    ".litexa"
-                ],
-                "configuration": "./language-configuration.json"
-            }
+  "name": "litexa",
+  "displayName": "litexa",
+  "version": "0.1.0",
+  "publisher": "Amazon.com",
+  "engines": {
+    "vscode": "^1.23.0"
+  },
+  "license": "Apache-2.0",
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "litexa",
+        "aliases": [
+          "Litexa",
+          "litexa"
         ],
-        "grammars": [
-            {
-                "language": "litexa",
-                "scopeName": "source.litexa",
-                "path": "./syntaxes/litexa.tmLanguage.json"
-            }
-        ]
-    }
+        "extensions": [
+          ".litexa"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "litexa",
+        "scopeName": "source.litexa",
+        "path": "./syntaxes/litexa.tmLanguage.json"
+      }
+    ]
+  }
 }

@@ -1,7 +1,6 @@
 {
   "name": "{name}",
   "version": "1.0.0",
-  "description": "",
   "scripts": {
     "clean": "npx rimraf node_modules litexa/main.min.js && npm install",
     "compile": "npx webpack --config webpack.config.js",
@@ -15,7 +14,7 @@
     "test:litexa:watch": "npm run compile:watch | litexa test -w",
     "test:watch": "npx mocha --opts mocha.opts './test/**/*.spec.coffee' --watch"
   },
-  "author": "",
+  "author": "Amazon",
   "devDependencies": {
     "chai": "4.2.0",
     "coffee-loader": "0.9.0",

@@ -3,7 +3,7 @@
 Litexa is an Alexa domain specific language, developed for long form multi-turn skills such as games.
 This package contains the source for the CLI and core runtime.
 
-Further documentation can be found at <https://litexa.games.alexa.a2z.com>
+Further documentation can be found at <https://litexa.com>
 
 ## Installing Litexa
 

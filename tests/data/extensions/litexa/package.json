@@ -1,12 +1,11 @@
 {
   "name": "litexa",
   "version": "0.0.1",
-  "description": "",
   "main": "utils.js",
   "scripts": {
     "test": "echo \"Warning: no test specified\" && exit 0"
   },
-  "author": "Amazon.com",
+  "author": "Amazon",
   "license": "Apache-2.0",
   "dependencies": {
     "runtime-require": "file:../external/runtime-require",

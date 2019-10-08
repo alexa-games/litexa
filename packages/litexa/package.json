@@ -17,7 +17,7 @@
     "test:file": "npx mocha",
     "test:file:debug": "npx mocha debug"
   },
-  "author": "Amazon.com",
+  "author": "Amazon",
   "keywords": [
     "Alexa",
     "Skill",
@@ -25,7 +25,7 @@
     "Command Line",
     "SDK"
   ],
-  "license": "SEE LICENSE IN LICENSE.TXT",
+  "license": "Apache-2.0",
   "dependencies": {
     "chalk": "2.4.2",
     "chokidar": "2.1.0",
@@ -46,5 +46,5 @@
   },
   "repository": "github:alexa-games/litexa",
   "bugs": "https://github.com/alexa-games/litexa/issues",
-  "homepage": "https://litexa.games.alexa.a2z.com"
+  "homepage": "https://litexa.com"
 }

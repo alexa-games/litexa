@@ -7,9 +7,8 @@
     "deploy": "npm run compile && litexa deploy",
     "lint": "npx tslint -c tslint.json --project tsconfig.json --fix"
   },
-  "author": "",
+  "author": "Amazon",
   "license": "ISC",
-  "description": "",
   "devDependencies": {
     "tsconfig-paths": "3.7.0",
     "tslint": "5.12.1",

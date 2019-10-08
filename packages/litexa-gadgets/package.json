@@ -1,7 +1,7 @@
 {
   "name": "@litexa/gadgets",
   "version": "0.2.0",
-  "description": "This module adds support for GameEngine, GadgetController, and CustomInterfaceController directives and events.",
+  "description": "This module adds support for GameEngine, GadgetController, and CustomInterfaceController directives and events to Litexa.",
   "scripts": {
     "build": "npm run clean && npm install",
     "clean": "npx rimraf node_modules",
@@ -11,7 +11,7 @@
     "test:file": "npx mocha",
     "test:file:debug": "npx mocha debug"
   },
-  "author": "Amazon.com",
+  "author": "Amazon",
   "keywords": [
     "Alexa",
     "Skill",
@@ -21,11 +21,11 @@
     "Gadgets",
     "SDK"
   ],
-  "license": "SEE LICENSE IN LICENSE.TXT",
+  "license": "Apache-2.0",
   "dependencies": {
     "uuid": "3.3.2"
   },
   "repository": "github:alexa-games/litexa",
   "bugs": "https://github.com/alexa-games/litexa/issues",
-  "homepage": "https://litexa.games.alexa.a2z.com"
+  "homepage": "https://litexa.com"
 }
