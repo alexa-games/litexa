@@ -2605,9 +2605,15 @@ TemplateStringFontSize
 
 TemplateStringInterjectionPart
   = '<!' __ text:TagText '>' __ punctuation:TagPunctuation {
+    if (text.includes('&')) {
+      throw new ParserError(location(), `Interjection <!${text}> contains an invalid ampersand character.`);
+    }
     return new lib.TagPart(skill, location(), '!', text + punctuation );
   }
   / '<!' __ text:TagText '>' {
+    if (text.includes('&')) {
+      throw new ParserError(location(), `Interjection <!${text}> contains an invalid ampersand character.`);
+    }
     return new lib.TagPart(skill, location(), '!', text );
   }
 
