@@ -66,9 +66,9 @@ class StartCustomEventHandlerParser {
     stringifiedCode = stringifiedCode.replace(/(const\s*__directive\s*=\s*)expression/g, `$1${expression};`);
 
     // Clean up the indentation -> the above toString() indents with 4 spaces.
-    stringifiedCode = stringifiedCode.replace(/\n    /g, `\n${indent}  `)
+    stringifiedCode = stringifiedCode.replace(/\n    /g, `\n${indent}  `);
 
-    output.push(`${indent}await (${stringifiedCode})(context).catch(err => console.error(err.message))`)
+    output.push(`${indent}await (${stringifiedCode})(context).catch(err => console.error(err.message))`);
   }
 };
 
