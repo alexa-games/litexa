@@ -47,7 +47,7 @@
 			"patterns": [
 				{
 					"name": "string.regexp.litexa",
-					"match": "\/([a-zA-Z0-9|*+()='<>!:?.,^${}\\[\\] ]|-|\\\\|\\\/|(\\[wWdDsSbBtnr*+.?]))+\/[gi]*"
+					"match": "\/([a-zA-Z0-9|*+()-_='<>!:?.,^${}\\[\\] ]|\\\\|\\\/|(\\[wWdDsSbBtnr*+.?]))+\/[gi]*"
 				}
 			]
 		},
@@ -63,7 +63,7 @@
 				},
 				{
 					"name": "variable.language.litexa",
-					"match": "(\\$[a-zA-Z_-]*|@[a-zA-Z_-]*|DEPLOY\\b|context\\b|litexa\\b)"
+					"match": "(\\$[a-zA-Z_-]*|@[a-zA-Z_-]*|DEPLOY\\b|context\\b|litexa\\b|jsonFiles\\b)"
 				},
 				{
 					"name": "variable.parameter.litexa",
@@ -114,14 +114,14 @@
 				{
 					"name": "keyword.operator.litexa",
 					"match": "(=|>|<|>=|<=|==|!=|===|\\|\\||&&|\\+|\\-|\\%|\\(|\\)|,|\\.)"
-				}
+        }
 			]
 		},
 		"keywords": {
 			"patterns": [
 				{
 					"name": "keyword.control.litexa",
-					"match": "\\b(and|as|buyInSkillProduct|cancelInSkillProduct|capture|card|define|directive|else|END|exclude|for|if|inputHandlerAction|inputHandlerEvent|jsonFiles|launch|LISTEN|local|log|logStateTraces|metric|not|or|otherwise|playMusic|pronounce|quit|reprompt|resume|say|set|setRegion|setResponseSpacing|soundEffect|stopMusic|switch|then|unless|upsellInSkillProduct|wait|when|with|apl|aplcommand|screen|startCustomEventHandler|startInputHandler|stopCustomEventHandler|stopInputHandler)([ ]|$)"
+					"match": "\\b(and|as|buyInSkillProduct|cancelInSkillProduct|capture|card|define|directive|else|END|exclude|for|if|inputHandlerAction|inputHandlerEvent|launch|LISTEN|local|log|logStateTraces|metric|not|or|otherwise|playMusic|pronounce|quit|reprompt|resume|say|set|setRegion|setResponseSpacing|soundEffect|stopMusic|switch|then|unless|upsellInSkillProduct|wait|when|with|apl|aplcommand|screen|startCustomEventHandler|startInputHandler|stopCustomEventHandler|stopInputHandler)([ ]|$)"
 				},
 				{
 					"name": "markup.quote.say.litexa",

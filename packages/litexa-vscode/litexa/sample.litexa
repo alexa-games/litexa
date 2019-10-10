@@ -84,5 +84,5 @@ TEST "syntax highlighting"
   resume isKeyword
   inputHandlerAction isKeyword
   inputHandlerEvent isKeyWord
-  alexa: launch, /^[]{}$/i
+  alexa: launch, /^[]-_{}$/i
   quit
