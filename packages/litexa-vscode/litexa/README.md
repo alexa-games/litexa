@@ -1,22 +1,22 @@
-# Litexa
+# litexa-syntax-highlighting
 
-This Visual Studio Code (VS Code) plugin supports syntax highlighting for files written in the Litexa language for Alexa 
-Skills. Any such files will be denoted with the `.litexa` file extension.
+This Visual Studio Code (VS Code) extension supports syntax highlighting for files written in the Litexa language for
+Alexa skills. Any such files will be denoted with the `.litexa` file extension.
 
 ## Installation
 
-To install this extension, you can either copy or symlink the `litexa-vscode/litexa` directory to your 
+You can find and install the extension in the VS Code Extensions Marketplace, by the name `Litexa Syntax Highlighting`.
+
+Alternatively, you can either copy or symlink the `litexa-vscode/litexa` directory to your
 [VS Code extensions directory](#vs-code-extensions-directory) and relaunch VS Code.
 
-**Note**: The added benefit of using a symlink is being able to keep the extension up-to-date by running `git pull` on this project when a
-new feature is launched.
-
 ### VS Code Extensions Directory
+
 Extensions are installed in a per-user extensions directory. Depending on your platform, the directory is located here:
 
-* Windows `%USERPROFILE%\.vscode\extensions`
-* macOS `~/.vscode/extensions`
-* Linux `~/.vscode/extensions`
+* Windows: `%USERPROFILE%\.vscode\extensions`
+* macOS: `~/.vscode/extensions`
+* Linux: `~/.vscode/extensions`
 
 You can change the location by launching VS Code with the `--extensions-dir <dir>` command line option.
 
