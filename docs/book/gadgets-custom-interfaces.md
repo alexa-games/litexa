@@ -81,7 +81,7 @@ someState
 * add a handler `token` (unless one was specified)
 * create a `CustomInterfaceController.StartEventHandler` directive and attach it to the pending skill response
 * persist the handler token in memory (`@__lastCustomEventHandlerToken`), for validation of received events
-* deprecate any previously started event handler for the same namespace, if still alive
+* start ignoring any previously started event handler for the same namespace, if there is one that hasn't expired
 :::
 
 The last started event handler can be halted with `stopCustomEventHandler`:
@@ -92,10 +92,10 @@ someState
   stopCustomEventHandler
 ```
 
-:::tip stopCustomEventHandler will:
+:::tip stopCustomEventHandler behavior:
 
-* create a `CustomInterfaceController.StopEventHandler` directive specifying the last started handler's
-token (if there is one), and attach it to the pending skill response
+* if a custom event handler was started and hasn't expired, a `CustomInterfaceController.StopEventHandler`
+directive is created (specifying the last started handler's token) and attached to the pending skill response
 :::
 
 ## Custom Interface Events
