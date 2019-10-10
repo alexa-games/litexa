@@ -1,6 +1,9 @@
 TEST "happy path"
-  launch 
+  launch
+  user: TestButtonsIntent
+  alexa: waitForReady
   user: AMAZON.YesIntent
+  alexa: waitForButton
   inputHandlerEvent "pressed"
   inputHandlerEvent pressed.json
   inputHandlerEvent "button1"
@@ -10,10 +13,22 @@ TEST "happy path"
 TEST "should trigger warnings in console"
   launch
   # warning shows up here
+  user: TestButtonsIntent
+  alexa: waitForReady
   user: "endInputHandler"
   quit
   launch
+  user: TestButtonsIntent
+  alexa: waitForReady
   user: AMAZON.YesIntent
+  alexa: waitForButton
   user: "endInputHandler"
   # and here
   user: "endInputHandler"
+
+TEST "custom interfaces"
+  launch
+  user: TestCustomInterfacesIntent
+  alexa: waitForCustomEvents
+  user: StopCustomEventHandlerIntent
+  alexa: waitForCustomEvents

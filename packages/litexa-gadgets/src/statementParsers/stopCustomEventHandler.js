@@ -26,7 +26,7 @@ class StopCustomEventHandlerParser {
     const lambdaCode = async function(context) {
       const __directive = context.directives.find((directive) => {
         directive.type === 'CustomInterfaceController.StopEventHandler';
-      })
+      });
       if (__directive === undefined) {
         // We haven't already sent a StopInputHandler, so send one now.
         const lastToken = context.db.read('__lastCustomEventHandlerToken');
@@ -45,9 +45,9 @@ class StopCustomEventHandlerParser {
     // Stringify our lambda code, to be inserted in the lambda output.
     let stringifiedCode = lambdaCode.toString();
     // Clean up the indentation -> the above toString() indents with 4 spaces.
-    stringifiedCode = stringifiedCode.replace(/    /g, `${indent}  `)
+    stringifiedCode = stringifiedCode.replace(/    /g, `${indent}  `);
 
-    output.push(`${indent}await (${stringifiedCode})(context)`)
+    output.push(`${indent}await (${stringifiedCode})(context)`);
   }
 };
 

@@ -44,9 +44,9 @@ class StopInputHandlerParser {
     // Stringify our lambda code, to be inserted in the lambda output.
     let stringifiedCode = lambdaCode.toString();
     // Clean up the indentation -> the above toString() indents with 4 spaces.
-    stringifiedCode = stringifiedCode.replace(/    /g, `${indent}  `)
+    stringifiedCode = stringifiedCode.replace(/    /g, `${indent}  `);
 
-    output.push(`${indent}await (${stringifiedCode})(context)`)
+    output.push(`${indent}await (${stringifiedCode})(context)`);
   }
 };
 

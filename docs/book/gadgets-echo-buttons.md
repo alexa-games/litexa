@@ -1,4 +1,4 @@
-# Echo Buttons
+# Gadgets: Echo Buttons
 
 An [Echo
 Button](https://www.amazon.com/Echo-Buttons-Pack-gaming-companion/dp/B072C4KCQH)
@@ -26,7 +26,7 @@ In this chapter, you will learn:
 <span style="color:#00caff">&#10004;</span>  some best practices in designing for voice + Echo Buttons<br/>
 <span style="color:#00caff">&#10004;</span>  how the above points apply to an existing, live skill<br/>
 
-## The Gadgets Extension Overview
+## Support for Echo Buttons
 
 ### Game Engine Interface
 

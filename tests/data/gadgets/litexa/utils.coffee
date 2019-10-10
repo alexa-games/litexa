@@ -75,3 +75,35 @@ anyButtonHandler = ->
       meets: [ 'timed out' ]
       reports: 'nothing'
       shouldEndInputHandler: true
+
+customEventHandler = ->
+  return {
+    eventFilter: {
+      filterExpression: {
+        and: [
+            { "==": [{ "var": "header.namespace" }, "Custom.MyGadget"] }
+            { "==": [{ "var": "header.name" }, "SupportedEventName"] }
+          ]
+      },
+      filterMatchAction: "SEND_AND_TERMINATE"
+    },
+    expiration: {
+      durationInMilliseconds: 60000,
+      expirationPayload: {
+        data: "Some data to be sent to skill upon handler expiration."
+      }
+    }
+  }
+
+customDirective = ->
+  return {
+    type: 'CustomInterfaceController.SendDirective',
+    header: {
+      name: 'SupportedDirectiveName',
+      namespace: 'Custom.MyGadget'
+    },
+    endpoint: {
+      endpointId: "amzn1.ask.endpoint.someId"
+    },
+    payload: {}
+  }
