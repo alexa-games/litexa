@@ -1,0 +1,88 @@
+# NOTE: This file is not meant to be run -> just intended to illustrate the syntax highlighting.
+
+exclude file unless DEPLOY.SETTING
+define @something as Something
+pronounce "something" as "<phoneme alphabet='ipa'>something else</phoneme>"
+
+checkSyntaxHighlighting
+  # @ and $ without proper identifiers - unless at EOL (while being written) - should display as invalid
+  $ = $
+  @ = @
+  say "@, and @. and @123 and @ are invalid"
+  say "$ and $. and $123 and $ are invalid"
+
+  say "strings interpolate @variables, @variable.members, @variable.functionCalls(identifier, 123, "12345")"
+  say "strings interpolate $variables, $variable.members, $variable.functionCalls(identifier, 123, "12345")"
+  say "strings interpolate DEPLOY and DEPLOY.members"
+
+  say "strings interpolate variables {identifier}"
+  say "strings interpolate variable functions {identifier.member.function(var, 123, "12345", litexa.assetsRoot)}"
+  say "strings interpolate standalone functions {func(identifier, 123, "12345", context.language)}"
+
+  reprompt "reprompts also interpolate everything {identifier.member.function(var, 123, "12345", litexa.assetsRoot)}"
+
+  local contextIsALanguageVariable = context
+  local litexaIsALanguageVariable = litexa
+  local DEPLOYIsALanguageVariable = DEPLOY
+
+  $nullIsAConstant = null
+  $falseIsAConstant = false
+  $trueIsAConstant = true
+
+  @undefinedIsInvalid = undefined
+
+  identifier
+  identifier.member
+  identifier.member.function(identifier, 123, "12345", context.language, litexa.assetsRoot)
+
+  log "a log"
+  local jsonContent = jsonFiles["someFile"]
+  directive createDirective()
+
+  # conditionals
+  unless true and true or true
+    switch var
+      == "something" then
+        say "something"
+      else
+        say "<!uh oh>."
+
+  # display
+  apl apl/test.json
+  aplcommand command.json
+  card image.png
+  screen image.png
+
+  # sounds
+  soundEffect sound.mp3
+  playMusic sound.mp3
+  stopMusic sound.mp3
+
+  # gadgets
+  startInputHandler
+  stopInputHandler
+  startCustomEventHandler
+  stopCustomEventHandler
+
+  # ISP
+  buyInSkillProduct "Reference"
+  cancelInSkillProduct "Reference"
+  upsellInSkillProduct "Reference"
+
+  when AMAZON.StopIntent
+    END
+
+  otherwise
+    if true
+      LISTEN events
+    else
+      LISTEN microphone
+
+TEST "syntax highlighting"
+  launch
+  capture isKeyword
+  resume isKeyword
+  inputHandlerAction isKeyword
+  inputHandlerEvent isKeyWord
+  alexa: launch, /^[]{}$/i
+  quit

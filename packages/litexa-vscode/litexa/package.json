@@ -1,10 +1,10 @@
 {
-  "name": "litexa",
-  "displayName": "litexa",
-  "version": "0.1.0",
-  "publisher": "Amazon.com",
+  "name": "litexa-syntax-highlighting",
+  "displayName": "Litexa Syntax Highlighting",
+  "version": "0.0.1",
+  "publisher": "Amazon",
   "engines": {
-    "vscode": "^1.23.0"
+    "vscode": "^1.38.0"
   },
   "license": "Apache-2.0",
   "categories": [
