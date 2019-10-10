@@ -1,0 +1,19 @@
+launch
+  when AppleIntent
+    say "<!great.> I heard you say apple."
+
+  when OrangeIntent
+    say "<!excellent>. I heard you say orange."
+
+TEST "say statement"
+  launch
+  user: AppleIntent
+  alexa: launch, /say (?!orange)/
+  user: AppleIntent
+  alexa: launch, /say apple\.$/
+  user: AppleIntent
+  alexa: launch, /^<!great.>/
+  user: OrangeIntent
+  alexa: launch, /e[^y]cellent/
+  user: OrangeIntent
+  alexa: launch, /[_]{0}/
