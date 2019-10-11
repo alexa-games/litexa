@@ -1,35 +1,51 @@
 {
-  "name": "litexa-syntax-highlighting",
-  "displayName": "Litexa Syntax Highlighting",
-  "version": "0.0.1",
-  "publisher": "Amazon",
-  "engines": {
-    "vscode": "^1.38.0"
-  },
-  "license": "Apache-2.0",
-  "categories": [
-    "Programming Languages"
-  ],
-  "contributes": {
-    "languages": [
-      {
-        "id": "litexa",
-        "aliases": [
-          "Litexa",
-          "litexa"
-        ],
-        "extensions": [
-          ".litexa"
-        ],
-        "configuration": "./language-configuration.json"
-      }
-    ],
-    "grammars": [
-      {
-        "language": "litexa",
-        "scopeName": "source.litexa",
-        "path": "./syntaxes/litexa.tmLanguage.json"
-      }
-    ]
-  }
+	"name": "litexa-syntax-highlighting",
+	"displayName": "Litexa Syntax Highlighting",
+	"version": "1.0.0",
+	"publisher": "litexa",
+	"engines": {
+		"vscode": "^1.38.0"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://https://github.com/alexa-games/litexa/tree/master/packages/litexa-vscode/litexa"
+	},
+	"icon": "images/icon.png",
+	"galleryBanner": {
+		"color": "#232F3E",
+		"theme": "dark"
+	},
+	"license": "Apache-2.0",
+	"categories": [
+		"Programming Languages"
+	],
+	"contributes": {
+		"languages": [
+			{
+				"id": "litexa",
+				"aliases": [
+					"Litexa",
+					"litexa"
+				],
+				"extensions": [
+					".litexa"
+				],
+				"configuration": "./language-configuration.json"
+			}
+		],
+		"grammars": [
+			{
+				"language": "litexa",
+				"scopeName": "source.litexa",
+				"path": "./syntaxes/litexa.tmLanguage.json"
+			}
+		]
+	},
+	"homepage": "https://litexa.com",
+	"bugs": "https://github.com/alexa-games/litexa/issues",
+	"__metadata": {
+		"id": "ebe68d91-e5fb-4ae9-a275-cac1835bf317",
+		"publisherDisplayName": "Alexa Games Litexa",
+		"publisherId": "acbf0adf-214b-4dbf-9ad9-27686a049ee6"
+	}
 }

@@ -1,12 +1,12 @@
 # Appendix: Editor Support
 
-We have written a Visual Studio Code (VS Code) plugin that supports syntax highlighting for files written in the Litexa 
-language for Alexa Skills. Any such files will be denoted with the `.litexa` file extension.
+We have written a Visual Studio Code (VS Code) plugin that supports syntax highlighting for files written in the Litexa
+language for Alexa skills. Any such files will be denoted with the `.litexa` file extension.
 
 ## Installation
 
 To install this extension, you will need to have cloned the [alexa-games/litexa](https://github.com/alexa-games/litexa)
-repository. From the `packages` directory, you can either copy or symlink the `litexa-vscode/litexa` directory to your 
+repository. From the `packages` directory, you can either copy or symlink the `litexa-vscode/litexa` directory to your
 [VS Code extensions directory](#vs-code-extensions-directory) and relaunch VS Code.
 
 ::: tip Symlinking

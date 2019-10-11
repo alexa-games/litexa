@@ -11,7 +11,13 @@ Specifically it requires node version 8.x or greater, for the `async` support.
 Full documentation is available at <https://litexa.com>
 
 **Disclaimer:**
-*Hello! Litexa is an open source tech sharing initiative, from the Alexa Games team at Amazon. We (Alexa Games) have used Litexa to develop and ship over 20 Alexa skills. Your feedback is welcome and we are happy to consider contributions. Otherwise, you are free to use and modify this software as needed. As with all open-source packages, please use them in accordance with the licenses assigned to each package. Thanks and enjoy!*
+*Litexa is an Alexa Labs community-supported project (alpha) from the Alexa Games team at Amazon. We (Alexa Games) have
+used Litexa to develop and ship 20+ Alexa skills. Your feedback is welcome and we are happy to consider contributions.
+Otherwise, you are free to use and modify this software as needed. As with all open-source packages, please use them in
+accordance with the licenses assigned to each package. For official Alexa supported skill development tools, we
+recommend using tools in the [Alexa Skills Kit](https://developer.amazon.com/en-US/alexa/alexa-skills-kit) like [Skill
+Flow Builder](https://developer.amazon.com/blogs/alexa/post/83c61d4e-ab3f-443e-bf71-75b5354bdc9e/skill-flow-builder) and
+the [ASK SDK](https://developer.amazon.com/docs/alexa-skills-kit-sdk-for-nodejs/overview.html). Thanks and enjoy!*
 
 ## Packages
 

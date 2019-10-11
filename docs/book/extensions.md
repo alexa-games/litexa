@@ -5,7 +5,7 @@ Litexa's core functionality. These extensions can be installed locally in a Lite
 directory (in which case they only affect that individual project), or globally (in which case they
 affect all Litexa projects on the same machine).
 
-Examples of such extensions are the [@litexa/gadgets extension](echo-buttons.html#installation), the
+Examples of such extensions are the [@litexa/gadgets extension](gadgets-custom-interfaces.html#installation), the
 [@litexa/apl extension](screens.html#installation), and the
 [@litexa/render-template extension](appendix-render-template.html#installation). These extensions
 allow for optional customizations of Litexa, and can be installed on a project-by-project basis,
