@@ -44,6 +44,9 @@
     "typescript": "3.3.1",
     "uuid": "3.3.2"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": "github:alexa-games/litexa",
   "bugs": "https://github.com/alexa-games/litexa/issues",
   "homepage": "https://litexa.com"
