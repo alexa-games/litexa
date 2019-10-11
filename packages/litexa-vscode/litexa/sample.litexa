@@ -11,15 +11,15 @@ checkSyntaxHighlighting
   say "@, and @. and @123 and @ are invalid"
   say "$ and $. and $123 and $ are invalid"
 
-  say "strings interpolate @variables, @variable.members, @variable.functionCalls(identifier, 123, "12345")"
-  say "strings interpolate $variables, $variable.members, $variable.functionCalls(identifier, 123, "12345")"
+  say "strings interpolate @variables. @variable.members, @variable.functionCalls(identifier, 123, "string")"
+  say "strings interpolate $variables. $variable.members, $variable.functionCalls(identifier, 123, "string")"
   say "strings interpolate DEPLOY and DEPLOY.members"
 
   say "strings interpolate variables {identifier}"
-  say "strings interpolate variable functions {identifier.member.function(var, 123, "12345", litexa.assetsRoot)}"
-  say "strings interpolate standalone functions {func(identifier, 123, "12345", context.language)}"
+  say "strings interpolate variable functions {identifier.member.function(var, 123, "string", litexa.assetsRoot)}"
+  say "strings interpolate standalone functions {func(identifier, 123, "string", context.language)}"
 
-  reprompt "reprompts also interpolate everything {identifier.member.function(var, 123, "12345", litexa.assetsRoot)}"
+  reprompt "reprompts also interpolate everything {identifier.member.function(var, 123, "string", litexa.assetsRoot)}"
 
   local contextIsALanguageVariable = context
   local litexaIsALanguageVariable = litexa
@@ -33,7 +33,7 @@ checkSyntaxHighlighting
 
   identifier
   identifier.member
-  identifier.member.function(identifier, 123, "12345", context.language, litexa.assetsRoot)
+  identifier.member.function(identifier, 123, "string", context.language, litexa.assetsRoot)
 
   log "a log"
   local jsonContent = jsonFiles["someFile"]
@@ -65,10 +65,11 @@ checkSyntaxHighlighting
   stopCustomEventHandler
 
   # ISP
-  buyInSkillProduct "Reference"
-  cancelInSkillProduct "Reference"
-  upsellInSkillProduct "Reference"
+  buyInSkillProduct "Product"
+  cancelInSkillProduct "Product"
+  upsellInSkillProduct "Product"
 
+  # intent handlers
   when AMAZON.StopIntent
     END
 
@@ -85,4 +86,5 @@ TEST "syntax highlighting"
   inputHandlerAction isKeyword
   inputHandlerEvent isKeyWord
   alexa: launch, /^[]-_{}$/i
+  user: SomeIntent
   quit
