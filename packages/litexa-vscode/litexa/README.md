@@ -1,30 +1,28 @@
-# litexa-syntax-highlighting
+# Litexa Language Support
 
-This Visual Studio Code (VS Code) extension supports syntax highlighting for files written in the Litexa language for
+This Visual Studio Code (VS Code) extension adds syntax highlighting for files written in Litexa, a language for writing
 Alexa skills. Any such files will be denoted with the `.litexa` file extension.
 
 ## Installation
 
-You can find and install the extension in the VS Code Extensions Marketplace, by the name `Litexa Syntax Highlighting`.
+You can find and install the extension in the VS Code Marketplace, under the name `Litexa Syntax Highlighting`.
+For instructions on how to use the VS Code Marketplace, please refer to the documentation
+[here](https://code.visualstudio.com/docs/editor/extension-gallery).
 
-Alternatively, you can either copy or symlink the `litexa-vscode/litexa` directory to your
-[VS Code extensions directory](#vs-code-extensions-directory) and relaunch VS Code.
+## Feedback
 
-### VS Code Extensions Directory
+If you notice any bugs or have suggestions for improvements, please submit a GitHub issue in the Litexa repository
+[here](https://github.com/alexa-games/litexa/issues).
 
-Extensions are installed in a per-user extensions directory. Depending on your platform, the directory is located here:
+## Contribution & Customization
 
-* Windows: `%USERPROFILE%\.vscode\extensions`
-* macOS: `~/.vscode/extensions`
-* Linux: `~/.vscode/extensions`
+If you'd like to contribute to the extension or customize it for your own usage, you can clone it from the repository
+[here](https://github.com/alexa-games/litexa/tree/master/packages/litexa-vscode/litexa) and install it locally. For
+instructions on how to install a local VS Code extension, please refer to the documentation
+[here](https://vscode-docs.readthedocs.io/en/stable/extensions/example-hello-world/#installing-your-extension-locally).
 
-You can change the location by launching VS Code with the `--extensions-dir <dir>` command line option.
-
-## Resources
-
-* [Installing your VS Code Extensions Locally](https://vscode-docs.readthedocs.io/en/stable/extensions/example-hello-world/#installing-your-extension-locally)
-* [Your VS Code Extensions Folder](https://vscode-docs.readthedocs.io/en/stable/extensions/install-extension/#your-extensions-folder)
+For any contributions, please submit a [pull request](https://github.com/alexa-games/litexa/pulls) for us to review.
 
 ## Release Notes
 
-See CHANGELOG.md
+See CHANGELOG

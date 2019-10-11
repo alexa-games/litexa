@@ -289,7 +289,7 @@ own Alexa Device.
 
 We will be using AWS for the deployment of your skill. You
 do not need to be familiar with AWS, but if you
-continue to use it in deploying Alexa Skills, it would be
+continue to use it in deploying Alexa skills, it would be
 valuable to learn more about the AWS services your skill
 uses.
 

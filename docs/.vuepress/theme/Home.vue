@@ -57,7 +57,7 @@
           <p>{{ feature.details }}</p>
         </div>
       </div>
-  
+
 
 
 <div class="feature-content">
@@ -82,7 +82,7 @@
 <pre class="language-coffeescript"><code>askAboutRoses
   say <span class="token string">"Do you prefer red or blue roses?"</span>
   <span class="token constant">LISTEN</span> microphone
-  
+
   <span class="token keyword">when</span> <span class="token string">"I like $color roses"</span>
     <span class="token keyword">or</span> <span class="token string">"$color ones"</span>
     <span class="token keyword">or</span> <span class="token string">"$color"</span>
@@ -91,7 +91,7 @@
   say <span class="token string">"Hey, I like $color ones too."</span>
     <span class="token keyword">or</span> <span class="token string">"Nice! I like $color ones too."</span>
   <span class="token constant">END</span>
-  
+
  <span class="token keyword">when</span> <span class="token constant">AMAZON</span>.RepeatIntent
   <span class="token string">-></span> askAboutRoses
 </code></pre>
@@ -110,7 +110,7 @@
 say <span class="token string">"turning page"</span>
 apl
   <span class="token constant">commands:</span> turn_page.json
-  
+
 soundEffect page_chime.mp3
 say <span class="token string">"page turned"</span>
 </code></pre>
@@ -125,13 +125,13 @@ say <span class="token string">"page turned"</span>
   <span class="token string">-></span> playGame
 <span class="token keyword">else</span>
   <span class="token string">-></span> askName
-  
+
 askName
   say <span class="token string">"What's your name?"</span>
-  
+
   <span class="token keyword">when</span> <span class="token string">"My name is $name"</span>
     <span class="token keyword">with</span> $name = <span class="token constant">AMAZON.US_FIRST_NAME</span>
-    
+
     say <span class="token string">"Hi, {formatName($name)}"</span>
     <span class="token comment"># store the result permanently</span>
     <span class="token string">@name</span> = $name
@@ -194,8 +194,8 @@ askName
     <div class="cloud-container cloud-bottoms"></div>
     <div class="cloud-container cloud-left-twins"></div>
     <div class="cloud-container cloud-bottom-left"></div>
-    
-    
+
+
   </div>
 </template>
 
