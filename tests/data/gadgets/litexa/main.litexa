@@ -3,8 +3,12 @@ launch
   say "Gadgets API test skill."
   say "Your buttons should be lighting up now, if they're awake."
 
-  directive pulseButtons()
-  -> waitForReady
+  when TestButtonsIntent
+    directive pulseButtons()
+    -> waitForReady
+
+  when TestCustomInterfacesIntent
+    -> waitForCustomEvents
 
 waitForReady
   say "Do you have at least 2 buttons?"
@@ -18,7 +22,6 @@ waitForReady
     say "Okay. <...2s> How about now?"
 
 waitForButton
-
   when GameEngine.InputHandlerEvent
     if $request.events[0].name != "finished"
       soundEffect doorbell.mp3
@@ -52,6 +55,22 @@ waitForButton
     log "nothing"
     -> waitForButton
 
+waitForCustomEvents
+  startCustomEventHandler customEventHandler()
+  directive customDirective()
+
+  when CustomInterfaceController.EventsReceived
+    say "received events"
+
+  when CustomInterfaceController.EventsReceived "Custom.MyGadget"
+    say "looks like your gadget color is $event.payload.color"
+    if $event.payload.color == "blue"
+      say "Let's talk about water."
+    else if $event.payload.color == "red"
+      say "Let's talk about fire."
+
+  when CustomInterfaceController.EventsReceived "Custom.ExitButton"
+    -> goodbye
 
 goodbye
   say "alright then, goodbye"
@@ -62,3 +81,6 @@ global
     say "stopping the input handler"
     stopInputHandler
     -> waitForButton
+
+  when StopCustomEventHandlerIntent
+    stopCustomEventHandler

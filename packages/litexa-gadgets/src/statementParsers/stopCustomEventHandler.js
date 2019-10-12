@@ -1,12 +1,8 @@
 /*
- * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- * Copyright 2019 Amazon.com (http://amazon.com/), Inc. or its affiliates. All Rights Reserved.
- * These materials are licensed as "Restricted Program Materials" under the Program Materials
- * License Agreement (the "Agreement") in connection with the Amazon Alexa voice service.
- * The Agreement is available at https://developer.amazon.com/public/support/pml.html.
- * See the Agreement for the specific terms and conditions of the Agreement. Capitalized
- * terms not defined in this file have the meanings given to them in the Agreement.
- * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ *  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ *  Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ *  SPDX-License-Identifier: Apache-2.0
+ *  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
 
 class StopCustomEventHandlerParser {
@@ -30,7 +26,7 @@ class StopCustomEventHandlerParser {
     const lambdaCode = async function(context) {
       const __directive = context.directives.find((directive) => {
         directive.type === 'CustomInterfaceController.StopEventHandler';
-      })
+      });
       if (__directive === undefined) {
         // We haven't already sent a StopInputHandler, so send one now.
         const lastToken = context.db.read('__lastCustomEventHandlerToken');
@@ -49,9 +45,9 @@ class StopCustomEventHandlerParser {
     // Stringify our lambda code, to be inserted in the lambda output.
     let stringifiedCode = lambdaCode.toString();
     // Clean up the indentation -> the above toString() indents with 4 spaces.
-    stringifiedCode = stringifiedCode.replace(/    /g, `${indent}  `)
+    stringifiedCode = stringifiedCode.replace(/    /g, `${indent}  `);
 
-    output.push(`${indent}await (${stringifiedCode})(context)`)
+    output.push(`${indent}await (${stringifiedCode})(context)`);
   }
 };
 

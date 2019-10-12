@@ -1,6 +1,6 @@
 ---
 home: true
-tagline: A new <a href="https://en.wikipedia.org/wiki/Literate_programming">literate style programming</a> language and toolchain for building long form Alexa Skills
+tagline: A new <a href="https://en.wikipedia.org/wiki/Literate_programming">literate style programming</a> language and toolchain for building long form Alexa skills
 heroText: Litexa
 actionText: Get Started →
 actionLink: /get-started/
@@ -18,7 +18,7 @@ minorFeatures:
     details: Emits standard, highly performant JavaScript code ready to deploy to a host like AWS Lambda. Compile time checking of things like language model elements and asset references means fewer bugs to discover at runtime.
   - title: The Toolchain
     img: /icons/toolchain_160x96.png
-    details: A one-step build and deploy system sends your language model to the Alexa Developer Portal, and your skill endpoint, persistent storage setup, and asset files to AWS.
+    details: A one-step build and deploy system that seamlessly synchronizes your language model and deploys your skill endpoint, assets, and storage to AWS.
   - title: Extensions
     img: /icons/extensions_160x96.png
     details: Designed to be tweaked, Litexa extensions let you add new features to the compiler and toolchain, even add new syntax. Build tools to dig into what makes your team and project special.
@@ -40,12 +40,9 @@ secondaryFeatures:
       link: /book/expressions.html
 faqs:
   - question: How much does Litexa cost? Where does it come from?
-    answer:  Litexa is <em>free!</em> &nbsp; Litexa is an open source tech sharing initiative, from the Alexa Games team at Amazon. We've learned a thing or two from building our own skills, and would love to share with, and learn from, the community at large.
+    answer: Litexa is <em>free!</em>&nbsp; Litexa is an Alexa Labs community-supported project (alpha) from the Alexa Games team at Amazon. We (Alexa Games) have used Litexa to develop and ship 20+ Alexa skills. Your feedback is welcome and we are happy to consider contributions. Otherwise, you are free to use and modify this software as needed. As with all open-source packages, please use them in accordance with the licenses assigned to each package. For official Alexa supported skill development tools, we recommend using tools in the <a href='https://developer.amazon.com/en-US/alexa/alexa-skills-kit/'>Alexa Skills Kit</a> like <a href='https://developer.amazon.com/blogs/alexa/post/83c61d4e-ab3f-443e-bf71-75b5354bdc9e/skill-flow-builder'>Skill Flow Builder</a> and the <a href='https://developer.amazon.com/docs/alexa-skills-kit-sdk-for-nodejs/overview.html'>ASK SDK</a>.
   - question: Does Litexa handle Alexa feature X?
     answer:  Check out <a href='book/'>the documentation book</a> for features that Litexa has value added syntax for. Don't see something you want to use? No sweat, Litexa lets you write your own directives from scratch, and whitelist incoming event names.
-  #- question: Can I host my web artifacts elsewhere?
-  #  answer: Sure. The Litexa deployment pipeline is implemented as an extension, allowing you to swap out the code, storage, and asset upload implementations to suit your project. Thinking about provisioning dedicated servers? No sweat, as long as you're running node.js, you can host a Litexa project.
-
   - question: Can I still use my JavaScript libraries?
     answer: Yes! Litexa compiles into a JavaScript closure that you can inject code into, in order to add symbols that will be visible to your Litexa code. In there you can refer to any external modules in the usual way, and thereby pass their symbols up to Litexa too.
   - question: I really like writing in TypeScript/CoffeeScript can I still do that?
@@ -58,8 +55,8 @@ faqs:
     answer: <ul><li><strong>litexa/deploy-aws:</strong> A deployment module that pushes a skill to AWS using Lambda, DynamoDB, and S3.</li><li><strong>litexa/apl:</strong> An extension that makes working with the Alexa Presentation Language (APL) in your Litexa project more powerful, with shorthand for managing APL documents and common design patterns.</li><li><strong>litexa/render-template:</strong> An extension that supports easily building, sending, and validating a <code>Display.RenderTemplate</code> directive, the predecessor to APL.</li><li><strong>litexa/assets-wav:</strong> A WAV/MP3 composer that can combine multiple overlapping samples into a single MP3 stream, and a binding layer for use in Literate Alexa.</li><li><strong>litexa/gadgets:</strong> An extension for the Gadgets Skill API, which powers interaction with Echo Buttons (and potentially other Alexa Gadgets).</li></ul> Additionally, there is built-in support for <a href='book/monetization.html'>In Skill Purchasing (ISP)</a> in the core package, and a <a href='#'>VSCode extension</a> that provides syntax highlighting for <code>.litexa</code> files. We've also provided documentation for how to <a href='book/backdoor.html'>use Alexa features that Litexa does not yet support</a>.
 
 footer: >
-   Brought to you with ❤ by the Alexa Games team at Amazon.
-   © 2019, Amazon.com, Inc. or its affiliates. All Rights Reserved.
+    Brought to you with ❤ by the Alexa Games team at Amazon.
+    © 2019, Amazon.com, Inc. or its affiliates. All Rights Reserved.
 ---
 
 ## Install, Generate, Test, and Deploy

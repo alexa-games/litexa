@@ -1,8 +1,8 @@
 {
   "name": "@litexa/assets-wav",
-  "author": "Amazon.com",
+  "author": "Amazon",
   "version": "0.2.0",
-  "license": "SEE LICENSE IN LICENSE.TXT",
+  "license": "Apache-2.0",
   "description": "This module adds automatic support for WAV files in the asset pipeline of a Litexa project.",
   "keywords": [
     "Alexa",
@@ -23,7 +23,10 @@
     "coverage": "echo \"Missing coverage script.\" && exit 0",
     "test": "echo \"Missing test script.\" && exit 0"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": "github:alexa-games/litexa",
   "bugs": "https://github.com/alexa-games/litexa/issues",
-  "homepage": "https://litexa.games.alexa.a2z.com"
+  "homepage": "https://litexa.com"
 }

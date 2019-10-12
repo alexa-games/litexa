@@ -1,8 +1,7 @@
 {
   "name": "statement-inline",
   "version": "0.0.1",
-  "description": "",
   "scripts": {},
-  "author": "Amazon.com",
+  "author": "Amazon",
   "license": "Apache-2.0"
 }

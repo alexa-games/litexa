@@ -8,7 +8,7 @@
     "coverage": "npx nyc npm test && node ../cacheCoverage.js",
     "test": "npx mocha --opts mocha.opts \"./features/*.spec.coffee\""
   },
-  "author": "Amazon.com",
-  "license": "SEE LICENSE IN LICENSE.TXT",
+  "author": "Amazon",
+  "license": "Apache-2.0",
   "private": true
 }

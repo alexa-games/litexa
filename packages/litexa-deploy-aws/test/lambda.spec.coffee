@@ -1,17 +1,9 @@
-
 ###
-
- * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- * Copyright 2019 Amazon.com (http://amazon.com/), Inc. or its affiliates. All Rights Reserved.
- * These materials are licensed as "Restricted Program Materials" under the Program Materials
- * License Agreement (the "Agreement") in connection with the Amazon Alexa voice service.
- * The Agreement is available at https://developer.amazon.com/public/support/pml.html.
- * See the Agreement for the specific terms and conditions of the Agreement. Capitalized
- * terms not defined in this file have the meanings given to them in the Agreement.
- * ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ###
-
 
 {assert, expect} = require('chai')
 {match, spy, stub} = require('sinon')
@@ -109,7 +101,7 @@ describe 'Running Deploy to Lambda', ->
           }
         removePermission: () -> return new Promise()
       }
-      
+
       logSpy = spy(loggerInterface, 'log')
       lambdaContext.lambda = awsLambda
       await unitTestHelper 'checkLambdaPermissions', context, loggerInterface, lambdaContext
@@ -132,7 +124,7 @@ describe 'Running Deploy to Lambda', ->
             promise: -> return new Promise(addPolicyPromise)
           }
       }
-      
+
       logSpy = spy(loggerInterface, 'log')
       verboseSpy = spy(loggerInterface, 'verbose')
       lambdaContext.lambda = awsLambda
@@ -159,7 +151,7 @@ describe 'Running Deploy to Lambda', ->
             promise: -> return new Promise(addPolicyPromise)
           }
       }
-      
+
       logSpy = spy(loggerInterface, 'log')
       verboseSpy = spy(loggerInterface, 'verbose')
       lambdaContext.lambda = awsLambda

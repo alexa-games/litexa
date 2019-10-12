@@ -13,7 +13,7 @@ const markdownGlobalDep = path.join(globalNodeModulesPath, 'markdown-it-vuepress
 
 module.exports = {
   title: 'Litexa',
-  description: 'A domain specific language for building Alexa Skills',
+  description: 'A domain specific language for building Alexa skills',
   head: [
     ['link', { rel: 'icon', href: `/icon.png` }],
     ['link', { rel: 'manifest', href: '/manifest.json' }],
@@ -61,7 +61,8 @@ module.exports = {
           '/book/screens',
           '/book/companion-app',
           '/book/monetization',
-          '/book/echo-buttons',
+          '/book/gadgets-custom-interfaces',
+          '/book/gadgets-echo-buttons',
           '/book/localization',
           '/book/project-structure',
           '/book/testing',
