@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.3.0](https://github.com/alexa-games/litexa/compare/v0.2.1...v0.3.0) (2019-10-12)
+
+
+### Bug Fixes
+
+* Added missing regex chars for Litexa tests. ([#58](https://github.com/alexa-games/litexa/issues/58)) ([e235ed4](https://github.com/alexa-games/litexa/commit/e235ed467a6f78040f43597ca1e30b74852604ab))
+
+
+
+
+
 # [0.2.0](https://github.com/alexa-games/litexa/compare/v0.1.6...v0.2.0) (2019-09-19)
 
 

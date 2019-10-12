@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.3.0](https://github.com/alexa-games/litexa/compare/v0.2.1...v0.3.0) (2019-10-12)
+
+
+### Features
+
+* Update per-package configuration to publish publicly 🥳 ([#49](https://github.com/alexa-games/litexa/issues/49)) ([0ff383b](https://github.com/alexa-games/litexa/commit/0ff383b3bba3fe51a9fdb7166d8a5b3414beec68))
+
+
+
+
+
 # [0.2.0](https://github.com/alexa-games/litexa/compare/v0.1.6...v0.2.0) (2019-09-19)
 
 

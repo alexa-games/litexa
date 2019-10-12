@@ -1,6 +1,6 @@
 {
   "name": "@litexa/core",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Litexa, a programming language for writing Alexa skills",
   "bin": {
     "litexa": "src/command-line/main.js"

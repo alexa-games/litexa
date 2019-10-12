@@ -1,6 +1,6 @@
 {
   "name": "@litexa/render-template",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "This module adds support for the Alexa Display.RenderTemplate directive to Litexa.",
   "scripts": {
     "build": "npm run clean && npm install",
