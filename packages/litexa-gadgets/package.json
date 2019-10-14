@@ -1,6 +1,6 @@
 {
   "name": "@litexa/gadgets",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "This module adds support for GameEngine, GadgetController, and CustomInterfaceController directives and events to Litexa.",
   "scripts": {
     "build": "npm run clean && npm install",
