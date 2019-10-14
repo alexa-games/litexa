@@ -23,7 +23,8 @@
     "Skill",
     "CLI",
     "Command Line",
-    "SDK"
+    "SDK",
+    "Litexa"
   ],
   "license": "Apache-2.0",
   "dependencies": {

@@ -18,7 +18,8 @@
     "Alexa",
     "Skill",
     "APL",
-    "SDK"
+    "SDK",
+    "Litexa"
   ],
   "license": "Apache-2.0",
   "dependencies": {

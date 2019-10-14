@@ -19,7 +19,8 @@
     "Echo Buttons",
     "Game Engine",
     "Gadgets",
-    "SDK"
+    "SDK",
+    "Litexa"
   ],
   "license": "Apache-2.0",
   "dependencies": {
