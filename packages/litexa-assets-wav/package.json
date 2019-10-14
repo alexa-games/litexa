@@ -9,7 +9,8 @@
     "wav",
     "Skill",
     "mp3",
-    "SDK"
+    "SDK",
+    "Litexa"
   ],
   "main": "index.js",
   "dependencies": {
