@@ -4,11 +4,11 @@ This guide covers how to get up and running with Litexa.
 
 After reading this guide you'll know:
 
-<span style="color:#00caff">&#10004;</span> How to generate a new Litexa project<br/>
-<span style="color:#00caff">&#10004;</span> The anatomy of a Litexa project<br/>
-<span style="color:#00caff">&#10004;</span> How to run, modify, and test your code<br/>
-<span style="color:#00caff">&#10004;</span> How to deploy your code<br/>
-<span style="color:#00caff">&#10004;</span> Where you can go to learn more about Litexa<br/>
+<span style="color:#00caff; font-family:Helvetica,sans-serif">&#10004;</span> How to generate a new Litexa project<br/>
+<span style="color:#00caff;font-family:Helvetica,sans-serif">&#10004;</span> The anatomy of a Litexa project<br/>
+<span style="color:#00caff;font-family:Helvetica,sans-serif">&#10004;</span> How to run, modify, and test your code<br/>
+<span style="color:#00caff;font-family:Helvetica,sans-serif">&#10004;</span> How to deploy your code<br/>
+<span style="color:#00caff;font-family:Helvetica,sans-serif">&#10004;</span> Where you can go to learn more about Litexa<br/>
 
 ## Guide Assumptions
 
@@ -59,7 +59,9 @@ often want to incorporate external code and dependencies alongside your skill lo
 Litexa is a command line utility that is installed as a global npm package.
 To install the CLI run:
 
-    npm install -g @litexa/core
+```bash
+npm install -g @litexa/core
+```
 
 From then on, you should be able to invoke the `litexa` command from anywhere on your machine.
 
@@ -75,7 +77,9 @@ differences between operating systems we'll call them out.
 Once you've installed the Litexa CLI you can create a new Litexa project by opening up a terminal, navigating to
 a directory where you have rights to create files, and typing:
 
-    litexa generate
+```bash
+litexa generate
+```
 
 At this point you'll get a series of questions to help you get started. For now, answer the questions with the following
 options:
@@ -97,23 +101,27 @@ It will also print out the file names of the files it generated to the console.
 
 Let's review in a little more depth what files were generated and what our application looks like.
 
-    cd hello-litexa
+```bash
+cd hello-litexa
+```
 
 If we take a look at the contents of the directory we notice they look something like this
 
-	.
-	├── README.md
-	├── artifacts.json
-	├── litexa
-	│   ├── assets
-	│   │   ├── icon-108.png
-	│   │   └── icon-512.png
-	│   ├── main.litexa
-	│   ├── main.test.litexa
-	│   ├── utils.js
-	│   └── utils.test.js
-	├── litexa.config.js
-	└── skill.js
+```bash
+.
+├── README.md
+├── artifacts.json
+├── litexa
+│   ├── assets
+│   │   ├── icon-108.png
+│   │   └── icon-512.png
+│   ├── main.litexa
+│   ├── main.test.litexa
+│   ├── utils.js
+│   └── utils.test.js
+├── litexa.config.js
+└── skill.js
+```
 
 ::: tip Documentation
 The **README.md** is a great place to start after generating a project. It provides information specific to the type of project
@@ -128,9 +136,9 @@ litexa project. Here's a short rundown of each of the files and folders created 
 * `litexa.config.js` is your project configuration file.
 * `skill.js` is a representation of your skill that provides required metadata to Alexa.
 * `litexa` folder houses your assets, litexa files, and skill logic:
-    * `assets` contains any images, videos and sounds you'd like to deploy with your project.
-    * `*.litexa` files are the Litexa language files.
-    * `*.js` files are code files. Anything defined in them will be visible in the litexa global scope.
+  * `assets` contains any images, videos and sounds you'd like to deploy with your project.
+  * `*.litexa` files are the Litexa language files.
+  * `*.js` files are code files. Anything defined in them will be visible in the litexa global scope.
 
 ::: warning Importing Code
 As mentioned above, code files inside of the `litexa` directory are treated differently.
@@ -144,6 +152,7 @@ section of the cookbook.
 :::
 
 ### The Code
+
 *If you want to go straight to getting your skill up and running, feel free to [skip this section](#building-and-running).
 This part just skims through the content of your generated skill code.*
 
@@ -377,7 +386,9 @@ able to invoke your skill.
 
 Try it out. Invoke your skill on an Alexa device connected to your Alexa account. Just say
 
-    Alexa, open Hello Litexa
+```text
+Alexa, open Hello Litexa
+```
 
 ::: tip Alexa Simulator
 If you don't have an Alexa device you can also visit the [ASK Developer Console](https://developer.amazon.com/alexa/console/ask)
