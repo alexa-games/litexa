@@ -148,24 +148,6 @@ askName
           </div>
         </div>
       </div>
-
-
-
-      <!--
-      <div class="state-of-mind">
-        <h2>State of Mind</h2>TODO: This will be replaced with Chris's interactive demo...
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 1187 706"
-        >
-          <g>
-            <g>
-              <rect style="fill:#292c32" width="1187" height="706"></rect>
-            </g>
-          </g>
-        </svg>
-      </div>
-      -->
     </div>
     <div class="stripe">
       <Content class="home-aligned" :custom="false"/>
@@ -228,6 +210,7 @@ export default {
 .cloud-container {
   background-repeat: no-repeat;
   position: absolute;
+  will-change: transform, opacity;
 
   @media (max-width: $MQMobile) {
     display: none;
@@ -301,7 +284,7 @@ baloonBob(speed, phase) {
   height: 106px;
   top: 100px;
   transition: all 4.3s ease;
-  cloudScroll(1, 0);
+  cloudScroll(.6, 0);
 }
 
 .cloud-charlie ~ .cloud-charlie {
@@ -314,7 +297,7 @@ baloonBob(speed, phase) {
   right: 180px;
   top: 120px;
   transition: all 4.3s ease;
-  baloonBob(1, 0);
+  baloonBob(.4, 0);
 }
 
 .cloud-twins ~ .cloud-twins {
@@ -326,12 +309,12 @@ baloonBob(speed, phase) {
   height: 540px;
   top: 330px;
   transition: all 4.3s ease;
-  cloudScroll(0.7, 0.6);
+  cloudScroll(.2, 0.6);
 }
 
 .cloud-righty ~ .cloud-righty {
   top: 1930px;
-  cloudScroll(0.4, 0.3);
+  cloudScroll(.1, 0.3);
 }
 
 .cloud-bottoms {
@@ -353,7 +336,7 @@ baloonBob(speed, phase) {
   left: 20px;
   top: 730px;
   transition: all 4.3s ease;
-  cloudScroll(0.9, 0.3);
+  cloudScroll(0.12, 0.3);
 }
 
 .cloud-bottom-left ~ .cloud-bottom-left {
@@ -366,7 +349,7 @@ baloonBob(speed, phase) {
   left: -10px;
   top: 530px;
   transition: all 4.3s ease;
-  cloudScroll(0.5, 0.1);
+  cloudScroll(.08, 0.1);
 }
 
 .cloud-fluffy ~ .cloud-fluffy{
@@ -447,6 +430,7 @@ baloonBob(speed, phase) {
 
     h1 {
       font-size: 3.5rem;
+      font-weight: 600;
       letter-spacing: 2px;
     }
 
@@ -786,7 +770,8 @@ baloonBob(speed, phase) {
       }
 
       h1 {
-        font-size: 2rem;
+        font-size: 3.0rem;
+        font-weight: 600;
       }
 
       h1, .description .action {
@@ -816,8 +801,9 @@ baloonBob(speed, phase) {
       }
 
       h2 {
-        font-size: 1.25rem;
+        font-size: 1.4rem;
         padding: 0.5em;
+        font-weight: 600;
       }
     }
 
