@@ -50,10 +50,6 @@ A WAV/MP3 composer that can combine multiple overlapping samples into a single M
 binding layer for use in Literate Alexa. Click to learn more about the
 [WAV audio converter](./docs/book/appendix-wav-conversion.md).
 
-### litexa-test-projects
-
-Miscellaneous integration tests and examples of usage.
-
 ## Developer Setup
 
 While having split code-bases facilitates code-sharing, it comes at a cost of increased difficulty
@@ -128,8 +124,9 @@ npm run coverage:lerna
 
 #### Integration Tests
 
-Integration tests are handled outside of Lerna and handled by the `ltexa-integrations-tests` package
-in the `./tests` folder. If you're writing an integration test put it here.
+Integration tests are handled outside of Lerna, by the unpublished `@litexa/integration-tests` package
+in the `./tests` directory. If you're writing an integration test, add it there. Integration tests can
+also be referred to for usage examples of various Litexa features.
 
 #### Misc
 
