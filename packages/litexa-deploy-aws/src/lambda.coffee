@@ -323,7 +323,7 @@ makeLambdaConfiguration = (context, logger) ->
       Handler: "index.handler" # exports.handler in index.js
       MemorySize: 256 # megabytes, mainly because this also means dedicated CPU
       Role: context.lambdaIAMRoleARN
-      Runtime: "nodejs8.10"
+      Runtime: "nodejs12.x"
       Timeout: 10 # seconds
       Environment:
         Variables:
