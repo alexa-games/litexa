@@ -35,7 +35,7 @@ module.exports =
   initializeSkillInfo: () ->
     unless @artifacts and @skillId
       # Build the skill so we can retrieve the skill ID.
-      skill = await skillBuilder.build(@root)
+      skill = await skillBuilder.build(@root, @deployment)
       skill.projectInfo.variant = @deployment
 
       context = {

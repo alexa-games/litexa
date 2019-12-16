@@ -101,7 +101,7 @@ module.exports.buildExtendedParser = (projectInfo) ->
   if enableParserCache
     fs.writeFileSync projectSourceCacheFilename, extSourcePEG, 'utf8'
 
-  extParserSource = peg.generate extSourcePEG, { cache: true, output: 'source', format: 'bare', allowedStartRules:['start', 'TestStatements'] }
+  extParserSource = peg.generate extSourcePEG, { cache: true, output: 'source', format: 'bare', allowedStartRules:['start', 'TestStatements', 'AllFileExclusions'] }
 
   try
     extParser = eval extParserSource

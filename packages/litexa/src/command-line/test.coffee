@@ -58,11 +58,11 @@ module.exports.run = (options) ->
     important "#{(new Date).toLocaleString()} running tests in #{options.root} with #{filterReport}"
 
     try
-      skill = await require('./skill-builder').build(options.root)
+      skill = await require('./skill-builder').build(options.root, options.deployment)
     catch err
       return error err
 
-    skill.projectInfo.testRoot = path.join skill.projectInfo.root, '.test'
+    skill.projectInfo.testRoot = path.join skill.projectInfo.root, '.test', skill.projectInfo.variant
     mkdirp.sync skill.projectInfo.testRoot
     testRoot = skill.projectInfo.testRoot
 

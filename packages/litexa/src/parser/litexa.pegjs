@@ -269,6 +269,7 @@ Statement
 
 RootStatements
   = DefineStatement
+  / ExcludeStatement
   / PronounceStatement
   / NewTestStatement
   / NewDataTableStatement
@@ -338,6 +339,8 @@ TableStatements
   = DataTableRowStatement
 
 
+
+
 // Fragment is used as an entry point
 // in the test framework to parse chunks
 Fragment
@@ -367,6 +370,54 @@ Coming soon!
 DefineStatement "database type definition"
   = "define" ___ '@' name:Identifier ___ 'as'___ type:DottedIdentifier {
     skill.pushDBTypeDefinition( new lib.DBTypeDefinition(location(), name, type) );
+  }
+
+
+AllFileExclusions
+  = results:AllFileExclusionsStatment* {
+    if ( !results ) {
+      return true;
+    }
+    let shouldInclude = true;
+    for ( let i=0; i<results.length; ++i ) {
+      if ( !results[i] ) {
+        shouldInclude = false;
+      }
+    }
+    return shouldInclude;
+  }
+
+AllFileExclusionsStatment
+  = __ EndOfStatementSequence { return true; }
+  / r:ExcludeStatement __ EndOfStatementSequence { return r; }
+  / $(!EndOfStatementSequence .)* EndOfStatementSequence { return true; }
+
+/* litexa [exclude file]
+The `exclude file` statement lets you specify a static [expression](
+#expression) to exclude all the contents of the file. You might want to exclude
+a file of test states from a production build, or exclude a file from versions
+of your skill, as defined by your [DEPLOY](#deploy-variable) variables.
+
+```coffeescript
+exclude file unless DEPLOY.DEBUG
+# excludes a file's contents unless the DEPLOY variable DEBUG was set
+```
+
+Note: this statement only works on files that exclusively have tests or states
+that don't have any transitions to them.
+*/
+ExcludeStatement "file exclusion statement"
+  = "exclude file" ___ type:("if"/"unless") ___ expr:ExpressionString {
+    if (options.context) {
+      let result = expr.evaluateStatic(options.context);
+      if (type === "unless") {
+        return result == true;
+      } else {
+        return result == false;
+      }
+
+    }
+    return null;
   }
 
 
@@ -598,6 +649,10 @@ SwitchAssignment
     }
   / '@' name:VariableReference {
       name = new lib.DatabaseReferencePart(name);
+      return new lib.SwitchAssignment(location(), name, null);
+    }
+  / 'DEPLOY.' name:VariableReference {
+      name = new lib.StaticVariableReferencePart(name);
       return new lib.SwitchAssignment(location(), name, null);
     }
   / name:SlotVariableReference {
@@ -1056,7 +1111,7 @@ AttributeStatement
 
 
 /* litexa [when]
-Defines an intent that the parent state is willing to handle.
+Declares an intent that the parent state is willing to handle.
 
 ```coffeescript
 when "my name is $name"
@@ -1127,6 +1182,47 @@ askForAlternativeName
   when MyNameIs
     say "Understood."
 ```
+
+### Postfix Conditional
+
+The statement can include a conditional static [expression](
+#expression). If the condition evaluates to false, then the handler will not
+exist in that state.
+
+```coffeescript
+forkInTheRoad
+  say "Do you want to go left or right?"
+
+  when AlwaysCorrectPath if DEPLOY.shortcutsEnabled
+    or "the correct path"
+    or "next"
+    ...
+
+  when SkipToEnding if DEPLOY.shortcutsEnabled
+    -> ending
+
+  ... # other handlers
+
+  otherwise
+    say "I didn't get that."
+    -> forkInTheRoad
+
+```
+
+This can be a way to exclude some intents for specific deployment targets. For
+the above example, if this was the only place `AlwaysCorrectPath` was defined,
+it would not exist in the language model for the deployment targets that have
+`DEPLOY.shortcutsEnabled = true`. On the other hand, `SkipToEnding` is defined
+elsewhere because there are no utterances attached to its statement, so it will
+exist in the language model.
+
+If the skill is deployed with a deployment target that does not have `DEPLOY.
+shortcutsEnabled = true` and the skill receives `SkipToEnding` in this state,
+Litexa will have the [`otherwise`](#otherwise) handler resolve it.
+
+It may be useful to learn about [DEPLOY variables](#deploy-variable) and static
+[expressions](#expression) for these statements.
+
 */
 
 /* litexa [Intent Name]
@@ -1185,6 +1281,13 @@ IntentStatement
   / "when" ___ "Connections.Response" {
     const intent = pushIntent(location(), 'Connections.Response', {class:lib.FilteredIntent});
     intent.setCurrentIntentFilter({ name: '__' });
+  }
+  / "when" ___ utterance:(UtteranceString / DottedIdentifier) ___ type:("if"/"unless") ___ qualifier:ExpressionString {
+    const intent = pushIntent(location(), utterance, false);
+    intent.qualifier = qualifier;
+    if (type === "unless") {
+      intent.qualifierIsInverted = true;
+    }
   }
   / "when" ___ utterance:(UtteranceString / DottedIdentifier) {
     const intent = pushIntent(location(), utterance, false);
@@ -1252,7 +1355,7 @@ language
 model](https://developer.amazon.com/docs/custom-skills/create-and-edit-custom-slot-types.html#json-for-slot-types-interaction-model-schema).
 
 ```javascript
-    // in slots.build.js
+// in slots.build.js
 exports.vehicleNames = function() {
   return {
     name: "LIST_OF_VEHICLES",
@@ -2558,13 +2661,14 @@ SayStringPart
   / TemplateStringSlotPart
   / TemplateStringDatabaseCallPart
   / TemplateStringDatabasePart
+  / TemplateStringStaticPart
   / TemplateStringPausePart
   / TemplateStringInterjectionPart
   / TemplateStringTaggedPart
 
 
 TemplateStringClearPart
-  = $(!'"' !'$' !'@' !'{' !'<' !'\\' .)+ { return new lib.StringPart(text()); }
+  = $(!'"' !'$' !'@' !'{' !'<' !'\\' !'DEPLOY' .)+ { return new lib.StringPart(text()); }
 
 
 TemplateStringEscapedCharacterPart
@@ -2586,6 +2690,23 @@ TemplateStringSlotPart
 TemplateStringDatabasePart
   = '@' name:VariableReference {
     return new lib.DatabaseReferencePart(name);
+  }
+
+/* litexa [DEPLOY variable]
+
+References a field defined on the `DEPLOY` object of your Litexa
+configuration file. It is a variable that is hydrated upon compilation of your
+skill handler. It can be used as part of an [expression](#expression) like
+other variables. Using it in a static expression will not cause the expression to
+become dynamic. Please see the Variables and Expressions chapter on how to
+define and use DEPLOY variables.
+
+Note that you cannot reference the DEPLOY object by itself; you must reference
+a field on the DEPLOY object.
+*/
+TemplateStringStaticPart
+  = 'DEPLOY.' name:VariableReference {
+    return new lib.StaticVariableReferencePart(name);
   }
 
 TemplateStringDatabaseCallPart
@@ -2694,6 +2815,8 @@ FunctionCallStatement
 
 /* litexa [Expression]
 Coming soon!
+
+For now, please reference the Variables and Expressions chapter in the Book.
 */
 /* litexa [Inline Function]
 Coming soon!
@@ -2767,6 +2890,9 @@ ExpressionValue
   / FunctionCall
   / '@' name:VariableReference {
     return new lib.DatabaseReferencePart(name);
+  }
+  / 'DEPLOY.' name:VariableReference {
+    return new lib.StaticVariableReferencePart(name);
   }
   / name:SlotVariableReference {
     return new lib.SlotReferencePart(name);

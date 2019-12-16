@@ -457,9 +457,11 @@ test library, go to the `litexa` package's
 
 ### .test Directory Contents
 
-Running `litexa test` will generate a .test directory with
-test artifacts. You can delete this at any time without
-affecting your Litexa project.
+Running `litexa test` will generate a .test directory with test artifacts. You
+can delete this at any time without affecting your Litexa project. The command
+is deployment target specific; the artifacts will live in a subdirectory named
+after the target inside the .test directory. By default, it will run using the
+`development` target.
 
 However, the contents might be useful for diving deeper into
 your test output. Here are all the files and their contents:

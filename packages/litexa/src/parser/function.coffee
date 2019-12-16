@@ -32,6 +32,33 @@ operatorMap =
   '||': '||'
 
 
+isStaticValue = (v) ->
+  switch typeof(v)
+    when 'string' then return true
+    when 'number' then return true 
+    when 'boolean' then return true 
+    when 'object' then return v.isStatic?()
+  return false
+
+evaluateStaticValue = (v, context, location) ->
+  switch typeof(v)
+    when 'string' 
+      if v[0] == '"' and v[v.length-1] == '"'
+        return v[1...v.length-1]
+      else 
+        return v
+    when 'number' then return v 
+    when 'boolean' then return v 
+    when 'object' 
+      unless v.evaluateStatic?
+        throw new ParserError location, "missing evaluateStatic for #{JSON.stringify(v)}"
+      try 
+        return v.evaluateStatic(context)
+      catch err
+        throw new ParserError location, "Error in static evaluation: #{err}"
+  throw "don't know how to static evaluate #{JSON.stringify(v)}"
+
+
 class lib.EvaluateExpression
   constructor: (@expression) ->
 
@@ -43,6 +70,12 @@ class lib.Expression
   constructor: (@location, @root) ->
     unless @root?
       throw new ParserError @location, "expression with no root?"
+
+  isStatic: ->
+    return isStaticValue(@root)
+
+  evaluateStatic: (context) ->
+    evaluateStaticValue @root, context, @location
 
   toString: ->
     @root.toString()
@@ -58,6 +91,15 @@ class lib.BinaryExpression
   constructor: (@location, @left, @op, @right) ->
     unless @op of operatorMap
       throw new ParserError @location, "unrecognized operator #{@op}"
+
+  isStatic: ->
+    return isStaticValue(@left) and isStaticValue(@right)
+
+  evaluateStatic: (context) ->
+    left = evaluateStaticValue @left, context, @location
+    right = evaluateStaticValue @right, context, @location
+    op = operatorMap[@op]
+    eval "#{JSON.stringify left} #{op} #{JSON.stringify right}"
 
   toLambda: (options) ->
     left = @left

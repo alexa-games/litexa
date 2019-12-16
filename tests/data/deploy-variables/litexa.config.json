@@ -1,0 +1,24 @@
+{
+  "name": "staticTests",
+  "deployments": {
+    "development": {
+      "DEPLOY": {
+        "name": "Bob",
+        "positive": true,
+        "negative": false,
+        "EU": true,
+        "BASE": true
+      }
+    },
+    "europe-production": {
+      "DEPLOY": {
+        "version": "Europe"
+      }
+    },
+    "base-production": {
+      "DEPLOY": {
+        "version": "Base"
+      }
+    }
+  }
+}

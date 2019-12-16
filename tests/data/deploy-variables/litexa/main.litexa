@@ -1,0 +1,60 @@
+exclude file unless DEPLOY.EU
+
+launch
+  local name = DEPLOY.name
+  say "Hello {name}."
+  say "And hello DEPLOY.name."
+
+  switch DEPLOY.version
+    == "Europe" then
+      say "This is the European version"
+
+  switch DEPLOY.name
+    == "Bob" then
+      say "Bob is in the house."
+    else
+      fail("Couldn't switch on DEPLOY")
+
+  switch name
+    == DEPLOY.name then
+      say "Bob is everywhere."
+    else
+      fail("Couldn't compare with DEPLOY in test case")
+
+  switch checkName = DEPLOY.name
+    checkName == "Bob" then
+      say "No, really, lots of Bob."
+    else
+      fail("couldn't create switch temp var with DEPLOY value")
+
+
+  unless DEPLOY.name == "Bob"
+    fail("couldn't test a DEPLOY variable in a conditional")
+
+  if DEPLOY.name != "Bob"
+    fail("couldn't test a DEPLOY variable in a conditional")
+
+
+  when "hello"
+    say "hello DEPLOY.name"
+
+  when "hello Roger" if DEPLOY.name == "Roger"
+
+  when "hello Bob" if DEPLOY.name == "Bob"
+
+  when "positive inclusion" if DEPLOY.positive
+
+  when "go to tunnel" if DEPLOY.BASE
+
+  when "negative inclusion" if DEPLOY.negative
+
+  when "hello unless Roger" unless DEPLOY.name == "Roger"
+
+  when "hello unless Bob" unless DEPLOY.name == "Bob"
+
+
+TEST "main"
+  launch
+  user: "hello"
+  alexa: launch, e"hello Bob"
+  user: AMAZON.StopIntent

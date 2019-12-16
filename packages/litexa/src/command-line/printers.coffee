@@ -21,7 +21,7 @@ module.exports.run = (options, after) ->
     after(err) if after?
 
   try
-    skill = await require('./skill-builder').build(options.root)
+    skill = await require('./skill-builder').build(options.root, options.deployment)
     switch options.type
       when 'model'
         model = skill.toModelV2 options.region ? 'default'

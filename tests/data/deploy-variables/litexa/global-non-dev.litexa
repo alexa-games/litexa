@@ -1,0 +1,5 @@
+exclude file if DEPLOY.BASE
+global
+  when AMAZON.StopIntent
+    say "bye. not dev version"
+    END

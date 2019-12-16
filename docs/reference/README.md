@@ -405,6 +405,18 @@ switch score
 
 Coming soon!
 
+## DEPLOY variable
+
+References a field defined on the `DEPLOY` object of your Litexa
+configuration file. It is a variable that is hydrated upon compilation of your
+skill handler. It can be used as part of an [expression](#expression) like
+other variables. Using it in a static expression will not cause the expression to
+become dynamic. Please see the Variables and Expressions chapter on how to
+define and use DEPLOY variables.
+
+Note that you cannot reference the DEPLOY object by itself; you must reference
+a field on the DEPLOY object.
+
 ## directive
 
 Adds directives to the next Alexa response, by calling an
@@ -456,9 +468,26 @@ session should end.
 
 For an example, see [LISTEN (Testing)](#listen-testing).
 
+## exclude file
+
+The `exclude file` statement lets you specify a static [expression](
+#expression) to exclude all the contents of the file. You might want to exclude
+a file of test states from a production build, or exclude a file from versions
+of your skill, as defined by your [DEPLOY](#deploy-variable) variables.
+
+```coffeescript
+exclude file unless DEPLOY.DEBUG
+# excludes a file's contents unless the DEPLOY variable DEBUG was set
+```
+
+Note: this statement only works on files that exclusively have tests or states
+that don't have any transitions to them.
+
 ## Expression
 
 Coming soon!
+
+For now, please reference the Variables and Expressions chapter in the Book.
 
 ## for
 
@@ -1565,7 +1594,7 @@ simulate properly otherwise.
 
 ## when
 
-Defines an intent that the parent state is willing to handle.
+Declares an intent that the parent state is willing to handle.
 
 ```coffeescript
 when "my name is $name"
@@ -1637,6 +1666,47 @@ askForAlternativeName
     say "Understood."
 ```
 
+### Postfix Conditional
+
+The statement can include a conditional static [expression](
+#expression). If the condition evaluates to false, then the handler will not
+exist in that state.
+
+```coffeescript
+forkInTheRoad
+  say "Do you want to go left or right?"
+
+  when AlwaysCorrectPath if DEPLOY.shortcutsEnabled
+    or "the correct path"
+    or "next"
+    ...
+
+  when SkipToEnding if DEPLOY.shortcutsEnabled
+    -> ending
+
+  ... # other handlers
+
+  otherwise
+    say "I didn't get that."
+    -> forkInTheRoad
+
+```
+
+This can be a way to exclude some intents for specific deployment targets. For
+the above example, if this was the only place `AlwaysCorrectPath` was defined,
+it would not exist in the language model for the deployment targets that have
+`DEPLOY.shortcutsEnabled = true`. On the other hand, `SkipToEnding` is defined
+elsewhere because there are no utterances attached to its statement, so it will
+exist in the language model.
+
+If the skill is deployed with a deployment target that does not have `DEPLOY.
+shortcutsEnabled = true` and the skill receives `SkipToEnding` in this state,
+Litexa will have the [`otherwise`](#otherwise) handler resolve it.
+
+It may be useful to learn about [DEPLOY variables](#deploy-variable) and static
+[expressions](#expression) for these statements.
+
+
 ## with
 
 Specifies the type of a [slot](#slot), as part of a [when](#when) clause.
@@ -1683,7 +1753,7 @@ language
 model](https://developer.amazon.com/docs/custom-skills/create-and-edit-custom-slot-types.html#json-for-slot-types-interaction-model-schema).
 
 ```javascript
-    // in slots.build.js
+// in slots.build.js
 exports.vehicleNames = function() {
   return {
     name: "LIST_OF_VEHICLES",

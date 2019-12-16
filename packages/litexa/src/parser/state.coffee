@@ -300,7 +300,12 @@ class lib.State
       try
         model = intent.toModelV2(context)
       catch err
-        throw "failed to write language model for state `#{@name}`: #{err}"
+        if err.location
+          throw err
+        else 
+          throw new Error "failed to write language model for state `#{@name}`: #{err}"
+
+      continue unless model?
 
       if model.name of context.intents
         console.error "duplicate `#{model.name}` intent found while writing model"

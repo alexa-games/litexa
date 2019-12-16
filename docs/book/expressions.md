@@ -227,6 +227,60 @@ askName
     @name = $name
 ```
 
+## DEPLOY Variables
+
+DEPLOY variables are a type of memory storage variable that you can define as
+part of your Litexa configuration to exist at compilation time. They can be
+used like the other types of variables, but can also be used in [`when`
+statements](/reference/#when) and [file exclusion statements](/reference/#exclude-file).
+
+To define DEPLOY variables, add a `DEPLOY` object in your deployment targets
+like so:
+
+```javascript
+const deploymentConfiguration = {
+  name: 'cats-in-space',
+  deployments: {
+    development: {
+      ... // other configuration
+      DEPLOY: { // your DEPLOY variables go in this object
+        debug: true,
+        mode: 'practice'
+      }
+    },
+    production: {
+      ... // other configuration
+      DEPLOY: {
+        mode: 'challenge'
+      }
+    },
+    ...
+```
+
+These variables will then be available for use in your Litexa code with their
+values dependent on which deployment target you specified in the litexa command
+(`litexa test`, `litexa deploy`, etc.).
+
+DEPLOY variables can be useful when you want specific values in your builds for
+testing. For example, you can bypass non-deterministic logic.
+
+```coffeescript
+announceCategory
+  say "Your next category is,"
+  if DEPLOY.disableRandom
+    say "{getIncrementalCategory()}."
+  else
+    say "{getRandomCategory()}."
+```
+
+You can also use them in test skills to jump to another part of the skill as a
+shortcut. See the [relevant section](#postfix-conditional) in `when` statements
+for its application.
+
+Otherwise, if you want to deploy multiple skills where most of their
+logic is the same, you can keep them as one Litexa project with different
+DEPLOY object configurations, thereby avoiding code duplication.
+
 ## Expressions
 
 There are various places in Litexa syntax that accept
@@ -276,4 +330,38 @@ use their values.
   local b = a + 5
   $count = 10
   local c = ( a * $count ) + b - 7
+```
+
+Function calls, defined in your JavaScript files, are also expressions.
+
+```coffeescript
+  local a = foo()
+  local b = bar(a) + 7
+  functionThatDoesNotExplicitlyReturn() # this is still an expression because it
+                                        # will return undefined
+```
+
+### Static Expressions
+
+Static expressions are expressions in which all parts of the expression can be
+evaluated during compilation. If an expression contains any dynamic part, then
+the whole expression is dynamic.
+
+Strings, numbers, and booleans are inherently static. [DEPLOY variables](
+#deploy-variables) are also static, because they are evaluated
+before compilation.
+
+The following examples are static expressions:
+
+```coffeescript
+  if "woem" == "meow" and DEPLOY.type == "debug" # static conditional
+```
+
+And the following are dynamic expressions:
+
+```coffeescript
+  if 10/2 == 5 or $cat == 'chantilly'
+  if isCorrectAnswer($answer)
+  local playerName = "Ellie"
+  if playerName == DEPLOY.name # playerName is not a DEPLOY variable
 ```

@@ -353,9 +353,27 @@ Litexa takes your `skill.coffee/js/ts` (we might refer to this as `skill.*` in d
 to create your skill manifest file. You can find the constructed skill manifest file after a deployment
 in `.deploy/{yourDeploymentTarget}/skill.json`.
 
-If you use any litexa extensions in your project, they may add the APIs they use to your skill manifest automatically.
+If you use any Litexa extensions in your project, they may add the APIs they use to your skill manifest automatically.
 Otherwise, you will need to add the required fields to your `skill.*`. Likewise, if you use an API Litexa does not
 explicitly support (e.g. Gadget Controller), you will need to add it to your `skill.*`.
+
+#### Deployment Target Overrides
+
+If you want to change your skill manifest based on a specific deployment target, you can do so by keying the original
+manifest content structure on the deployment target name. You can choose to do this for some deployment targets; any
+unkeyed targets will fall back to the original manifest structure and its contents.
+
+For example, the below `skill.js` has a different manifest for its `QA` deployment target only.
+
+```javascript
+module.exports = {
+  manifest: standardSkillManifest // defined elsewhere...
+};
+
+module.exports['QA'] = {
+  manifest: qaSkillManifest // also defined elsewhere...
+};
+```
 
 ### Skill Model
 
@@ -451,13 +469,13 @@ Once again, you can view the result skill invocation names in the deployed model
 
 Please see the [Monetization chapter](/book/monetization.html).
 
-## Extra Note: The `production` Deployment Target Name
+## Extra Note: Including `production` in the Deployment Target Name
 
-There is a special deployment target name called `production`.
-For deployment targets that are *not* this, a `\ (development)` will be
-automatically appended to the name of your skill, with `development`
-specified as your named deployment target. We recommend creating and
-using this deployment target for your live skill.
+There is a special condition on deployment target names. If the name does *not*
+have the word `production` in it, a ` (development)` will be automatically
+appended to the name of your skill, with `development` specified as your named
+deployment target. We recommend labelling only your production skill deployment
+target(s) with `production`.
 
 :::tip
 We recommend changing the DynamoDB settings for your live skill to ensure that it does not
