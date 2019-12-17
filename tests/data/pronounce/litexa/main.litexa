@@ -1,7 +1,3 @@
-pronounce "dog" as "cat"
-pronounce "hidden" as "<phoneme alphabet='ipa' ph='hɪd.ɛn'>hidden</phoneme>"
-pronounce "'goodbye'" as "goodbye then"
-
 launch
   say "I really like my dog. Do you agree?"
 
@@ -25,3 +21,48 @@ TEST "say no"
   alexa: launch, /I really like my cat/i
   user: AMAZON.NoIntent
   alexa: null, /goodbye then/i
+
+TEST "say yes en-CA"
+  setRegion en-CA
+  launch
+  alexa: launch, /I really like my ferret/i
+  user: AMAZON.YesIntent
+  alexa: null, /my ferret/
+  alexa: null, /phoneme/
+
+TEST "say no en-CA"
+  setRegion en-CA
+  launch
+  alexa: launch, /I really like my ferret/i
+  user: AMAZON.NoIntent
+  alexa: null, /'goodbye'/i
+
+TEST "say yes en-GB"
+  setRegion en-GB
+  launch
+  alexa: launch, /I really like my gerbil/i
+  user: AMAZON.YesIntent
+  alexa: null, /my gerbil/
+  alexa: null, /phoneme/
+
+TEST "say no en-GB"
+  setRegion en-GB
+  launch
+  alexa: launch, /I really like my gerbil/i
+  user: AMAZON.NoIntent
+  alexa: null, /'goodbye'/i
+
+TEST "say yes en-IN"
+  setRegion en-IN
+  launch
+  alexa: launch, /I really like my dog/i
+  user: AMAZON.YesIntent
+  alexa: null, /my dog/
+  alexa: null, /stay hidden for hours/
+
+TEST "say no en-IN"
+  setRegion en-IN
+  launch
+  alexa: launch, /I really like my dog/i
+  user: AMAZON.NoIntent
+  alexa: null, /'goodbye'/i

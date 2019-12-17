@@ -906,8 +906,8 @@ applied to all voiced responses from this skill. The statement
 should be placed outside of the scope of any state, at the top
 level of the file.
 
-Use this to improve Alexa's pronounciation of words, or select
-a specific pronounciation skill wide, while retaining human
+Use this to improve Alexa's pronunciation of words, or select
+a specific pronunciation skill wide, while retaining human
 readable spelling in your code.
 
 ```coffeescript
@@ -916,6 +916,24 @@ pronounce "tomato" as "<phoneme alphabet="ipa" ph="/təˈmɑːtoʊ/">tomato</pho
 
 Note that you must use SSML in the replacement text; the Litexa
 SSML shorthand statements (e.g "<!Bravo>") will not work.
+
+### localized pronunciations
+
+If you plan to publish your skill to multiple locales, you can define
+locale-specific pronunciations for your voiced responses. Simply add
+your locale-specific pronunciation definitions to the Litexa files that
+reside in said locale's Litexa project directory.
+
+::: tip Use a pronounce.litexa file in each locale's Litexa project directory
+If defining locale-specific pronunciations, we recommend creating a
+pronounce.litexa file in each of your locale's Litexa project directories.
+Put all of your locale-specific pronunciation definitions inside of it.
+:::
+
+::: warning The default locale's pronunciations do not carry over to other locales
+Because pronunciations are very locale-specific, the default locale's pronunciations
+will not carry over to other locales.
+:::
 */
 
 PronounceStatement

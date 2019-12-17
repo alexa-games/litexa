@@ -172,7 +172,7 @@ class lib.Skill
     @states = @createDefaultStates()
     @tests = {}
     @dataTables = {}
-    @sayMapping = {}
+    @sayMapping = []
     @dbTypes = {}
     @maxStateNameLength = 16
 
@@ -272,11 +272,12 @@ class lib.Skill
     @dataTables[table.name] = table
 
   pushSayMapping: (location, source, target) ->
-    if source of @sayMapping and @sayMapping[source] != target
-      # TODO: support localized mappings
-      console.error "duplicate pronounciation mapping for #{source} as #{target}, previously #{@sayMapping[source]}"
-      #throw new ParserError location, "duplicate pronounciation mapping for #{source} as #{target}, previously #{@sayMapping[source]}"
-    @sayMapping[source] = target
+    for mapping in @sayMapping
+      if (mapping.language is location.language) and (mapping.source is source) and (mapping.target is not target)
+        throw new ParserError location, "duplicate pronunciation mapping for #{source} as #{target}
+          in #{location.language} language, previously #{mapping.target}"
+
+    @sayMapping.push({ language: location.language, source, target })
 
   pushDBTypeDefinition: (definition) ->
     if definition.name of @dbTypes
@@ -363,11 +364,12 @@ class lib.Skill
     do =>
       output.push "litexa.sayMapping = ["
       lines = []
-      for source, target of @sayMapping
-        source = source.replace(/'/g, '\\\'')
-        target = target.replace(/'/g, '\\\'')
-        lines.push "  { test: new RegExp(' #{source}','gi'), change: ' #{target}' }"
-        lines.push "  { test: new RegExp('#{source} ','gi'), change: '#{target} ' }"
+      for mapping in @sayMapping
+        source = mapping.source.replace /'/g, '\\\''
+        target = mapping.target.replace /'/g, '\\\''
+        language = mapping.language
+        lines.push "  { test: new RegExp(' #{source}','gi'), change: ' #{target}', language: '#{language}' }"
+        lines.push "  { test: new RegExp('#{source} ','gi'), change: '#{target} ', language: '#{language}' }"
       output.push lines.join ",\n"
       output.push "];"
 
