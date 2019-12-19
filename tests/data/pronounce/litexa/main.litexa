@@ -13,8 +13,7 @@ TEST "say yes"
   launch
   alexa: launch, /I really like my cat/
   user: AMAZON.YesIntent
-  alexa: null, /my cat/
-  alexa: null, /phoneme.*hidden/i
+  alexa: null, /my cat.*<phoneme[^>]*>hidden/
 
 TEST "say no"
   launch
@@ -27,8 +26,7 @@ TEST "say yes en-CA"
   launch
   alexa: launch, /I really like my ferret/
   user: AMAZON.YesIntent
-  alexa: null, /my ferret/
-  alexa: null, /phoneme.*concealed/i
+  alexa: null, /my ferret.*<phoneme[^>]*>concealed/
 
 TEST "say no en-CA"
   setRegion en-CA
@@ -42,13 +40,12 @@ TEST "say yes en-GB"
   launch
   alexa: launch, /I really like my gerbil/
   user: AMAZON.YesIntent
-  alexa: null, /my gerbil/
-  alexa: null, /phoneme.*buried/i
+  alexa: null, /my gerbil.*<phoneme[^>]*>buried/
 
 TEST "say no en-GB"
   setRegion en-GB
   launch
-  alexa: launch, /I really like my gerbil/i
+  alexa: launch, /I really like my gerbil/
   user: AMAZON.NoIntent
   alexa: null, /'goodbye'/i
 
@@ -57,8 +54,7 @@ TEST "say yes en-IN"
   launch
   alexa: launch, /I really like my dog/
   user: AMAZON.YesIntent
-  alexa: null, /my dog/
-  alexa: null, /stay hidden for hours/
+  alexa: null, /my dog.*stay hidden for hours/
 
 TEST "say no en-IN"
   setRegion en-IN

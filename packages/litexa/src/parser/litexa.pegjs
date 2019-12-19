@@ -925,12 +925,12 @@ your locale-specific pronunciation definitions to the Litexa files that
 reside in said locale's Litexa project directory (see the Localization
 chapter for further information).
 
-::: tip Tip
+:::tip Tip
 We recommend using a standalone file (e.g. `pronounce.litexa`) for
 pronunciation definitions.
 :::
 
-::: warning Note
+:::warning Note
 Opposite to Litexa's structured-based override features of localization,
 the default locale's pronunciations will not carry over to other locales.
 :::

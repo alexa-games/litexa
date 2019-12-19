@@ -273,11 +273,10 @@ class lib.Skill
 
   pushSayMapping: (location, from, to) ->
     if location.language of @sayMapping
-      language = @sayMapping[location.language]
-      for mapping in language
+      for mapping in @sayMapping[location.language]
         if (mapping.from is from) and (mapping.to is not to)
           throw new ParserError location, "duplicate pronunciation mapping for \'#{from}\'
-            as \'#{to}\' in \'#{language}\' language, previously \'#{mapping.to}\'"
+            as \'#{to}\' in \'#{location.language}\' language, previously \'#{mapping.to}\'"
       @sayMapping[location.language].push({ from, to })
     else
       @sayMapping[location.language] = [{ from, to }]
@@ -365,16 +364,18 @@ class lib.Skill
       output.push "__languages['#{language}'] = { enterState:{}, processIntents:{}, exitState:{}, dataTables:{} };"
 
     do =>
-      output.push "litexa.sayMapping = ["
-      lines = []
+      output.push "litexa.sayMapping = {"
       for language of @sayMapping
+        lines = []
+        output.push "  '#{language}': ["
         for mapping in @sayMapping[language]
           from = mapping.from.replace /'/g, '\\\''
           to = mapping.to.replace /'/g, '\\\''
-          lines.push "  { from: new RegExp(' #{from}','gi'), to: ' #{to}', language: '#{language}' }"
-          lines.push "  { from: new RegExp('#{from} ','gi'), to: '#{to} ', language: '#{language}' }"
-      output.push lines.join ",\n"
-      output.push "];"
+          lines.push "    { from: new RegExp(' #{from}','gi'), to: ' #{to}' }"
+          lines.push "    { from: new RegExp('#{from} ','gi'), to: '#{to} ' }"
+        output.push lines.join ",\n"
+        output.push "  ],"
+      output.push "};"
 
     do =>
       output.push "litexa.dbTypes = {"

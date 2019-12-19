@@ -445,9 +445,9 @@ handlerSteps.createFinalResult = (stateContext) ->
   joinSpeech = (arr, language = 'default') ->
     result = arr.join(' ')
     result = result.replace /(  )/g, ' '
-    sayMapping = litexa.sayMapping.filter (x) -> x.language is language
-    for mapping in sayMapping
-      result = result.replace mapping.from, mapping.to
+    if litexa.sayMapping[language]
+      for mapping in litexa.sayMapping[language]
+        result = result.replace mapping.from, mapping.to
     return result
 
   if stateContext.say? and stateContext.say.length > 0
