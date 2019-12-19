@@ -11,39 +11,39 @@ launch
 
 TEST "say yes"
   launch
-  alexa: launch, /I really like my cat/i
+  alexa: launch, /I really like my cat/
   user: AMAZON.YesIntent
   alexa: null, /my cat/
-  alexa: null, /phoneme/
+  alexa: null, /phoneme.*hidden/i
 
 TEST "say no"
   launch
-  alexa: launch, /I really like my cat/i
+  alexa: launch, /I really like my cat/
   user: AMAZON.NoIntent
-  alexa: null, /goodbye then/i
+  alexa: null, /goodbye then/
 
 TEST "say yes en-CA"
   setRegion en-CA
   launch
-  alexa: launch, /I really like my ferret/i
+  alexa: launch, /I really like my ferret/
   user: AMAZON.YesIntent
   alexa: null, /my ferret/
-  alexa: null, /phoneme/
+  alexa: null, /phoneme.*concealed/i
 
 TEST "say no en-CA"
   setRegion en-CA
   launch
-  alexa: launch, /I really like my ferret/i
+  alexa: launch, /I really like my ferret/
   user: AMAZON.NoIntent
   alexa: null, /'goodbye'/i
 
 TEST "say yes en-GB"
   setRegion en-GB
   launch
-  alexa: launch, /I really like my gerbil/i
+  alexa: launch, /I really like my gerbil/
   user: AMAZON.YesIntent
   alexa: null, /my gerbil/
-  alexa: null, /phoneme/
+  alexa: null, /phoneme.*buried/i
 
 TEST "say no en-GB"
   setRegion en-GB
@@ -55,7 +55,7 @@ TEST "say no en-GB"
 TEST "say yes en-IN"
   setRegion en-IN
   launch
-  alexa: launch, /I really like my dog/i
+  alexa: launch, /I really like my dog/
   user: AMAZON.YesIntent
   alexa: null, /my dog/
   alexa: null, /stay hidden for hours/
@@ -63,6 +63,6 @@ TEST "say yes en-IN"
 TEST "say no en-IN"
   setRegion en-IN
   launch
-  alexa: launch, /I really like my dog/i
+  alexa: launch, /I really like my dog/
   user: AMAZON.NoIntent
   alexa: null, /'goodbye'/i

@@ -442,12 +442,12 @@ handlerSteps.createFinalResult = (stateContext) ->
     delete response.shouldEndSession
 
   # build outputSpeech and reprompt from the accumulators
-  joinSpeech = (arr, language) ->
+  joinSpeech = (arr, language = 'default') ->
     result = arr.join(' ')
     result = result.replace /(  )/g, ' '
     sayMapping = litexa.sayMapping.filter (x) -> x.language is language
     for mapping in sayMapping
-      result = result.replace mapping.test, mapping.change
+      result = result.replace mapping.from, mapping.to
     return result
 
   if stateContext.say? and stateContext.say.length > 0

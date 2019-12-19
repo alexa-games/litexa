@@ -172,7 +172,7 @@ class lib.Skill
     @states = @createDefaultStates()
     @tests = {}
     @dataTables = {}
-    @sayMapping = []
+    @sayMapping = {}
     @dbTypes = {}
     @maxStateNameLength = 16
 
@@ -271,13 +271,16 @@ class lib.Skill
     # todo name stomp?
     @dataTables[table.name] = table
 
-  pushSayMapping: (location, source, target) ->
-    for mapping in @sayMapping
-      if (mapping.language is location.language) and (mapping.source is source) and (mapping.target is not target)
-        throw new ParserError location, "duplicate pronunciation mapping for #{source} as #{target}
-          in #{location.language} language, previously #{mapping.target}"
-
-    @sayMapping.push({ language: location.language, source, target })
+  pushSayMapping: (location, from, to) ->
+    if location.language of @sayMapping
+      language = @sayMapping[location.language]
+      for mapping in language
+        if (mapping.from is from) and (mapping.to is not to)
+          throw new ParserError location, "duplicate pronunciation mapping for \'#{from}\'
+            as \'#{to}\' in \'#{language}\' language, previously \'#{mapping.to}\'"
+      @sayMapping[location.language].push({ from, to })
+    else
+      @sayMapping[location.language] = [{ from, to }]
 
   pushDBTypeDefinition: (definition) ->
     if definition.name of @dbTypes
@@ -364,12 +367,12 @@ class lib.Skill
     do =>
       output.push "litexa.sayMapping = ["
       lines = []
-      for mapping in @sayMapping
-        source = mapping.source.replace /'/g, '\\\''
-        target = mapping.target.replace /'/g, '\\\''
-        language = mapping.language
-        lines.push "  { test: new RegExp(' #{source}','gi'), change: ' #{target}', language: '#{language}' }"
-        lines.push "  { test: new RegExp('#{source} ','gi'), change: '#{target} ', language: '#{language}' }"
+      for language of @sayMapping
+        for mapping in @sayMapping[language]
+          from = mapping.from.replace /'/g, '\\\''
+          to = mapping.to.replace /'/g, '\\\''
+          lines.push "  { from: new RegExp(' #{from}','gi'), to: ' #{to}', language: '#{language}' }"
+          lines.push "  { from: new RegExp('#{from} ','gi'), to: '#{to} ', language: '#{language}' }"
       output.push lines.join ",\n"
       output.push "];"
 
