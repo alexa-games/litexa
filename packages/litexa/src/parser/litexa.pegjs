@@ -110,12 +110,26 @@
     skill.pushDataTable(table);
   }
 
-  var pushIntent = function(location, utterance, intentInfo) {
+  var pushIntent = function(location, utterance, intentInfo, fromAlternate) {
     if (stack[2].lead != null) {
+      if (fromAlternate) {
+        if (stack[3].lead == null) {
+          const parentIntent = getTarget();
+          if (parentIntent.hasAlternateUtterance) {
+            throw new ParserError(location, `Can't add intent name \`${utterance}\` as an \`or\` alternative to \`${parentIntent.name}\` `
+              + `because it already has utterance alternatives. Intent name and utterance alternatives can't be combined in a single handler; `
+              + `please use one or the other.`);
+          }
+          const intent = stack[0].target.pushIntent(stack[1].target, location, utterance, intentInfo);
+          return intent;
+        }
+        throw new ParserError(location, `Invalid indentation of \`or ${utterance}\`: ` +
+          `\`or\` statements for \`when\` statements must begin at the second level of indentation.`);
+      }
       throw new ParserError(location, `Invalid indentation of \`when ${utterance}\`: ` +
-      `\`when\` statements can only be directly subordinate to a state and must begin at the first level of indentation.`);
+        `\`when\` statements can only be directly subordinate to a state and must begin at the first level of indentation.`);
     }
-    var intent = stack[0].target.pushIntent(stack[1].target, location, utterance, intentInfo);
+    const intent = stack[0].target.pushIntent(stack[1].target, location, utterance, intentInfo);
     popStackTo(1);
     pushToStack(intent);
     return intent;
@@ -123,7 +137,7 @@
 
   var pushSay = function(location, say) {
     say.location = location
-    var target = getTarget();
+    const target = getTarget();
     if (target && target.pushCode) {
       target.pushCode(say);
       pushToStack(say);
@@ -135,7 +149,7 @@
 
   var pushBlock = function(type, location, condition) {
     condition.location = location
-    var target = getTarget();
+    const target = getTarget();
     if (target && target.pushCode) {
       target.pushCode(condition);
       popToTarget();
@@ -159,7 +173,7 @@
 
   var pushSwitchCase = function(location, switchCase) {
     switchCase.location = location
-    var target = getTarget();
+    const target = getTarget();
     if (target && target.pushCase) {
       target.pushCase(switchCase);
       popToTarget();
@@ -210,7 +224,7 @@
 
 
   var pushCode = function(location, thing) {
-    var target = getTarget();
+    const target = getTarget();
     if (target && target.pushCode) {
       thing.location = location;
       target.pushCode(thing);
@@ -476,7 +490,7 @@ ConditionalStatement "conditional statement"
       pushIf(location(), new lib.ElseCondition(expression));
     }
   / "else" {
-      var target = getTarget();
+      const target = getTarget();
       if (target && target.pushCode) {
         pushIf(location(), new lib.ElseCondition());
       } else if (target && target.pushCase) {
@@ -1157,7 +1171,9 @@ statements.
 
 The content of the statement can be an [Utterance](#utterance), or an
 [Intent Name](#intent-name). In either case, the statement can be followed
-by a series of subordinate [or](#or) utterance statements that offer
+by a series of one of the two following subordinate statements.
+
+1. The statement can be followed by [or](#or) utterance statements that offer
 alternative ways to specify the same intent.
 
 ```coffeescript
@@ -1165,6 +1181,18 @@ when "my name is $name"
   or "I'm $name"
   or "call me $name"
 ```
+
+2. The statement can be followed by [or](#or) intent name statements to have
+these intents share the same handler.
+
+```coffeescript
+when RephraseQuestionIntent
+  or AMAZON.RepeatIntent
+  or UnsureIntent
+```
+
+These types of subordinate statements cannot be mixed; doing so will result in a
+compilation-time error.
 
 When the `when` statement contains an [Utterance](#utterance), the underlying
 intent name will be automatically generated from that utterance,
@@ -1279,6 +1307,13 @@ waitForAnswer
     END
 ```
 */
+
+/*  litexa [Utterance]
+An example phrase to be spoken by the user that maps to an intent.
+Utterances in Litexa are defined in [when](#when) statements.
+
+Please read the State Management chapter for more information on intents and utterances.
+*/
 IntentStatement
   = "when" ___ ![a-zA-Z"] {
     throw new ParserError(location(), "intent identifiers must begin with a letter, upper or lower case");
@@ -1330,10 +1365,38 @@ Used to provide variations to various statements:
 */
 
 AlternativeStatement
-  = "or" ___ parts:(SayStringParts / AssetName) {
-    var target = getTarget();
+  = "or" ___ utterance:(DottedIdentifier) ___ type:("if"/"unless") ___ qualifier:ExpressionString {
+    const intent = pushIntent(location(), utterance, false, true);
+    intent.qualifier = qualifier;
+    if (type === "unless") {
+      intent.qualifierIsInverted = true;
+    }
+  }
+  / "or" ___ parts:(SayStringParts) {
+    const target = getTarget();
     if (target && target.pushAlternate) {
-      target.pushAlternate(parts);
+      if (target instanceof lib.Intent) {
+        if (target.hasChildIntents()) {
+          throw new ParserError(location, `Can't add utterance as an \`or\` alternative to \`${target.name}\` because it `
+            + `already has intent name alternatives. Utterance and intent name alternatives can't be combined in a single handler; `
+            + `please use one or the other.`);
+        }
+      }
+      target.pushAlternate(parts, skill);
+    } else {
+      throw new ParserError(location(), "Couldn't find anything to add an alternative to here");
+    }
+  }
+  / "or" ___ parts:(AssetName / DottedIdentifier) {
+    const target = getTarget();
+    if (target instanceof lib.Intent) {
+      if (parts.isAssetName) { // parts was parsed into an AssetName type; reconstruct it as the original text
+        parts = parts.toString();
+      }
+      const intent = pushIntent(location(), parts, false, true);
+      target.pushChildIntent(intent);
+    } else if (target && target.pushAlternate) {
+      target.pushAlternate(parts, skill);
     } else {
       throw new ParserError(location(), "Couldn't find anything to add an alternative to here");
     }
@@ -1438,7 +1501,7 @@ use a shortcut and return an array of strings for the values key:
 exports.vehicleNames = function() {
   return {
     name: "LIST_OF_TRAVEL_MODES",
-    values: [ "train",
+    values: [
       "train",
       "jet",
       "fly",
@@ -1457,7 +1520,7 @@ exports.vehicleNames = function() {
 
 SlotTypeStatement
   = "with" ___ name:SlotVariableReference __ "=" __ type:(FileFunctionReference/DottedIdentifier/StringLiteralList) {
-    var target = getTarget();
+    const target = getTarget();
     if (target && target.pushSlotType) {
       target.pushSlotType(location(), name, type);
     } else {
@@ -1486,7 +1549,7 @@ waitForAnswer
 */
 OtherwiseStatement
   = "otherwise" {
-    var target = getTarget();
+    const target = getTarget();
     if (target && target.pushOrGetIntent) {
       pushIntent(location(), '--default--', false);
     } else {

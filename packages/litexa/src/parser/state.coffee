@@ -144,6 +144,7 @@ class lib.State
       # only allow repeat intents if they are events that can be filtered
       if collection[key] not instanceof FilteredIntent
         throw new ParserError location, "Not allowed to redefine intent `#{key}` in state `#{@name}`"
+
     intent = collection[key]
 
     if intent.defaultedResetOnGet
@@ -194,6 +195,7 @@ class lib.State
     if @endFunction?
       @endFunction.toLambda(exitFunc, "", options)
 
+    childIntentsEncountered = []
     intentsFunc = []
     intentsFunc.push "switch( context.intent ) {"
     for name, intent of workingIntents
@@ -216,6 +218,17 @@ class lib.State
           else
             intentsFunc.push "    console.error('unhandled intent ' + context.intent + ' in state ' + context.handoffState);"
       else
+        # Child intents are registered to the state as handlers, but it is parent handlers that perform the logic
+        # of adding them to the same switch case. Therefore, keep track of the ones already added to transformed code and
+        # ignore them if they are encountered again.
+        if childIntentsEncountered.includes intent.name
+          options.scopeManager.popScope()
+          continue
+
+        for intentName in intent.childIntents
+          intentsFunc.push "  case '#{intentName}':"
+          childIntentsEncountered.push intentName
+
         intentsFunc.push "  case '#{intent.name}': {"
 
         if intent.code?
@@ -223,7 +236,6 @@ class lib.State
             intentsFunc.push "    " + line
         else
           intent.toLambda(intentsFunc, options)
-
       intentsFunc.push "    break;\n    }"
       options.scopeManager.popScope()
     intentsFunc.push "}"
@@ -291,12 +303,15 @@ class lib.State
       continue if intent.referenceIntent?
       intent.toUtterances(output)
 
-  toModelV2: (output, context) ->
+  toModelV2: (output, context, extendedEventNames) ->
     workingIntents = @collectIntentsForLanguage(context.language)
     for name, intent of workingIntents
       continue if name == '--default--'
       continue if intent.referenceIntent?
-      continue unless intent.hasUtterances
+      unless intent.hasUtterances
+        unless name in extendedEventNames
+          console.warn "`#{name}` does not have utterances; not adding to language model."
+        continue
       try
         model = intent.toModelV2(context)
       catch err

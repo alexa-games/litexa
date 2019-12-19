@@ -300,6 +300,7 @@ class lib.Intent
             refer to a built in intent beginning with `AMAZON.`"
     @builtin = @name in builtInIntents
     @hasContent = false
+    @childIntents = []
 
   report: ->
     "#{@name} {#{k for k of @slots}}"
@@ -366,7 +367,14 @@ class lib.Intent
     Intent.registerUtterance(@location, utterance, @name)
 
   pushAlternate: (parts) ->
+    @hasAlternateUtterance = true
     @pushUtterance new lib.Utterance parts
+
+  pushChildIntent: (intent) ->
+    @childIntents.push(intent.name)
+
+  hasChildIntents: ->
+    return @childIntents.length > 0
 
   pushSlotType: (location, name, type) ->
     if @referenceIntent?

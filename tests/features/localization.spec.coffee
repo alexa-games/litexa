@@ -34,6 +34,11 @@ describe 'supports languages folder overrides', ->
     intents = frModel.languageModel.intents.map (intent) -> intent.name
     assert("CAT" not in intents)
 
+  it 'includes intents defined in multi-intent handlers from default language', ->
+    frModel = await preamble.buildSkillModel 'localization', 'fr'
+    intents = frModel.languageModel.intents.map (intent) -> intent.name
+    assert("AMAZON.HelpIntent" in intents)
+
   testCompleteSlotValuesForIntent = (actualSlots, expectedSlots) ->
     for slotValue in actualSlots.values
       assert(slotValue.name.value in expectedSlots)
