@@ -934,7 +934,7 @@ your locale-specific pronunciation definitions to the Litexa files that
 reside in said locale's Litexa project directory (see the Localization
 chapter for further information).
 
-:::tip
+:::tip Tip
 We recommend using a standalone file (e.g. `pronounce.litexa`) for
 pronunciation definitions.
 :::
