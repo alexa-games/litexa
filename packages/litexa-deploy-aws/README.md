@@ -22,7 +22,9 @@ root). It probably looks something like this:
   "deployments": {
     "development": {
       "module": "@litexa/deploy-aws",
-      "S3BucketName": "suncoast-assets",
+      "s3Configuration": {
+        "bucketName": "suncoast-assets"
+      },
       "askProfile": "suncoast",
       "awsProfile": "prototyping"
     }
@@ -119,15 +121,15 @@ and [IAM User-specific Credential Management](
 ## AWS Configuration
 
 This deploy module requires you to fill out one more field in your litexa
-config called `S3BucketName`. There are also some optional `LambdaConfiguration` parameters
-you can put into your configuration for further project customization.
+config called `s3Configuration.bucketName`. There are also some optional `LambdaConfiguration`
+parameters you can put into your configuration for further project customization.
 
-### S3BucketName
+### S3 Configuration
 
 The deploy module uses S3 to host your skill's assets, which can be sounds and images.
 Assets are deployed to the [S3 bucket](
   https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingBucket.html) with the name you
-put in the `S3BucketName` field in your Litexa config.
+put in the `s3Configuration.bucketName` field in your Litexa config.
 
 If this bucket doesn't exist yet, the module will automatically create it for you. If
 you create your own bucket:
@@ -138,6 +140,91 @@ files will be marked public on upload.
 * The bucket does need to have default CORS correctly configured.
 See: [Cross-Origin Resource Sharing (CORS)](
   https://docs.aws.amazon.com/AmazonS3/latest/dev/cors.html)
+
+#### Upload Parameters
+
+You can specify S3 upload parameters to groups of your assets by utilizing the
+optional `s3Configuration.uploadParams` object list.
+
+A Litexa config that utilizes `s3Configuration.uploadParams` might look like:
+
+```javascript
+const deploymentConfiguration = {
+  name: 'my-skill',
+  deployments: {
+    production: {
+      module: '@litexa/deploy-aws',
+      s3Configuration: {
+        bucketName: 'my-skill-bucket',
+        uploadParams: [
+          {
+            filter: ['*.mp3'],
+            params: {
+              // check for file change every 10 minutes
+              // (useful for content files that are regularly updated)
+              CacheControl: 'max-age=600'
+            }
+          },
+          {
+            filter: ['*.jpg', '*.png'],
+            params: {
+              // always check for file change
+              // (useful during development)
+              CacheControl: 'no-cache'
+            }
+          },
+          {
+            params: {
+              // no file filter -> applies 1 hour age
+              // to all files that aren't caught by the
+              // above 2 filters
+              CacheControl: 'max-age=3600'
+            }
+          }
+        ]
+      }
+    }
+  }
+}
+```
+
+#### S3 Configuration Schema
+
+The schema for the `s3Configuration` object is as follows:
+
+* `bucketName` - (String)
+  * The name of the bucket that your assets are deployed to.
+* `uploadParams` - (Array\<Object\>) - Optional
+  * `filter` - (Array\<String\>) - Optional
+    * A list of glob patterns that, when matched to your assets,
+      the upload params are applied to. Litexa uses the
+      [minimatch NPM package](https://www.npmjs.com/package/minimatch)
+      to implement the file pattern matching.
+  * `params` - (Object)
+    * An object that is passed into Litexa's call on
+      the AWS SDK S3 Client's `#upload()` function.
+      * To understand what keys are acceptable in the
+      `params` object, read more about the AWS SDK S3 Client's
+      `#upload()` function in the
+      [AWS SDK docs](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#upload-property).
+
+**Tip: The order of elements inside of uploadParams matters.
+The `uploadParams` object array is a logical pipeline of filters. The
+filters will be applied to your assets in the order that they are
+defined in your Litexa configuration. Once a filter has been applied
+to a set of assets, those assets are removed from the pipeline, so
+subsequent filters will not be applied; subsequent filters will not
+override a previous filter.**
+
+**Tip: You can define default upload params.
+An `uploadParams` object with a `filter` property that is either
+not defined or has a value of `'*'` will be treated as a default
+set of upload parameters. All assets that do not match any other
+filter will have this one applied to them.**
+
+**Warning: You may not use the `Key`, `Body`, `ContentType`, and `ACL` keys
+as part of an `uploadParams` object. If you attempt to use them, the
+Litexa deployment process will fail.**
 
 #### Asset Deployment Location
 
@@ -196,7 +283,9 @@ is an example with all the supported Lambda configuration options:
   "deployments": {
     "development": {
       "module": "@litexa/deploy-aws",
-      "S3BucketName": "suncoast-assets",
+      "s3Configuration": {
+        "bucketName": "suncoast-assets"
+      },
       "askProfile": "suncoast",
       "awsProfile": "prototyping",
       "lambdaConfiguration": {
@@ -374,13 +463,13 @@ This permission automatically applies to all resources.
 * ListAllMyBuckets
 
 The following permissions apply to the S3 bucket defined in the
-`S3BucketName` field in your litexa.config.coffee/js/ts/json file.
+`s3Configuration.bucketName` field in your litexa.config.coffee/js/ts/json file.
 
 * CreateBucket
 * ListBucket
 
 The following permissions apply to all objects in the S3 bucket defined
-in the `S3BucketName` field in your litexa.config.coffee/js/ts/json file.
+in the `s3Configuration.bucketName` field in your litexa.config.coffee/js/ts/json file.
 
 * PutObject
 * PutObjectAcl

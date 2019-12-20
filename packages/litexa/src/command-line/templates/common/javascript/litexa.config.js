@@ -12,7 +12,9 @@ module.exports = {
     deployments: {
         development: {
             module: '@litexa/deploy-aws',
-            S3BucketName: null,
+            s3Configuration: {
+                bucketName: null
+            },
             askProfile: null,
             awsProfile: null
         }

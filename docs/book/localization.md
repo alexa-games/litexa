@@ -318,7 +318,7 @@ Much like slots, asset overrides are a one-to-one replacement based on whether
 they exist in the locale-specific directory's assets directory or not. This
 means that any asset references in the skill will use a localized asset over the
 default counterpart. To see the directory structure of assets in the deployed
-skill, see the [S3BucketName section](/book/deployment.html#aws-configuration)
+skill, see the [S3 Configuration section](/book/deployment.html#s3-configuration)
 in the Deployment Chapter.
 
 ## Option 2: String Replacement Map

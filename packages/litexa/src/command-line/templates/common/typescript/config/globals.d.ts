@@ -28,11 +28,22 @@ interface LambdaSettings {
     Timeout?: number;
 }
 
+interface S3Configuration {
+    bucketName: string;
+    uploadParams?: UploadParams[];
+}
+
+interface UploadParams {
+    filter?: string[];
+    params: { [key: string]: any };
+}
+
 interface Deployment {
     module: string;
-    S3BucketName: string;
+    s3Configuration: S3Configuration;
     askProfile: string;
     awsProfile: string;
+    S3BucketName?: string;  // Deprecated. Now using S3Configuration.bucketName.
     invocationSuffix?: string;
     invocation?: InvocationCollection;
     lambdaConfiguration?: LambdaSettings;

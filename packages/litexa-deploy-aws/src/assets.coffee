@@ -26,12 +26,11 @@ module.exports = {
 
     context.assetDeploymentStart = new Date
 
-    unless context.deploymentOptions?.S3BucketName
-      throw new Error "couldn't find `S3BucketName` in the '#{context.deploymentName}' deployment
-        parameters from this project's config file. Please specify the bucket name you'd like to
-        deploy to or create."
+    bucketName = context.deploymentOptions?.S3BucketName ? context.deploymentOptions?.s3Configuration?.bucketName
 
-    bucketName = context.deploymentOptions.S3BucketName
+    unless bucketName
+      throw new Error "Found neither `S3BucketName` nor `s3Configuration.bucketName` in Litexa config for deployment
+        target '#{context.deploymentName}'. Please use either setting to specify a bucket to create (if necessary) and deploy to."
 
     validateS3BucketName bucketName
 
