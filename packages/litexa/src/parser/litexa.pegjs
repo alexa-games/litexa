@@ -490,6 +490,9 @@ ConditionalStatement "conditional statement"
   / "else" ___ "if" ___ expression:ExpressionString {
       pushIf(location(), new lib.ElseCondition(expression));
     }
+  / "else" ___ "unless" ___ expression:ExpressionString {
+      pushIf(location(), new lib.ElseCondition(expression, true));
+    }
   / "else" {
       const target = getTarget();
       if (target && target.pushCode) {
@@ -854,7 +857,7 @@ RegexLiteral
 
 RegexLiteralCharacter
   = [a-zA-Z0-9|*+()=\-_\'<>!:?.,^${}\[\] ]
-  / ('\\' [wWdDsSbBtnr*+.?\\\/])
+  / ('\\' [wWdDsSbBtnr.+*?$^\\\/\[\](){}=!<>|:-])
 
 /* litexa [say]
 Adds spoken content to the next response. The content
@@ -2973,7 +2976,8 @@ ComparisonExpr
 
 ComparisonExprTail "Expression Comparison Operator"
   = __ op:ExpressionCompareOperator __ val:AdditiveExpr {
-    return {op:op, val:val}; }
+      return {op:op, val:val};
+    }
 
 ExpressionCompareOperator "Expression Comparison Operator"
   = ">="
@@ -2993,10 +2997,14 @@ AdditiveExpr
 
 AdditiveExprTail "Expression Operator"
   = __ op:("+"/"-") __ val:MultiplicativeExpr {
-    return {op:op, val:val}; }
+      return {op:op, val:val};
+    }
 
 MultiplicativeExpr
-  = left:ExpressionValue tail:(MultiplicativeExprTail)+ {
+  = op:"not" ___ val:MultiplicativeExpr {
+      return new lib.UnaryExpression(location(), op, val);
+    }
+  / left:ExpressionValue tail:(MultiplicativeExprTail)+ {
       return tail.reduce(function(res, right){
         return new lib.BinaryExpression(location(), res, right.op, right.val);
       }, left);
@@ -3005,7 +3013,8 @@ MultiplicativeExpr
 
 MultiplicativeExprTail "Expression Operator"
   = __ op:("*"/"/") __ val:ExpressionValue {
-    return {op:op, val:val}; }
+      return {op:op, val:val};
+    }
 
 ExpressionValue
   = "(" __ val:LogicalExpr __  ")" { return val; }
