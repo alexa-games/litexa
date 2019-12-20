@@ -146,7 +146,7 @@ Here is a sample IntentRequest type `$request` from running `litexa test` in a p
   }
 }
 ```
-### slot variables
+### Slot Variables
 
 The most common use of request variables is population of slot values in
 intents. If an intent contains a slot value, Litexa will automatically populate
@@ -168,7 +168,7 @@ the value the skill received from the request. Therefore, if the user said "my
 cat is named Ellie," then the skill would respond with "Ellie you say. How
 cute!"
 
-### general use variables
+### General-Purpose Variables
 
 You can assign your own $ variables as a messaging system to affect
 downstream states.
@@ -915,8 +915,8 @@ applied to all voiced responses from this skill. The statement
 should be placed outside of the scope of any state, at the top
 level of the file.
 
-Use this to improve Alexa's pronounciation of words, or select
-a specific pronounciation skill wide, while retaining human
+Use this to improve Alexa's pronunciation of words, or select
+a specific pronunciation skill-wide, while retaining human
 readable spelling in your code.
 
 ```coffeescript
@@ -925,6 +925,24 @@ pronounce "tomato" as "<phoneme alphabet="ipa" ph="/təˈmɑːtoʊ/">tomato</pho
 
 Note that you must use SSML in the replacement text; the Litexa
 SSML shorthand statements (e.g "<!Bravo>") will not work.
+
+### Localized Pronunciations
+
+If you plan to publish your skill to multiple locales, you can define
+locale-specific pronunciations for your voiced responses. Simply add
+your locale-specific pronunciation definitions to the Litexa files that
+reside in said locale's Litexa project directory (see the Localization
+chapter for further information).
+
+:::tip Tip
+We recommend using a standalone file (e.g. `pronounce.litexa`) for
+pronunciation definitions.
+:::
+
+:::warning Note
+Opposite to Litexa's structured-based override features of localization,
+the default locale's pronunciations will not carry over to other locales.
+:::
 
 ## quit
 

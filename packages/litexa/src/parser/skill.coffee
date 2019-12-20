@@ -271,12 +271,15 @@ class lib.Skill
     # todo name stomp?
     @dataTables[table.name] = table
 
-  pushSayMapping: (location, source, target) ->
-    if source of @sayMapping and @sayMapping[source] != target
-      # TODO: support localized mappings
-      console.error "duplicate pronounciation mapping for #{source} as #{target}, previously #{@sayMapping[source]}"
-      #throw new ParserError location, "duplicate pronounciation mapping for #{source} as #{target}, previously #{@sayMapping[source]}"
-    @sayMapping[source] = target
+  pushSayMapping: (location, from, to) ->
+    if location.language of @sayMapping
+      for mapping in @sayMapping[location.language]
+        if (mapping.from is from) and (mapping.to is not to)
+          throw new ParserError location, "duplicate pronunciation mapping for \'#{from}\'
+            as \'#{to}\' in \'#{location.language}\' language, previously \'#{mapping.to}\'"
+      @sayMapping[location.language].push({ from, to })
+    else
+      @sayMapping[location.language] = [{ from, to }]
 
   pushDBTypeDefinition: (definition) ->
     if definition.name of @dbTypes
@@ -361,15 +364,18 @@ class lib.Skill
       output.push "__languages['#{language}'] = { enterState:{}, processIntents:{}, exitState:{}, dataTables:{} };"
 
     do =>
-      output.push "litexa.sayMapping = ["
-      lines = []
-      for source, target of @sayMapping
-        source = source.replace(/'/g, '\\\'')
-        target = target.replace(/'/g, '\\\'')
-        lines.push "  { test: new RegExp(' #{source}','gi'), change: ' #{target}' }"
-        lines.push "  { test: new RegExp('#{source} ','gi'), change: '#{target} ' }"
-      output.push lines.join ",\n"
-      output.push "];"
+      output.push "litexa.sayMapping = {"
+      for language of @sayMapping
+        lines = []
+        output.push "  '#{language}': ["
+        for mapping in @sayMapping[language]
+          from = mapping.from.replace /'/g, '\\\''
+          to = mapping.to.replace /'/g, '\\\''
+          lines.push "    { from: new RegExp(' #{from}','gi'), to: ' #{to}' }"
+          lines.push "    { from: new RegExp('#{from} ','gi'), to: '#{to} ' }"
+        output.push lines.join ",\n"
+        output.push "  ],"
+      output.push "};"
 
     do =>
       output.push "litexa.dbTypes = {"
