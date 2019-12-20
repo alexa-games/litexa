@@ -145,7 +145,7 @@ compileSlot = (context, type) ->
   for value, index in data.values
     if typeof(value) == 'string'
       data.values[index] =
-        id: null
+        id: undefined
         name: {
           value: value
           synonyms: []
@@ -172,7 +172,7 @@ createSlotFromArray = (context, slotName, values) ->
 
   for v in values
     type.values.push
-      id: null
+      id: undefined
       name: {
         value: JSON.parse v
         synonyms: []
