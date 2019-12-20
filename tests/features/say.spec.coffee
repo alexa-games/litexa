@@ -265,3 +265,18 @@ describe 'formats say statements with interpolation properly', ->
       directives = response.directives
       assert.equal directives[0].type, 'Display.RenderTemplate'
       assert.equal directives[0].template.textContent.primaryText.text, "start<br/>end"
+
+describe 'adds reprompts correctly', ->
+  it 'runs the say-reprompt integration test', ->
+    preamble.runSkill 'say-reprompt'
+      .then (result) ->
+        individualSayReprompt = result.raw[0].response.response
+        repromptTheSay = result.raw[1].response.response
+        sayReprompt = result.raw[2].response.response
+
+        assert.equal individualSayReprompt.outputSpeech.ssml, '<speak>1st say 2nd say</speak>'
+        assert.equal individualSayReprompt.reprompt.outputSpeech.ssml, '<speak>1st reprompt 2nd reprompt</speak>'
+        assert.equal repromptTheSay.outputSpeech.ssml, '<speak>1st say 2nd say 3rd say</speak>'
+        assert.equal repromptTheSay.reprompt.outputSpeech.ssml, '<speak>1st say 2nd say 3rd say</speak>'
+        assert.equal sayReprompt.outputSpeech.ssml, '<speak>say-only common say and reprompt</speak>'
+        assert.equal sayReprompt.reprompt.outputSpeech.ssml, '<speak>common say and reprompt reprompt-only</speak>'

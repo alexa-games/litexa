@@ -312,6 +312,7 @@ StateStatements
   / StopMusicStatement
   / SayStatement
   / RepromptStatement
+  / SayRepromptStatement
   / CardStatement
   / DirectiveStatement
   / HandoffStatement
@@ -888,14 +889,26 @@ will be included in the response.
 
 RepromptStatement
   = "reprompt" ___ say:SayString {
-      say.reprompt = true;
-      pushSay(location(), say);
-    }
+    say.isReprompt = true;
+    pushSay(location(), say);
+  }
   / "reprompt" {
-      var say = new lib.Say( [new lib.SayEchoPart] );
-      say.reprompt = true;
-      pushSay(location(), say);
-    }
+    const say = new lib.Say( [new lib.SayEchoPart] );
+    say.isReprompt = true;
+    pushSay(location(), say);
+  }
+
+/* litexa [say reprompt]
+Combines the [say](#say) and [reprompt](#reprompt) functionality: The indicated
+[Say String](#say-string) is added to both the pending skill response's output speech
+and the reprompt.
+*/
+
+SayRepromptStatement
+  = "say reprompt" ___ say:SayString {
+    say.isAlsoReprompt = true
+    pushSay(location(), say);
+  }
 
 /* litexa [soundEffect]
 Converts a specified sound effect to SSML, and adds it to the next response.

@@ -1200,6 +1200,12 @@ say "World"
 
 This would result in Alexa saying "Hello World"
 
+## say reprompt
+
+Combines the [say](#say) and [reprompt](#reprompt) functionality: The indicated
+[Say String](#say-string) is added to both the pending skill response's output speech
+and the reprompt.
+
 ## Say String
 
 The Say String format is used by [say](#say) and [reprompt](#reprompt) statements,
