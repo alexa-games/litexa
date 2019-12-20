@@ -30,14 +30,25 @@ interface LambdaSettings {
 
 type DeploymentVariables = {[key: string]: boolean | number | string | object | Array<boolean | number | string | object> }
 
+interface S3Configuration {
+    bucketName: string;
+    uploadParams?: UploadParams[];
+}
+
+interface UploadParams {
+    filter?: string[];
+    params: { [key: string]: any };
+}
+
 interface Deployment {
     module: string;
-    S3BucketName: string;
     askProfile: string;
     awsProfile: string;
+    lambdaConfiguration?: LambdaSettings;
+    s3Configuration: S3Configuration;
+    S3BucketName?: string;  // Deprecated. Now using s3Configuration.bucketName.
     invocationSuffix?: string;
     invocation?: InvocationCollection;
-    lambdaConfiguration?: LambdaSettings;
     DEPLOY?: DeploymentVariables;
 }
 

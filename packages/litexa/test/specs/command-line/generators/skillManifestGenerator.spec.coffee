@@ -27,7 +27,9 @@ describe 'SkillManifestGenerator', ->
       deployments: {
         development: {
           module: '@litexa/deploy-aws',
-          S3BucketName: 'mock-litexa-assets',
+          s3Configuration: {
+            bucketName: 'mock-litexa-assets'
+          },
           askProfile: 'mock'
         }
       },

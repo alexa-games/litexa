@@ -347,14 +347,14 @@ npm install -g @litexa/deploy-aws
 
 #### Setup
 
-Deploying requires some simple setup. In the Litexa configuration you must specify your deployment module, the `S3BucketName`
+Deploying requires some simple setup. In the Litexa configuration you must specify your deployment module, the `s3Configuration.bucketName`
 you want to deploy to, your `askProfile`, and your `awsProfile`. By default, Litexa configures your project to deploy with
 the `@litexa/deploy-aws` module for the `development` environment and sets the other options to `null`.
 
 @[code lang=javascript transclude={16-23}](@/packages/litexa/src/command-line/templates/common/javascript/litexa.config.js)
 
 ::: warning NOTE
-If your `S3BucketName` doesn't exist we'll create it for you, given that you provided an S3 bucket name that does not yet exist.
+If your `s3Configuration.bucketName` doesn't exist we'll create it for you, given that you provided an S3 bucket name that does not yet exist.
 Your `askProfile` needs to match one that you configured with `ask init`.
 Your `awsProfile` needs to match one that you configured with `aws configure` and has the IAM Policy listed above.
 :::
