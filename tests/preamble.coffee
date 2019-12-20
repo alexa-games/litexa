@@ -89,7 +89,7 @@ exports.runSkill = (name) ->
         return reject(err)
 
       # Let's run our tests on a 'show', so Display & APL are supported.
-      skill.runTests {testDevice: 'show'}, (err, result) ->
+      skill.runTests { testDevice: 'show', logRawData: true }, (err, result) ->
         if err?
           return reject(err)
         unless result.success
