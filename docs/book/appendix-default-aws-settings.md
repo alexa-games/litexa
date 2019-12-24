@@ -17,6 +17,8 @@ gives this the skill requests's `context.System.device.deviceId` field, by defau
 
 ## Lambda
 
+* Lambda runtime should use `nodejs10.x` or later.
+  * We can check the runtime EOL in [the AWS document](https://docs.aws.amazon.com/lambda/latest/dg/runtime-support-policy.html).
 * Creates/uses an alias, which is included as part of the skill endpoint
 * The deployment target's alias is set to point to `$LATEST` on every deployment
 * Memory size of 256 MB
