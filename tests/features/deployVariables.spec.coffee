@@ -24,7 +24,7 @@ describe 'supports deploy variables and excluding blocks with them', ->
   it 'builds the model taking into account postfix conditionals on intent handlers', ->
     languageModel = await preamble.buildSkillModel 'deploy-variables', 'default'
     nameIsIncludedCorrectly = (intent) =>
-      return ['HELLO','HELLO_BOB', 'POSITIVE_INCLUSION', 'GO_TO_TUNNEL', 'HELLO_UNLESS_ROGER',
+      return ['HELLO', 'HELLO_BOB', 'POSITIVE_INCLUSION', 'GO_TO_TUNNEL', 'HELLO_UNLESS_ROGER',
         'AMAZON.StopIntent', 'AMAZON.CancelIntent', 'AMAZON.StartOverIntent', 'AMAZON.NavigateHomeIntent']
         .includes(intent.name);
 

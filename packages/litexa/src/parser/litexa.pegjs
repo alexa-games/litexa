@@ -398,13 +398,24 @@ The `exclude file` statement lets you specify a static [expression](
 a file of test states from a production build, or exclude a file from versions
 of your skill, as defined by your [DEPLOY](#deploy-variable) variables.
 
+The statement can also be used to skip a `.test.litexa` file if the tests within
+aren't relevant and would otherwise fail for the deployment target being tested.
+For instance:
+
 ```coffeescript
-exclude file unless DEPLOY.DEBUG
-# excludes a file's contents unless the DEPLOY variable DEBUG was set
+# campaign.test.litexa
+exclude file unless DEPLOY.ENABLE_CAMPAIGN
+
+TEST "campaign setup"
+  # ...
+
+# other tests for campaign mode that assume DEPLOY.ENABLE_CAMPAIGN == true
 ```
 
-Note: this statement only works on files that exclusively have tests or states
+:::warning
+This statement only works on files that exclusively have tests or states
 that don't have any transitions to them.
+:::
 */
 ExcludeStatement "file exclusion statement"
   = "exclude file" ___ type:("if"/"unless") ___ expr:ExpressionString {
@@ -2694,15 +2705,31 @@ TemplateStringDatabasePart
 
 /* litexa [DEPLOY variable]
 
-References a field defined on the `DEPLOY` object of your Litexa
-configuration file. It is a variable that is hydrated upon compilation of your
-skill handler. It can be used as part of an [expression](#expression) like
-other variables. Using it in a static expression will not cause the expression to
-become dynamic. Please see the Variables and Expressions chapter on how to
-define and use DEPLOY variables.
+Can reference a property of the optional `DEPLOY` object that can be defined in your
+Litexa configuration file. Assuming that this `DEPLOY` object was defined on your
+`development` deployment target:
 
-Note that you cannot reference the DEPLOY object by itself; you must reference
-a field on the DEPLOY object.
+```javascript
+development: {
+  DEPLOY: { LOG_LEVEL: 'verbose' }
+  // other configuration...
+}
+```
+
+Then the below condition would be true while testing or running the skill for the
+`development` target:
+
+```coffeescript
+launch
+  if DEPLOY.LOG_LEVEL == "verbose"
+    log "verbose logging enabled"
+```
+
+Please see the Variables and Expressions chapter for how to define and use `DEPLOY`
+variables, and their practical applications.
+
+Note that you cannot reference the `DEPLOY` object by itself; you must reference
+a field on the `DEPLOY` object.
 */
 TemplateStringStaticPart
   = 'DEPLOY.' name:VariableReference {

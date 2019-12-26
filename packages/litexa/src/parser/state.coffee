@@ -301,7 +301,7 @@ class lib.State
         model = intent.toModelV2(context)
       catch err
         if err.location
-          throw err
+          throw err # ParserErrors have location properties; propagate the error
         else 
           throw new Error "failed to write language model for state `#{@name}`: #{err}"
 

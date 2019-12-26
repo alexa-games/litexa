@@ -360,19 +360,21 @@ explicitly support (e.g. Gadget Controller), you will need to add it to your `sk
 #### Deployment Target Overrides
 
 If you want to change your skill manifest based on a specific deployment target, you can do so by keying the original
-manifest content structure on the deployment target name. You can choose to do this for some deployment targets; any
-unkeyed targets will fall back to the original manifest structure and its contents.
+manifest content structure on the deployment target name. This is completely optional - any unkeyed targets will fall
+back to using the default manifest.
 
 For example, the below `skill.js` has a different manifest for its `QA` deployment target only.
 
 ```javascript
-module.exports = {
-  manifest: standardSkillManifest // defined elsewhere...
-};
+const standardSkillManifest = { /* ... */ };
+const qaSkillManifest = { /* ... */ };
 
-module.exports['QA'] = {
-  manifest: qaSkillManifest // also defined elsewhere...
-};
+module.exports = {
+  manifest: standardSkillManifest // default manifest
+  QA: {
+    manifest: qaSkillManifest // "QA" deployment target-specific manifest
+  }
+}
 ```
 
 ### Skill Model
@@ -465,6 +467,12 @@ Combining the above examples will net you `cloudy cats dev` in en-GB and
 Once again, you can view the result skill invocation names in the deployed model files at
 `.deploy/{yourDeploymentTarget}/model-{locale}.json`.
 
+### Deployment Target-based Skill Configuration
+
+You can change the skill behavior and language model based on the deployment target you
+are executing tests or deploying the skill for. Please see [DEPLOY variables](
+/book/expressions.html#deploy-variables) for more information.
+
 ### Monetization
 
 Please see the [Monetization chapter](/book/monetization.html).
@@ -472,10 +480,10 @@ Please see the [Monetization chapter](/book/monetization.html).
 ## Extra Note: Including `production` in the Deployment Target Name
 
 There is a special condition on deployment target names. If the name does *not*
-have the word `production` in it, a ` (development)` will be automatically
-appended to the name of your skill, with `development` specified as your named
-deployment target. We recommend labelling only your production skill deployment
-target(s) with `production`.
+have the word `production` in it, a ` (<target>)` will be automatically
+appended to the name of your skill, with `<target>` being the name of the
+deployment target you used to deploy the skill. We recommend labelling only
+your production skill deployment target(s) with `production`.
 
 :::tip
 We recommend changing the DynamoDB settings for your live skill to ensure that it does not
