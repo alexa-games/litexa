@@ -31,7 +31,7 @@ someState
 
   when "handler is utterance"
     or lowercase
-    say "hello"
+    say "got {context.event.request.intent.name}"
   
   when "another intent"
     or PreviouslyNotDefinedIntentName
@@ -44,7 +44,7 @@ someState
 otherState
   when "another intent"
     or "another intent alternate"
-    say "handled another intent in otherState"
+    say "otherState got {context.event.request.intent.name}"
   
   when PreviouslyNotDefinedIntentName
     or "some utterance for this intent"
@@ -65,8 +65,8 @@ TEST "aggregated handlers work for the intents declared in them"
   user: OtherIntentName
   alexa: someState, e"got OtherIntentName"
   user: lowercase
-  alexa: someState, e"hello"
+  alexa: someState, e"got lowercase"
   user: PreviouslyNotDefinedIntentName
   alexa: otherState, e"moving to otherState"
   user: "another intent alternate"
-  alexa: otherState, e"handled another intent in otherState"
+  alexa: otherState, e"otherState got ANOTHER_INTENT"

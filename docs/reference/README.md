@@ -1684,7 +1684,7 @@ when RephraseQuestionIntent
 ```
 
 These types of subordinate statements cannot be mixed; doing so will result in a
-compilation-time error.
+compile time error.
 
 When the `when` statement contains an [Utterance](#utterance), the underlying
 intent name will be automatically generated from that utterance,
