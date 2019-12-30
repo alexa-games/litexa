@@ -36,7 +36,7 @@ module.exports.run = (options) ->
     deploymentStartTime = new Date
 
     # ok, load skill
-    skill = await require('./skill-builder').build(options.root)
+    skill = await require('./skill-builder').build(options.root, options.deployment)
     options.deployment = options.deployment ? 'development'
     skill.projectInfo.variant = options.deployment
 

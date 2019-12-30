@@ -5,7 +5,7 @@
  *  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
 
-const litexaConfiguration: Configuration = {
+const deploymentConfiguration: Configuration = {
     name: '{name}',
     deployments: {
         development: {
@@ -18,4 +18,4 @@ const litexaConfiguration: Configuration = {
     plugins: {}
 };
 
-export = litexaConfiguration;
+export = deploymentConfiguration;

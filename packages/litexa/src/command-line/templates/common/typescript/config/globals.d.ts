@@ -28,6 +28,8 @@ interface LambdaSettings {
     Timeout?: number;
 }
 
+type DeploymentVariables = {[key: string]: boolean | number | string | object | Array<boolean | number | string | object> }
+
 interface Deployment {
     module: string;
     S3BucketName: string;
@@ -36,6 +38,7 @@ interface Deployment {
     invocationSuffix?: string;
     invocation?: InvocationCollection;
     lambdaConfiguration?: LambdaSettings;
+    DEPLOY?: DeploymentVariables;
 }
 
 interface Configuration {

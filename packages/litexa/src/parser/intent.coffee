@@ -400,6 +400,15 @@ class lib.Intent
   toModelV2: (context) ->
     return if @referenceIntent?
 
+    if @qualifier?
+      if @qualifier.isStatic()
+        condition = @qualifier.evaluateStatic context
+        if @qualifierIsInverted
+          condition = not condition
+        return null unless condition
+      else 
+        throw new ParserError @qualifier.location, "intent conditionals must be static expressions"
+
     result =
       name: @name
 

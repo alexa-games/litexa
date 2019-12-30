@@ -191,7 +191,18 @@ class lib.Skill
       for name, file of @files
         if file.extension == 'litexa'
           try
-            @parser.parse file.contentForLanguage(language), {
+            litexaSource = file.contentForLanguage(language)
+            shouldIncludeFile = @parser.parse litexaSource, {
+              lib: lib
+              skill: @
+              source: file.filename()
+              startRule: 'AllFileExclusions'
+              context:
+                skill: @
+            }
+            continue unless shouldIncludeFile
+
+            @parser.parse litexaSource, {
               lib: lib
               skill: @
               source: file.filename()
@@ -320,6 +331,9 @@ class lib.Skill
       "if (typeof(litexa) === 'undefined') { litexa = {}; }"
       "if (typeof(litexa.modulesRoot) === 'undefined') { litexa.modulesRoot = process.cwd(); }"
     ]
+
+    if @projectInfo.DEPLOY?
+      @libraryCode.push "litexa.DEPLOY = #{JSON.stringify(@projectInfo.DEPLOY)};"
 
     if options.preamble?
       @libraryCode.push options.preamble

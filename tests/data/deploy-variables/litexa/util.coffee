@@ -1,0 +1,1 @@
+fail = (reason) -> throw reason

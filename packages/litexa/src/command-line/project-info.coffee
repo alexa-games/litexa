@@ -27,6 +27,7 @@ class ProjectInfo
     @litexaRoot = path.join @root, "litexa"
     debug "litexa root is #{@litexaRoot}"
     @logger = logger
+    @DEPLOY = @deployments?[@variant]?.DEPLOY ? {}
 
     # Direct Public Side-Effect
     @parseDirectory jsonConfig
