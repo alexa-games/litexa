@@ -30,7 +30,7 @@ global
       == "ACCEPTED" then
         say "Looks like you've canceled {$newProduct.name}."
       == "DECLINED" then
-        say "Looks like you opted out of cancelling {$newProduct.name}."
+        say "Looks like you opted out of canceling {$newProduct.name}."
 
   when Connections.Response "Upsell"
     switch $purchaseResult

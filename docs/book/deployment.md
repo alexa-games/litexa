@@ -482,7 +482,7 @@ Please see the [Monetization chapter](/book/monetization.html).
 There is a special condition on deployment target names. If the name does *not*
 have the word `production` in it, a ` (<target>)` will be automatically
 appended to the name of your skill, with `<target>` being the name of the
-deployment target you used to deploy the skill. We recommend labelling only
+deployment target you used to deploy the skill. We recommend labeling only
 your production skill deployment target(s) with `production`.
 
 :::tip
