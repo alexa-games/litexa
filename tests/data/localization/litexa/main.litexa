@@ -34,6 +34,11 @@ unusedState
     say "unused state answer"
     END
 
+  when CAT_BREED
+    or AMAZON.HelpIntent
+    say "Got cat breed or help."
+    END
+
 global
   when AMAZON.RepeatIntent
     say "repeat"

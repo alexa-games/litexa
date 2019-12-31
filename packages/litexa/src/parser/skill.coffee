@@ -638,7 +638,7 @@ class lib.Skill
         intents: []
 
     for name, state of @states
-      state.toModelV2 output, context
+      state.toModelV2 output, context, @extendedEventNames
 
     for name, type of context.types
       output.languageModel.types.push type

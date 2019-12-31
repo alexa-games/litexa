@@ -1595,6 +1595,13 @@ user: "my name is" with $name = Cat # this is valid, but can't happen in a real 
 ```
 
 
+## Utterance
+
+An example phrase to be spoken by the user that maps to an intent.
+Utterances in Litexa are defined in [when](#when) statements.
+
+Please read the State Management chapter for more information on intents and utterances.
+
 ## wait
 
 Simulates a designated amount of time to pass in a Litexa test case.
@@ -1656,7 +1663,9 @@ statements.
 
 The content of the statement can be an [Utterance](#utterance), or an
 [Intent Name](#intent-name). In either case, the statement can be followed
-by a series of subordinate [or](#or) utterance statements that offer
+by a series of one of the two following subordinate statements.
+
+1. The statement can be followed by [or](#or) utterance statements that offer
 alternative ways to specify the same intent.
 
 ```coffeescript
@@ -1664,6 +1673,18 @@ when "my name is $name"
   or "I'm $name"
   or "call me $name"
 ```
+
+2. The statement can be followed by [or](#or) intent name statements to have
+these intents share the same handler.
+
+```coffeescript
+when RephraseQuestionIntent
+  or AMAZON.RepeatIntent
+  or UnsureIntent
+```
+
+These types of subordinate statements cannot be mixed; doing so will result in a
+compile time error.
 
 When the `when` statement contains an [Utterance](#utterance), the underlying
 intent name will be automatically generated from that utterance,
@@ -1852,7 +1873,7 @@ use a shortcut and return an array of strings for the values key:
 exports.vehicleNames = function() {
   return {
     name: "LIST_OF_TRAVEL_MODES",
-    values: [ "train",
+    values: [
       "train",
       "jet",
       "fly",
