@@ -877,22 +877,17 @@ SayStatement
   }
 
 /* litexa [reprompt]
-Specifies the reprompt that will be installed during
-the next response. The content is specified in the
-[Say String](#say-string) format.
-
-Note: Unlike [say](#say) statements, reprompt statements
-are *not* accumulative; only the most recent reprompt statement
-will be included in the response.
+Adds a [Say String](#say-string) to the pending skill response's reprompt speech.
+Same as the [say](#say) statement, any reprompted fragments are accumulated.
+```coffeescript
+reprompt "Hello"
+reprompt "World"
+# would result in Alexa reprompting "Hello World"
+```
 */
 
 RepromptStatement
   = "reprompt" ___ say:SayString {
-      say.reprompt = true;
-      pushSay(location(), say);
-    }
-  / "reprompt" {
-      var say = new lib.Say( [new lib.SayEchoPart] );
       say.reprompt = true;
       pushSay(location(), say);
     }
@@ -1365,14 +1360,7 @@ Used to provide variations to various statements:
 */
 
 AlternativeStatement
-  = "or" ___ utterance:(DottedIdentifier) ___ type:("if"/"unless") ___ qualifier:ExpressionString {
-    const intent = pushIntent(location(), utterance, false, true);
-    intent.qualifier = qualifier;
-    if (type === "unless") {
-      intent.qualifierIsInverted = true;
-    }
-  }
-  / "or" ___ parts:(SayStringParts) {
+  = "or" ___ parts:(SayStringParts) {
     const target = getTarget();
     if (target && target.pushAlternate) {
       if (target instanceof lib.Intent) {
@@ -2737,7 +2725,7 @@ say "<!aloha>. This {'is ' + 'an ' + 'example'}
 */
 SayString
   = parts:SayStringParts {
-    return new lib.Say(parts);
+    return new lib.Say(parts, skill);
   }
 
 SayStringParts

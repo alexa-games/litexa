@@ -702,14 +702,16 @@ class lib.Skill
 
   toLocalization: () ->
     @refreshAllFiles()
-    result =
-      states: {}
-      intents: {}
+
+    localization = {
+      intents: {},
+      speech: {}
+    }
 
     for name, state of @states
-      state.toLocalization result
+      state.toLocalization(localization)
 
-    return result
+    return localization
 
 
   runTests: (options, cb, tests) ->

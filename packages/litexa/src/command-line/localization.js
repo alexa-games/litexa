@@ -103,6 +103,12 @@ function mergePreviousLocalization(options, prevLocalization, curLocalization) {
   mergePreviousIntents(options, prevLocalization, curLocalization);
   mergePreviousUtterances(options, prevLocalization, curLocalization);
   mergePreviousSpeech(options, prevLocalization, curLocalization);
+  // Perform any cloning steps after merging to not interleave cloning errors with merging process.
+  // If CLI command specified from/to for cloning, copy everything to the target language.
+  if (shouldPerformCloning(options)) {
+    cloneUtterancesBetweenLocalizations(options, curLocalization);
+    cloneSpeechBetweenLocalizations(options, curLocalization);
+  }
 }
 
 function mergePreviousIntents(options, prevLocalization, curLocalization) {
@@ -118,6 +124,27 @@ function mergePreviousUtterances(options, prevLocalization, curLocalization) {
 function mergePreviousSpeech(options, prevLocalization, curLocalization) {
   checkForNewSpeechLines(options, prevLocalization, curLocalization);
   checkForOrphanedSpeechLines(options, prevLocalization, curLocalization);
+}
+
+function shouldPerformCloning(options) {
+  if (!options.cloneFrom && !options.cloneTo) {
+    return false;
+  }
+  let errorMessage = null;
+  if (options.cloneTo === 'default') {
+    errorMessage = "Not allowed to clone localizations to `default` language.";
+  }
+  if (!options.cloneFrom) {
+    errorMessage = "Missing `cloneFrom` option. Please specify a Litexa language to clone from.";
+  }
+  if (!options.cloneTo) {
+    errorMessage = "Missing `cloneTo` option. Please specify a Litexa language to clone to.";
+  }
+  if (errorMessage){
+    options.logger.error(errorMessage);
+    process.exit(1);
+  }
+  return true;
 }
 
 function checkForNewIntents(options, prevLocalization, curLocalization) {
@@ -193,9 +220,6 @@ function checkForOrphanedUtterances(options, prevLocalization, curLocalization) 
   for (const intent of Object.keys(prevLocalization.intents)) {
 
     let intentObject = prevLocalization.intents[intent];
-    if (!options.disableSortLanguages) {
-      intentObject = sortObjectByKeys(intentObject);
-    }
 
     for (const [language, utterances] of Object.entries(intentObject)) {
       if (language === 'default') {
@@ -221,12 +245,10 @@ function checkForOrphanedUtterances(options, prevLocalization, curLocalization) 
         if (!options.disableSortUtterances) {
           curLocalization.intents[intent][language] = localeSortArray(curLocalization.intents[intent][language]);
         }
-
-        // If CLI command specified from/to for cloning, copy everything to the target language.
-        if (options.cloneFrom && options.cloneTo && language === options.cloneFrom) {
-          curLocalization.intents[intent][options.cloneTo] = curLocalization.intents[intent][options.cloneFrom];
-        }
       }
+    }
+    if (!options.disableSortLanguages) {
+      intentObject = sortObjectByKeys(intentObject);
     }
   }
 
@@ -234,6 +256,25 @@ function checkForOrphanedUtterances(options, prevLocalization, curLocalization) 
     options.logger.verbose(`number of orphaned utterances removed from localization.json: ${numOrphanedUtterances}`);
   } else {
     options.logger.verbose(`number of localization.json utterances that are missing in skill: ${numOrphanedUtterances}`);
+  }
+}
+
+function cloneUtterancesBetweenLocalizations(options, curLocalization) {
+  let performedClone = false;
+  for (const intent of Object.keys(curLocalization.intents)) {
+    let intentObject = curLocalization.intents[intent];
+    for (const language of Object.entries(intentObject)) {
+      if (language === options.cloneFrom) {
+        curLocalization.intents[intent][options.cloneTo] = curLocalization.intents[intent][options.cloneFrom];
+        performedClone = true;
+      }
+    }
+    if (!options.disableSortLanguages) {
+      intentObject = sortObjectByKeys(intentObject);
+    }
+  }
+  if (!performedClone) {
+    options.logger.log(`No intents were found for ${options.cloneFrom}, so no intent cloning occurred.`);
   }
 }
 
@@ -276,11 +317,6 @@ function checkForOrphanedSpeechLines(options, prevLocalization, curLocalization)
     if (curLocalization.speech.hasOwnProperty(line) || !options.removeOrphanedSpeech) {
       // Regardless of whether the speech line was orphaned, persist its translations in the output.
       curLocalization.speech[line] = options.disableSortLanguages ? { ...translations } : sortObjectByKeys({ ...translations });
-
-      // If CLI command specified from/to for cloning, copy everything to the target language.
-      if (options.cloneFrom && options.cloneTo && curLocalization.speech[line].hasOwnProperty(options.cloneFrom)) {
-        curLocalization.speech[line][options.cloneTo] = curLocalization.speech[line][options.cloneFrom];
-      }
     }
   }
 
@@ -288,6 +324,19 @@ function checkForOrphanedSpeechLines(options, prevLocalization, curLocalization)
     options.logger.verbose(`number of orphaned speech lines removed from localization.json: ${numOrphanedLines}`);
   } else {
     options.logger.verbose(`number of localization.json speech lines that are missing in skill: ${numOrphanedLines}`);
+  }
+}
+
+function cloneSpeechBetweenLocalizations(options, curLocalization) {
+  let performedClone = false;
+  for (const line of Object.entries(curLocalization.speech)) {
+    if (curLocalization.speech[line].hasOwnProperty(options.cloneFrom)) {
+      curLocalization.speech[line][options.cloneTo] = curLocalization.speech[line][options.cloneFrom];
+      performedClone = true;
+    }
+  }
+  if (!performedClone) {
+    options.logger.log(`No speech was found for ${options.cloneFrom}, so no speech cloning occurred.`);
   }
 }
 

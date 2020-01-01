@@ -43,7 +43,7 @@
     "coffeescript": "2.3.2",
     "lerna": "3.13.1",
     "mkdirp": "0.5.1",
-    "mocha": "6.0.2",
+    "mocha": "6.2.2",
     "module-alias": "2.2.0",
     "move-cli": "1.2.1",
     "nyc": "13.3.0",
