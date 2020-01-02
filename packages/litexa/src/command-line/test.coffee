@@ -79,6 +79,7 @@ module.exports.run = (options) ->
       strictMode: !!options.strict
       region: options.region ? "en-US"
       testDevice: options.device ? 'show'
+      logRawData: options.logRawData
       reportProgress: (str) ->
         process.stdout.write str + "\n"
 

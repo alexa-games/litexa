@@ -149,6 +149,7 @@ module.exports.run = ->
     .option '-d --deployment [deployment]', "which deployment to run, using the name from the deployments map in the Litexa configuration file.", 'development'
     .option '--no-strict', 'disable strict testing'
     .option '--device [device]', 'which device to emulate (dot, echo, show)', 'show'
+    .option '--log-raw-data [logRawData]', 'dumps all raw requests, responses, and DB contents in .test/output.json'
     .option '-w, --watch', "watch for file changes, then rerun tests"
     .action (filter, cmd) ->
       errors = validator(
@@ -181,6 +182,7 @@ module.exports.run = ->
         region: cmd.parent.region
         watch: cmd.watch
         device: cmd.device
+        logRawData: cmd.logRawData
       require('./test.coffee').run options
 
   program

@@ -291,6 +291,8 @@ effects:
   have them.
   * options are `echo`, `dot`, and `show`, with `show` as
     default
+* `--log-raw-data [logRawData]`: dumps all requests, responses, and
+  DB contents into .test/output.json
 * `--watch/-w`: rerun tests after any file changes in your
   Litexa project. This is handy for the rapid iteration
   stage of development and testing because you can trap

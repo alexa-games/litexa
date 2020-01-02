@@ -900,6 +900,7 @@ class lib.Skill
     # accumulate output
     successes = 0
     fails = 0
+    failedTests = []
     output = { log:[], cards:[], directives:[], raw:[] }
 
     unless options.singleStep
@@ -919,7 +920,7 @@ class lib.Skill
         totalTime = new Date - firstTimeStamp
         options.reportProgress( "test steps complete #{testCounter-1}/#{totalTests} #{totalTime}ms total" )
         if fails
-          output.summary = "✘ #{successes + fails} tests run, #{fails} failed (#{totalTime}ms)\n"
+          output.summary = "✘ #{successes + fails} tests run, #{fails} failed (#{totalTime}ms)\nFailed tests were:\n  " + failedTests.join("\n  ")
         else
           output.summary = "✔ #{successes} tests run, all passed (#{totalTime}ms)\n"
         unless options.singleStep
@@ -937,9 +938,11 @@ class lib.Skill
       options.reportProgress( "test step #{testCounter++}/#{totalTests} +#{new Date - lastTimeStamp}ms: #{test.name ? test.file?.filename()}" )
       lastTimeStamp = new Date
 
-      test.test testContext, output, (err, successCount, failCount) =>
+      test.test testContext, output, (err, successCount, failCount, failedTestName) =>
         successes += successCount
         fails += failCount
+        if failedTestName
+          failedTests.push(failedTestName)
         if remainingTests.length > 0 and (successCount + failCount) > 0
          output.log.push "\n"
         nextTest()
