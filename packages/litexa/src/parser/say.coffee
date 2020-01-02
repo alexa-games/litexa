@@ -192,6 +192,28 @@ class lib.DatabaseReferencePart
     "{#{reference}}"
 
 
+
+class lib.StaticVariableReferencePart
+  constructor: (@ref) ->
+  needsEscaping: true
+  isStatic: -> true
+  toString: -> return "DEPLOY.#{@ref.toString()}"
+  toUtterance: ->
+    throw new ParserError null, "you cannot use a static reference in an utterance"
+  toLambda: (options) ->
+    return "litexa.DEPLOY.#{@ref.toLambda()}"
+  express: (context) ->
+    return eval "context.lambda.litexa.DEPLOY.#{@ref.toLambda()}"
+  evaluateStatic: (context) ->
+    return eval "context.skill.projectInfo.DEPLOY.#{@ref.toLambda()}"
+  toRegex: ->
+    throw "missing toRegex function for StaticVariableReferencePart"
+  toTestRegex: -> @toRegex()
+  toLocalization: (context) ->
+    throw "missing toLocalization function for StaticVariableReferencePart"
+
+
+
 class lib.DatabaseReferenceCallPart
   constructor: (@ref, @args) ->
   isDB: true

@@ -27,7 +27,7 @@ describe 'supports the playMusic and stopMusic statements', ->
       assert.equal directives[0].type, 'AudioPlayer.Play'
       assert.equal directives[0].audioItem?.stream?.url, 'https://www.example.com/sound.mp3'
 
-      response = result.raw[3].response.response
+      response = result.raw[4].response.response
       directives = response.directives
       assert.equal directives.length, 1
       assert.equal directives[0].type, 'AudioPlayer.Stop'

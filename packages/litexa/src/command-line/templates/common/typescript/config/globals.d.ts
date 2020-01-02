@@ -28,6 +28,8 @@ interface LambdaSettings {
     Timeout?: number;
 }
 
+type DeploymentVariables = {[key: string]: boolean | number | string | object | Array<boolean | number | string | object> }
+
 interface S3Configuration {
     bucketName: string;
     uploadParams?: UploadParams[];
@@ -40,13 +42,14 @@ interface UploadParams {
 
 interface Deployment {
     module: string;
-    s3Configuration: S3Configuration;
     askProfile: string;
     awsProfile: string;
-    S3BucketName?: string;  // Deprecated. Now using S3Configuration.bucketName.
+    lambdaConfiguration?: LambdaSettings;
+    s3Configuration: S3Configuration;
+    S3BucketName?: string;  // Deprecated. Now using s3Configuration.bucketName.
     invocationSuffix?: string;
     invocation?: InvocationCollection;
-    lambdaConfiguration?: LambdaSettings;
+    DEPLOY?: DeploymentVariables;
 }
 
 interface Configuration {

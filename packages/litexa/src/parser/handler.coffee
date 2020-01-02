@@ -442,17 +442,18 @@ handlerSteps.createFinalResult = (stateContext) ->
     delete response.shouldEndSession
 
   # build outputSpeech and reprompt from the accumulators
-  joinSpeech = (arr) ->
+  joinSpeech = (arr, language = 'default') ->
     result = arr.join(' ')
     result = result.replace /(  )/g, ' '
-    for mapping in litexa.sayMapping
-      result = result.replace mapping.test, mapping.change
+    if litexa.sayMapping[language]
+      for mapping in litexa.sayMapping[language]
+        result = result.replace mapping.from, mapping.to
     return result
 
   if stateContext.say? and stateContext.say.length > 0
     response.outputSpeech =
       type: "SSML"
-      ssml: "<speak>#{joinSpeech(stateContext.say)}</speak>"
+      ssml: "<speak>#{joinSpeech(stateContext.say, stateContext.language)}</speak>"
       playBehavior: "REPLACE_ALL"
 
   if stateContext.repromptTheSay
@@ -460,12 +461,13 @@ handlerSteps.createFinalResult = (stateContext) ->
     response.reprompt =
       outputSpeech:
         type: "SSML"
-        ssml: "<speak>#{joinSpeech(stateContext.reprompt)} #{joinSpeech(stateContext.say)}</speak>"
+        ssml: "<speak>#{joinSpeech(stateContext.reprompt, stateContext.language)}
+          #{joinSpeech(stateContext.say, stateContext.language)}</speak>"
   else if stateContext.reprompt? and stateContext.reprompt.length > 0
     response.reprompt =
       outputSpeech:
         type: "SSML",
-        ssml: "<speak>#{joinSpeech(stateContext.reprompt)}</speak>"
+        ssml: "<speak>#{joinSpeech(stateContext.reprompt, stateContext.language)}</speak>"
 
   if stateContext.card?
     card = stateContext.card

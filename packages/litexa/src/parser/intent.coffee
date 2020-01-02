@@ -145,7 +145,7 @@ compileSlot = (context, type) ->
   for value, index in data.values
     if typeof(value) == 'string'
       data.values[index] =
-        id: null
+        id: undefined
         name: {
           value: value
           synonyms: []
@@ -172,7 +172,7 @@ createSlotFromArray = (context, slotName, values) ->
 
   for v in values
     type.values.push
-      id: null
+      id: undefined
       name: {
         value: JSON.parse v
         synonyms: []
@@ -300,6 +300,7 @@ class lib.Intent
             refer to a built in intent beginning with `AMAZON.`"
     @builtin = @name in builtInIntents
     @hasContent = false
+    @childIntents = []
 
   report: ->
     "#{@name} {#{k for k of @slots}}"
@@ -366,7 +367,14 @@ class lib.Intent
     Intent.registerUtterance(@location, utterance, @name)
 
   pushAlternate: (parts) ->
+    @hasAlternateUtterance = true
     @pushUtterance new lib.Utterance parts
+
+  pushChildIntent: (intent) ->
+    @childIntents.push(intent.name)
+
+  hasChildIntents: ->
+    return @childIntents.length > 0
 
   pushSlotType: (location, name, type) ->
     if @referenceIntent?
@@ -399,6 +407,15 @@ class lib.Intent
 
   toModelV2: (context) ->
     return if @referenceIntent?
+
+    if @qualifier?
+      if @qualifier.isStatic()
+        condition = @qualifier.evaluateStatic context
+        if @qualifierIsInverted
+          condition = not condition
+        return null unless condition
+      else 
+        throw new ParserError @qualifier.location, "intent conditionals must be static expressions"
 
     result =
       name: @name

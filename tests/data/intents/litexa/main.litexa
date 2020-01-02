@@ -18,6 +18,36 @@ launch
     say "heard upper"
   when "lower case utterance"
     say "heard lower"
+  when OtherIntentName
+    or "other intent name"
+    -> someState
+
+someState
+  say "in some state"
+
+  when AMAZON.NoIntent
+    or OtherIntentName
+    say "got {context.event.request.intent.name}"
+
+  when "handler is utterance"
+    or lowercase
+    say "got {context.event.request.intent.name}"
+  
+  when "another intent"
+    or PreviouslyNotDefinedIntentName
+    say "moving to otherState"
+    -> otherState
+
+  otherwise
+    -> someState
+
+otherState
+  when "another intent"
+    or "another intent alternate"
+    say "otherState got {context.event.request.intent.name}"
+  
+  when PreviouslyNotDefinedIntentName
+    or "some utterance for this intent"
 
 TEST "capitalization mismatch doesn't matter between intent handler and 'user:' statement"
   launch
@@ -25,3 +55,18 @@ TEST "capitalization mismatch doesn't matter between intent handler and 'user:' 
   alexa: launch, e"heard upper"
   user: "LOWER CASE UTTERANCE"
   alexa: launch, e"heard lower"
+
+TEST "aggregated handlers work for the intents declared in them"
+  launch
+  user: OtherIntentName
+  alexa: someState, e"in some state"
+  user: AMAZON.NoIntent
+  alexa: someState, e"got AMAZON.NoIntent"
+  user: OtherIntentName
+  alexa: someState, e"got OtherIntentName"
+  user: lowercase
+  alexa: someState, e"got lowercase"
+  user: PreviouslyNotDefinedIntentName
+  alexa: otherState, e"moving to otherState"
+  user: "another intent alternate"
+  alexa: otherState, e"otherState got ANOTHER_INTENT"

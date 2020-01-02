@@ -225,7 +225,7 @@ skill when it's automatically relaunched.
 
 ### Step 6: Handle purchase result
 
-As stated above, buying/cancelling an in-skill product will temporarily exit your skill. Once
+As stated above, buying/canceling an in-skill product will temporarily exit your skill. Once
 automatically relaunched, your skill will receive a `Connections.Response` event with the
 "purchaseResult". To see the structure of the response and more information on its fields, refer to
 [Resuming your skill after the purchase flow](https://developer.amazon.com/docs/in-skill-purchase/add-isps-to-a-skill.html#handle-results)

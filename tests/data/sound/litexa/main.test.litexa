@@ -4,5 +4,7 @@ TEST "happy path"
   alexa: playFile
   user: "play URL"
   alexa: playURL
+  user: "play random mp3"
+  alexa: playSfx
   user: "stop"
   alexa: stop

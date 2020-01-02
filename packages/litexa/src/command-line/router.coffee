@@ -28,21 +28,25 @@ module.exports.run = ->
   program
     .command 'model'
     .description "compiles a project's language model and prints it to the console."
+    .option '-d --deployment [deployment]', "which deployment to run, using the name from the deployments map in the Litexa configuration file.", 'development'
     .action (cmd) ->
       chalk.enabled = cmd.parent.color
       options =
         root: root
         type: 'model'
+        deployment: cmd.deployment
         region: cmd.parent.region
       require('./printers.coffee').run options
 
   program
     .command 'handler'
     .description "compiles a project's JavaScript handler and prints it to the console."
+    .option '-d --deployment [deployment]', "which deployment to run, using the name from the deployments map in the Litexa configuration file.", 'development'
     .action (cmd) ->
       chalk.enabled = cmd.parent.color
       options =
         root: root
+        deployment: cmd.deployment
         type: 'handler'
       require('./printers.coffee').run options
 
@@ -142,8 +146,10 @@ module.exports.run = ->
   program
     .command 'test [filter]'
     .description "executes a project's tests and prints the output to the console."
+    .option '-d --deployment [deployment]', "which deployment to run, using the name from the deployments map in the Litexa configuration file.", 'development'
     .option '--no-strict', 'disable strict testing'
     .option '--device [device]', 'which device to emulate (dot, echo, show)', 'show'
+    .option '--log-raw-data [logRawData]', 'dumps all raw requests, responses, and DB contents in .test/output.json'
     .option '-w, --watch', "watch for file changes, then rerun tests"
     .action (filter, cmd) ->
       errors = validator(
@@ -171,10 +177,12 @@ module.exports.run = ->
       options =
         root: root
         filter: filter
+        deployment: cmd.deployment
         strict: cmd.strict
         region: cmd.parent.region
         watch: cmd.watch
         device: cmd.device
+        logRawData: cmd.logRawData
       require('./test.coffee').run options
 
   program

@@ -64,6 +64,8 @@ module.exports =
 
     loadSkillInfo context, manifestContext
     .then ->
+      getManifestFromSkillInfo context, manifestContext
+    .then ->
       buildSkillManifest context, manifestContext
     .then ->
       createOrUpdateSkill context, manifestContext
@@ -89,7 +91,7 @@ loadSkillInfo = (context, manifestContext) ->
   infoFilename = path.join context.projectRoot, 'skill'
 
   try
-    manifestContext.info = require infoFilename
+    manifestContext.skillInfo = require infoFilename
   catch err
     if err.code == 'MODULE_NOT_FOUND'
       writeDefaultManifest(context, path.join context.projectRoot, 'skill.coffee')
@@ -99,19 +101,40 @@ loadSkillInfo = (context, manifestContext) ->
     throw "Failed to parse skill manifest #{infoFilename}"
   Promise.resolve()
 
-
-buildSkillManifest = (context, manifestContext) ->
+getManifestFromSkillInfo = (context, manifestContext) ->
   logger.log "building skill manifest"
-  unless 'manifest' of manifestContext.info
+  unless 'manifest' of manifestContext.skillInfo
     throw "Didn't find a 'manifest' property in the skill.* file. Has it been corrupted?"
 
-  info = manifestContext.info.manifest
+  deploymentTarget = context.projectInfo.variant
 
+  # Let's check if a deployment target specific manifest is being exported in the form of:
+  # { deploymentTargetName: { manifest: {...} } }
+  for key of manifestContext.skillInfo
+    if key == deploymentTarget
+      manifestContext.fileManifest = manifestContext.skillInfo[deploymentTarget].manifest
+
+  unless manifestContext.fileManifest?
+    # If we didn't find a deployment-target-specific manifest, let's try to get the manifest
+    # from the top level of the file export.
+    manifestContext.fileManifest = manifestContext.skillInfo.manifest
+
+  unless manifestContext.fileManifest?
+    throw "skill* is neither exporting a top-level 'manifest' key, nor a 'manifest' nested below
+      the current deployment target '#{deploymentTarget}' - please export a manifest for either and
+      re-deploy."
+
+  Promise.resolve()
+
+buildSkillManifest = (context, manifestContext) ->
   lambdaArn = context.artifacts.get 'lambdaARN'
   unless lambdaArn
     throw "Missing lambda ARN during manifest deployment. Has the Lambda been deployed yet?"
 
-  manifest =
+  fileManifest = manifestContext.fileManifest
+  # pull the skill file's manifest into our template merge manifest, which
+  # will set any non-critical values that were missing in the file manifest
+  mergeManifest =
     manifestVersion: "1.0"
     publishingInformation:
       isAvailableWorldwide: false,
@@ -138,33 +161,31 @@ buildSkillManifest = (context, manifestContext) ->
     #events: {}
     #permissions: {}
 
-  unless 'publishingInformation' of info
-    throw "skill.json is missing publishingInformation.
-      Has it been corrupted?"
+  unless 'publishingInformation' of fileManifest
+    throw "skill.json is missing publishingInformation. Has it been corrupted?"
 
-  interfaces = manifest.apis.custom.interfaces
+  interfaces = mergeManifest.apis.custom.interfaces
 
-  for key of info
+  for key of fileManifest
     switch key
       when 'publishingInformation'
-
         # copy over all sub keys of publishing information
-        for k, v of manifest.publishingInformation
-          manifest.publishingInformation[k] = info.publishingInformation[k] ? v
+        for k, v of mergeManifest.publishingInformation
+          mergeManifest.publishingInformation[k] = fileManifest.publishingInformation[k] ? v
 
-        unless 'locales' of info.publishingInformation
+        unless 'locales' of fileManifest.publishingInformation
           throw "skill.json is missing locales in publishingInformation.
             Has it been corrupted?"
 
         # dig through specified locales. TODO: compare with code language support?
-        manifest.publishingInformation.locales = {}
+        mergeManifest.publishingInformation.locales = {}
         manifestContext.locales = []
 
         # check for icon files that were deployed via 'assets' directories
         deployedIconAssets = context.artifacts.get('deployedIconAssets') ? {}
         manifestContext.deployedIconAssetsMd5Sum = ''
 
-        for locale, data of info.publishingInformation.locales
+        for locale, data of fileManifest.publishingInformation.locales
           # copy over kosher keys, ignore the rest
           whitelist = ['name', 'summary', 'description'
             'examplePhrases', 'keywords', 'smallIconUri',
@@ -207,7 +228,7 @@ buildSkillManifest = (context, manifestContext) ->
                 'smallIconUri' in the skill manifest, or deploy an '#{largeIconFileName}' image via
                 assets."
 
-          manifest.publishingInformation.locales[locale] = copy
+          mergeManifest.publishingInformation.locales[locale] = copy
 
           invocationName = context.deploymentOptions.invocation?[locale] ? data.invocation ? data.name
           invocationName = invocationName.replace /[^a-zA-Z0-9 ]/g, ' '
@@ -233,7 +254,9 @@ buildSkillManifest = (context, manifestContext) ->
           copy.examplePhrases = for phrase in copy.examplePhrases
             phrase.replace /\<invocation\>/gi, invocationName
 
-          if context.projectInfo.variant != 'production'
+          # if 'production' isn't in the deployment target name, assume it's a development skill
+          # and append a ' (target)' suffix to its name
+          if (!context.projectInfo.variant.includes('production'))
             copy.name += " (#{context.projectInfo.variant})"
 
           manifestContext.locales.push {
@@ -246,13 +269,13 @@ buildSkillManifest = (context, manifestContext) ->
 
       when 'privacyAndCompliance'
         # dig through these too
-        for k, v of manifest.privacyAndCompliance
-          manifest.privacyAndCompliance[k] = info.privacyAndCompliance[k] ? v
+        for k, v of mergeManifest.privacyAndCompliance
+          mergeManifest.privacyAndCompliance[k] = fileManifest.privacyAndCompliance[k] ? v
 
-        if info.privacyAndCompliance.locales?
-          manifest.privacyAndCompliance.locales = {}
-          for locale, data of info.privacyAndCompliance.locales
-            manifest.privacyAndCompliance.locales[locale] =
+        if fileManifest.privacyAndCompliance.locales?
+          mergeManifest.privacyAndCompliance.locales = {}
+          for locale, data of fileManifest.privacyAndCompliance.locales
+            mergeManifest.privacyAndCompliance.locales[locale] =
               privacyPolicyUrl: data.privacyPolicyUrl
               termsOfUseUrl: data.termsOfUseUrl
 
@@ -260,13 +283,13 @@ buildSkillManifest = (context, manifestContext) ->
         # copy over any keys the user has specified, they might know some
         # advanced information that hasn't been described in a plugin yet,
         # trust the user on this
-        if info.apis?.custom?.interfaces?
-          for i in info.apis.custom.interfaces
+        if fileManifest.apis?.custom?.interfaces?
+          for i in fileManifest.apis.custom.interfaces
             interfaces.push i
 
       else
         # no opinion on any remaining keys, so if they exist, copy them over
-        manifest[key] = info[key]
+        mergeManifest[key] = fileManifest[key]
 
   # collect which APIs are actually in use and merge them
   requiredAPIs = {}
@@ -281,20 +304,20 @@ buildSkillManifest = (context, manifestContext) ->
       interfaces.push { type: apiName }
 
   # save it for later, wrap it one deeper for SMAPI
-  manifestContext.manifest = manifest
-  manifest = { manifest: manifest }
+  manifestContext.manifest = mergeManifest
+  finalManifest = { manifest: mergeManifest }
 
   # extensions can opt to validate the manifest, in case there are other
   # dependencies they want to assert
   for extensionName, extension of context.projectInfo.extensions
-    validator = new JSONValidator manifest
+    validator = new JSONValidator finalManifest
     extension.compiler?.validators?.manifest { validator, skill: context.skill }
     if validator.errors.length > 0
       logger.error e for e in validator.errors
       throw "Errors encountered with the manifest, cannot continue."
 
   # now that we have the manifest, we can also validate the models
-  for region of manifest.manifest.publishingInformation.locales
+  for region of finalManifest.manifest.publishingInformation.locales
     model = context.skill.toModelV2(region)
     validator = new JSONValidator model
     for extensionName, extension of context.projectInfo.extensions
@@ -304,7 +327,7 @@ buildSkillManifest = (context, manifestContext) ->
         throw "Errors encountered with model in #{region} language, cannot continue"
 
   manifestContext.manifestFilename = path.join(context.deployRoot, 'skill.json')
-  writeFilePromise manifestContext.manifestFilename, JSON.stringify(manifest, null, 2), 'utf8'
+  writeFilePromise manifestContext.manifestFilename, JSON.stringify(finalManifest, null, 2), 'utf8'
 
 
 createOrUpdateSkill = (context, manifestContext) ->
@@ -642,3 +665,6 @@ enableSkill = (context, manifestContext) ->
   }
   .catch (err) ->
     Promise.reject err
+
+module.exports.testing =
+  getManifestFromSkillInfo: getManifestFromSkillInfo

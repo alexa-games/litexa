@@ -110,12 +110,26 @@
     skill.pushDataTable(table);
   }
 
-  var pushIntent = function(location, utterance, intentInfo) {
+  var pushIntent = function(location, utterance, intentInfo, fromAlternate) {
     if (stack[2].lead != null) {
+      if (fromAlternate) {
+        if (stack[3].lead == null) {
+          const parentIntent = getTarget();
+          if (parentIntent.hasAlternateUtterance) {
+            throw new ParserError(location, `Can't add intent name \`${utterance}\` as an \`or\` alternative to \`${parentIntent.name}\` `
+              + `because it already has utterance alternatives. Intent name and utterance alternatives can't be combined in a single handler; `
+              + `please use one or the other.`);
+          }
+          const intent = stack[0].target.pushIntent(stack[1].target, location, utterance, intentInfo);
+          return intent;
+        }
+        throw new ParserError(location, `Invalid indentation of \`or ${utterance}\`: ` +
+          `\`or\` statements for \`when\` statements must begin at the second level of indentation.`);
+      }
       throw new ParserError(location, `Invalid indentation of \`when ${utterance}\`: ` +
-      `\`when\` statements can only be directly subordinate to a state and must begin at the first level of indentation.`);
+        `\`when\` statements can only be directly subordinate to a state and must begin at the first level of indentation.`);
     }
-    var intent = stack[0].target.pushIntent(stack[1].target, location, utterance, intentInfo);
+    const intent = stack[0].target.pushIntent(stack[1].target, location, utterance, intentInfo);
     popStackTo(1);
     pushToStack(intent);
     return intent;
@@ -123,7 +137,7 @@
 
   var pushSay = function(location, say) {
     say.location = location
-    var target = getTarget();
+    const target = getTarget();
     if (target && target.pushCode) {
       target.pushCode(say);
       pushToStack(say);
@@ -135,7 +149,7 @@
 
   var pushBlock = function(type, location, condition) {
     condition.location = location
-    var target = getTarget();
+    const target = getTarget();
     if (target && target.pushCode) {
       target.pushCode(condition);
       popToTarget();
@@ -159,7 +173,7 @@
 
   var pushSwitchCase = function(location, switchCase) {
     switchCase.location = location
-    var target = getTarget();
+    const target = getTarget();
     if (target && target.pushCase) {
       target.pushCase(switchCase);
       popToTarget();
@@ -210,7 +224,7 @@
 
 
   var pushCode = function(location, thing) {
-    var target = getTarget();
+    const target = getTarget();
     if (target && target.pushCode) {
       thing.location = location;
       target.pushCode(thing);
@@ -269,6 +283,7 @@ Statement
 
 RootStatements
   = DefineStatement
+  / ExcludeStatement
   / PronounceStatement
   / NewTestStatement
   / NewDataTableStatement
@@ -338,6 +353,8 @@ TableStatements
   = DataTableRowStatement
 
 
+
+
 // Fragment is used as an entry point
 // in the test framework to parse chunks
 Fragment
@@ -367,6 +384,65 @@ Coming soon!
 DefineStatement "database type definition"
   = "define" ___ '@' name:Identifier ___ 'as'___ type:DottedIdentifier {
     skill.pushDBTypeDefinition( new lib.DBTypeDefinition(location(), name, type) );
+  }
+
+
+AllFileExclusions
+  = results:AllFileExclusionsStatment* {
+    if ( !results ) {
+      return true;
+    }
+    let shouldInclude = true;
+    for ( let i=0; i<results.length; ++i ) {
+      if ( !results[i] ) {
+        shouldInclude = false;
+      }
+    }
+    return shouldInclude;
+  }
+
+AllFileExclusionsStatment
+  = __ EndOfStatementSequence { return true; }
+  / r:ExcludeStatement __ EndOfStatementSequence { return r; }
+  / $(!EndOfStatementSequence .)* EndOfStatementSequence { return true; }
+
+/* litexa [exclude file]
+The `exclude file` statement lets you specify a static [expression](
+#expression) to exclude all the contents of the file. You might want to exclude
+a file of test states from a production build, or exclude a file from versions
+of your skill, as defined by your [DEPLOY](#deploy-variable) variables.
+
+The statement can also be used to skip a `.test.litexa` file if the tests within
+aren't relevant and would otherwise fail for the deployment target being tested.
+For instance:
+
+```coffeescript
+# campaign.test.litexa
+exclude file unless DEPLOY.ENABLE_CAMPAIGN
+
+TEST "campaign setup"
+  # ...
+
+# other tests for campaign mode that assume DEPLOY.ENABLE_CAMPAIGN == true
+```
+
+:::warning
+This statement only works on files that exclusively have tests or states
+that don't have any transitions to them.
+:::
+*/
+ExcludeStatement "file exclusion statement"
+  = "exclude file" ___ type:("if"/"unless") ___ expr:ExpressionString {
+    if (options.context) {
+      let result = expr.evaluateStatic(options.context);
+      if (type === "unless") {
+        return result == true;
+      } else {
+        return result == false;
+      }
+
+    }
+    return null;
   }
 
 
@@ -414,7 +490,7 @@ ConditionalStatement "conditional statement"
       pushIf(location(), new lib.ElseCondition(expression));
     }
   / "else" {
-      var target = getTarget();
+      const target = getTarget();
       if (target && target.pushCode) {
         pushIf(location(), new lib.ElseCondition());
       } else if (target && target.pushCase) {
@@ -598,6 +674,10 @@ SwitchAssignment
     }
   / '@' name:VariableReference {
       name = new lib.DatabaseReferencePart(name);
+      return new lib.SwitchAssignment(location(), name, null);
+    }
+  / 'DEPLOY.' name:VariableReference {
+      name = new lib.StaticVariableReferencePart(name);
       return new lib.SwitchAssignment(location(), name, null);
     }
   / name:SlotVariableReference {
@@ -906,8 +986,8 @@ applied to all voiced responses from this skill. The statement
 should be placed outside of the scope of any state, at the top
 level of the file.
 
-Use this to improve Alexa's pronounciation of words, or select
-a specific pronounciation skill wide, while retaining human
+Use this to improve Alexa's pronunciation of words, or select
+a specific pronunciation skill-wide, while retaining human
 readable spelling in your code.
 
 ```coffeescript
@@ -916,6 +996,24 @@ pronounce "tomato" as "<phoneme alphabet="ipa" ph="/təˈmɑːtoʊ/">tomato</pho
 
 Note that you must use SSML in the replacement text; the Litexa
 SSML shorthand statements (e.g "<!Bravo>") will not work.
+
+### Localized Pronunciations
+
+If you plan to publish your skill to multiple locales, you can define
+locale-specific pronunciations for your voiced responses. Simply add
+your locale-specific pronunciation definitions to the Litexa files that
+reside in said locale's Litexa project directory (see the Localization
+chapter for further information).
+
+:::tip Tip
+We recommend using a standalone file (e.g. `pronounce.litexa`) for
+pronunciation definitions.
+:::
+
+:::warning Note
+Opposite to Litexa's structured-based override features of localization,
+the default locale's pronunciations will not carry over to other locales.
+:::
 */
 
 PronounceStatement
@@ -1056,7 +1154,7 @@ AttributeStatement
 
 
 /* litexa [when]
-Defines an intent that the parent state is willing to handle.
+Declares an intent that the parent state is willing to handle.
 
 ```coffeescript
 when "my name is $name"
@@ -1073,7 +1171,9 @@ statements.
 
 The content of the statement can be an [Utterance](#utterance), or an
 [Intent Name](#intent-name). In either case, the statement can be followed
-by a series of subordinate [or](#or) utterance statements that offer
+by a series of one of the two following subordinate statements.
+
+1. The statement can be followed by [or](#or) utterance statements that offer
 alternative ways to specify the same intent.
 
 ```coffeescript
@@ -1081,6 +1181,18 @@ when "my name is $name"
   or "I'm $name"
   or "call me $name"
 ```
+
+2. The statement can be followed by [or](#or) intent name statements to have
+these intents share the same handler.
+
+```coffeescript
+when RephraseQuestionIntent
+  or AMAZON.RepeatIntent
+  or UnsureIntent
+```
+
+These types of subordinate statements cannot be mixed; doing so will result in a
+compile time error.
 
 When the `when` statement contains an [Utterance](#utterance), the underlying
 intent name will be automatically generated from that utterance,
@@ -1127,6 +1239,47 @@ askForAlternativeName
   when MyNameIs
     say "Understood."
 ```
+
+### Postfix Conditional
+
+The statement can include a conditional static [expression](
+#expression). If the condition evaluates to false, then the handler will not
+exist in that state.
+
+```coffeescript
+forkInTheRoad
+  say "Do you want to go left or right?"
+
+  when AlwaysCorrectPath if DEPLOY.shortcutsEnabled
+    or "the correct path"
+    or "next"
+    ...
+
+  when SkipToEnding if DEPLOY.shortcutsEnabled
+    -> ending
+
+  ... # other handlers
+
+  otherwise
+    say "I didn't get that."
+    -> forkInTheRoad
+
+```
+
+This can be a way to exclude some intents for specific deployment targets. For
+the above example, if this was the only place `AlwaysCorrectPath` was defined,
+it would not exist in the language model for the deployment targets that have
+`DEPLOY.shortcutsEnabled = true`. On the other hand, `SkipToEnding` is defined
+elsewhere because there are no utterances attached to its statement, so it will
+exist in the language model.
+
+If the skill is deployed with a deployment target that does not have `DEPLOY.
+shortcutsEnabled = true` and the skill receives `SkipToEnding` in this state,
+Litexa will have the [`otherwise`](#otherwise) handler resolve it.
+
+It may be useful to learn about [DEPLOY variables](#deploy-variable) and static
+[expressions](#expression) for these statements.
+
 */
 
 /* litexa [Intent Name]
@@ -1153,6 +1306,13 @@ waitForAnswer
     say "Oh, alright then. See you later!"
     END
 ```
+*/
+
+/*  litexa [Utterance]
+An example phrase to be spoken by the user that maps to an intent.
+Utterances in Litexa are defined in [when](#when) statements.
+
+Please read the State Management chapter for more information on intents and utterances.
 */
 IntentStatement
   = "when" ___ ![a-zA-Z"] {
@@ -1186,6 +1346,13 @@ IntentStatement
     const intent = pushIntent(location(), 'Connections.Response', {class:lib.FilteredIntent});
     intent.setCurrentIntentFilter({ name: '__' });
   }
+  / "when" ___ utterance:(UtteranceString / DottedIdentifier) ___ type:("if"/"unless") ___ qualifier:ExpressionString {
+    const intent = pushIntent(location(), utterance, false);
+    intent.qualifier = qualifier;
+    if (type === "unless") {
+      intent.qualifierIsInverted = true;
+    }
+  }
   / "when" ___ utterance:(UtteranceString / DottedIdentifier) {
     const intent = pushIntent(location(), utterance, false);
   }
@@ -1198,10 +1365,38 @@ Used to provide variations to various statements:
 */
 
 AlternativeStatement
-  = "or" ___ parts:(SayStringParts / AssetName) {
-    var target = getTarget();
+  = "or" ___ utterance:(DottedIdentifier) ___ type:("if"/"unless") ___ qualifier:ExpressionString {
+    const intent = pushIntent(location(), utterance, false, true);
+    intent.qualifier = qualifier;
+    if (type === "unless") {
+      intent.qualifierIsInverted = true;
+    }
+  }
+  / "or" ___ parts:(SayStringParts) {
+    const target = getTarget();
     if (target && target.pushAlternate) {
-      target.pushAlternate(parts);
+      if (target instanceof lib.Intent) {
+        if (target.hasChildIntents()) {
+          throw new ParserError(location, `Can't add utterance as an \`or\` alternative to \`${target.name}\` because it `
+            + `already has intent name alternatives. Utterance and intent name alternatives can't be combined in a single handler; `
+            + `please use one or the other.`);
+        }
+      }
+      target.pushAlternate(parts, skill);
+    } else {
+      throw new ParserError(location(), "Couldn't find anything to add an alternative to here");
+    }
+  }
+  / "or" ___ parts:(AssetName / DottedIdentifier) {
+    const target = getTarget();
+    if (target instanceof lib.Intent) {
+      if (parts.isAssetName) { // parts was parsed into an AssetName type; reconstruct it as the original text
+        parts = parts.toString();
+      }
+      const intent = pushIntent(location(), parts, false, true);
+      target.pushChildIntent(intent);
+    } else if (target && target.pushAlternate) {
+      target.pushAlternate(parts, skill);
     } else {
       throw new ParserError(location(), "Couldn't find anything to add an alternative to here");
     }
@@ -1252,7 +1447,7 @@ language
 model](https://developer.amazon.com/docs/custom-skills/create-and-edit-custom-slot-types.html#json-for-slot-types-interaction-model-schema).
 
 ```javascript
-    // in slots.build.js
+// in slots.build.js
 exports.vehicleNames = function() {
   return {
     name: "LIST_OF_VEHICLES",
@@ -1306,7 +1501,7 @@ use a shortcut and return an array of strings for the values key:
 exports.vehicleNames = function() {
   return {
     name: "LIST_OF_TRAVEL_MODES",
-    values: [ "train",
+    values: [
       "train",
       "jet",
       "fly",
@@ -1325,7 +1520,7 @@ exports.vehicleNames = function() {
 
 SlotTypeStatement
   = "with" ___ name:SlotVariableReference __ "=" __ type:(FileFunctionReference/DottedIdentifier/StringLiteralList) {
-    var target = getTarget();
+    const target = getTarget();
     if (target && target.pushSlotType) {
       target.pushSlotType(location(), name, type);
     } else {
@@ -1354,7 +1549,7 @@ waitForAnswer
 */
 OtherwiseStatement
   = "otherwise" {
-    var target = getTarget();
+    const target = getTarget();
     if (target && target.pushOrGetIntent) {
       pushIntent(location(), '--default--', false);
     } else {
@@ -1519,7 +1714,7 @@ Here is a sample IntentRequest type `$request` from running `litexa test` in a p
   }
 }
 ```
-### slot variables
+### Slot Variables
 
 The most common use of request variables is population of slot values in
 intents. If an intent contains a slot value, Litexa will automatically populate
@@ -1541,7 +1736,7 @@ the value the skill received from the request. Therefore, if the user said "my
 cat is named Ellie," then the skill would respond with "Ellie you say. How
 cute!"
 
-### general use variables
+### General-Purpose Variables
 
 You can assign your own $ variables as a messaging system to affect
 downstream states.
@@ -2558,13 +2753,14 @@ SayStringPart
   / TemplateStringSlotPart
   / TemplateStringDatabaseCallPart
   / TemplateStringDatabasePart
+  / TemplateStringStaticPart
   / TemplateStringPausePart
   / TemplateStringInterjectionPart
   / TemplateStringTaggedPart
 
 
 TemplateStringClearPart
-  = $(!'"' !'$' !'@' !'{' !'<' !'\\' .)+ { return new lib.StringPart(text()); }
+  = $(!'"' !'$' !'@' !'{' !'<' !'\\' !'DEPLOY' .)+ { return new lib.StringPart(text()); }
 
 
 TemplateStringEscapedCharacterPart
@@ -2586,6 +2782,39 @@ TemplateStringSlotPart
 TemplateStringDatabasePart
   = '@' name:VariableReference {
     return new lib.DatabaseReferencePart(name);
+  }
+
+/* litexa [DEPLOY variable]
+
+Can reference a property of the optional `DEPLOY` object that can be defined in your
+Litexa configuration file. Assuming that this `DEPLOY` object was defined on your
+`development` deployment target:
+
+```javascript
+development: {
+  DEPLOY: { LOG_LEVEL: 'verbose' }
+  // other configuration...
+}
+```
+
+Then the below condition would be true while testing or running the skill for the
+`development` target:
+
+```coffeescript
+launch
+  if DEPLOY.LOG_LEVEL == "verbose"
+    log "verbose logging enabled"
+```
+
+Please see the Variables and Expressions chapter for how to define and use `DEPLOY`
+variables, and their practical applications.
+
+Note that you cannot reference the `DEPLOY` object by itself; you must reference
+a field on the `DEPLOY` object.
+*/
+TemplateStringStaticPart
+  = 'DEPLOY.' name:VariableReference {
+    return new lib.StaticVariableReferencePart(name);
   }
 
 TemplateStringDatabaseCallPart
@@ -2694,6 +2923,8 @@ FunctionCallStatement
 
 /* litexa [Expression]
 Coming soon!
+
+For now, please reference the Variables and Expressions chapter in the Book.
 */
 /* litexa [Inline Function]
 Coming soon!
@@ -2767,6 +2998,9 @@ ExpressionValue
   / FunctionCall
   / '@' name:VariableReference {
     return new lib.DatabaseReferencePart(name);
+  }
+  / 'DEPLOY.' name:VariableReference {
+    return new lib.StaticVariableReferencePart(name);
   }
   / name:SlotVariableReference {
     return new lib.SlotReferencePart(name);

@@ -363,3 +363,7 @@ To inspect your skill model for a specific locale, execute
 `litexa model -r <locale>`. This will print out the skill model for that locale.
 You can also look at the `.deploy` directory contents for each skill model
 produced for your skill on deployment.
+
+If you've used [DEPLOY variables](/book/expressions.html#deploy-variables) to
+change your model for specific deployment targets, you may specify which target
+to run the command for by adding the `-d <deployment>` flag.
