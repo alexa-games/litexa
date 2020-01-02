@@ -271,12 +271,9 @@ describe 'adds reprompts correctly', ->
     preamble.runSkill 'say-reprompt'
       .then (result) ->
         individualSayReprompt = result.raw[0].response.response
-        repromptTheSay = result.raw[1].response.response
-        sayReprompt = result.raw[2].response.response
+        sayReprompt = result.raw[1].response.response
 
         assert.equal individualSayReprompt.outputSpeech.ssml, '<speak>1st say 2nd say</speak>'
         assert.equal individualSayReprompt.reprompt.outputSpeech.ssml, '<speak>1st reprompt 2nd reprompt</speak>'
-        assert.equal repromptTheSay.outputSpeech.ssml, '<speak>1st say 2nd say 3rd say</speak>'
-        assert.equal repromptTheSay.reprompt.outputSpeech.ssml, '<speak>1st say 2nd say 3rd say</speak>'
         assert.equal sayReprompt.outputSpeech.ssml, '<speak>say-only common say and reprompt</speak>'
         assert.equal sayReprompt.reprompt.outputSpeech.ssml, '<speak>common say and reprompt reprompt-only</speak>'

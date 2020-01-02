@@ -4,12 +4,6 @@ launch
   reprompt "2nd reprompt"
   say "2nd say"
 
-  when RepromptTheSayIntent
-    say "1st say"
-    say "2nd say"
-    say "3rd say"
-    reprompt
-
   when SayRepromptIntent
     say "say-only"
     say reprompt "common say and reprompt"
@@ -17,5 +11,4 @@ launch
 
 TEST "say reprompt behavior"
   launch
-  user: RepromptTheSayIntent
   user: SayRepromptIntent

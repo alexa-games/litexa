@@ -461,8 +461,8 @@ handlerSteps.createFinalResult = (stateContext) ->
     saySSML = joinSpeech(stateContext.say, stateContext.language)
     repromptSSML = joinSpeech(stateContext.reprompt, stateContext.language)
     if repromptSSML and saySSML
-    # add spacing, if necessary
-          repromptSSML += ' '
+      # add spacing, if necessary
+      repromptSSML += ' '
 
     response.reprompt =
       outputSpeech:
