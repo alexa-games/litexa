@@ -48,13 +48,13 @@ This permission automatically applies to all resources.
 * ListAllMyBuckets
 
 The following permissions apply to the S3 bucket defined in the
-`S3BucketName` field in your litexa.config.js/json/ts/coffee file.
+`s3Configuration.bucketName` field in your litexa.config.js/json/ts/coffee file.
 
 * CreateBucket
 * ListBucket
 
 The following permissions apply to all objects in the S3 bucket defined
-in the `S3BucketName` field in your litexa.config.js/json/ts/coffee file.
+in the `s3Configuration.bucketName` field in your litexa.config.js/json/ts/coffee file.
 
 * PutObject
 * PutObjectAcl

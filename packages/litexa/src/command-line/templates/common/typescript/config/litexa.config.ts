@@ -10,7 +10,7 @@ const deploymentConfiguration: Configuration = {
     deployments: {
         development: {
             module: '@litexa/deploy-aws',
-            S3BucketName: '',
+            s3Configuration: { bucketName: '' },
             askProfile: '',
             awsProfile: ''
         }
