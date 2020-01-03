@@ -312,6 +312,7 @@ StateStatements
   / StopMusicStatement
   / SayStatement
   / RepromptStatement
+  / SayRepromptStatement
   / CardStatement
   / DirectiveStatement
   / HandoffStatement
@@ -866,9 +867,8 @@ being separated by a single space.
 ```coffeescript
 say "Hello"
 say "World"
+# would result in Alexa saying "Hello World"
 ```
-
-This would result in Alexa saying "Hello World"
 */
 
 SayStatement
@@ -877,25 +877,39 @@ SayStatement
   }
 
 /* litexa [reprompt]
-Specifies the reprompt that will be installed during
-the next response. The content is specified in the
-[Say String](#say-string) format.
-
-Note: Unlike [say](#say) statements, reprompt statements
-are *not* accumulative; only the most recent reprompt statement
-will be included in the response.
+Adds a [Say String](#say-string) to the pending skill response's reprompt speech.
+Same as the [say](#say) statement, any reprompted fragments are accumulated.
+```coffeescript
+reprompt "Hello"
+reprompt "World"
+# would result in Alexa reprompting "Hello World"
+```
 */
 
 RepromptStatement
   = "reprompt" ___ say:SayString {
-      say.reprompt = true;
-      pushSay(location(), say);
-    }
-  / "reprompt" {
-      var say = new lib.Say( [new lib.SayEchoPart] );
-      say.reprompt = true;
-      pushSay(location(), say);
-    }
+    say.isReprompt = true;
+    pushSay(location(), say);
+  }
+
+/* litexa [say reprompt]
+Combines the [say](#say) and [reprompt](#reprompt) functionality: The indicated
+[Say String](#say-string) is added to both the pending skill response's output speech
+and reprompt speech.
+
+```coffeescript
+say reprompt "something"
+# equivalent to:
+# say "something"
+# reprompt "something"
+```
+*/
+
+SayRepromptStatement
+  = "say reprompt" ___ say:SayString {
+    say.isAlsoReprompt = true
+    pushSay(location(), say);
+  }
 
 /* litexa [soundEffect]
 Converts a specified sound effect to SSML, and adds it to the next response.

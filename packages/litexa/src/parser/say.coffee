@@ -376,17 +376,20 @@ class lib.Say
     partsToExpression @alternates[0], options
 
   toLambda: (output, indent, options) ->
-    targetFunction = "say"
-    if @reprompt
-      targetFunction = "reprompt"
+    speechTargets = ["say"]
+    if @isReprompt
+      speechTargets = [ "reprompt" ]
+    else if @isAlsoReprompt
+      speechTargets = speechTargets.concat "reprompt"
 
     writeLine = (indent, parts) ->
       if parts[0]?.isSayEcho
         output.push "#{indent}context.repromptTheSay = true;"
       else
         line = partsToExpression(parts, options)
-        if line and line != '""'
-          output.push "#{indent}context.#{targetFunction}.push( #{line} );"
+        for target in speechTargets
+          if line and line != '""'
+            output.push "#{indent}context.#{target}.push( #{line} );"
 
     if @alternates.length > 1
       sayKey = require('./sayCounter').get()
