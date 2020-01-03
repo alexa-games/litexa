@@ -111,6 +111,9 @@ class lib.UnaryExpression
     else
       "(#{op}#{val})"
 
+  toString: ->
+    "#{@op}#{@val}"
+
 
 class lib.BinaryExpression
   constructor: (@location, @left, @op, @right) ->
