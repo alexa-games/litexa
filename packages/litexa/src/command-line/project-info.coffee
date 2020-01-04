@@ -20,7 +20,7 @@ debug = require('debug')('litexa-project-info')
 LoggingChannel = require './loggingChannel'
 
 class ProjectInfo
-  constructor: (jsonConfig, @variant, logger = new LoggingChannel({logPrefix: 'project info'})) ->
+  constructor: ({jsonConfig, @variant, logger = new LoggingChannel({logPrefix: 'project info'}), @doNotParseExtensions = false}) ->
     @variant = @variant ? "development"
     for k, v of jsonConfig
       @[k] = v
@@ -75,7 +75,7 @@ class ProjectInfo
     @extensions = {}
     @extensionOptions = @extensionOptions ? {}
 
-    return if @root == '--mockRoot'
+    return if @root == '--mockRoot' or @doNotParseExtensions
 
     lib = require '../parser/parserlib.coffee'
 
@@ -297,6 +297,6 @@ ProjectInfo.createMock = ->
     name: "mockProject"
     isMock: true
   }
-  return new ProjectInfo config, "mockTesting"
+  return new ProjectInfo {jsonConfig: config, variant: "mockTesting"}
 
 module.exports = ProjectInfo

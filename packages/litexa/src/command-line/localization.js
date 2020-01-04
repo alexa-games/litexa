@@ -34,7 +34,7 @@ const { Skill } = require('@litexa/core/src/parser/skill');
 
 // Utility function that will crawl Litexa code, to retrieve all intents/utterances and say/reprompts.
 async function localizeSkill(options) {
-  options.logger = new LoggingChannel({
+  options.logger = options.logger || new LoggingChannel({
     logPrefix: 'localization',
     logStream: options.logStream || console,
     verbose: options.verbose || false
@@ -57,7 +57,7 @@ async function localizeSkill(options) {
   };
 
   try {
-    const skill = await buildSkill(options.root);
+    const skill = await buildSkill(options);
     options.logger.log('parsing default skill intents, utterances, and output speech ...')
 
     const prevLocalization = { ...skill.projectInfo.localization };
@@ -79,9 +79,10 @@ async function localizeSkill(options) {
   }
 }
 
-async function buildSkill(root, variant = 'development') {
-  const jsonConfig = await projectConfig.loadConfig(root);
-  const projectInfo = new (require('./project-info'))(jsonConfig, variant);
+async function buildSkill(options, variant = 'development') {
+  const jsonConfig = await projectConfig.loadConfig(options.root);
+  const projectInfo = new (require('./project-info'))({jsonConfig, variant, doNotParseExtensions: options.doNotParseExtensions});
+
   const skill = new Skill(projectInfo);
   skill.strictMode = true;
 
@@ -130,19 +131,14 @@ function shouldPerformCloning(options) {
   if (!options.cloneFrom && !options.cloneTo) {
     return false;
   }
-  let errorMessage = null;
   if (options.cloneTo === 'default') {
-    errorMessage = "Not allowed to clone localizations to `default` language.";
+    throw new Error("Not allowed to clone localizations to `default` language.");
   }
   if (!options.cloneFrom) {
-    errorMessage = "Missing `cloneFrom` option. Please specify a Litexa language to clone from.";
+    throw new Error("Missing `cloneFrom` option. Please specify a Litexa language to clone from.");
   }
   if (!options.cloneTo) {
-    errorMessage = "Missing `cloneTo` option. Please specify a Litexa language to clone to.";
-  }
-  if (errorMessage){
-    options.logger.error(errorMessage);
-    process.exit(1);
+    throw new Error("Missing `cloneTo` option. Please specify a Litexa language to clone to.");
   }
   return true;
 }
@@ -263,10 +259,11 @@ function cloneUtterancesBetweenLocalizations(options, curLocalization) {
   let performedClone = false;
   for (const intent of Object.keys(curLocalization.intents)) {
     let intentObject = curLocalization.intents[intent];
-    for (const language of Object.entries(intentObject)) {
+    for (const language of Object.keys(intentObject)) {
       if (language === options.cloneFrom) {
         curLocalization.intents[intent][options.cloneTo] = curLocalization.intents[intent][options.cloneFrom];
         performedClone = true;
+        break;
       }
     }
     if (!options.disableSortLanguages) {
@@ -274,7 +271,7 @@ function cloneUtterancesBetweenLocalizations(options, curLocalization) {
     }
   }
   if (!performedClone) {
-    options.logger.log(`No intents were found for ${options.cloneFrom}, so no intent cloning occurred.`);
+    options.logger.warning(`No intents were found for \`${options.cloneFrom}\`, so no intent cloning occurred.`);
   }
 }
 
@@ -329,14 +326,17 @@ function checkForOrphanedSpeechLines(options, prevLocalization, curLocalization)
 
 function cloneSpeechBetweenLocalizations(options, curLocalization) {
   let performedClone = false;
-  for (const line of Object.entries(curLocalization.speech)) {
+  for (const line of Object.keys(curLocalization.speech)) {
     if (curLocalization.speech[line].hasOwnProperty(options.cloneFrom)) {
       curLocalization.speech[line][options.cloneTo] = curLocalization.speech[line][options.cloneFrom];
+      performedClone = true;
+    } else if (options.cloneFrom === 'default') {
+      curLocalization.speech[line][options.cloneTo] = line;
       performedClone = true;
     }
   }
   if (!performedClone) {
-    options.logger.log(`No speech was found for ${options.cloneFrom}, so no speech cloning occurred.`);
+    options.logger.warning(`No speech was found for ${options.cloneFrom}, so no speech cloning occurred.`);
   }
 }
 

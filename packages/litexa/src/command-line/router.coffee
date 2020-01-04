@@ -275,7 +275,7 @@ module.exports.run = ->
         region: cmd.parent.region
       try
         config = await (require('./project-config').loadConfig root)
-        info = new (require('./project-info'))(config)
+        info = new (require('./project-info'))({jsonConfig: config})
         console.log JSON.stringify info, null, 2
       catch err
         console.error err
@@ -356,7 +356,7 @@ module.exports.run = ->
     .option '--clone-from [language]', 'specify source language for a cloning operation'
     .option '--clone-to [language]', 'copy all translations from the language specified by --clone-from to this language'
     .option '--disable-sort-languages', 'disables sorting languages in localization.json alphabetically'
-    .option '--disable-sort-utterances', 'disables sorting utterances alphabetically'
+    .option '--disable-sort-utterances', 'disables sorting utterances in localization.json alphabetically'
     .option '--find-missing-translations [missingLanguage]', 'check for missing strings for a specific language'
     .option '--remove-orphaned-utterances', 'remove all localization utterances that are no longer in the skill'
     .option '--remove-orphaned-speech', 'remove all speech lines that are no longer in the skill'
