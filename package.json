@@ -4,6 +4,7 @@
     "doc": "docs"
   },
   "scripts": {
+    "audit:fix": "npx lerna run audit:fix",
     "build": "npm run clean && npm install",
     "clean": "npx lerna clean --yes && npx rimraf ./node_modules ./.nyc_output",
     "coverage": "npx rimraf .nyc_output_combined && npx lerna exec --concurrency 1 npm run coverage && npm run coverage:report",

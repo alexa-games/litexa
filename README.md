@@ -220,3 +220,24 @@ To build the full static website for S3 or GitHub hosting, run the following:
 ```bash
 npm run docs:build
 ```
+
+## Security
+
+Security is of the utmost importance. This section will describe NPM scripts that
+can help with making sure that the code base is as secure as possible.
+
+### Dependency Audit
+
+NPM provides a tool that will scan and automatically install any compatible updates
+to vulnerable dependencies. More on `npm audit` [here](https://docs.npmjs.com/cli/audit).
+
+To run the tool against every Litexa package, run the following from
+the root of the code base:
+
+```bash
+npm run audit:fix
+```
+
+If the tool does automatically install any compatible updates, it's advised to run 
+`npm run coverage` before you commit any changes (to make sure nothing has broken in 
+the update).
