@@ -237,3 +237,7 @@ the root of the code base:
 ```bash
 npm run audit:fix
 ```
+
+If the tool does automatically install any compatible updates, it's advised to run 
+`npm run coverage` before you commit any changes (to make sure nothing has broken in 
+the update).
