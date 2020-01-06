@@ -3,6 +3,7 @@
   "version": "0.3.1",
   "description": "This module adds support for APL directives to Litexa.",
   "scripts": {
+    "audit:fix": "npm audit fix",
     "build": "npm run clean && npm install",
     "clean": "npx rimraf node_modules",
     "compile": "npx rollup --config rollup.config.js",
