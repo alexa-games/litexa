@@ -88,7 +88,7 @@ exports.runSkill = (name) ->
             #{err.toString()}"
         return reject(err)
 
-      # Let's run our tests on a 'show', so Display & APL are supported.
+      # Let's run our tests on a 'show', so Display, APL, and HTML are supported.
       skill.runTests { testDevice: 'show', logRawData: true }, (err, result) ->
         if err?
           return reject(err)
@@ -153,7 +153,7 @@ exports.buildSkillModel = (name, locale='en-US') ->
             #{err.toString()}"
         return reject(err)
 
-      # Let's run our tests on a 'show', so Display & APL are supported.
+      # Let's run our tests on a 'show', so Display, APL, and HTML are supported.
       try
         resolve(skill.toModelV2 locale)
       catch err

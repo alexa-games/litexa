@@ -97,6 +97,7 @@ makeBaseRequest = (skill) ->
       dev = req.context.System.device
       dev.supportedInterfaces =
         'Alexa.Presentation.APL': {}
+        'Alexa.Presentation.HTML': {}
         Display: {}
     else
       throw new Error "Unknown test device type #{device}"
