@@ -312,6 +312,7 @@ StateStatements
   / StopMusicStatement
   / SayStatement
   / RepromptStatement
+  / SayRepromptStatement
   / CardStatement
   / DirectiveStatement
   / HandoffStatement
@@ -488,6 +489,9 @@ ConditionalStatement "conditional statement"
     }
   / "else" ___ "if" ___ expression:ExpressionString {
       pushIf(location(), new lib.ElseCondition(expression));
+    }
+  / "else" ___ "unless" ___ expression:ExpressionString {
+      pushIf(location(), new lib.ElseCondition(expression, true));
     }
   / "else" {
       const target = getTarget();
@@ -853,7 +857,7 @@ RegexLiteral
 
 RegexLiteralCharacter
   = [a-zA-Z0-9|*+()=\-_\'<>!:?.,^${}\[\] ]
-  / ('\\' [wWdDsSbBtnr*+.?\\\/])
+  / ('\\' [wWdDsSbBtnr.+*?$^\\\/\[\](){}=!<>|:-])
 
 /* litexa [say]
 Adds spoken content to the next response. The content
@@ -866,9 +870,8 @@ being separated by a single space.
 ```coffeescript
 say "Hello"
 say "World"
+# would result in Alexa saying "Hello World"
 ```
-
-This would result in Alexa saying "Hello World"
 */
 
 SayStatement
@@ -888,9 +891,28 @@ reprompt "World"
 
 RepromptStatement
   = "reprompt" ___ say:SayString {
-      say.reprompt = true;
-      pushSay(location(), say);
-    }
+    say.isReprompt = true;
+    pushSay(location(), say);
+  }
+
+/* litexa [say reprompt]
+Combines the [say](#say) and [reprompt](#reprompt) functionality: The indicated
+[Say String](#say-string) is added to both the pending skill response's output speech
+and reprompt speech.
+
+```coffeescript
+say reprompt "something"
+# equivalent to:
+# say "something"
+# reprompt "something"
+```
+*/
+
+SayRepromptStatement
+  = "say reprompt" ___ say:SayString {
+    say.isAlsoReprompt = true
+    pushSay(location(), say);
+  }
 
 /* litexa [soundEffect]
 Converts a specified sound effect to SSML, and adds it to the next response.
@@ -2947,7 +2969,8 @@ ComparisonExpr
 
 ComparisonExprTail "Expression Comparison Operator"
   = __ op:ExpressionCompareOperator __ val:AdditiveExpr {
-    return {op:op, val:val}; }
+      return {op:op, val:val};
+    }
 
 ExpressionCompareOperator "Expression Comparison Operator"
   = ">="
@@ -2967,10 +2990,14 @@ AdditiveExpr
 
 AdditiveExprTail "Expression Operator"
   = __ op:("+"/"-") __ val:MultiplicativeExpr {
-    return {op:op, val:val}; }
+      return {op:op, val:val};
+    }
 
 MultiplicativeExpr
-  = left:ExpressionValue tail:(MultiplicativeExprTail)+ {
+  = op:"not" ___ val:MultiplicativeExpr {
+      return new lib.UnaryExpression(location(), op, val);
+    }
+  / left:ExpressionValue tail:(MultiplicativeExprTail)+ {
       return tail.reduce(function(res, right){
         return new lib.BinaryExpression(location(), res, right.op, right.val);
       }, left);
@@ -2979,7 +3006,8 @@ MultiplicativeExpr
 
 MultiplicativeExprTail "Expression Operator"
   = __ op:("*"/"/") __ val:ExpressionValue {
-    return {op:op, val:val}; }
+      return {op:op, val:val};
+    }
 
 ExpressionValue
   = "(" __ val:LogicalExpr __  ")" { return val; }

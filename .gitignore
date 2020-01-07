@@ -15,6 +15,7 @@ lerna-debug.log
 .test
 .deploy
 aws-config.json
+litexa.pegjs.cached
 
 # nothing in this repo should be
 # a permanent deployment

@@ -1,0 +1,91 @@
+launch
+  when IfTestIntent
+    -> ifTests
+
+  when ElseTestIntent
+    -> elseTests
+
+  when NotTestIntent
+    -> notTests
+
+  when UnlessTestIntent
+    -> unlessTests
+
+ifTests
+  if getTrue()
+    say "function,"
+
+  if true
+    say "boolean,"
+
+  if 1 == 1
+    say "comparison,"
+
+  local bool = true
+  if bool
+    say "variable,"
+
+  if getTrue() and true and (1 == 1) and bool
+    say "all true with ands,"
+
+  if getFalse() or false or (1 == 1)
+    say "mixed false with ors"
+  -> launch
+
+elseTests
+  if true
+  else
+    say "true if,"
+  if false
+  else
+    say "false if,"
+
+  if false
+  else if false or getFalse() or 1 != 1
+    say "else if false"
+  else if true and getTrue() and (1 == 1)
+    say "else if true"
+  -> launch
+
+notTests
+  if not getFalse()
+    say "not getFalse,"
+  if not getTrue()
+    say "not getTrue,"
+
+  if not false and not (false and (false or true)) and not (true and false)
+    say "not (true and false),"
+
+  if 0 != 1 and 1 != 0 and not getFalse() and not (false and false)
+    say "negative conditions,"
+
+  if not not not false and not not not getFalse()
+    say "triple not falses"
+  -> launch
+
+unlessTests
+  unless getFalse()
+    say "unless getFalse,"
+
+  unless (false or getFalse())
+    say "unless or,"
+
+  unless (false and getTrue())
+    say "unless and,"
+
+  unless (false or ((false and false) or (0 != 0 or (getFalse() and getTrue()))))
+    say "unless nested conditions"
+
+  -> launch
+
+TEST "conditionals"
+  launch
+  alexa: launch
+  user: IfTestIntent
+  alexa: launch, /^function, boolean, comparison, variable, all true with ands, mixed false with ors$/i
+  user: ElseTestIntent
+  alexa: launch, /^false if, else if true$/i
+  user: NotTestIntent
+  alexa: launch, /^not getFalse, not \(true and false\), negative conditions, triple not falses$/i
+  user: UnlessTestIntent
+  alexa: launch, /^unless getFalse, unless or, unless and, unless nested conditions$/i

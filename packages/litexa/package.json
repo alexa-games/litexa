@@ -6,6 +6,7 @@
     "litexa": "src/command-line/main.js"
   },
   "scripts": {
+    "audit:fix": "npm audit fix",
     "build": "npm run clean && npm install",
     "clean": "npx rimraf node_modules",
     "coverage": "npx nyc npm test && node ../../cacheCoverage.js",
@@ -36,7 +37,7 @@
     "debug": "4.1.1",
     "global-modules": "2.0.0",
     "inquirer": "6.2.2",
-    "marked": "0.6.0",
+    "marked": "0.8.0",
     "mkdirp": "0.5.1",
     "module-alias": "2.2.0",
     "pegjs": "0.10.0",

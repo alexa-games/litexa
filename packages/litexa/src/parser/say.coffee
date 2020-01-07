@@ -416,9 +416,11 @@ class lib.Say
     partsToExpression @alternates[language][0], options
 
   toLambda: (output, indent, options) ->
-    targetFunction = "say"
-    if @reprompt
-      targetFunction = "reprompt"
+    speechTargets = ["say"]
+    if @isReprompt
+      speechTargets = [ "reprompt" ]
+    else if @isAlsoReprompt
+      speechTargets = speechTargets.concat "reprompt"
 
     writeAlternates = (indent, alternates) ->
       if alternates.length > 1
@@ -437,8 +439,9 @@ class lib.Say
 
     writeLine = (indent, parts) ->
       line = partsToExpression(parts, options)
-      if line and line != '""'
-        output.push "#{indent}context.#{targetFunction}.push( #{line} );"
+      for target in speechTargets
+        if line and line != '""'
+          output.push "#{indent}context.#{target}.push( #{line} );"
 
     # Add language-specific output speech to the Lambda, if translations exist.
     alternates = @alternates[options.language] ? @alternates.default

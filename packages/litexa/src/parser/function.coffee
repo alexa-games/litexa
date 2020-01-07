@@ -29,6 +29,7 @@ operatorMap =
   '&&': '&&'
   'or': '||'
   '||': '||'
+  'not': '!'
 
 
 isStaticValue = (v) ->
@@ -87,6 +88,33 @@ class lib.Expression
 
   toString: ->
     @root.toString()
+
+class lib.UnaryExpression
+  constructor: (@location, @op, @val) ->
+    unless @op of operatorMap
+      throw new ParserError @location, "unrecognized operator #{@op}"
+
+  isStatic: ->
+    return isStaticValue(@val)
+
+  evaluateStatic: (context) ->
+    val = evaluateStaticValue @val, context, @location
+    op = operatorMap[@op]
+    eval "#{op}#{JSON.stringify val}"
+
+  toLambda: (options) ->
+    val = @val
+    if @val.toLambda?
+      val = @val.toLambda(options)
+    op = operatorMap[@op]
+    if @skipParentheses
+      "#{op}#{val}"
+    else
+      "(#{op}#{val})"
+
+  toString: ->
+    "#{@op}#{@val}"
+
 
 class lib.BinaryExpression
   constructor: (@location, @left, @op, @right) ->
@@ -192,7 +220,7 @@ class lib.IfCondition
 
 
 class lib.ElseCondition
-  constructor: (@expression) ->
+  constructor: (@expression, @negated) ->
 
   pushCode: (line) ->
     @startFunction = @startFunction ? new lib.Function
@@ -203,7 +231,10 @@ class lib.ElseCondition
 
   toLambda: (output, indent, options) ->
     if @expression
-      output.push "#{indent}else if (#{@expression.toLambda(options)}) {"
+      if @negated
+        output.push "#{indent}else if (!(#{@expression.toLambda(options)})) {"
+      else
+        output.push "#{indent}else if (#{@expression.toLambda(options)}) {"
     else
       output.push "#{indent}else {"
     @startFunction?.toLambda(output, indent + "  ", options)

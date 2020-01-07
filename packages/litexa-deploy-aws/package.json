@@ -4,6 +4,7 @@
   "description": "Implements deployment for Litexa to AWS Lambda, DynamoDB and S3.",
   "main": "index.js",
   "scripts": {
+    "audit:fix": "npm audit fix",
     "build": "npm run clean && npm install",
     "clean": "npx rimraf node_modules",
     "coverage": "npx nyc npm test && node ../../cacheCoverage.js",
@@ -29,6 +30,7 @@
     "debug": "3.2.6",
     "md5-file": "4.0.0",
     "mime": "2.4.0",
+    "minimatch": "3.0.4",
     "mkdirp": "0.5.1",
     "rimraf": "2.6.3"
   },
