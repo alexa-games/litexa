@@ -50,6 +50,8 @@ interface Deployment {
     invocationSuffix?: string;
     invocation?: InvocationCollection;
     DEPLOY?: DeploymentVariables;
+    disableAssetReferenceValidation?: boolean;
+    overrideAssetsRoot?: string;
 }
 
 interface Configuration {

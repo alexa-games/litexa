@@ -6,15 +6,9 @@
 ###
 
 AWS = require 'aws-sdk'
-configureAWS = require './aws-config'
 
-{
-  collectUploadInfo
-  listBucketAndUploadAssets
-  prepareBucket
-  validateS3BucketName
-  validateS3PathName
-} = require('./utils/s3Utils')
+configureAWS = require './aws-config'
+s3Utils = require './utils/s3Utils'
 
 module.exports = {
   deploy: (context, logger) ->
@@ -22,7 +16,7 @@ module.exports = {
     skill = context.skill
     s3Context = null
 
-    await configureAWS(context, logger, AWS)
+    await configureAWS.handle(context, logger, AWS)
 
     context.assetDeploymentStart = new Date
 
@@ -32,7 +26,7 @@ module.exports = {
       throw new Error "Found neither `S3BucketName` nor `s3Configuration.bucketName` in Litexa config for deployment
         target '#{context.deploymentName}'. Please use either setting to specify a bucket to create (if necessary) and deploy to."
 
-    validateS3BucketName bucketName
+    s3Utils.validateS3BucketName bucketName
 
     projectInfo = skill.projectInfo
     s3Context = {
@@ -42,7 +36,7 @@ module.exports = {
       bucketName: bucketName
     }
 
-    validateS3PathName s3Context.baseLocation
+    s3Utils.validateS3PathName s3Context.baseLocation
 
     context.S3 = new AWS.S3 {
       params: {
@@ -52,15 +46,18 @@ module.exports = {
 
     region = context.S3.config.region
     s3Context.RESTRoot =  "https://s3.#{region}.amazonaws.com/#{bucketName}"
-    context.artifacts.save 'assets-root', "#{s3Context.RESTRoot}/#{s3Context.baseLocation}/"
+    if context.deploymentOptions?.overrideAssetsRoot?
+      context.artifacts.save 'assets-root', context.deploymentOptions?.overrideAssetsRoot
+    else
+      context.artifacts.save 'assets-root', "#{s3Context.RESTRoot}/#{s3Context.baseLocation}/"
 
     us3UtilArgs = { s3Context, skillContext: context, logger }
 
-    prepareBucket(us3UtilArgs)
+    s3Utils.prepareBucket(us3UtilArgs)
     .then ->
-      collectUploadInfo(us3UtilArgs)
+      s3Utils.collectUploadInfo(us3UtilArgs)
     .then ->
-      listBucketAndUploadAssets(us3UtilArgs)
+      s3Utils.listBucketAndUploadAssets(us3UtilArgs)
     .catch (err) ->
       logger.error err
       throw "failed assets deployment"

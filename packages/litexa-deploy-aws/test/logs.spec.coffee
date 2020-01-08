@@ -17,7 +17,6 @@ path = require 'path'
 rimraf = require 'rimraf'
 mkdirp = require 'mkdirp'
 Logs = require('../src/logs')
-AwsConfig = require('../src/aws-config')
 AWS = require 'aws-sdk'
 debug = require('debug')('litexa-logs')
 

@@ -12,7 +12,7 @@ mkdirp = require 'mkdirp'
 debug = require('debug')('litexa-logs')
 
 exports.pull = (context, logger) ->
-  require('./aws-config')(context, logger, AWS)
+  require('./aws-config').handle(context, logger, AWS)
 
   # log group should be derivable from the project name and variant, via the lambda name
   # log stream is a little more difficult, basically we'll need to scan for all active ones

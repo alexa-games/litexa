@@ -309,6 +309,51 @@ ignore any file types it does not recognize. These files must have the file exte
 `.png`, `.jpeg`, `.jpg`, `.mp3`, `.json`, or`.txt`. Litexa extensions may add to that list.
 Please see the [section on assets](/book/presentation.html#asset-file-references) for more information.
 
+:::tip Overriding a deployment's assets root path
+You can optionally point a deployment at an arbitrary location, and Litexa
+will blindly expect the assets to be there. This is useful if you have a massive
+project and don't want every developer to push their own isolated asset caches up,
+or even pull the assets onto their machine in the first place.
+
+To override a deployment's assets root path, its configuration can
+use the `overrideAssetsRoot` property with a URL to the root of the assets path.
+A simple example Litexa config with a deployment that uses assets root override:
+
+```javascript
+const deploymentConfiguration = {
+  name: 'my-skill',
+  deployments: {
+    a_developer_deployment: {
+      module: '@litexa/deploy-aws',
+      overrideAssetsRoot: 'https://path.com/to/your/assets/'
+    }
+  }
+}
+```
+:::
+
+:::tip Skipping Litexa's asset reference validation
+You can also optionally skip (per deployment) Litexa's asset reference validation.
+This is useful because you may want to test and/or deploy your skill that references
+some assets that aren't yet in S3.
+
+To skip a deployment's asset reference validation, its configuration can use the
+`disableAssetReferenceValidation` property with a value of `true`. A simple
+example Litexa config with a deployment that skips asset reference validation:
+
+```javascript
+const deploymentConfiguration = {
+  name: 'my-skill',
+  deployments: {
+    a_developer_deployment: {
+      module: '@litexa/deploy-aws',
+      disableAssetReferenceValidation: true
+    }
+  }
+}
+```
+:::
+
 #### Lambda Configuration (optional)
 
 The `@litexa/deploy-aws` module deploys your skill to AWS Lambda. It sets a few defaults,
