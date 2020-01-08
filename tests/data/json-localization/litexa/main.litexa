@@ -1,0 +1,90 @@
+define @catFact as CatFact
+
+launch
+  say reprompt "start"
+    or "begin"
+  
+  when AMAZON.RepeatIntent
+    -> launch
+
+  when TestConditionals
+    or "test conditionals"
+    if true
+      say reprompt "if conditional."
+
+    unless false
+      say reprompt "unless conditional."
+
+    if false
+      fail("shouldn't have reached here")
+    else if true
+      say reprompt "else if conditional."
+    
+    if false
+      fail("shouldn't have reached here")
+    else
+      say reprompt "else conditional."
+  
+  when TestSwitch
+    or "test switch $number"
+    or "test switch $number test"
+    or "test switch"
+    with $number = "1", "2", "cat" # these are not supported by JSON localization
+    switch $number
+      == "1" then
+        say reprompt "switch 1."
+      == "cat" then
+        say reprompt "switch cat."
+      else
+        say reprompt "switch else."
+
+  when TestFor
+    or "test for"
+    for letter in spellEllie()
+      say "{letter}"
+
+  when TestShorthand
+    or "test shorthand"
+    @cat = "Ellie"
+    $numberOfPeets = 4
+    local catfood = "fish"
+    say reprompt "<!meow.> @cat is a DEPLOY.color {getCat()}. She has $numberOfPeets paws and likes to eat {catfood}. \<break time='10ms'>"
+    say reprompt "@catFact.getFact()"
+
+TEST "all say statements"
+  launch
+  alexa: launch, /[start|begin]/
+  user: AMAZON.RepeatIntent
+  alexa: launch, /[start|begin]/
+  user: TestConditionals
+  alexa: launch, e"if conditional. unless conditional. else if conditional. else conditional."
+  user: TestSwitch with $number="1"
+  alexa: launch, e"switch 1."
+  user: TestSwitch with $number="2"
+  alexa: launch, e"switch else."
+  user: TestSwitch with $number="cat"
+  alexa: launch, e"switch cat."
+  user: TestFor
+  alexa: launch, e"e l l i e"
+  user: TestShorthand
+  alexa: launch, e"<!meow.> Ellie is a black cat. She has 4 paws and likes to eat fish. <break time='10ms'> Ellie is cute."
+
+
+TEST "all say statements localized"
+  setRegion en-gb
+  launch
+  alexa: launch, /[astart|abegin]/
+  user: AMAZON.RepeatIntent
+  alexa: launch, /[astart|abegin]/
+  user: TestConditionals
+  alexa: launch, e"an if conditional. an unless conditional. an else if conditional. an else conditional."
+  user: TestSwitch with $number="1"
+  alexa: launch, e"a switch 1."
+  user: TestSwitch with $number="2"
+  alexa: launch, e"a switch else."
+  user: TestSwitch with $number="cat"
+  alexa: launch, e"a switch cat."
+  user: TestFor
+  alexa: launch, e"a e a l a l a i a e"
+  user: TestShorthand
+  alexa: launch, e"<!woof.> Ellie is a black cat. She has 4 peets and likes to eat fish. <break time='10ms'> Did you know? Ellie is cute."

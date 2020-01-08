@@ -333,6 +333,13 @@ describe('localization command', async () => {
       '    or "no intent"',
       '    or "no"',
       '    say "say no intent."',
+      '  when NumberIntent',
+      '    or "number $number"',
+      '    or "$number"',
+      '    or "$number cats"',
+      '    or "$number cat"',
+      '    with $number = AMAZON.NUMBER',
+      '    say "Got number intent with value $number."'
     ]
     before(async () => {
       sinon.stub(process, 'exit');
