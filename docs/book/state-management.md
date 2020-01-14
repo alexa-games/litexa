@@ -430,7 +430,7 @@ code in `litexa/slotbuilder.build.js`
 ```javascript
 // litexa/slotbuilder.build.js
 function answerSlots(skill, language){
-  jsonFiles['questions.json'].map( (d) =>
+  let answers = jsonFiles['questions.json'].map( (d) =>
     return d.a.replace(/[,.]/g, ' ');
   );
   return {

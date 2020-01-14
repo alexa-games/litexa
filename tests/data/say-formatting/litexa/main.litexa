@@ -66,6 +66,16 @@ launch
     say "{'There'} should be a space
       between 'there' and 'should'."
 
+  when PunctuationTest
+    say "Start"
+    say "word"
+    say "!"
+    say "?"
+    say ":"
+    say ";"
+    say ","
+    say "."
+
 TEST "say statement"
   launch
   alexa: launch, /here: word salad\..*space cats\./
@@ -77,3 +87,5 @@ TEST "say statement"
   alexa: launch, /Start middle end\. Start middle end\. Start middle end\./
   user: "d"
   alexa: launch, /There should be a space between 'there' and 'should'\./i
+  user: PunctuationTest
+  alexa: launch, /Start word\!\?:;,\./i
