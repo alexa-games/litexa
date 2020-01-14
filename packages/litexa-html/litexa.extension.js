@@ -4,7 +4,6 @@ module.exports = (options, lib) => {
     const compiler = {
         requiredAPIs: ['ALEXA_PRESENTATION_HTML'],
         validEventNames: ['Alexa.Presentation.HTML.Message'],
-        validIntentNames: ['Alexa.Presentation.HTML.Message'],
         validators: {
             manifest: () => {},
             model: () => {},

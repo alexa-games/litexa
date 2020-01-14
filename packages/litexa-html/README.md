@@ -1,12 +1,16 @@
 # Litexa HTML Support
 
-This module adds support for the [Alexa Web API 
-for Games](https://developer.amazon.com/en-US/docs/alexa/web-api-for-games/understand-alexa-web-api-for-games.html)
+This module adds support for the Alexa Web API for Games.
 
 The Alexa Web API for Games allows you to use existing web technologies and tools to create 
 visually rich and interactive voice-controlled game experiences. You'll be able to build 
 for multimodal devices using HTML and web technologies like Canvas 2D, WebAudio, WebGL, 
 JavaScript, and CSS, starting with Echo Show devices and Fire TVs.
+
+The Alexa Web API for Games is currently in Developer Preview. To gain access
+to its features & documentation, visit the [Alexa Developer
+Blog](https://developer.amazon.com/en-US/blogs/alexa/alexa-skills-kit/2019/11/apply-for-the-alexa-web-api-for-games-developer-preview)
+for sign-up information.
 
 ## Installation
 
@@ -48,8 +52,7 @@ launch
 
 This will add a substring like `<mark name="screen:blue"/>` to your response's speech. 
 This is useful for your HTML runtime in that, when it receives the Alexa response,
-it can use these `mark` tags for additional context before you finally render any
-visual & auditory content to the user.
+the marks can be used to trigger HTML events that interleave with SSML playback.
 
 ## Relevant Resources
 

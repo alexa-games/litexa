@@ -2,9 +2,6 @@
   "name": "html-extension-integration-test",
   "version": "0.0.1",
   "description": "Project for testing the @litexa/html extension.",
-  "dependencies": {
-    "@litexa/assets-wav": "file:../../../packages/litexa-html"
-  },
   "scripts": {
     "test": "echo \"Warning: no test specified\" && exit 0"
   },
