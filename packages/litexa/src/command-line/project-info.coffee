@@ -58,20 +58,6 @@ class ProjectInfo
       for lang in languages
         @languages[lang] = @parseLanguage(path.join(@languagesRoot, lang), lang)
 
-    # check for a localization summary file in the project's root dir
-    for type in ['json', 'js']
-      localizationFilePath = path.join(@root, "localization.#{type}")
-      if fs.existsSync localizationFilePath
-        @localization = require(localizationFilePath)
-
-    # if skill has no localization file, let's add a blank localization container
-    # (to be populated by toLocalization() calls)
-    unless @localization?
-      @localization = {
-        intents: {},
-        speech: {}
-      }
-
   parseExtensions: ->
     @extensions = {}
     @extensionOptions = @extensionOptions ? {}

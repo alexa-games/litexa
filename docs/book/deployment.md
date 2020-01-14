@@ -309,21 +309,19 @@ ignore any file types it does not recognize. These files must have the file exte
 `.png`, `.jpeg`, `.jpg`, `.mp3`, `.json`, or`.txt`. Litexa extensions may add to that list.
 Please see the [section on assets](/book/presentation.html#asset-file-references) for more information.
 
-:::tip Overriding a deployment's assets root path
-You can optionally point a deployment at an arbitrary location, and Litexa
-will blindly expect the assets to be there. This is useful if you have a massive
-project and don't want every developer to push their own isolated asset caches up,
-or even pull the assets onto their machine in the first place.
+:::tip Overriding a deployment target's assets root path
+You can override the skill's assets URL path, instead of using the default S3 path (location of files 
+deployed from `litexa/assets`). This can be useful when collaborating on a project with sizable assets, 
+to prevent each contributor needing to upload and maintain their own copies of assets.
 
-To override a deployment's assets root path, its configuration can
-use the `overrideAssetsRoot` property with a URL to the root of the assets path.
-A simple example Litexa config with a deployment that uses assets root override:
+A deployment target can override the skill asset root path by specifying an `overrideAssetsRoot` URL 
+in the Litexa config. For example:
 
 ```javascript
 const deploymentConfiguration = {
   name: 'my-skill',
   deployments: {
-    a_developer_deployment: {
+    deployment_target_name: {
       module: '@litexa/deploy-aws',
       overrideAssetsRoot: 'https://path.com/to/your/assets/'
     }
@@ -333,20 +331,21 @@ const deploymentConfiguration = {
 :::
 
 :::tip Skipping Litexa's asset reference validation
-You can also optionally skip (per deployment) Litexa's asset reference validation.
-This is useful because you may want to test and/or deploy your skill that references
-some assets that aren't yet in S3.
+Litexa will validate asset references for certain keywords (`card`, `screen`, `soundEffect`, etc.) and fail 
+Litexa tests if those assets aren't found in the `litexa/assets` directory. This validation can be 
+disabled per deployment target, when referenced assets are missing locally (which is typically the 
+case when `overrideAssetsRoot` is used).
 
-To skip a deployment's asset reference validation, its configuration can use the
-`disableAssetReferenceValidation` property with a value of `true`. A simple
-example Litexa config with a deployment that skips asset reference validation:
+A deployment target can skip asset reference validation by setting disableAssetReferenceValidation in the 
+Litexa config. For example:
 
 ```javascript
 const deploymentConfiguration = {
   name: 'my-skill',
   deployments: {
-    a_developer_deployment: {
+    deyployment_target_name: {
       module: '@litexa/deploy-aws',
+      overrideAssetsRoot: 'https://path.com/to/your/assets/',
       disableAssetReferenceValidation: true
     }
   }
