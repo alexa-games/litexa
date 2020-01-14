@@ -355,28 +355,48 @@ describe('localization command', async () => {
       doMemoryCleanup();
     });
 
-    it('should clone a language given valid parameters', async () => {
+    it('should clone a language and sort strings given valid parameters', async () => {
       options = createOptionsObject();
       options.cloneFrom = 'default';
-      options.cloneTo = 'en';
+      options.cloneTo = 'en-US';
       await localization.localizeSkill(options);
       doMemoryCleanup();
 
       options = createOptionsObject();
-      options.cloneFrom = 'en';
-      options.cloneTo = 'en-US';
+      options.cloneFrom = 'en-US';
+      options.cloneTo = 'en';
       await localization.localizeSkill(options);
-      // @TODO: verify each field in json has en and en-US, and it matches the key, verify sort order
+
+      const localizationJson = JSON.parse(fs.readFileSync(path.join(options.root, 'localization.json'), 'utf8'));
+
+      const intents = Object.keys(localizationJson.intents);
+      intents.forEach((intent) => {
+        expect(Object.keys(localizationJson.intents[intent])).to.deep.equal(['default','en','en-US']);
+        expect(localizationJson.intents[intent]['en-US']).to.deep.equal(localizationJson.intents[intent]['en']);
+        // no test to compare to default because default does not get sorted
+      });
+      const sayStrings = Object.keys(localizationJson.speech);
+      sayStrings.forEach((sayString) => {
+        expect(Object.keys(localizationJson.speech[sayString])).to.deep.equal(['en','en-US']);
+        expect(sayString).to.deep.equal(localizationJson.speech[sayString]['en']);
+        expect(sayString).to.deep.equal(localizationJson.speech[sayString]['en-US']);
+      });
     });
 
     it('should warn when there was nothing to clone', async () => {
+      options = createOptionsObject();
+      await localization.localizeSkill(options);
+      const originalLocalizationJson = JSON.parse(fs.readFileSync(path.join(options.root, 'localization.json'), 'utf8'));
+      doMemoryCleanup();
+
       options = createOptionsObject();
       options.cloneFrom = 'non-existent';
       options.cloneTo = 'en';
       await localization.localizeSkill(options);
       expect(options.logger.warningLogs[0]).to.equal('No intents were found for `non-existent`, so no intent cloning occurred.');
       expect(options.logger.warningLogs[1]).to.equal('No speech was found for non-existent, so no speech cloning occurred.');
-      // @TODO: verify before json deep-copies after json
+      const cloneResultLocalizationJson = JSON.parse(fs.readFileSync(path.join(options.root, 'localization.json'), 'utf8'));
+      expect(originalLocalizationJson).to.deep.equal(cloneResultLocalizationJson);
     });
 
     it('should not clone a language if it is missing the source', async () => {

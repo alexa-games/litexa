@@ -12,4 +12,3 @@ preamble = require '../preamble.coffee'
 describe 'supports the JSON localization feature', ->
   it 'runs the sound integration test', ->
     preamble.runSkill 'json-localization'
-git 

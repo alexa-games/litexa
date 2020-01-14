@@ -244,7 +244,7 @@ function checkForOrphanedUtterances(options, prevLocalization, curLocalization) 
       }
     }
     if (!options.disableSortLanguages) {
-      intentObject = sortObjectByKeys(intentObject);
+      curLocalization.intents[intent] = sortObjectByKeys(intentObject);
     }
   }
 
@@ -267,7 +267,7 @@ function cloneUtterancesBetweenLocalizations(options, curLocalization) {
       }
     }
     if (!options.disableSortLanguages) {
-      intentObject = sortObjectByKeys(intentObject);
+      curLocalization.intents[intent] = sortObjectByKeys(intentObject);
     }
   }
   if (!performedClone) {
@@ -333,6 +333,9 @@ function cloneSpeechBetweenLocalizations(options, curLocalization) {
     } else if (options.cloneFrom === 'default') {
       curLocalization.speech[line][options.cloneTo] = line;
       performedClone = true;
+    }
+    if (!options.disableSortLanguages) {
+      curLocalization.speech[line] = sortObjectByKeys(curLocalization.speech[line]);
     }
   }
   if (!performedClone) {
