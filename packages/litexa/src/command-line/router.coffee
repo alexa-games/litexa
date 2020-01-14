@@ -354,16 +354,16 @@ module.exports.run = ->
   program
     .command 'localize'
     .description "parses intents/utterances, and any say/reprompt speech from the default Litexa code files. Updates existing localization.json or creates new file in the Litexa project's root directory."
-    # @TODO: Add options to support creating translation placeholders for languages, and warn about missing translations.
     .option '--clone-from [language]', 'specify source language for a cloning operation'
     .option '--clone-to [language]', 'copy all translations from the language specified by --clone-from to this language'
     .option '--disable-sort-languages', 'disables sorting languages in localization.json alphabetically'
     .option '--disable-sort-utterances', 'disables sorting utterances in localization.json alphabetically'
-    .option '--find-missing-translations [missingLanguage]', 'check for missing strings for a specific language'
     .option '--remove-orphaned-utterances', 'remove all localization utterances that are no longer in the skill'
     .option '--remove-orphaned-speech', 'remove all speech lines that are no longer in the skill'
-    .option '--create-localization-excel', 'generate Excel file from contents of localization.json'
-    .option '--parse-localization-excel [file path]', 'parse translations from indicated Excel file back into localization.json'
+    # @TODO: Add options to support creating translation placeholders for languages, and warn about missing translations.
+    # .option '--find-missing-translations [missingLanguage]', 'check for missing strings for a specific language'
+    # .option '--create-localization-excel', 'generate Excel file from contents of localization.json'
+    # .option '--parse-localization-excel [file path]', 'parse translations from indicated Excel file back into localization.json'
     .action (cmd) ->
       options = {
         root: root
@@ -371,12 +371,12 @@ module.exports.run = ->
         cloneTo: cmd.cloneTo
         disableSortLanguages: cmd.disableSortLanguages
         disableSortUtterances: cmd.disableSortUtterances
-        findMissingTranslations: cmd.missingLanguage # @TODO: Not implemented yet.
         removeOrphanedUtterances: cmd.removeOrphanedUtterances
         removeOrphanedSpeech: cmd.removeOrphanedSpeech
         verbose: cmd.parent.verbose
-        createLocalizationExcel: cmd.createLocalizationExcel # @TODO: Not implemented yet.
-        parseExcelPath: cmd.excelPath # @TODO: Not implemented yet.
+        # findMissingTranslations: cmd.missingLanguage # @TODO: Not implemented yet.
+        # createLocalizationExcel: cmd.createLocalizationExcel # @TODO: Not implemented yet.
+        # parseExcelPath: cmd.excelPath # @TODO: Not implemented yet.
       }
 
       localization.localizeSkill(options)
