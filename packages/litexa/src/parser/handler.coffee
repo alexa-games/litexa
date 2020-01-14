@@ -443,7 +443,15 @@ handlerSteps.createFinalResult = (stateContext) ->
 
   # build outputSpeech and reprompt from the accumulators
   joinSpeech = (arr, language = 'default') ->
-    result = arr.join(' ')
+    return '' unless arr
+    result = arr[0]
+    for line in arr[1..]
+      # If the line starts with punctuation, don't add a space before.
+      if line.match /^[?!:;,.]/
+        result += line
+      else
+        result += " #{line}"
+
     result = result.replace /(  )/g, ' '
     if litexa.sayMapping[language]
       for mapping in litexa.sayMapping[language]
