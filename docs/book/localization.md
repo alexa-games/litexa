@@ -5,7 +5,7 @@ locales](https://developer.amazon.com/docs/custom-skills/develop-skills-in-multi
 You can localize your skill in 2 ways:
 
 * project structure-based overrides
-* string replacement map (coming soon)
+* string replacement map
 
 ## Skill Manifest changes
 
@@ -323,21 +323,192 @@ in the Deployment Chapter.
 
 ## Option 2: String Replacement Map
 
+This localization method is best suited for:
+
+* minimal functional differences
+* major dialogue differences
+
+between supported locales.
+
 This localization method is similar to traditional localization methods -
-meaning that all strings are stored with a reference in a single file, instead
-of being integrated with your skill code. This method supports:
+meaning that all translated strings are aggregated and stored by reference
+in a single file, instead of integrating with the skill code.
 
-* major dialogue differences between locales (e.g for different languages)
+In this method, we reuse the definition of **default skill code** defined in the
+previous method under the [Project Structure](#project-structure) section.
 
-This method is coming soon. Hang tight :)
+:::tip Note
+This method only localizes utterances and say/reprompt strings. Strings in code
+are not captured; this means that slotbuilder functions, `context.say.push` calls,
+function calls that may use strings, and inline slot definitions are not
+localized. You will need to handle localization in these functions themselves.
+You can pass `context.language` to code to retrieve the Litexa language.
+:::
 
-```stdout
-    |\__/,|
-  _.|o o  |_(`\
--(((---(((--------
-    |     |  ) )
-    ((( (((  -
+To localize your skill with this method to a new language, there are 2 steps.
+
+First, you will need to generate a
+`localization.json` in your project root via the Litexa command line.
+
+Use:
+
+```bash
+litexa localize
 ```
+
+The second step is to create a Litexa file for your target language. This file
+can be blank; it just has to exist for Litexa to recognize that you are
+supporting that language. So, for example, if you are localizing for French,
+you could create `litexa/languages/fr/main.litexa` and this would complete your
+setup. Make sure this conforms to the [project structure](#project-structure)
+above.
+
+### The localization file: `localization.json`
+
+You are now ready to add localization content. Let's take a look at the
+`localization.json` file. This will serve as the source file for your
+translations. This is what it looks like from running it on the vanilla
+`litexa generate` skill:
+
+```json
+{
+  "intents": {
+    "AMAZON.StopIntent": {
+      "default": []
+    },
+    "AMAZON.CancelIntent": {
+      "default": []
+    },
+    "AMAZON.StartOverIntent": {
+      "default": []
+    },
+    "MY_NAME_IS_NAME": {
+      "default": [
+        "my name is {name}",
+        "call me {name}",
+        "{name}"
+      ]
+    },
+    "AMAZON.HelpIntent": {
+      "default": []
+    }
+  },
+  "speech": {
+    "Hello again, @name. Wait a minute... you could be someone else.": {},
+    "Hi there, human.": {},
+    "What's your name?": {},
+    "Please tell me your name?": {},
+    "Sorry, I didn't understand that.": {},
+    "Nice to meet you, $name. It's a fine {todayName()}, isn't it?": {},
+    "Just tell me your name please. I'd like to know it.": {},
+    "Please? I'm really curious to know what your name is.": {},
+    "Bye now!": {}
+  }
+}
+```
+
+`localization.json` follows this structure:
+
+```json
+{
+  "intents": {
+    "SomeIntentName": { // map of all skill intents to their utterances by Litexa language
+      "default": [ // utterances parsed from the default Litexa files
+        "default utterance {slot_name}",
+        "another default utterance {slot_name}"
+      ],
+      "fr": [ // translated utterances added to the localization.json by a translator for fr
+        "french utterance {slot_name}",
+        "another french utterance {slot_name}"
+      ]
+    }
+  },
+  "speech": { // map of all in-skill speech to map of Litexa language with any available translations
+    "default speech string": { // say/reprompt string found in default Litexa files
+      "fr": "override string for FR"
+    },
+    "say statement|alternate one": { // say/reprompt with their `or` alternates are delineated by `|` characters
+      "fr": "french alternate one|french alternate two|french alternate three"
+    }
+  }
+}
+```
+
+To add your localized strings, map them from the target language to the string,
+for each default string you wish to localize. Litexa's SSML shorthand and
+interpolation rules continue to apply.
+
+:::tip Escaped SSML tags require an extra `\`
+Due to how say strings are parsed, if you have escaped SSML tags:
+
+```coffeescript
+  say "\<amazon:emotion name='excited'>Cats are cute!\</amazon:emotion>"
+```
+
+They render in `localization.json` as:
+
+```json
+"<amazon:emotion name='excited'>Cats are cute!</amazon:emotion>"
+```
+
+And you need to add the escapes back into the mapped translations with another
+backslash:
+
+```json
+"speech": {
+  "<amazon:emotion name='excited'>Cats are cute!</amazon:emotion>": {
+    "fr": "\\<amazon:emotion name='excited'>Cats are cute!\\</amazon:emotion>"
+  },
+  ...
+}
+```
+:::
+
+A few things to observe:
+* Utterances for a language are not mapped one to one, meaning that an intent
+in the default language might have 3 utterances, and the one for fr-FR might
+have 5. You can have any number of utterances for an intent for any language.
+* Say/reprompt strings and their alternatives are mapped together. They appear
+as one entry in the file as pipe (`|`) separated strings. As such, your
+localized language can have asymmetrical alternatives. Both default and
+localized strings follow the same format.
+
+This method reads strings from only the default skill code. Because the default
+skill code is the source of truth, modifying any of the default language speech
+strings in the localization file will break the mapping. A subsequent
+`litexa localize` will show modified strings as orphaned, and re-add the
+original strings to the file, with logging output stating they are new speech
+lines. Modifying any default language intents in `localization.json` will
+behave the same way, and any changes from modifying default language utterances
+will be ignored, and overridden by `litexa localize` executions.
+
+The speech strings function as overrides in the skill. If there is no translated
+string for a given language, it will fall back to the default string.
+
+### More on `litexa localize`
+
+`litexa localize` can receive some arguments to modify its behavior. To see the
+complete list, run `litexa localize --help`.
+
+#### Cloning
+
+With cloning, the arguments for cloning your default language to French would look like:
+
+```bash
+litexa localize --clone-from default --clone-to fr
+```
+
+:::warning Cloning to an existing language
+If you clone to a language that already exists, you will overwrite its existing
+localization in the localization file.
+:::
+
+## Combining both localization strategies
+You can combine both localization methods in accordance with your use case
+(e.g, project structure-based overrides for assets, and string replacement map
+for dialogue). However, they function completely independently of each other.
+Also, remember: the string replacement map method only extracts information from the
+default language.
 
 ## Testing
 
