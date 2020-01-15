@@ -25,6 +25,7 @@ describe 'Running Deploy to Lambda', ->
       log: -> undefined
       error: -> undefined
       verbose: -> undefined
+      warning: -> undefined
     }
 
     context =
@@ -107,6 +108,11 @@ describe 'Running Deploy to Lambda', ->
       await unitTestHelper 'checkLambdaPermissions', context, loggerInterface, lambdaContext
       assert(logSpy.calledWith(match("reconciling policies against existing data")), 'getPolicy returned data')
       assert(logSpy.withArgs(match("removing policy")).notCalled, 'no policies were removed')
+
+    it 'warns when assets root is not set in the deployed lambda environment config', ->
+      logSpy = spy(loggerInterface, 'warning')
+      await unitTestHelper 'checkForAssetsRoot', context, loggerInterface, lambdaContext
+      assert(logSpy.withArgs(match("Assets root is not set")), 'assets root is not set')
 
     it 'adds a policy if no policy exists', ->
       getPolicyPromise = (resolve) ->

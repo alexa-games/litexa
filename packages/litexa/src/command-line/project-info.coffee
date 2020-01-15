@@ -28,6 +28,7 @@ class ProjectInfo
     debug "litexa root is #{@litexaRoot}"
     @logger = logger
     @DEPLOY = @deployments?[@variant]?.DEPLOY ? {}
+    @disableAssetReferenceValidation = @deployments?[@variant]?.disableAssetReferenceValidation
 
     # Direct Public Side-Effect
     @parseDirectory jsonConfig
@@ -197,10 +198,21 @@ class ProjectInfo
     assetExtensionsWhitelist = [
       '.png'
       '.jpg'
+      '.svg'
       '.mp3'
+      '.otf'
       '.json'
       '.jpeg'
       '.txt'
+      '.html'
+      '.css'
+      '.js'
+      '.map'
+      '.glb'
+      '.m4a'
+      '.mp4'
+      '.ico'
+      '.ogg'
     ]
 
     for kind, info of @extensions
@@ -239,41 +251,53 @@ class ProjectInfo
 
       def.assets.files = []
 
-      for f in fs.readdirSync(def.assets.root)
-        continue if f in fileBlacklist
+      processDirectory = (root) ->
+        debug "processing asset dir #{root}"
+        for f in fs.readdirSync(root)
+          continue if f in fileBlacklist
 
-        processed = false
-        if assetFilter(f)
-          def.assets.files.push f
-          processed = true
+          f = path.join root, f
+          stat = fs.statSync f
+          if stat.isDirectory()
+            processDirectory f
+            continue
 
-        # check whether any extensions would produce
-        # usable assets from this file
-        for kind, proc of def.assetProcessors
-          outputs = proc.listOutputs
-            assetName: f
-            assetsRoot: def.assets.root
-            targetRoot: null
-            options: proc.options
+          f = path.relative def.assets.root, f
+          debug "processing asset file #{f}"
 
-          if outputs?.length > 0
-            debug "#{kind}: #{f} -> #{outputs}"
+          processed = false
+          if assetFilter(f)
+            def.assets.files.push f
             processed = true
-            proc.inputs.push f
-            for o in outputs
-              proc.outputs.push o
-              if (o in def.assets.files) or (o in def.convertedAssets.files)
-                throw new Error "Asset processor #{kind} would
-                  produce a duplicate file #{o}.
-                  Please resolve this before continuing by either
-                  deleting the duplicate or determining whether you
-                  have multiple asset processors that create
-                  the same output."
-              def.convertedAssets.files.push o
 
-        unless processed
-          logger.warning "Unsupported internally or by extensions, skipping asset: #{f}"
+          # check whether any extensions would produce
+          # usable assets from this file
+          for kind, proc of def.assetProcessors
+            outputs = proc.listOutputs
+              assetName: f
+              assetsRoot: def.assets.root
+              targetRoot: null
+              options: proc.options
 
+            if outputs?.length > 0
+              debug "#{kind}: #{f} -> #{outputs}"
+              processed = true
+              proc.inputs.push f
+              for o in outputs
+                proc.outputs.push o
+                if (o in def.assets.files) or (o in def.convertedAssets.files)
+                  throw new Error "Asset processor #{kind} would
+                    produce a duplicate file #{o}.
+                    Please resolve this before continuing by either
+                    deleting the duplicate or determining whether you
+                    have multiple asset processors that create
+                    the same output."
+                def.convertedAssets.files.push o
+
+          unless processed
+            logger.warning "Unsupported internally or by extensions, skipping asset: #{f}"
+
+      processDirectory def.assets.root
 
     debug "project info: \n #{JSON.stringify def, null, 2}"
     return def
