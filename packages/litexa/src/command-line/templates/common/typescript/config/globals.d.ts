@@ -150,7 +150,7 @@ interface StrictEndpoint extends Endpoint {
     sslCertificateType: SSLCertificate;
 }
 type StrictRegions = { [key in Region]?: StrictEndpoint };
-type CustomInterface = 'ALEXA_PRESENTATION_APL' | 'AUDIO_PLAYER' | 'CAN_FULFILL_INTENT_REQUEST' | 'GADGET_CONTROLLER' | 'GAME_ENGINE' | 'RENDER_TEMPLATE' | 'VIDEO_APP';
+type CustomInterface = 'ALEXA_PRESENTATION_HTML' | 'ALEXA_PRESENTATION_APL' | 'AUDIO_PLAYER' | 'CAN_FULFILL_INTENT_REQUEST' | 'GADGET_CONTROLLER' | 'GAME_ENGINE' | 'RENDER_TEMPLATE' | 'VIDEO_APP';
 interface Interface {
     type: CustomInterface;
 }
