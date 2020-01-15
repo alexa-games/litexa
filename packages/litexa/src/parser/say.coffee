@@ -274,8 +274,8 @@ class lib.SlotReferencePart
 
 class lib.JavaScriptPart
   constructor: (@expression) ->
-    isJavaScript: true
-    needsEscaping: true
+  isJavaScript: true
+  needsEscaping: true
   toString: ->
     "{#{@expression.toString()}}"
   toUtterance: ->
