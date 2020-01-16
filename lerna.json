@@ -14,6 +14,7 @@
         "packages/litexa-assets-wav",
         "packages/litexa-deploy-aws",
         "packages/litexa-gadgets",
+        "packages/litexa-html",
         "packages/litexa-render-template",
         "tests"
     ],

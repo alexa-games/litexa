@@ -1,0 +1,13 @@
+{
+  "name": "html-integration-test",
+  "version": "0.0.1",
+  "description": "Project that tests the @litexa/html extension's functionality.",
+  "scripts": {
+    "test": "echo \"Warning: no test specified\" && exit 0"
+  },
+  "author": "Amazon",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@litexa/html": "file:../../../packages/litexa-html"
+  }
+}

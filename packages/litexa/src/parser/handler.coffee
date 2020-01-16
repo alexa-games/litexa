@@ -538,6 +538,10 @@ handlerSteps.createFinalResult = (stateContext) ->
   if stateContext.directives? and stateContext.directives.length > 0
     response.directives = stateContext.directives
 
+  # last chance, see if the developer left a postprocessor to run here
+  if litexa.responsePostProcessor?
+    litexa.responsePostProcessor wrapper, stateContext
+
   return await new Promise (resolve, reject) ->
     stateContext.db.finalize (err, info) ->
       if err?

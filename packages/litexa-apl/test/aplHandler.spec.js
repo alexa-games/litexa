@@ -48,8 +48,19 @@ describe('aplHandler', function() {
     warnStub.restore();
   });
 
-  it('returns userFacing.isEnabled()', function() {
-    expect(handler.userFacing.isEnabled()).to.be.true;
+  describe('#isEnabled()', function() {
+    it('should return true if the APL interface is declared', function() {
+      expect(handler.userFacing.isEnabled()).to.be.true;
+    });
+
+    it('should return false if the context suggests APL is user disabled', function() {
+      context.isUserEnabled = false;
+      handler.userFacing.setUserEnabledCheck(function(context) {
+        return context.isUserEnabled;
+      });
+
+      expect(handler.userFacing.isEnabled()).to.be.false;
+    });
   });
 
   it('when sending document, interleaves speech with APL commands and empties context.say', function() {

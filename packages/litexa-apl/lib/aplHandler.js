@@ -31,7 +31,9 @@ module.exports = function(context) {
       return supportedInterfaces.hasOwnProperty('Alexa.Presentation.APL');
     },
 
-    curSpeechIndex: 0 // tracks which speech needs to be added next
+    curSpeechIndex: 0, // tracks which speech needs to be added next
+
+    userEnabledCheck: null // custom function to disable APL callbacks
   }
 
   const checkForDocument = function() {
@@ -114,16 +116,34 @@ module.exports = function(context) {
     }
   }
 
+  // checks to see if the user has disabled the APL callbacks
+  const isUserDisabled = function() {
+    if (typeof(myData.userEnabledCheck) == 'function') {
+      if (!myData.userEnabledCheck(context)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   return {
     userFacing: {
       // Allows users to check if APL is available.
       isEnabled: function() {
-        return myData.hasAPLSupport();
+        return myData.hasAPLSupport() && !isUserDisabled();
+      },
+
+      setUserEnabledCheck: function(func) {
+        myData.userEnabledCheck = func;
       }
     },
 
     events: {
       afterStateMachine: function() {
+        if (isUserDisabled()) {
+          return;
+        }
+
         if (!isEmpty(context.apl) && myData.hasAPLSupport()) {
 
           // Let's first check for a document, to know whether we should interleave speech/sound:
@@ -176,6 +196,10 @@ module.exports = function(context) {
       },
 
       beforeFinalResponse: function(response) {
+        if (isUserDisabled()) {
+          return;
+        }
+
         if (!isEmpty(response.directives)) {
           let aplFound = false;
           let renderTemplateIndex = -1;

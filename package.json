@@ -31,6 +31,7 @@
     "@litexa/core": "file:packages/litexa",
     "@litexa/deploy-aws": "file:packages/litexa-deploy-aws",
     "@litexa/gadgets": "file:packages/litexa-gadgets",
+    "@litexa/html": "file:packages/litexa-html",
     "@litexa/integration-tests": "file:tests",
     "@litexa/render-template": "file:packages/litexa-render-template"
   },
