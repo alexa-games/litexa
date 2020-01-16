@@ -86,7 +86,6 @@ class lib.Skill
     @reparseLiterateAlexa()
 
   setFile: (filename, language, contents) ->
-    language = language.toLowerCase()
     unless contents?
       console.log filename, language, contents
       throw new Error "probably missing language at skill set file" unless contents?
@@ -173,7 +172,7 @@ class lib.Skill
     @tests = {}
     @dataTables = {}
     @sayMapping = {}
-    @dbTypes = {}
+    @dbTypes = []
     @maxStateNameLength = 16
 
     for extensionName, extension of @projectInfo.extensions
@@ -293,12 +292,12 @@ class lib.Skill
       @sayMapping[location.language] = [{ from, to }]
 
   pushDBTypeDefinition: (definition) ->
-    if definition.name of @dbTypes
-      old = @dbTypes[definition.name]
-      throw new ParserError definition.location, "The db variable #{old.name} already has the
-        previously defined type #{old.type}"
+    for dbType in @dbTypes
+      if (dbType.name is definition.name) and (dbType.location.language is definition.location.language)
+        throw new ParserError definition.location, "The db variable #{dbType.name} already has the
+          previously defined type #{dbType.type} in language #{dbType.location.language}"
 
-    @dbTypes[definition.name] = definition
+    @dbTypes.push(definition)
 
   refreshAllFiles: ->
     litexaDirty = false
@@ -394,8 +393,11 @@ class lib.Skill
     do =>
       output.push "litexa.dbTypes = {"
       lines = []
-      for name, def of @dbTypes
-        lines.push "  #{name}: { type: '#{def.type}' }"
+      dbTypeSet = {}
+      for dbType in @dbTypes
+        if dbType.name not of dbTypeSet
+          lines.push "  #{dbType.name}: { type: '#{dbType.type}' }"
+          dbTypeSet[dbType.name] = dbType
       output.push lines.join ",\n"
       output.push "};"
 
@@ -478,8 +480,13 @@ class lib.Skill
       # inject code to map typed DB objects to their
       # types from inside this closure
       output.push "__language.dbTypes = {"
-      output.push (for name, def of @dbTypes
-        "  #{name}: #{def.type}").join(',\n')
+      lines = []
+      dbTypeSet = {}
+      for dbType in @dbTypes
+        if dbType.name not of dbTypeSet
+          lines.push "  #{dbType.name}: #{dbType.type}"
+          dbTypeSet[dbType.name] = dbType
+      output.push lines.join ",\n"
       output.push "};"
 
       for name, state of @states
@@ -602,7 +609,7 @@ class lib.Skill
 
   getLanguageForRegion: (region) ->
     throw new Error "missing region" unless region?
-    language = region.toLowerCase()
+    language = region
     unless language of @languages
       language = language[0...2]
       if language == 'en'

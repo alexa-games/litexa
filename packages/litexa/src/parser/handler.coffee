@@ -150,12 +150,12 @@ handlerSteps.runConcurrencyLoop = (event, handlerContext) ->
     # work out the language, from the locale, if it exists
     language = 'default'
     if event.request.locale?
-      lang = event.request.locale.toLowerCase()
+      lang = event.request.locale
       langCode = lang[0...2]
-      if lang of __languages
-        language = lang
-      else if langCode of __languages
-        language = langCode
+
+      for __language of __languages
+        if (lang.toLowerCase() is __language.toLowerCase()) or (langCode is __language)
+          language = __language
 
     litexa.language = language
     handlerContext.identity.litexaLanguage = language
