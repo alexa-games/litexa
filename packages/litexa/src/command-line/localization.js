@@ -68,7 +68,6 @@ async function localizeSkill(options) {
     // 2) Log any orphaned (no longer in skill) utterances and speech lines in red, prefixed with '-'.
     // Persist orphaned content in localization.json unless otherwise specified by --remove flags.
     mergePreviousLocalization(options, prevLocalization, curLocalization);
-
     const outputPath = path.join(skill.projectInfo.root, 'localization.json');
     const promisifiedFileWrite = promisify(fs.writeFile);
     await promisifiedFileWrite(outputPath, JSON.stringify(curLocalization, null, 2));
@@ -204,7 +203,6 @@ function checkForNewUtterances(options, prevLocalization, curLocalization) {
       }
     }
   }
-
   options.logger.verbose(`number of new utterances added since last localization: ${numNewUtterances}`);
 }
 
@@ -244,7 +242,7 @@ function checkForOrphanedUtterances(options, prevLocalization, curLocalization) 
       }
     }
     if (!options.disableSortLanguages) {
-      curLocalization.intents[intent] = sortObjectByKeys(intentObject);
+      curLocalization.intents[intent] = sortObjectByKeys(curLocalization.intents[intent]);
     }
   }
 
@@ -267,11 +265,11 @@ function cloneUtterancesBetweenLocalizations(options, curLocalization) {
       }
     }
     if (!options.disableSortLanguages) {
-      curLocalization.intents[intent] = sortObjectByKeys(intentObject);
+      curLocalization.intents[intent] = sortObjectByKeys(curLocalization.intents[intent]);
     }
   }
   if (!performedClone) {
-    options.logger.warning(`No intents were found for \`${options.cloneFrom}\`, so no intent cloning occurred.`);
+    options.logger.verbose(`No sample utterances were found for \`${options.cloneFrom}\`, so no utterances were cloned.`);
   }
 }
 

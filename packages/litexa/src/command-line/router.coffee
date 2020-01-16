@@ -374,9 +374,6 @@ module.exports.run = ->
         removeOrphanedUtterances: cmd.removeOrphanedUtterances
         removeOrphanedSpeech: cmd.removeOrphanedSpeech
         verbose: cmd.parent.verbose
-        # findMissingTranslations: cmd.missingLanguage # @TODO: Not implemented yet.
-        # createLocalizationExcel: cmd.createLocalizationExcel # @TODO: Not implemented yet.
-        # parseExcelPath: cmd.excelPath # @TODO: Not implemented yet.
       }
 
       localization.localizeSkill(options)

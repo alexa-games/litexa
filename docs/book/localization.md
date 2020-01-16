@@ -339,18 +339,16 @@ previous method under the [Project Structure](#project-structure) section.
 
 :::tip Note
 This method only localizes utterances and say/reprompt strings. Strings in code
-are not captured; this means that slotbuilder functions, `context.say.push` calls,
-function calls that may use strings, and inline slot definitions are not
-localized. You will need to handle localization in these functions themselves.
-You can pass `context.language` to code to retrieve the Litexa language.
+are not captured; if you use slot builders, inline slot definitions, or inline
+code speech injection, you will need to do the localization in the same location.
+
+See [Localization in code](#localization-in-code) for details on implementing this.
 :::
 
 To localize your skill with this method to a new language, there are 2 steps.
 
 First, you will need to generate a
-`localization.json` in your project root via the Litexa command line.
-
-Use:
+`localization.json` in your project root via the Litexa command line:
 
 ```bash
 litexa localize
@@ -359,7 +357,7 @@ litexa localize
 The second step is to create a Litexa file for your target language. This file
 can be blank; it just has to exist for Litexa to recognize that you are
 supporting that language. So, for example, if you are localizing for French,
-you could create `litexa/languages/fr/main.litexa` and this would complete your
+you could create `litexa/languages/fr/blank.litexa` and this would complete your
 setup. Make sure this conforms to the [project structure](#project-structure)
 above.
 
@@ -464,39 +462,143 @@ backslash:
 ```
 :::
 
-A few things to observe:
-* Utterances for a language are not mapped one to one, meaning that an intent
-in the default language might have 3 utterances, and the one for fr-FR might
-have 5. You can have any number of utterances for an intent for any language.
-* Say/reprompt strings and their alternatives are mapped together. They appear
+There's a few things to note. First, utterances for a language are not mapped one to one, meaning that an intent in the default language might have 3 utterances, and the one for fr-FR might have 5. You can have any number of utterances for an intent for any language.
+
+Second, say/reprompt strings and their alternatives are mapped together. They appear
 as one entry in the file as pipe (`|`) separated strings. As such, your
 localized language can have asymmetrical alternatives. Both default and
 localized strings follow the same format.
 
-This method reads strings from only the default skill code. Because the default
-skill code is the source of truth, modifying any of the default language speech
-strings in the localization file will break the mapping. A subsequent
-`litexa localize` will show modified strings as orphaned, and re-add the
-original strings to the file, with logging output stating they are new speech
-lines. Modifying any default language intents in `localization.json` will
-behave the same way, and any changes from modifying default language utterances
-will be ignored, and overridden by `litexa localize` executions.
+As an example, the say statement in a Litexa file:
 
-The speech strings function as overrides in the skill. If there is no translated
+```coffeescript
+launch
+  say "one thing"
+    or "another thing"
+```
+
+would look like this in `localization.json`:
+
+```json
+"speech": {
+  // (...)
+  "one thing|another thing": {
+    "fr-CA": "une chose", // translation can have fewer alternatives
+    "fr-FR": "une chose|autre chose|encore une autre chose" // translation can have more alternatives
+  }
+  // (...)
+}
+```
+
+Finally, the speech strings function as overrides in the skill. If there is no translated
 string for a given language, it will fall back to the default string.
 
-### More on `litexa localize`
+### Modifying strings in between localization iterations
+
+In the process of skill development, you might revise your default skill code
+strings at the same time you are adding localizations to your skill. To help
+you keep track of changes, the `localize` command will output a summary of the
+`localization.json` strings that have changed.
+
+It's important to remember that the `localize` command reads strings from
+*only* the default skill code. To keep things straight, you can keep in mind
+these two truths as you localize:
+
+* the default skill code is the source of truth for what utterances and
+  say/reprompt strings to localize
+* `localization.json` is the source of truth for what's covered for localized
+  languages
+
+Here's an example on what would happen if you had modified a string after it
+was localized. Your Litexa project initially looks like this, after running
+`litexa localize` and adding translations for Spanish:
+
+```coffeescript
+# main.litexa
+launch
+  say "Hello."
+    or "Hi."
+  say "What's your name?"
+```
+
+```json
+// localization.json
+"speech": {
+  "Hello.|Hi.": {
+    "es": "Hola."
+  },
+  "What's your name?": {
+    "es": "¿Cómo se llama?"
+  }
+}
+```
+
+If we then changed `main.litexa` to this:
+
+```coffeescript
+# main.litexa
+launch
+  say "Howdy."
+  say "What's your name?"
+```
+
+Running `litexa localize` would then output this in the console:
+
+```stdout
+[localization] +441ms parsing default skill intents, utterances, and output speech ...
+[localization] +320ms the following speech lines are new since the last localization:
+[localization] +1ms + Howdy.
+[localization] +0ms the following speech lines in localization.json are missing in skill:
+[localization] +0ms - Hello.|Hi.
+```
+
+And `localization.json` would now have:
+
+```json
+"speech": {
+  "Howdy.": {}, // new line
+  "What's your name?": {
+    "es": "¿Cómo se llama?"
+  },
+  "Hello.|Hi.": { // orphaned line
+    "es": "Hola."
+  }
+}
+```
+
+So, if the translations from the original string still apply, they should be
+copied to the new string mapping manually.
+
+Intents and utterances changed in the same way follow the same behavior.
+
+### `litexa localize` arguments
 
 `litexa localize` can receive some arguments to modify its behavior. To see the
 complete list, run `litexa localize --help`.
 
-#### Cloning
+#### Verbose logs
 
-With cloning, the arguments for cloning your default language to French would look like:
+The `--verbose` flags turns on logging to give more detail on the contents that
+have changed from the existing `localization.json`.
+
+#### Auto-removing orphaned strings
+
+Orphaned speech strings and orphaned utterances can be automatically removed
+with the `--remove-orphaned-speech` and `--remove-orphaned-utterances` flags,
+respectively, but note that doing so will also remove their translations from
+`localization.json`.
+
+#### Cloning translations
+
+With cloning, the arguments for cloning your default language to French would
+look like:
 
 ```bash
-litexa localize --clone-from default --clone-to fr
+litexa localize --clone-from fr-FR --clone-to fr-CA
 ```
+
+This can be useful as a starting point for adjusting translations for a
+different region.
 
 :::warning Cloning to an existing language
 If you clone to a language that already exists, you will overwrite its existing
@@ -504,11 +606,68 @@ localization in the localization file.
 :::
 
 ## Combining both localization strategies
+
 You can combine both localization methods in accordance with your use case
 (e.g, project structure-based overrides for assets, and string replacement map
 for dialogue). However, they function completely independently of each other.
 Also, remember: the string replacement map method only extracts information from the
 default language.
+
+## Localization in code
+
+Both localization methods do not cover all cases of localizing strings. 
+this means that [slotbuilder functions](/book/state-management.html#slots),
+`context.say.push` calls, function calls that may use strings, and inline code
+speech injection are not localized.
+
+In your Litexa files, you can pass `context.language` to code to retrieve the
+Litexa language.
+
+As an example, let's assume your Litexa code had a custom color slot type and
+an inline function that injects speech directly into `context.say`:
+
+```coffeescript
+# main.litexa
+launch
+  when "$color"
+    with $color = mySlotBuilders.js:myColorSlotBuilder
+    injectSpeech(context)
+```
+
+The inline code could use `context.language` to do any necessary localization.
+
+```javascript
+// inlineCode.js
+function injectSpeech(context) {
+  switch (context.language) {
+    case 'fr':
+      context.say.push('Bien!');
+      break;
+    default:
+      context.say.push('Great!');
+      break;
+  }
+}
+```
+
+Likewise, slot builders will be provided the same value as a `language`
+argument which can be used to do any necessary localization:
+
+```javascript
+// mySlotBuilders.js
+function myColorSlotBuilder(skill, language){
+  const slot = { name: 'myColorSlotName' }
+  switch (language) {
+    case 'fr':
+      slot.values = [ 'bleu', 'rouge' ];
+      break;
+    default:
+      slot.values = [ 'blue', 'red' ];
+      break;
+  }
+  return slot;
+}
+```
 
 ## Testing
 

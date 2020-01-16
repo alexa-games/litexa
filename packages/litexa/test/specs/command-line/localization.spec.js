@@ -393,8 +393,8 @@ describe('localization command', async () => {
       options.cloneFrom = 'non-existent';
       options.cloneTo = 'en';
       await localization.localizeSkill(options);
-      expect(options.logger.warningLogs[0]).to.equal('No intents were found for `non-existent`, so no intent cloning occurred.');
-      expect(options.logger.warningLogs[1]).to.equal('No speech was found for non-existent, so no speech cloning occurred.');
+      expect(options.logger.verboseLogs[12]).to.equal('No sample utterances were found for `non-existent`, so no utterances were cloned.');
+      expect(options.logger.warningLogs[0]).to.equal('No speech was found for non-existent, so no speech cloning occurred.');
       const cloneResultLocalizationJson = JSON.parse(fs.readFileSync(path.join(options.root, 'localization.json'), 'utf8'));
       expect(originalLocalizationJson).to.deep.equal(cloneResultLocalizationJson);
     });
