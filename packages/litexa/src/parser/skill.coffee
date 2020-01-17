@@ -355,7 +355,7 @@ class lib.Skill
     @libraryCode.push "};"
 
     # @TODO: remove dynamoDb from core litexa into the deploy-aws module
-    dbConfiguration = @projectInfo.deployments[@projectInfo.variant].dynamoDbConfiguration
+    dbConfiguration = @projectInfo.deployments?[@projectInfo.variant]?.dynamoDbConfiguration
     if dbConfiguration?.ttlName? and dbConfiguration?.ttlInSeconds?
       if typeof(dbConfiguration.ttlName) != "string"
         throw new Error("`dynamoDbConfiguration.ttlName` must be a string.")
