@@ -16,8 +16,8 @@ for sign-up information.
 
 **WARNING**: The use of this extension is currently reserved for those in the 
 Alexa Web API for Games Developer Preview. If you are not in the Developer Preview 
-and you install this extension, you will not be able to deploy your Alexa skills 
-through Litexa.
+and you have this extension installed, you will not be able to deploy your Alexa 
+skills through Litexa.
 
 The module can be installed globally, which makes it available to any of your 
 Litexa projects:
