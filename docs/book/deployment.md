@@ -415,8 +415,9 @@ Live specification, add the `dynamoDbConfiguration` object to your Litexa config
 ```
 
 At this time, Litexa does not create or update your table with your TTL
-settings. You will need to manually activate the TTL attribute for your table
-in the AWS console or AWS CLI.
+settings. You will need to [manually activate the TTL attribute for your table
+in the AWS console or AWS CLI](
+  https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/time-to-live-ttl-how-to.html).
 
 ### CloudWatch Logging
 
