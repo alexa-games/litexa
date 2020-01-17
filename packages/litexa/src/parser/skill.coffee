@@ -297,13 +297,13 @@ class lib.Skill
     defName = definition.name
     defType = definition.type
 
-    unless @dbTypes[defLanguage]?
-      @dbTypes[defLanguage] = {}
-    else if @dbTypes[defLanguage]?[defName]?
-      throw new ParserError defLocation, "The db variable #{@dbTypes[defLanguage][defName]} already
+    @dbTypes[defLanguage] = @dbTypes[defLanguage] ? {}
+
+    if @dbTypes[defLanguage]?[defName]?
+      throw new ParserError defLocation, "The DB variable #{@dbTypes[defLanguage][defName]} already
         has the previously defined type #{@dbTypes[defLanguage][defName]} in language #{defLanguage}"
 
-    @dbTypes[defLanguage][defName] = definition.type
+    @dbTypes[defLanguage][defName] = defType
 
   refreshAllFiles: ->
     litexaDirty = false
@@ -482,8 +482,8 @@ class lib.Skill
       # Copy over any default DB type definitions that aren't explicitly overriden.
       if language != "default"
         for dbTypeName, dbType of @dbTypes.default
-          unless @dbTypes[language]?[dbTypeName]?
-            @dbTypes[language][dbTypeName] = dbType
+          @dbTypes[language] = @dbTypes[language] ? {}
+          @dbTypes[language][dbTypeName] = @dbTypes[language][dbTypeName] ? dbType
 
       output.push lines.join ",\n"
       output.push "};"

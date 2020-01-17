@@ -1,4 +1,4 @@
-TEST "happy path"
+TEST "default path"
   launch
   @game.type == "Game"
   @game.score == 0
@@ -26,7 +26,12 @@ TEST "happy path"
   @wrapped.family == "Doe"
   @control == 5
 
-TEST "French DB overrides"
+TEST "fr DB overrides"
   setRegion fr
   launch
   @game.type == "FrenchGame"
+
+TEST "de DB without any overrides"
+  setRegion de
+  launch
+  @game.type == "Game"

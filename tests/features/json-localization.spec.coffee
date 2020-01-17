@@ -10,5 +10,5 @@ debug = require('debug')('litexa')
 preamble = require '../preamble.coffee'
 
 describe 'supports the JSON localization feature', ->
-  it 'runs the sound integration test', ->
+  it 'runs the json-localization integration test', ->
     preamble.runSkill 'json-localization'
