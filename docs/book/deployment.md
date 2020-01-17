@@ -370,6 +370,7 @@ is an example with all the supported Lambda configuration options:
       "askProfile": "suncoast",
       "awsProfile": "prototyping",
       "lambdaConfiguration": {
+        "Runtime": "nodejs12.x",
         "MemorySize": 128,
         "Timeout": 240,
         "Environment": {
@@ -388,6 +389,34 @@ that will be used to call Lambda's [updateFunctionConfiguration](
   https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Lambda.html#updateFunctionConfiguration-property).
 You can use this to modify the Lambda's timeout, change the memory size, or
 add your own environment variables. All sub keys are optional.
+
+#### DynamoDB TTL (optional)
+
+Litexa has limited support for setting a [Time To Live (TTL)](
+  https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/TTL.html)
+field with each database entry. This may be useful for limiting your table
+data to active users by automatically deleting old user data. To set a Time To
+Live specification, add the `dynamoDbConfiguration` object to your Litexa config:
+
+```json
+{
+  "deployments": {
+    "development": {
+      "module": "@litexa/deploy-aws",
+      "askProfile": "suncoast",
+      "awsProfile": "prototyping",
+      "dynamoDbConfiguration": {
+        "ttlName": "timeToLive", // the name of the TTL attribute to set
+        "ttlInSeconds": 2592000 // how many days (in seconds) the new/updated record lives for
+      }
+    }
+  }
+}
+```
+
+At this time, Litexa does not create or update your table with your TTL
+settings. You will need to manually activate the TTL attribute for your table
+in the AWS console or AWS CLI.
 
 ### CloudWatch Logging
 
