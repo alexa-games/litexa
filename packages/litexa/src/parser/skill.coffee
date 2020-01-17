@@ -86,7 +86,6 @@ class lib.Skill
     @reparseLiterateAlexa()
 
   setFile: (filename, language, contents) ->
-    language = language.toLowerCase()
     unless contents?
       console.log filename, language, contents
       throw new Error "probably missing language at skill set file" unless contents?
@@ -293,12 +292,18 @@ class lib.Skill
       @sayMapping[location.language] = [{ from, to }]
 
   pushDBTypeDefinition: (definition) ->
-    if definition.name of @dbTypes
-      old = @dbTypes[definition.name]
-      throw new ParserError definition.location, "The db variable #{old.name} already has the
-        previously defined type #{old.type}"
+    defLocation = definition.location
+    defLanguage = definition.location.language
+    defName = definition.name
+    defType = definition.type
 
-    @dbTypes[definition.name] = definition
+    @dbTypes[defLanguage] = @dbTypes[defLanguage] ? {}
+
+    if @dbTypes[defLanguage]?[defName]?
+      throw new ParserError defLocation, "The DB variable #{@dbTypes[defLanguage][defName]} already
+        has the previously defined type #{@dbTypes[defLanguage][defName]} in language #{defLanguage}"
+
+    @dbTypes[defLanguage][defName] = defType
 
   refreshAllFiles: ->
     litexaDirty = false
@@ -392,14 +397,6 @@ class lib.Skill
       output.push "};"
 
     do =>
-      output.push "litexa.dbTypes = {"
-      lines = []
-      for name, def of @dbTypes
-        lines.push "  #{name}: { type: '#{def.type}' }"
-      output.push lines.join ",\n"
-      output.push "};"
-
-    do =>
       shouldIncludeFile = (file) ->
         return false unless file.extension == 'json'
         return false unless file.fileCategory == 'regular'
@@ -478,8 +475,17 @@ class lib.Skill
       # inject code to map typed DB objects to their
       # types from inside this closure
       output.push "__language.dbTypes = {"
-      output.push (for name, def of @dbTypes
-        "  #{name}: #{def.type}").join(',\n')
+      lines = []
+      for dbTypeName, dbType of @dbTypes[language]
+        lines.push "  #{dbTypeName}: #{dbType}"
+
+      # Copy over any default DB type definitions that aren't explicitly overriden.
+      if language != "default"
+        for dbTypeName, dbType of @dbTypes.default
+          @dbTypes[language] = @dbTypes[language] ? {}
+          @dbTypes[language][dbTypeName] = @dbTypes[language][dbTypeName] ? dbType
+
+      output.push lines.join ",\n"
       output.push "};"
 
       for name, state of @states
@@ -602,7 +608,7 @@ class lib.Skill
 
   getLanguageForRegion: (region) ->
     throw new Error "missing region" unless region?
-    language = region.toLowerCase()
+    language = region
     unless language of @languages
       language = language[0...2]
       if language == 'en'

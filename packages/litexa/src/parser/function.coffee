@@ -35,24 +35,24 @@ operatorMap =
 isStaticValue = (v) ->
   switch typeof(v)
     when 'string' then return true
-    when 'number' then return true 
-    when 'boolean' then return true 
+    when 'number' then return true
+    when 'boolean' then return true
     when 'object' then return v.isStatic?()
   return false
 
 evaluateStaticValue = (v, context, location) ->
   switch typeof(v)
-    when 'string' 
+    when 'string'
       if v[0] == '"' and v[v.length-1] == '"'
         return v[1...v.length-1]
-      else 
+      else
         return v
-    when 'number' then return v 
-    when 'boolean' then return v 
-    when 'object' 
+    when 'number' then return v
+    when 'boolean' then return v
+    when 'object'
       unless v.evaluateStatic?
         throw new ParserError location, "missing evaluateStatic for #{JSON.stringify(v)}"
-      try 
+      try
         return v.evaluateStatic(context)
       catch err
         throw new ParserError location, "Error in static evaluation: #{err}"
