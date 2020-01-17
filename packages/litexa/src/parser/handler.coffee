@@ -464,19 +464,7 @@ handlerSteps.createFinalResult = (stateContext) ->
       ssml: "<speak>#{joinSpeech(stateContext.say, stateContext.language)}</speak>"
       playBehavior: "REPLACE_ALL"
 
-  if stateContext.repromptTheSay
-    stateContext.reprompt = stateContext.reprompt ? []
-    saySSML = joinSpeech(stateContext.say, stateContext.language)
-    repromptSSML = joinSpeech(stateContext.reprompt, stateContext.language)
-    if repromptSSML and saySSML
-      # add spacing, if necessary
-      repromptSSML += ' '
-
-    response.reprompt =
-      outputSpeech:
-        type: "SSML"
-        ssml: "<speak>#{repromptSSML}#{saySSML}</speak>"
-  else if stateContext.reprompt? and stateContext.reprompt.length > 0
+  if stateContext.reprompt? and stateContext.reprompt.length > 0
     response.reprompt =
       outputSpeech:
         type: "SSML",

@@ -24,7 +24,7 @@ module.exports.run = (options, after) ->
 
   config = require './project-config'
   options.projectConfig = await config.loadConfig options.root
-  options.projectInfo = new (require './project-info')(options.projectConfig, options.deployment)
+  options.projectInfo = new (require './project-info')({jsonConfig: options.projectConfig, variant: options.deployment})
 
   options.logsRoot = path.join options.projectConfig.root, '.logs'
   mkdirp.sync options.logsRoot

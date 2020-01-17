@@ -204,7 +204,7 @@ npm run docs:dev
 To run both the reference and the interactive site, run.
 
 ```bash
-npmr run docs
+npm run docs
 ```
 
 The website will update with any change in the docs folder.
