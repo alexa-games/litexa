@@ -339,10 +339,15 @@ previous method under the [Project Structure](#project-structure) section.
 
 :::tip Note
 This method only localizes utterances and say/reprompt strings. Strings in code
-are not captured; if you use slot builders, inline slot definitions, or inline
+are not captured; if you use slot builders, or inline
 code speech injection, you will need to do the localization in the same location.
 
 See [Localization in code](#localization-in-code) for details on implementing this.
+:::
+
+:::warning
+Inline slot definitions (e.g. `with $color = "red", "yellow", "blue"`) do not get
+localized with this method.
 :::
 
 To localize your skill with this method to a new language, there are 2 steps.
@@ -462,7 +467,10 @@ backslash:
 ```
 :::
 
-There's a few things to note. First, utterances for a language are not mapped one to one, meaning that an intent in the default language might have 3 utterances, and the one for fr-FR might have 5. You can have any number of utterances for an intent for any language.
+There's a few things to note. First, utterances for a language are not mapped
+one to one, meaning that an intent in the default language might have 3
+utterances, and the one for fr-FR might have 5. You can have any number of
+utterances for an intent for any language.
 
 Second, say/reprompt strings and their alternatives are mapped together. They appear
 as one entry in the file as pipe (`|`) separated strings. As such, your
@@ -490,8 +498,9 @@ would look like this in `localization.json`:
 }
 ```
 
-Finally, the speech strings function as overrides in the skill. If there is no translated
-string for a given language, it will fall back to the default string.
+Finally, the speech strings function as overrides in the skill. If there is no
+translated string for a given language, it will fall back to the default
+string.
 
 ### Modifying strings in between localization iterations
 
@@ -590,15 +599,15 @@ respectively, but note that doing so will also remove their translations from
 
 #### Cloning translations
 
-With cloning, the arguments for cloning your default language to French would
-look like:
+You can clone existing strings of a language to another language:
 
 ```bash
 litexa localize --clone-from fr-FR --clone-to fr-CA
 ```
 
-This can be useful as a starting point for adjusting translations for a
-different region.
+Cloning existing translations for one language (e.g. fr-FR) to another language
+(e.g. fr-CA) can be useful as a starting point for regionalizing a translation
+with the same base language.
 
 :::warning Cloning to an existing language
 If you clone to a language that already exists, you will overwrite its existing
