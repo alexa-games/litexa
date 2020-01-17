@@ -7,12 +7,17 @@ visually rich and interactive voice-controlled game experiences. You'll be able 
 for multimodal devices using HTML and web technologies like Canvas 2D, WebAudio, WebGL, 
 JavaScript, and CSS, starting with Echo Show devices and Fire TVs.
 
-The Alexa Web API for Games is currently in Developer Preview. To gain access
+**NOTE**: The Alexa Web API for Games is currently in Developer Preview. To gain access
 to its features & documentation, visit the [Alexa Developer
 Blog](https://developer.amazon.com/en-US/blogs/alexa/alexa-skills-kit/2019/11/apply-for-the-alexa-web-api-for-games-developer-preview)
 for sign-up information.
 
 ## Installation
+
+**WARNING**: The use of this extension is currently reserved for those in the 
+Alexa Web API for Games Developer Preview. If you are not in the Developer Preview 
+and you install this extension, you will not be able to deploy your Alexa skills 
+through Litexa.
 
 The module can be installed globally, which makes it available to any of your 
 Litexa projects:
@@ -59,5 +64,5 @@ the marks can be used to trigger HTML events that interleave with SSML playback.
 For more information, please refer to the official Alexa Web API for Games documentation:
 
 * [Alexa Web API 
-for Games](https://developer.amazon.com/en-US/docs/alexa/web-api-for-games/understand-alexa-web-api-for-games.html)
+for Games Announcement](https://developer.amazon.com/en-US/blogs/alexa/alexa-skills-kit/2019/11/apply-for-the-alexa-web-api-for-games-developer-preview)
 
