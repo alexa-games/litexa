@@ -113,7 +113,7 @@ handlerSteps.checkFastExit = (event, handlerContext) ->
     tryToClose = ->
       dbKey = litexa.overridableFunctions.generateDBKey(handlerContext.identity)
 
-      db.fetchDB { identity: handlerContext.identity, dbKey, dbConfiguration: litexa.dbConfiguration, fetchCallback: (err, dbObject) ->
+      db.fetchDB { identity: handlerContext.identity, dbKey, ttlConfiguration: litexa.ttlConfiguration, fetchCallback: (err, dbObject) ->
         if err?
           return reject(err)
 
@@ -166,7 +166,7 @@ handlerSteps.runConcurrencyLoop = (event, handlerContext) ->
         exports.Logging.log "CONCURRENCY LOOP iteration #{numberOfTries}, denied db write"
 
       dbKey = litexa.overridableFunctions.generateDBKey(handlerContext.identity)
-      db.fetchDB { identity: handlerContext.identity, dbKey, dbConfiguration: litexa.dbConfiguration, fetchCallback: (err, dbObject) ->
+      db.fetchDB { identity: handlerContext.identity, dbKey, ttlConfiguration: litexa.ttlConfiguration, fetchCallback: (err, dbObject) ->
         # build the context object for the state machine
         try
 

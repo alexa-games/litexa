@@ -398,16 +398,18 @@ field with each database entry. This may be useful for limiting your table
 data to active users by automatically deleting old user data. To set a Time To
 Live specification, add the `dynamoDbConfiguration` object to your Litexa config:
 
-```json
+```javascript
 {
-  "deployments": {
-    "development": {
-      "module": "@litexa/deploy-aws",
-      "askProfile": "suncoast",
-      "awsProfile": "prototyping",
-      "dynamoDbConfiguration": {
-        "ttlName": "timeToLive", // the name of the TTL attribute to set
-        "ttlInSeconds": 2592000 // how many days (in seconds) the new/updated record lives for
+  deployments: {
+    development: {
+      module: "@litexa/deploy-aws",
+      askProfile: "suncoast",
+      awsProfile: "prototyping",
+      dynamoDbConfiguration: {
+        timeToLive: {
+          AttributeName: "timeToLive", // needs to match the attribute name specified when enabling TTL
+          secondsToLive: 2592000 // specified in seconds (would wipe data if not updated in 30 days)
+        }
       }
     }
   }

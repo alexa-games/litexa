@@ -28,7 +28,7 @@ cloudWatch = new AWS.CloudWatch({
 })
 
 db =
-  fetchDB: ({ identity, dbKey, dbConfiguration, fetchCallback }) ->
+  fetchDB: ({ identity, dbKey, ttlConfiguration, fetchCallback }) ->
 
     if true
       tableName = process?.env?.dynamoTableName
@@ -102,8 +102,8 @@ db =
                 #console.log "sending #{JSON.stringify(params)} to dynamo"
                 params.Item.lastResponseTime = (new Date()).getTime()
 
-                if dbConfiguration?.ttlName? and dbConfiguration?.ttlInSeconds?
-                  params.Item[dbConfiguration.ttlName] = Math.round(params.Item.lastResponseTime/1000 + dbConfiguration.ttlInSeconds)
+                if ttlConfiguration?.AttributeName? and ttlConfiguration?.secondsToLive?
+                  params.Item[ttlConfiguration.AttributeName] = Math.round(params.Item.lastResponseTime/1000 + ttlConfiguration.secondsToLive)
 
                 dynamoDocClient.put params, (err, data) ->
                   if err?.code == 'ConditionalCheckFailedException'

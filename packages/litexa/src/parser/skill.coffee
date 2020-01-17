@@ -355,18 +355,18 @@ class lib.Skill
     @libraryCode.push "};"
 
     # @TODO: remove dynamoDb from core litexa into the deploy-aws module
-    dbConfiguration = @projectInfo.deployments?[@projectInfo.variant]?.dynamoDbConfiguration
-    if dbConfiguration?.ttlName? and dbConfiguration?.ttlInSeconds?
-      if typeof(dbConfiguration.ttlName) != "string"
-        throw new Error("`dynamoDbConfiguration.ttlName` must be a string.")
-      if typeof(dbConfiguration.ttlInSeconds) != "number"
-        throw new Error("`dynamoDbConfiguration.ttlInSeconds` must be a number.")
-      @libraryCode.push "litexa.dbConfiguration = {"
-      @libraryCode.push "  ttlName: '#{dbConfiguration.ttlName}',"
-      @libraryCode.push "  ttlInSeconds: #{dbConfiguration.ttlInSeconds}"
+    ttlConfiguration = @projectInfo.deployments?[@projectInfo.variant]?.dynamoDbConfiguration?.timeToLive
+    if ttlConfiguration?.AttributeName? and ttlConfiguration?.secondsToLive?
+      if typeof(ttlConfiguration.AttributeName) != "string"
+        throw new Error("`dynamoDbConfiguration.AttributeName` must be a string.")
+      if typeof(ttlConfiguration.secondsToLive) != "number"
+        throw new Error("`dynamoDbConfiguration.secondsToLive` must be a number.")
+      @libraryCode.push "litexa.ttlConfiguration = {"
+      @libraryCode.push "  AttributeName: '#{ttlConfiguration.AttributeName}',"
+      @libraryCode.push "  secondsToLive: #{ttlConfiguration.secondsToLive}"
       @libraryCode.push "};"
-    else if dbConfiguration?.ttlName? or dbConfiguration?.ttlInSeconds?
-      console.log "Not setting TTL. If you want to set a TTL, Litexa config requires both `ttlName` and `ttlInSeconds` fields in `dynamoDbConfiguration`."
+    else if ttlConfiguration?.AttributeName? or ttlConfiguration?.secondsToLive?
+      console.log "Not setting TTL. If you want to set a TTL, Litexa config requires both `AttributeName` and `secondsToLive` fields in `dynamoDbConfiguration.timeToLive`."
 
     librarySource = fs.readFileSync(__dirname + '/litexa-library.coffee', 'utf8')
     librarySource = coffee.compile(librarySource, {bare: true})
