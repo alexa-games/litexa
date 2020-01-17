@@ -1,5 +1,6 @@
 TEST "happy path"
-  launch 
+  launch
+  @game.type == "Game"
   @game.score == 0
   @control == 5
 
@@ -24,3 +25,8 @@ TEST "happy path"
   @name.last == "Replacey"
   @wrapped.family == "Doe"
   @control == 5
+
+TEST "French DB overrides"
+  setRegion fr
+  launch
+  @game.type == "FrenchGame"

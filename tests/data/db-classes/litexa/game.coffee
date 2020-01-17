@@ -13,6 +13,8 @@
 
 class Game
   constructor: ->
+    @type = "Game"
+
     console.log "Constructed game"
     @score = 0
     @constructed = @constructed ? 0
@@ -44,3 +46,13 @@ NameWrapper =
     wrapper = Object.create WrapperPrototype
     wrapper.data = value
     return wrapper
+
+class FrenchGame
+  constructor: ->
+    @type = "FrenchGame"
+
+  greeting: ->
+  setFlag: ->
+  getFlag: ->
+  saveScore: ->
+  getScore: ->

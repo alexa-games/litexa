@@ -172,7 +172,7 @@ class lib.Skill
     @tests = {}
     @dataTables = {}
     @sayMapping = {}
-    @dbTypes = []
+    @dbTypes = {}
     @maxStateNameLength = 16
 
     for extensionName, extension of @projectInfo.extensions
@@ -292,12 +292,18 @@ class lib.Skill
       @sayMapping[location.language] = [{ from, to }]
 
   pushDBTypeDefinition: (definition) ->
-    for dbType in @dbTypes
-      if (dbType.name is definition.name) and (dbType.location.language is definition.location.language)
-        throw new ParserError definition.location, "The db variable #{dbType.name} already has the
-          previously defined type #{dbType.type} in language #{dbType.location.language}"
+    defLocation = definition.location
+    defLanguage = definition.location.language
+    defName = definition.name
+    defType = definition.type
 
-    @dbTypes.push(definition)
+    unless @dbTypes[defLanguage]?
+      @dbTypes[defLanguage] = {}
+    else if @dbTypes[defLanguage]?[defName]?
+      throw new ParserError defLocation, "The db variable #{@dbTypes[defLanguage][defName]} already
+        has the previously defined type #{@dbTypes[defLanguage][defName]} in language #{defLanguage}"
+
+    @dbTypes[defLanguage][defName] = definition.type
 
   refreshAllFiles: ->
     litexaDirty = false
@@ -391,17 +397,6 @@ class lib.Skill
       output.push "};"
 
     do =>
-      output.push "litexa.dbTypes = {"
-      lines = []
-      dbTypeSet = {}
-      for dbType in @dbTypes
-        if dbType.name not of dbTypeSet
-          lines.push "  #{dbType.name}: { type: '#{dbType.type}' }"
-          dbTypeSet[dbType.name] = dbType
-      output.push lines.join ",\n"
-      output.push "};"
-
-    do =>
       shouldIncludeFile = (file) ->
         return false unless file.extension == 'json'
         return false unless file.fileCategory == 'regular'
@@ -481,11 +476,15 @@ class lib.Skill
       # types from inside this closure
       output.push "__language.dbTypes = {"
       lines = []
-      dbTypeSet = {}
-      for dbType in @dbTypes
-        if dbType.name not of dbTypeSet
-          lines.push "  #{dbType.name}: #{dbType.type}"
-          dbTypeSet[dbType.name] = dbType
+      for dbTypeName, dbType of @dbTypes[language]
+        lines.push "  #{dbTypeName}: #{dbType}"
+
+      # Copy over any default DB type definitions that aren't explicitly overriden.
+      if language != "default"
+        for dbTypeName, dbType of @dbTypes.default
+          unless @dbTypes[language]?[dbTypeName]?
+            @dbTypes[language][dbTypeName] = dbType
+
       output.push lines.join ",\n"
       output.push "};"
 
