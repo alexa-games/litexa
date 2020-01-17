@@ -718,7 +718,7 @@ The object name that consolidates all `.json` files, keyed by the
    # Reference a JSON file in-line
    say "Test. {jsonFiles["test.json"].test}"
  ```
- 
+
 ## launch
 
 Simulates the user invoking the skill in a Litexa test.

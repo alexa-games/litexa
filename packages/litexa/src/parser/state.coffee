@@ -9,7 +9,6 @@ lib = module.exports.lib = {}
 
 { Function } = require('./function.coffee').lib
 { Intent, FilteredIntent } = require('./intent.coffee').lib
-{ LocalizationContext } = require('./localization.coffee')
 { ParserError } = require("./errors.coffee").lib
 
 class lib.Transition
@@ -188,8 +187,7 @@ class lib.State
     options.scopeManager.currentScope.referenceTester = options.referenceTester
 
     enterFunc = []
-    if @startFunction?
-      @startFunction.toLambda(enterFunc, "", options)
+    @startFunction?.toLambda(enterFunc, "", options)
 
     exitFunc = []
     if @endFunction?
@@ -324,30 +322,17 @@ class lib.State
 
       if model.name of context.intents
         console.error "duplicate `#{model.name}` intent found while writing model"
-        #throw new Error "duplicate `#{model.name}` found while writing model"
       else
         context.intents[model.name] = model
         output.languageModel.intents.push model
 
-  toLocalization: (result) ->
-    context = new LocalizationContext
-    context.intents = {}
-
-    hasContent = false
-
-    if @startFunction?
-      start = new LocalizationContext
-      @startFunction.toLocalization(result, start)
-      if start.hasContent()
-        context.start = start
-        hasContent = true
+  toLocalization: (localization) ->
+    @startFunction?.toLocalization(localization)
 
     for name, intent of @intents
-      intentContext = new LocalizationContext
-      intent.toLocalization(result, intentContext)
-      if intentContext.hasContent()
-        context.intents[name] = intentContext
-        hasContent = true
+      if !localization.intents[name]? and name != '--default--' # 'otherwise' handler -> no utterances
+        # if this is a new intent, add it to the localization map
+        localization.intents[name] = { default: [] }
 
-    if hasContent
-      result.states[@name] = context
+      # add utterances mapped to the intent, and speech lines in the intent handler
+      intent.toLocalization(localization)

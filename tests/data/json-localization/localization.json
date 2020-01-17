@@ -1,0 +1,91 @@
+{
+  "intents": {
+    "AMAZON.RepeatIntent": {
+      "default": [],
+      "en-gb": []
+    },
+    "TestConditionals": {
+      "default": [
+        "test conditionals"
+      ],
+      "en-gb": [
+        "a test conditionals"
+      ]
+    },
+    "TestSwitch": {
+      "default": [
+        "test switch {number}",
+        "test switch {number} test",
+        "test switch"
+      ],
+      "en-gb": [
+        "a test switch {number}",
+        "a test switch {number} test",
+        "a test switch"
+      ]
+    },
+    "TestFor": {
+      "default": [
+        "test for"
+      ],
+      "en-gb": [
+        "test for"
+      ]
+    },
+    "TestShorthand": {
+      "default": [
+        "test shorthand"
+      ],
+      "en-gb": [
+        "test shorthand"
+      ]
+    },
+    "AMAZON.StopIntent": {
+      "default": [],
+      "en-gb": []
+    },
+    "AMAZON.CancelIntent": {
+      "default": [],
+      "en-gb": []
+    },
+    "AMAZON.StartOverIntent": {
+      "default": [],
+      "en-gb": []
+    }
+  },
+  "speech": {
+    "start|begin": {
+      "en-gb": "a start|a begin"
+    },
+    "if conditional.": {
+      "en-gb": "an if conditional."
+    },
+    "unless conditional.": {
+      "en-gb": "an unless conditional."
+    },
+    "else if conditional.": {
+      "en-gb": "an else if conditional."
+    },
+    "else conditional.": {
+      "en-gb": "an else conditional."
+    },
+    "switch 1.": {
+      "en-gb": "a switch 1."
+    },
+    "switch cat.": {
+      "en-gb": "a switch cat."
+    },
+    "switch else.": {
+      "en-gb": "a switch else."
+    },
+    "{letter}": {
+      "en-gb": "a {letter}"
+    },
+    "<!meow.> @cat is a DEPLOY.color {getCat()}. She has $numberOfPeets paws and likes to eat {catfood}. <break time='10ms'>": {
+      "en-gb": "<!woof.> @cat is a DEPLOY.color {getCat()}. She has $numberOfPeets peets and likes to eat {catfood}. \\<break time='10ms'>"
+    },
+    "@catFact.getFact()": {
+      "en-gb": "Did you know? @catFact.getFact()"
+    }
+  }
+}

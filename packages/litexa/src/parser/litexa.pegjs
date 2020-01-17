@@ -1382,14 +1382,7 @@ Used to provide variations to various statements:
 */
 
 AlternativeStatement
-  = "or" ___ utterance:(DottedIdentifier) ___ type:("if"/"unless") ___ qualifier:ExpressionString {
-    const intent = pushIntent(location(), utterance, false, true);
-    intent.qualifier = qualifier;
-    if (type === "unless") {
-      intent.qualifierIsInverted = true;
-    }
-  }
-  / "or" ___ parts:(SayStringParts) {
+  = "or" ___ parts:(SayStringParts) {
     const target = getTarget();
     if (target && target.pushAlternate) {
       if (target instanceof lib.Intent) {
@@ -2754,7 +2747,7 @@ say "<!aloha>. This {'is ' + 'an ' + 'example'}
 */
 SayString
   = parts:SayStringParts {
-    return new lib.Say(parts);
+    return new lib.Say(parts, skill);
   }
 
 SayStringParts

@@ -20,7 +20,7 @@ debug = require('debug')('litexa-project-info')
 LoggingChannel = require './loggingChannel'
 
 class ProjectInfo
-  constructor: (jsonConfig, @variant, logger = new LoggingChannel({logPrefix: 'project info'})) ->
+  constructor: ({jsonConfig, @variant, logger = new LoggingChannel({logPrefix: 'project info'}), @doNotParseExtensions = false}) ->
     @variant = @variant ? "development"
     for k, v of jsonConfig
       @[k] = v
@@ -58,11 +58,25 @@ class ProjectInfo
       for lang in languages
         @languages[lang] = @parseLanguage(path.join(@languagesRoot, lang), lang)
 
+    # check for a localization summary file in the project's root dir
+    for type in ['json', 'js']
+      localizationFilePath = path.join(@root, "localization.#{type}")
+      if fs.existsSync localizationFilePath
+        @localization = require(localizationFilePath)
+
+    # if skill has no localization file, let's add a blank localization container
+    # (to be populated by toLocalization() calls)
+    unless @localization?
+      @localization = {
+        intents: {},
+        speech: {}
+      }
+
   parseExtensions: ->
     @extensions = {}
     @extensionOptions = @extensionOptions ? {}
 
-    return if @root == '--mockRoot'
+    return if @root == '--mockRoot' or @doNotParseExtensions
 
     lib = require '../parser/parserlib.coffee'
 
@@ -307,6 +321,6 @@ ProjectInfo.createMock = ->
     name: "mockProject"
     isMock: true
   }
-  return new ProjectInfo config, "mockTesting"
+  return new ProjectInfo {jsonConfig: config, variant: "mockTesting"}
 
 module.exports = ProjectInfo

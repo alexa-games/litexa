@@ -1,0 +1,10 @@
+{
+  "name": "jsonLocalizationTests",
+  "deployments": {
+    "development": {
+      "DEPLOY": {
+        "color": "black"
+      }
+    }
+  } 
+}

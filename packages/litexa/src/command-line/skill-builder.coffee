@@ -16,7 +16,7 @@ build = (root, variant) ->
   require('../parser/parserlib.coffee').__resetLib()
 
   jsonConfig = await config.loadConfig root
-  projectInfo = new (require './project-info')(jsonConfig, variant)
+  projectInfo = new (require './project-info')({jsonConfig, variant})
 
   skill = new Skill projectInfo
   skill.strictMode = true

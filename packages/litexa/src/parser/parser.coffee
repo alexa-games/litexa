@@ -117,31 +117,24 @@ module.exports.buildExtendedParser = (projectInfo) ->
 
 fragmentParser = null
 module.exports.parseFragment = (fragment, language) ->
-  return new Promise (resolve, reject) ->
-    fs.readFile sourceFilename, 'utf8', (err, source) ->
-      if err?
-        return reject err
+  unless fragmentParser?
+    source = fs.readFileSync sourceFilename, 'utf8'
+    fragmentParserSource = peg.generate source,
+      cache: true
+      output: 'source'
+      format: 'bare'
+      allowedStartRules:['Fragment']
+    fragmentParser = eval(fragmentParserSource)
 
-      unless fragmentParser?
-        fragmentParserSource = peg.generate source,
-          cache: true
-          output: 'source'
-          format: 'bare'
-          allowedStartRules:['Fragment']
-        fragmentParser = eval(fragmentParserSource)
+  result = null
 
-      result = null
+  skill =
+    pushCode: (thing) -> result = thing
+    getExtensions: -> {}
 
-      skill =
-        pushCode: (thing) -> result = thing
-        getExtensions: -> {}
+  fragmentParser.parse fragment,
+    skill: skill
+    lib: require './parserlib.coffee'
+    language: language ? 'default'
 
-      try
-        fragmentParser.parse fragment,
-          skill: skill
-          lib: require './parserlib.coffee'
-          language: language ? 'default'
-      catch err
-        return reject err
-
-      resolve result
+  return result

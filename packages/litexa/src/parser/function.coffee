@@ -6,7 +6,6 @@
 ###
 
 lib = module.exports.lib = {}
-{ LocalizationContext } = require('./localization.coffee')
 { ParserError } = require("./errors.coffee").lib
 
 
@@ -66,6 +65,9 @@ class lib.EvaluateExpression
   toLambda: (output, indent, options) ->
     output.push "#{indent}#{@expression.toLambda(options)}"
 
+  toString: ->
+    @expression.toString()
+
 
 class lib.Expression
   constructor: (@location, @root) ->
@@ -78,15 +80,14 @@ class lib.Expression
   evaluateStatic: (context) ->
     evaluateStaticValue @root, context, @location
 
-  toString: ->
-    @root.toString()
-
   toLambda: (options, keepRootParentheses) ->
     if @root.toLambda?
       @root.skipParentheses = not ( keepRootParentheses ? false )
       return @root.toLambda(options)
     return @root
 
+  toString: ->
+    @root.toString()
 
 class lib.UnaryExpression
   constructor: (@location, @op, @val) ->
@@ -142,6 +143,9 @@ class lib.BinaryExpression
     else
       "(#{left} #{op} #{right})"
 
+  toString: ->
+    return "#{@left.toString()} #{@op} #{@right.toString()}"
+
 class lib.LocalExpressionCall
   constructor: (@location, @name, @arguments) ->
 
@@ -156,6 +160,12 @@ class lib.LocalExpressionCall
     options.scopeManager.checkAccess @location, @name.base
     "await #{@name}(#{args.join(', ')})"
 
+  toString: ->
+    args = []
+    for a in @arguments
+      args.push a.toString()
+
+    return "#{@name}(#{args.join(', ')})"
 
 class lib.DBExpressionCall
   constructor: (@location, @name, @arguments) ->
@@ -170,6 +180,12 @@ class lib.DBExpressionCall
 
     "await context.db.read('#{@name.base}')#{@name.toLambdaTail(options)}(#{args.join(', ')})"
 
+  toString: ->
+    args = []
+    for a in @arguments
+      args.push a.toString()
+
+    return "@#{@name}(#{args.join(', ')})"
 
 class lib.IfCondition
   constructor: (@expression, @negated) ->
@@ -199,12 +215,8 @@ class lib.IfCondition
   collectRequiredAPIs: (apis) ->
     @startFunction?.collectRequiredAPIs?(apis)
 
-  toLocalization: (result, context) ->
-    return unless @startFunction?
-    subContext = new LocalizationContext
-    @startFunction.toLocalization(result, subContext)
-    if subContext.hasContent()
-      context.pushOption @expression, subContext
+  toLocalization: (localization) ->
+    @startFunction?.toLocalization(localization)
 
 
 class lib.ElseCondition
@@ -236,12 +248,8 @@ class lib.ElseCondition
   collectRequiredAPIs: (apis) ->
     @startFunction?.collectRequiredAPIs?(apis)
 
-  toLocalization: (result, context) ->
-    return unless @startFunction?
-    subContext = new LocalizationContext
-    @startFunction.toLocalization(result, subContext)
-    if subContext.hasContent()
-      context.pushOption (@expression ? "else"), subContext
+  toLocalization: (localization) ->
+    @startFunction?.toLocalization(localization)
 
 
 class lib.ForStatement
@@ -279,7 +287,6 @@ class lib.ForStatement
     for l in code
       output.push indent + l
 
-
   hasStatementsOfType: (types) ->
     if @startFunction?
       return @startFunction.hasStatementsOfType(types)
@@ -288,12 +295,8 @@ class lib.ForStatement
   collectRequiredAPIs: (apis) ->
     @startFunction?.collectRequiredAPIs?(apis)
 
-  toLocalization: (result, context) ->
-    return unless @startFunction?
-    subContext = new LocalizationContext
-    @startFunction.toLocalization(result, subContext)
-    if subContext.hasContent()
-      context.pushOption @expression, subContext
+  toLocalization: (localization) ->
+    @startFunction?.toLocalization(localization)
 
 
 class lib.SwitchStatement
@@ -343,6 +346,9 @@ class lib.SwitchStatement
       output.push "#{indent}}"
 
     options.scopeManager.popScope()
+
+  toLocalization: (localization) ->
+    @cases.forEach((c) -> c.startFunction?.toLocalization(localization))
 
 
 class lib.SwitchAssignment
@@ -398,6 +404,9 @@ class lib.SwitchCase
     @startFunction?.toLambda(output, indent + "  ", options)
     output.push "#{indent}}"
 
+  toLocalization: (localization) ->
+    @startFunction?.toLocalization(localization)
+
 
 class lib.SetSetting
   constructor: (@variable, @value) ->
@@ -426,7 +435,6 @@ class lib.WrapClass
 class lib.DBTypeDefinition
   constructor: (@location, @name, @type) ->
 
-
 class lib.LocalDeclaration
   constructor: (@name, @expression) ->
 
@@ -447,6 +455,9 @@ class lib.LocalVariableReference
   toLambda: (options) ->
     options.scopeManager.checkAccess @location, @name.base
     @name.toLambda(options)
+
+  toString: (options) ->
+    return @name
 
 
 class lib.SlotVariableAssignment
@@ -525,11 +536,11 @@ class lib.Function
     if @shouldEndSession
       output.push("context.shouldEndSession = true;")
 
-  toLocalization: (result, context) ->
+  toLocalization: (localization) ->
     return unless 'default' of @languages
     for line, idx in @languages.default
       if line.toLocalization?
-        line.toLocalization(result, context)
+        line.toLocalization(localization)
 
   forEachPart: (language, cb) ->
     return unless @languages[language]
@@ -576,7 +587,7 @@ class lib.FunctionMap
     return unless name of @functions
     return @functions[name].toLambda output, indent, options
 
-  toLocalization: (result, context) ->
+  toLocalization: (localization) ->
 
   forEachPart: (language, cb) ->
     for n, f of @functions
