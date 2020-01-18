@@ -262,7 +262,6 @@ A separate project would look something like this:
 ├── lib
 │   ├── index.js
 │   ├── logger.js
-│   ├── mocha.opts
 │   ├── package.json
 │   ├── utils.js
 │   └── utils.spec.js
@@ -304,7 +303,7 @@ directories, as needed. The directory contains:
   set the entry-point and package name within.
   * `*.(js|ts|coffee)` files are your code files.
   * `*.spec.(js|ts|coffee)` files are Mocha tests files for your code.
-  * `mocha.opts` is the configuration file for Mocha.
+  * `.mocharc.json` is the configuration file for Mocha.
 
 * `litexa` directory contains your assets, Litexa files, and skill logic:
   * `*.litexa` files are the Litexa language files.
@@ -453,7 +452,6 @@ A bundled project would look something like this:
 │   │   └── icon-512.png
 │   ├── main.litexa
 │   └── main.test.litexa
-├── mocha.opts
 ├── package-lock.json
 ├── package.json
 ├── litexa.config.js
@@ -492,7 +490,6 @@ project configuration's compilation  and linting settings.
 will not be shipped with the skill. Typically these are build tools and compile-time extensions.
 * `package-lock.json` is the standard npm lock file that is responsible for deterministic installation of your project
 dependencies.
-* `mocha.opts` is the opts file for mocha.
 * `node_modules` contains all of the packages you installed with npm as specified in the package.json file. These
 packages will NOT be deployed with your skill.
 * `README.md` file contains information about your generated project's structure.
@@ -545,7 +542,7 @@ for development (and not required at runtime), use `--save-dev` instead of `--sa
 ### Testing
 
 The bundled strategy comes pre-configured with the generated tests to work with Mocha, Chai, and Sinon, to help you
-get started. The Mocha configuration file (`mocha.opts`) can be found in your project's root directory, and the
+get started. The Mocha configuration file (`.mocharc.json`) can be found in your project's root directory, and the
 testing scripts can be found in `package.json` (prefixed with *test*).
 
 If you already have a preferred testing stack, please modify this setup to suit your needs.

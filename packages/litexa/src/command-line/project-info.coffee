@@ -174,6 +174,7 @@ class ProjectInfo
       'tsconfig.json'
       'tslint.json'
       'mocha.opts'
+      '.mocharc.json'
       '.DS_Store'
     ]
 

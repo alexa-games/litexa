@@ -1,0 +1,9 @@
+{
+  "full-trace": true,
+  "recursive": true,
+  "require": [
+    "coffeescript/register",
+    "source-map-support/register"
+  ],
+  "watch-extensions": ["coffee"]
+}

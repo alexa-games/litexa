@@ -73,10 +73,10 @@ describe 'TemplateFilesHandler', ->
           path.join 'bundled', 'typescript', 'source'
         ],
         destination: 'tmp',
-        whitelist: ['mocha.opts$']
+        whitelist: ['.mocharc.json$']
       })
-      dataString = fs.readFileSync((path.join 'tmp', 'mocha.opts'), 'utf8')
-      expect(dataString).to.include('--recursive test/')
+      dataString = fs.readFileSync((path.join 'tmp', '.mocharc.json'), 'utf8')
+      expect(dataString).to.include('"recursive": true')
 
     it 'applies the data transformation function to the files it will write', ->
       test = {

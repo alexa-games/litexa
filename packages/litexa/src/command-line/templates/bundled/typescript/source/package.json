@@ -7,13 +7,11 @@
     "compile:watch": "npx webpack --config webpack.config.js --watch",
     "deploy": "npm run compile && litexa deploy",
     "lint": "npx tslint -c tslint.json --project tsconfig.json --fix",
-    "test": "npx mocha --opts mocha.opts './test/**/*.spec.ts' && npm run test:litexa",
-    "test:debug": "npx mocha debug --opts mocha.opts './test/**/*.spec.ts'",
-    "test:file": "npx mocha --opts mocha.opts",
-    "test:file:debug": "npx mocha debug --opts mocha.opts",
+    "test": "npx mocha './test/**/*.spec.ts' && npm run test:litexa",
+    "test:file": "npx mocha",
     "test:litexa": "npm run compile && litexa test",
     "test:litexa:watch": "npm run compile:watch | litexa test -w",
-    "test:watch": "npx mocha --opts mocha.opts './test/**/*.spec.ts' --watch"
+    "test:watch": "npx mocha './test/**/*.spec.ts' --watch"
   },
   "author": "Amazon",
   "devDependencies": {
@@ -23,7 +21,7 @@
     "@types/pino": "5.8.3",
     "@types/sinon": "7.0.5",
     "chai": "4.2.0",
-    "mocha": "5.2.0",
+    "mocha": "6.2.2",
     "sinon": "7.2.3",
     "source-map-support": "0.5.10",
     "ts-loader": "5.3.3",

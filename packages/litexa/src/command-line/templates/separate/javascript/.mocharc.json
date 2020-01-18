@@ -1,0 +1,5 @@
+{
+  "full-trace": true,
+  "recursive": true,
+  "watch-extensions": ["js"]
+}

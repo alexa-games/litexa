@@ -5,10 +5,10 @@ This README is a quick-start guide to help you create, run, and deploy this Lite
 ## Build
 
 * `cd litexa`
-* `npm run clean` 
-* `npm run compile` 
+* `npm run clean`
+* `npm run compile`
 
-These commands install the npm dependencies and compile your code. To facilitate this 
+These commands install the npm dependencies and compile your code. To facilitate this
 action, Litexa generates the utility functions `clean` and `compile` in your `package.json`.
 
 *Tip*: `npm run compile:watch` compiles your code as you make edits and changes to it.
@@ -21,7 +21,7 @@ This command will compile your code then bundle and run your Litexa project agai
 
 * `npm run test:litexa:watch`
 
-This command will compile your code then bundle and run your Litexa project against your Litexa tests 
+This command will compile your code then bundle and run your Litexa project against your Litexa tests
 as you make edits and changes to your code.
 
 ## Building and Deploying
@@ -29,7 +29,7 @@ as you make edits and changes to your code.
 * `npm install -g @litexa/deploy-aws`
 * `litexa deploy`
 
-To deploy your code you must specify the deployment module in your Litexa configuration. By default, Litexa 
+To deploy your code you must specify the deployment module in your Litexa configuration. By default, Litexa
 configures your project to deploy with the `@litexa/deploy-aws` module for the `development` environment.
 
 ## Command Reference

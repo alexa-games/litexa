@@ -1,5 +1,0 @@
---require coffeescript/register
---require ./preamble.coffee
---watch-extensions coffee
---full-trace
---timeout 20000

@@ -7,13 +7,11 @@
     "compile:watch": "npx webpack --config webpack.config.js --watch",
     "deploy": "npm run compile && litexa deploy",
     "lint": "npx eslint ./lib/**/*.js",
-    "test": "npx mocha --opts mocha.opts './test/**/*.spec.js' && npm run test:litexa",
-    "test:debug": "npx mocha debug --opts mocha.opts './test/**/*.spec.js'",
-    "test:file": "npx mocha --opts mocha.opts",
-    "test:file:debug": "npx mocha debug --opts mocha.opts",
+    "test": "npx mocha './test/**/*.spec.js' && npm run test:litexa",
+    "test:file": "npx mocha",
     "test:litexa": "npm run compile && litexa test",
     "test:litexa:watch": "npm run compile:watch | litexa test -w",
-    "test:watch": "npx mocha --opts mocha.opts './test/**/*.spec.js' --watch"
+    "test:watch": "npx mocha './test/**/*.spec.js' --watch"
   },
   "author": "Amazon",
   "devDependencies": {
@@ -24,7 +22,7 @@
     "babel-plugin-module-resolver": "3.1.3",
     "chai": "4.2.0",
     "eslint": "5.13.0",
-    "mocha": "5.2.0",
+    "mocha": "6.2.2",
     "sinon": "7.2.3",
     "source-map-support": "0.5.10",
     "webpack": "4.28.4",
