@@ -407,7 +407,7 @@ Live specification, add the `dynamoDbConfiguration` object to your Litexa config
       awsProfile: "prototyping",
       dynamoDbConfiguration: {
         timeToLive: {
-          AttributeName: "timeToLive", // needs to match the attribute name specified when enabling TTL
+          AttributeName: "ttl", // needs to match the attribute name specified when enabling TTL
           secondsToLive: 2592000 // specified in seconds (would wipe data if not updated in 30 days)
         }
       }
@@ -416,10 +416,16 @@ Live specification, add the `dynamoDbConfiguration` object to your Litexa config
 }
 ```
 
-At this time, Litexa does not create or update your table with your TTL
-settings. You will need to [manually activate the TTL attribute for your table
-in the AWS console or AWS CLI](
-  https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/time-to-live-ttl-how-to.html).
+:::warning Litexa does not enable TTL
+At this time, Litexa does **not** create or update your table with your TTL
+settings - it simply updates the specified attribute in the database records
+with every request. You will need to [manually enable TTL](
+  https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/time-to-live-ttl-how-to.html)
+for your table in the AWS console or AWS CLI.
+
+You can find your skill's table name in the `artifacts.json` file as part of
+the `dynamoDBARN`, once the skill has been deployed.
+:::
 
 ### CloudWatch Logging
 
