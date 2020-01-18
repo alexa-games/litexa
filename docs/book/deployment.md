@@ -370,6 +370,7 @@ is an example with all the supported Lambda configuration options:
       "askProfile": "suncoast",
       "awsProfile": "prototyping",
       "lambdaConfiguration": {
+        "Runtime": "nodejs12.x",
         "MemorySize": 128,
         "Timeout": 240,
         "Environment": {
@@ -388,6 +389,43 @@ that will be used to call Lambda's [updateFunctionConfiguration](
   https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Lambda.html#updateFunctionConfiguration-property).
 You can use this to modify the Lambda's timeout, change the memory size, or
 add your own environment variables. All sub keys are optional.
+
+#### DynamoDB TTL (optional)
+
+Litexa has limited support for setting a [Time To Live (TTL)](
+  https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/TTL.html)
+field with each database entry. This may be useful for limiting your table
+data to active users by automatically deleting old user data. To set a Time To
+Live specification, add the `dynamoDbConfiguration` object to your Litexa config:
+
+```javascript
+{
+  deployments: {
+    development: {
+      module: "@litexa/deploy-aws",
+      askProfile: "suncoast",
+      awsProfile: "prototyping",
+      dynamoDbConfiguration: {
+        timeToLive: {
+          AttributeName: "ttl", // needs to match the attribute name specified when enabling TTL
+          secondsToLive: 2592000 // specified in seconds (would wipe data if not updated in 30 days)
+        }
+      }
+    }
+  }
+}
+```
+
+:::warning Litexa does not enable TTL
+At this time, Litexa does **not** create or update your table with your TTL
+settings - it simply updates the specified attribute in the database records
+with every request. You will need to [manually enable TTL](
+  https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/time-to-live-ttl-how-to.html)
+for your table in the AWS console or AWS CLI.
+
+You can find your skill's table name in the `artifacts.json` file as part of
+the `dynamoDBARN`, once the skill has been deployed.
+:::
 
 ### CloudWatch Logging
 

@@ -354,6 +354,20 @@ class lib.Skill
     @libraryCode.push "  }"
     @libraryCode.push "};"
 
+    # @TODO: remove dynamoDb from core litexa into the deploy-aws module
+    ttlConfiguration = @projectInfo.deployments?[@projectInfo.variant]?.dynamoDbConfiguration?.timeToLive
+    if ttlConfiguration?.AttributeName? and ttlConfiguration?.secondsToLive?
+      if typeof(ttlConfiguration.AttributeName) != "string"
+        throw new Error("`dynamoDbConfiguration.AttributeName` must be a string.")
+      if typeof(ttlConfiguration.secondsToLive) != "number"
+        throw new Error("`dynamoDbConfiguration.secondsToLive` must be a number.")
+      @libraryCode.push "litexa.ttlConfiguration = {"
+      @libraryCode.push "  AttributeName: '#{ttlConfiguration.AttributeName}',"
+      @libraryCode.push "  secondsToLive: #{ttlConfiguration.secondsToLive}"
+      @libraryCode.push "};"
+    else if ttlConfiguration?.AttributeName? or ttlConfiguration?.secondsToLive?
+      console.log "Not setting TTL. If you want to set a TTL, Litexa config requires both `AttributeName` and `secondsToLive` fields in `dynamoDbConfiguration.timeToLive`."
+
     librarySource = fs.readFileSync(__dirname + '/litexa-library.coffee', 'utf8')
     librarySource = coffee.compile(librarySource, {bare: true})
     @libraryCode.push librarySource
