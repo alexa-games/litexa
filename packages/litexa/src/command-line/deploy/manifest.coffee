@@ -294,6 +294,10 @@ buildSkillManifest = (context, manifestContext) ->
   # collect which APIs are actually in use and merge them
   requiredAPIs = {}
   context.skill.collectRequiredAPIs requiredAPIs
+  for k, extension of context.projectInfo.extensions
+    continue unless extension.compiler?.requiredAPIs?
+    for a in extension.compiler.requiredAPIs
+      requiredAPIs[a] = true
   for apiName of requiredAPIs
     found = false
     for i in interfaces
