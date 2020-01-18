@@ -35,6 +35,13 @@ interface S3Configuration {
     uploadParams?: UploadParams[];
 }
 
+interface DynamoDbConfiguration {
+    timeToLive?: {
+        AttributeName: string;
+        secondsToLive: number;
+    }
+}
+
 interface UploadParams {
     filter?: string[];
     params: { [key: string]: any };
@@ -45,6 +52,7 @@ interface Deployment {
     askProfile: string;
     awsProfile: string;
     lambdaConfiguration?: LambdaSettings;
+    dynamoDbConfiguration?: DynamoDbConfiguration;
     s3Configuration: S3Configuration;
     S3BucketName?: string;  // Deprecated. Now using s3Configuration.bucketName.
     invocationSuffix?: string;
