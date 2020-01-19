@@ -317,7 +317,7 @@ Before you deploy your skill, you must have have done the following
 * [Create an Amazon Developer Account](https://developer.amazon.com/alexa-skills-kit)
 * [Create an AWS Account](https://aws.amazon.com/)
 * [Create a custom IAM Policy](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_create.html)
-  derived from the template below:
+  for the deployment user derived from the template below:
   * You will need to replace `myAccountId` and
     `myBucketName` with your [AWS account
     ID](https://docs.aws.amazon.com/general/latest/gr/acct-identifiers.html)
@@ -329,7 +329,7 @@ Before you deploy your skill, you must have have done the following
     @[code lang=json](@/docs/book/litexa-iam-policy-template.json)
     </details>
 * [Create an IAM User](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html)
-  with the above custom IAM policy attached
+  with the above custom IAM policy attached. You could name it something like "litexa-deploy".
 * [Install the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html) and
   [configure it](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html) with your
   above IAM User credentials.
