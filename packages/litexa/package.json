@@ -14,9 +14,7 @@
     "rdoc:watch": "npx coffee ./src/documentation/html/render.coffee watch",
     "release": "npm run build && npm run coverage",
     "test": "npx mocha \"./test/**/*.spec.coffee\"",
-    "test:debug": "npx mocha debug \"./test/**/**.spec.coffee\"",
-    "test:file": "npx mocha",
-    "test:file:debug": "npx mocha debug"
+    "test:file": "npx mocha"
   },
   "author": "Amazon",
   "keywords": [

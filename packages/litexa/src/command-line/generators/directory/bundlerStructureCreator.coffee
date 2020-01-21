@@ -22,6 +22,7 @@ StructureCreator = require('./structureCreator')
 #
 # Sample Generated Output (-c typescript -s typescript -b webpack)
 #
+├── .mocharc.json
 ├── lib
 │   ├── components
 │   │   ├── logger.ts
@@ -39,7 +40,6 @@ StructureCreator = require('./structureCreator')
 │   │   └── icon-512.png
 │   ├── main.litexa
 │   └── main.test.litexa
-├── mocha.opts
 ├── package.json
 ├── litexa.config.js
 ├── litexa.config.ts

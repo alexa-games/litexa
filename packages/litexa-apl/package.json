@@ -9,10 +9,8 @@
     "compile": "npx rollup --config rollup.config.js",
     "coverage": "npx nyc npm test && node ../../cacheCoverage.js",
     "postinstall": "npm run compile",
-    "test": "npx mocha \"./test/**/*.spec.js\"",
-    "test:debug": "npx mocha debug \"./test/**/**.spec.js\"",
-    "test:file": "npx mocha",
-    "test:file:debug": "npx mocha debug"
+    "test": "npx mocha './test/**/*.spec.js'",
+    "test:file": "npx mocha"
   },
   "author": "Amazon",
   "keywords": [

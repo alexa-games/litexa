@@ -1,0 +1,9 @@
+{
+  "full-trace": true,
+  "require": [
+    "coffeescript/register",
+    "./preamble.coffee"
+  ],
+  "timeout": 20000,
+  "watch-extensions": ["coffee"]
+}
