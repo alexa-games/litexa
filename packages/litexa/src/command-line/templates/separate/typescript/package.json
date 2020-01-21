@@ -15,20 +15,20 @@
   "author": "Amazon",
   "license": "ISC",
   "devDependencies": {
-    "@types/chai": "4.1.7",
-    "@types/mocha": "5.2.5",
-    "@types/node": "10.12.18",
-    "@types/pino": "5.8.3",
+    "@types/chai": "4.2.7",
+    "@types/mocha": "5.2.7",
+    "@types/node": "13.1.8",
+    "@types/pino": "5.15.3",
     "chai": "4.2.0",
-    "mocha": "6.2.2",
-    "source-map-support": "0.5.10",
-    "ts-node": "8.0.1",
-    "tsconfig-paths": "3.7.0",
-    "tslint": "5.12.1",
-    "typescript": "3.2.4"
+    "mocha": "7.0.0",
+    "source-map-support": "0.5.16",
+    "ts-node": "8.6.2",
+    "tsconfig-paths": "3.9.0",
+    "tslint": "6.0.0",
+    "typescript": "3.7.5"
   },
   "dependencies": {
-    "pino": "5.10.6",
-    "pino-pretty": "2.5.0"
+    "pino": "5.16.0",
+    "pino-pretty": "3.5.0"
   }
 }
