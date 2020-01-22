@@ -16,17 +16,17 @@
   "devDependencies": {
     "chai": "4.2.0",
     "coffee-loader": "0.9.0",
-    "coffeescript": "2.3.2",
-    "eslint": "5.13.0",
-    "mocha": "6.2.2",
-    "sinon": "7.2.3",
-    "source-map-support": "0.5.10",
-    "webpack": "4.28.4",
-    "webpack-cli": "3.2.1"
+    "coffeescript": "2.5.0",
+    "eslint": "6.8.0",
+    "mocha": "7.0.0",
+    "sinon": "8.1.0",
+    "source-map-support": "0.5.16",
+    "webpack": "4.41.5",
+    "webpack-cli": "3.3.10"
   },
   "dependencies": {
-    "pino": "5.10.6",
-    "pino-pretty": "2.5.0"
+    "pino": "5.16.0",
+    "pino-pretty": "3.5.0"
   },
   "license": "ISC"
 }
