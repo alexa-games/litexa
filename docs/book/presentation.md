@@ -1,6 +1,6 @@
 # Audio Presentation
 
-## `Say` Statements
+## `say` Statements
 
 The [say](/reference/#say) statement specifies speech content for Alexa
 to deliver. It takes one string as an argument and, like any Litexa string,
@@ -129,8 +129,8 @@ a `\` character.
 
 ```coffeescript
   say "That will be \$400 please."
-  say "Oh, you mean `"that`" thing."
-  say "Her Twitter handle was @martina."
+  say "Her Twitter handle was \@martina."
+  say "\<amazon:effect name='whispered'>Hi. I am not a human.\</amazon:effect>" # note that you need to escape each tag
 ```
 
 Please note that wherever possible, you are better off
@@ -140,11 +140,10 @@ incorrectly. So preferably:
 
 ```coffeescript
   say "That will be 400 dollars please."
-  say "Oh you mean, that, thing?"
   say "Her Twitter handle was, at martina."
 ```
 
-## `Soundeffect` Statements
+## `soundeffect` Statements
 
 Sometimes an audio queue stands alone, maybe it's a piece
 of music, or a natural delimiter. In that case, there's is a
