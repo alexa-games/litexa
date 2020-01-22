@@ -291,7 +291,7 @@ The above `data` is then accessed with the parameter `payload`:
     ],
     "item": {
       "type": "Text",
-      "text": "${payload.myDataObject.title}"
+      "text": "${payload.myDataObject.properties.title}"
     }
   }
 }
