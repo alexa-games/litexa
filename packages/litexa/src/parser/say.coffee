@@ -7,7 +7,7 @@
 
 lib = module.exports.lib = {}
 
-{ parseFragment } = require('@litexa/core/src/parser/parser')
+{ parseFragment } = require('./parser.coffee')
 { ParserError } = require('./errors.coffee').lib
 { AssetName } = require('./assets.coffee').lib
 {
