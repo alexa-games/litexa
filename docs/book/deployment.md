@@ -310,11 +310,11 @@ ignore any file types it does not recognize. These files must have the file exte
 Please see the [section on assets](/book/presentation.html#asset-file-references) for more information.
 
 :::tip Overriding a deployment target's assets root path
-You can override the skill's assets URL path, instead of using the default S3 path (location of files 
-deployed from `litexa/assets`). This can be useful when collaborating on a project with sizable assets, 
+You can override the skill's assets URL path, instead of using the default S3 path (location of files
+deployed from `litexa/assets`). This can be useful when collaborating on a project with sizable assets,
 to prevent each contributor needing to upload and maintain their own copies of assets.
 
-A deployment target can override the skill asset root path by specifying an `overrideAssetsRoot` URL 
+A deployment target can override the skill asset root path by specifying an `overrideAssetsRoot` URL
 in the Litexa config. For example:
 
 ```javascript
@@ -331,12 +331,12 @@ const deploymentConfiguration = {
 :::
 
 :::tip Skipping Litexa's asset reference validation
-Litexa will validate asset references for certain keywords (`card`, `screen`, `soundEffect`, etc.) and fail 
-Litexa tests if those assets aren't found in the `litexa/assets` directory. This validation can be 
-disabled per deployment target, when referenced assets are missing locally (which is typically the 
+Litexa will validate asset references for certain keywords (`card`, `screen`, `soundEffect`, etc.) and fail
+Litexa tests if those assets aren't found in the `litexa/assets` directory. This validation can be
+disabled per deployment target, when referenced assets are missing locally (which is typically the
 case when `overrideAssetsRoot` is used).
 
-A deployment target can skip asset reference validation by setting disableAssetReferenceValidation in the 
+A deployment target can skip asset reference validation by setting disableAssetReferenceValidation in the
 Litexa config. For example:
 
 ```javascript
@@ -370,7 +370,7 @@ is an example with all the supported Lambda configuration options:
       "askProfile": "suncoast",
       "awsProfile": "prototyping",
       "lambdaConfiguration": {
-        "Runtime": "nodejs12.x",
+        "Runtime": "nodejs10.x",
         "MemorySize": 128,
         "Timeout": 240,
         "Environment": {

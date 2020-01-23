@@ -19,9 +19,6 @@ supports native add-on modules for Node.js, which is
 required because `@litexa/assets-wav` depends on the
 [lame](https://www.npmjs.com/package/lame) module.
 
-**Note:** `@litexa/assets-wav` uses a local version of the
-`lame` NPM package, customized for compatibility with Node 12.x
-
 ```bash
 npm install -g node-gyp
 ```
