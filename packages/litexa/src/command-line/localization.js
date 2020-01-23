@@ -5,7 +5,7 @@ const { promisify } = require('util');
 
 const LoggingChannel = require('./loggingChannel');
 const projectConfig = require('./project-config');
-const { Skill } = require('@litexa/core/src/parser/skill');
+const { Skill } = require('../parser/skill');
 
 /* The skill localization object has the following contents:
   {
