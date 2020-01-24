@@ -51,8 +51,7 @@ often want to incorporate external code and dependencies alongside your skill lo
   * Windows 10 x64
   * Linux - Ubuntu (14, 16, 18)
 * Development
-  * [Node.js](https://nodejs.org/) version
-    <strong>8.11</strong> or higher
+  * [Node.js](https://nodejs.org/) version <strong>10.x</strong> or higher
 
 ### Installation Steps
 
