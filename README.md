@@ -6,7 +6,7 @@ Litexa is an Alexa domain specific language, developed for long form multi-turn 
 Its parser and tooling is implemented in Node.js and it compiles into JavaScript that expects Node.js
 as a runtime environment.
 
-Specifically it requires node version 8.x or greater, for the `async` support.
+**Note:** *Litexa officially supports and works best with Node.js v10.x.*
 
 Full documentation is available at <https://litexa.com>
 
