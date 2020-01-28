@@ -8,7 +8,9 @@ as a runtime environment.
 
 **Note:** *Due to a dependency not compatible with Node.js v12 in the @litexa/assets-wav package, the 
 recommended local runtime and default deployment runtime is Node.js v10. If you are not using this
-package, you are welcome to upgrade both your local and runtime environment to Node.js v12.*
+package, you are welcome to upgrade both your local and runtime environment to Node.js v12. Refer to our
+[deployment documentation](./docs/book/deployment.md#lambda-configuration-optional) for more configuration 
+details.*
 
 Full documentation is available at <https://litexa.com>
 

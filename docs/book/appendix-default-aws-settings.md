@@ -18,6 +18,8 @@ gives this the skill requests's `context.System.device.deviceId` field, by defau
 ## Lambda
 
 * Runtime is set to `nodejs10.x`, by default.
+  * You can modify the Lambda's runtime version by changing your Litexa configuration. Details can be
+    found in our [deployment chapter](/book/deployment.html#lambda-configuration-optional).
   * You can check the runtime deprecation schedule in the [Lambda Runtime Support
     Policy](https://docs.aws.amazon.com/lambda/latest/dg/runtime-support-policy.html).
 * Creates/uses an alias, which is included as part of the skill endpoint
