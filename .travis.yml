@@ -14,8 +14,6 @@ git:
 cache:
   directories:
     - $HOME/.npm
-    - node_modules
-    - packages/*/node_modules
 
 install:
   - 'npm install -g lerna@3.13.1'
