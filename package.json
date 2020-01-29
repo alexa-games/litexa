@@ -14,7 +14,7 @@
     "docs:build": "npm run docs:reference && npx vuepress build docs",
     "docs:dev": "npx vuepress dev docs",
     "docs:reference": "cd ./packages/litexa && npm run rdoc && npx move-cli ./src/documentation/reference.md ../../docs/reference/README.md && cd ../../",
-    "postinstall": "lerna link convert",
+    "postinstall": "npx lerna bootstrap && npx lerna link convert",
     "release": "npm run build && npm run coverage",
     "test": "npx lerna exec --concurrency 1 npm run test"
   },
