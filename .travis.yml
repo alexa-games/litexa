@@ -18,7 +18,7 @@ cache:
     - packages/*/node_modules
 
 install:
-  - if [ $TRAVIS_NODE_VERSION == "12" ]; then npm install --no-optional; else npm install; fi
+  - if [ $TRAVIS_NODE_VERSION == "12" ]; then lerna bootstrap --ignore @litexa/assets-wav; else lerna bootstrap; fi
 
 stages:
   - name: build
