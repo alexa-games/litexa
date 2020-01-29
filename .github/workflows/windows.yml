@@ -15,8 +15,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-2016]
-        node: [10]
+        os: [windows-2019]
+        node: [10, 12]
 
     steps:
     - uses: actions/checkout@master
