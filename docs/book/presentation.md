@@ -109,7 +109,9 @@ assumed to refer to the `litexa/assets` directory.
 using the "say-as" SSML tag in "interpret-as" mode. Note
 that punctuation should sit inside the speechcon tags in
 order to be read correctly, so you'll want to write
-`<!howdy.>` rather than `<!howdy>.`
+`<!howdy.>` rather than `<!howdy>.` The official
+documentation also recommends surrounding speechcons with a
+pause (e.g, punctuation) for optimal results.
 
 For more information on supported SSML tags, please see the
 [Alexa Skill Kit documentation][ssmltags].
