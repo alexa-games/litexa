@@ -1,9 +1,6 @@
 language: node_js
-
 node_js:
   - '10'
-  - '12'
-
 os:
   - linux
   - osx
@@ -17,9 +14,6 @@ cache:
     - node_modules
     - packages/*/node_modules
 
-install:
-  - if [ $TRAVIS_NODE_VERSION == "12" ]; then lerna bootstrap --ignore @litexa/assets-wav; else lerna bootstrap; fi
-
 stages:
   - name: build
   - name: coverage
@@ -32,7 +26,7 @@ stages:
 jobs:
   include:
     - stage: build
-      name: 'Build'
+      name: 'Compile'
       script: npm run build
       before_script:
         - echo "$TRAVIS_EVENT_TYPE"
