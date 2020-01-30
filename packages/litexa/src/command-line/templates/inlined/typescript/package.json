@@ -6,13 +6,13 @@
     "compile": "npx tsc",
     "compile:watch": "npx tsc -w",
     "deploy": "npm run compile && litexa deploy",
-    "test": "npm run compile && litexa test",
-    "test:watch": "npm run compile:watch | litexa test -w"
+    "test:litexa": "npm run compile && litexa test",
+    "test:litexa:watch": "npm run compile:watch | litexa test -w"
   },
   "author": "Amazon",
   "license": "ISC",
   "devDependencies": {
-    "@types/node": "10.12.18",
-    "typescript": "3.2.4"
+    "@types/node": "13.1.8",
+    "typescript": "3.7.5"
   }
 }

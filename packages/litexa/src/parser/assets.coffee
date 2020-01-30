@@ -27,6 +27,9 @@ class lib.AssetName
     files = @skill.projectInfo.languages[language]?.assets?.files
     convertedFiles = @skill.projectInfo.languages[language]?.convertedAssets?.files
     if files? or convertedFiles?
+      if @skill.projectInfo.disableAssetReferenceValidation
+        return "#{language}/#{filename}"
+
       if files? and filename in files
         return "#{language}/#{filename}"
 

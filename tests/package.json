@@ -6,9 +6,11 @@
     "build": "npm run clean && npm install",
     "clean": "npx rimraf node_modules",
     "coverage": "npx nyc npm test && node ../cacheCoverage.js",
-    "test": "npx mocha --opts mocha.opts \"./features/*.spec.coffee\""
+    "test": "npx mocha './features/*.spec.coffee'",
+    "test:file": "npx mocha"
   },
   "author": "Amazon",
   "license": "Apache-2.0",
-  "private": true
+  "private": true,
+  "dependencies": {}
 }

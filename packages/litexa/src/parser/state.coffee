@@ -9,7 +9,6 @@ lib = module.exports.lib = {}
 
 { Function } = require('./function.coffee').lib
 { Intent, FilteredIntent } = require('./intent.coffee').lib
-{ LocalizationContext } = require('./localization.coffee')
 { ParserError } = require("./errors.coffee").lib
 
 class lib.Transition
@@ -144,6 +143,7 @@ class lib.State
       # only allow repeat intents if they are events that can be filtered
       if collection[key] not instanceof FilteredIntent
         throw new ParserError location, "Not allowed to redefine intent `#{key}` in state `#{@name}`"
+
     intent = collection[key]
 
     if intent.defaultedResetOnGet
@@ -187,13 +187,13 @@ class lib.State
     options.scopeManager.currentScope.referenceTester = options.referenceTester
 
     enterFunc = []
-    if @startFunction?
-      @startFunction.toLambda(enterFunc, "", options)
+    @startFunction?.toLambda(enterFunc, "", options)
 
     exitFunc = []
     if @endFunction?
       @endFunction.toLambda(exitFunc, "", options)
 
+    childIntentsEncountered = []
     intentsFunc = []
     intentsFunc.push "switch( context.intent ) {"
     for name, intent of workingIntents
@@ -216,6 +216,17 @@ class lib.State
           else
             intentsFunc.push "    console.error('unhandled intent ' + context.intent + ' in state ' + context.handoffState);"
       else
+        # Child intents are registered to the state as handlers, but it is parent handlers that perform the logic
+        # of adding them to the same switch case. Therefore, keep track of the ones already added to transformed code and
+        # ignore them if they are encountered again.
+        if childIntentsEncountered.includes intent.name
+          options.scopeManager.popScope()
+          continue
+
+        for intentName in intent.childIntents
+          intentsFunc.push "  case '#{intentName}':"
+          childIntentsEncountered.push intentName
+
         intentsFunc.push "  case '#{intent.name}': {"
 
         if intent.code?
@@ -223,7 +234,6 @@ class lib.State
             intentsFunc.push "    " + line
         else
           intent.toLambda(intentsFunc, options)
-
       intentsFunc.push "    break;\n    }"
       options.scopeManager.popScope()
     intentsFunc.push "}"
@@ -291,43 +301,38 @@ class lib.State
       continue if intent.referenceIntent?
       intent.toUtterances(output)
 
-  toModelV2: (output, context) ->
+  toModelV2: (output, context, extendedEventNames) ->
     workingIntents = @collectIntentsForLanguage(context.language)
     for name, intent of workingIntents
       continue if name == '--default--'
       continue if intent.referenceIntent?
-      continue unless intent.hasUtterances
+      unless intent.hasUtterances
+        unless context.skill.testDevice? and (name in extendedEventNames or name.includes('.')) # supported events have '.' in their names
+          console.warn "`#{name}` does not have utterances; not adding to language model."
+        continue
       try
         model = intent.toModelV2(context)
       catch err
-        throw "failed to write language model for state `#{@name}`: #{err}"
+        if err.location
+          throw err # ParserErrors have location properties; propagate the error
+        else 
+          throw new Error "failed to write language model for state `#{@name}`: #{err}"
+
+      continue unless model?
 
       if model.name of context.intents
         console.error "duplicate `#{model.name}` intent found while writing model"
-        #throw new Error "duplicate `#{model.name}` found while writing model"
       else
         context.intents[model.name] = model
         output.languageModel.intents.push model
 
-  toLocalization: (result) ->
-    context = new LocalizationContext
-    context.intents = {}
-
-    hasContent = false
-
-    if @startFunction?
-      start = new LocalizationContext
-      @startFunction.toLocalization(result, start)
-      if start.hasContent()
-        context.start = start
-        hasContent = true
+  toLocalization: (localization) ->
+    @startFunction?.toLocalization(localization)
 
     for name, intent of @intents
-      intentContext = new LocalizationContext
-      intent.toLocalization(result, intentContext)
-      if intentContext.hasContent()
-        context.intents[name] = intentContext
-        hasContent = true
+      if !localization.intents[name]? and name != '--default--' # 'otherwise' handler -> no utterances
+        # if this is a new intent, add it to the localization map
+        localization.intents[name] = { default: [] }
 
-    if hasContent
-      result.states[@name] = context
+      # add utterances mapped to the intent, and speech lines in the intent handler
+      intent.toLocalization(localization)

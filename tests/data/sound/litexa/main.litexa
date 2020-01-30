@@ -6,6 +6,10 @@ playFile
 playURL
   playMusic "https://www.example.com/sound.mp3"
 
+playSfx
+  soundEffect sound.mp3
+    or sound.mp3
+
 stop
   stopMusic
 
@@ -14,5 +18,7 @@ global
     -> playFile
   when "play url"
     -> playURL
+  when "play random mp3"
+    -> playSfx
   when "stop"
     -> stop

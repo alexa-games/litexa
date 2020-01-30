@@ -10,8 +10,8 @@
   "author": "Amazon",
   "license": "ISC",
   "devDependencies": {
-    "tsconfig-paths": "3.7.0",
-    "tslint": "5.12.1",
-    "typescript": "3.2.4"
+    "tsconfig-paths": "3.9.0",
+    "tslint": "6.0.0",
+    "typescript": "3.7.5"
   }
 }

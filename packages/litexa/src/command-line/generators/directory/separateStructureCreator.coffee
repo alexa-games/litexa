@@ -21,9 +21,9 @@ StructureCreator = require('./structureCreator')
 ├── artifacts.json
 ├── aws-config.json
 ├── lib
+│   ├── .mocharc.json
 │   ├── index.coffee
 │   ├── logger.coffee
-│   ├── mocha.opts
 │   ├── package.json
 │   ├── utils.coffee
 │   └── utils.spec.coffee

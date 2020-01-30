@@ -7,32 +7,30 @@
     "compile:watch": "npx webpack --config webpack.config.js --watch",
     "deploy": "npm run compile && litexa deploy",
     "lint": "npx eslint ./lib/**/*.js",
-    "test": "npx mocha --opts mocha.opts './test/**/*.spec.js' && npm run test:litexa",
-    "test:debug": "npx mocha debug --opts mocha.opts './test/**/*.spec.js'",
-    "test:file": "npx mocha --opts mocha.opts",
-    "test:file:debug": "npx mocha debug --opts mocha.opts",
+    "test": "npx mocha './test/**/*.spec.js' && npm run test:litexa",
+    "test:file": "npx mocha",
     "test:litexa": "npm run compile && litexa test",
     "test:litexa:watch": "npm run compile:watch | litexa test -w",
-    "test:watch": "npx mocha --opts mocha.opts './test/**/*.spec.js' --watch"
+    "test:watch": "npx mocha './test/**/*.spec.js' --watch"
   },
   "author": "Amazon",
   "devDependencies": {
-    "@babel/core": "7.2.2",
-    "@babel/preset-env": "7.3.1",
-    "@babel/register": "7.0.0",
-    "babel-eslint": "10.0.1",
-    "babel-plugin-module-resolver": "3.1.3",
+    "@babel/core": "7.8.3",
+    "@babel/preset-env": "7.8.3",
+    "@babel/register": "7.8.3",
+    "babel-eslint": "10.0.3",
+    "babel-plugin-module-resolver": "4.0.0",
     "chai": "4.2.0",
-    "eslint": "5.13.0",
-    "mocha": "5.2.0",
-    "sinon": "7.2.3",
-    "source-map-support": "0.5.10",
-    "webpack": "4.28.4",
-    "webpack-cli": "3.2.1"
+    "eslint": "6.8.0",
+    "mocha": "7.0.0",
+    "sinon": "8.1.0",
+    "source-map-support": "0.5.16",
+    "webpack": "4.41.5",
+    "webpack-cli": "3.3.10"
   },
   "dependencies": {
-    "pino": "5.10.6",
-    "pino-pretty": "2.5.0"
+    "pino": "5.16.0",
+    "pino-pretty": "3.5.0"
   },
   "license": "ISC"
 }

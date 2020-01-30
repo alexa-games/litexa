@@ -7,7 +7,7 @@
 
 assert = require 'assert'
 debug = require('debug')('litexa')
-{runSkill, expectParse, expectFailParse} = require '../preamble.coffee'
+{runSkill, expectParse, expectFailParse, buildSkillModel} = require '../preamble.coffee'
 
 describe 'supports intent statements', ->
   it 'runs the intents integration test', ->
@@ -246,3 +246,94 @@ describe 'supports intent statements', ->
         say "running"
     """, "utterance 'walk the $Dog today' in the intent handler for 'STROLL' was already handled by
       the intent 'WANDER'"
+
+  it 'does not allow reusing intents when listed as parent handlers (multi-intent handlers)', ->
+    expectFailParse """
+    global
+      when AMAZON.YesIntent
+        say "hello"
+      
+      when AMAZON.YesIntent
+        or AMAZON.NextIntent
+        say "hi"
+    """, "Not allowed to redefine intent `AMAZON.YesIntent` in state `global`"
+
+  it 'does not allow reusing intents when aggregated with another handler (multi-intent handlers)', ->
+    expectFailParse """
+    global
+      when AMAZON.YesIntent
+        say "hello"
+      
+      when AMAZON.NextIntent
+        or AMAZON.YesIntent
+        say "hi"
+    """, "Not allowed to redefine intent `AMAZON.YesIntent` in state `global`"
+
+  it 'does not allow parenting itself (multi-intent handlers)', ->
+    expectFailParse """
+    global
+      when AMAZON.YesIntent
+        or AMAZON.YesIntent
+        say "hi"
+    """, "Not allowed to redefine intent `AMAZON.YesIntent` in state `global`"
+
+  it 'does not allow reusing intents when it is aggregated with 2 different handlers (multi-intent handlers)', ->
+    expectFailParse """
+    global
+      when AMAZON.YesIntent
+        or AMAZON.HelpIntent
+        say "hello"
+
+      when AMAZON.NoIntent
+        or AMAZON.HelpIntent
+        say "hi"
+    """, "Not allowed to redefine intent `AMAZON.HelpIntent` in state `global`"
+
+  it 'does not allow declaring utterances in multi-intent handlers', ->
+    expectFailParse """
+    global
+      when AMAZON.YesIntent
+        or AMAZON.HelpIntent
+        or "hello intent"
+        say "hello"
+    """, "Can't add utterance as an `or` alternative to `AMAZON.YesIntent` because it already has intent name alternatives"
+
+  it 'does not allow creating multi-intent handlers if utterances exist', ->
+    expectFailParse """
+    global
+      when AMAZON.YesIntent
+        or "hello intent"
+        or AMAZON.HelpIntent
+        say "hello"
+    """, "Can't add intent name `AMAZON.HelpIntent` as an `or` alternative to `AMAZON.YesIntent` because it already has utterance alternatives"
+
+  it 'allows separately declaring utterances in other states and utterances for when handlers (multi-intent handlers)', ->
+    expectParse """
+    stateA
+      when HelloIntent
+        or "hello there"
+
+      when MEOW
+        or "meow meow"
+
+      when AMAZON.RepeatIntent
+        or AMAZON.NextIntent
+
+    global
+      when HelloIntent
+        or AMAZON.NoIntent
+
+      when "meow"
+        or AMAZON.YesIntent
+      
+      when AMAZON.RepeatIntent
+        or "rephrase that"
+    """
+  
+  it 'creates a skill model that includes child intents of multi-intent handlers', ->
+    model = await buildSkillModel 'intents'
+    intents = model.languageModel.intents.map (intent) -> intent.name
+    assert("PreviouslyNotDefinedIntentName" in intents, 'PreviouslyNotDefinedIntentName exists in model')
+    assert("AMAZON.NoIntent" in intents, 'AMAZON.NoIntent exists in model')
+    assert("OtherIntentName" in intents, 'OtherIntentName exists in model')
+    

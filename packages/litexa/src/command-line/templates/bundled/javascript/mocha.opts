@@ -1,5 +1,0 @@
---require @babel/register
---require source-map-support/register
---recursive test/
---watch-extensions js
---full-trace

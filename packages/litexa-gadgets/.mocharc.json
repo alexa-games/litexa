@@ -1,0 +1,5 @@
+{
+  "full-trace": true,
+  "timeout": 1000,
+  "watch-extensions": ["js"]
+}

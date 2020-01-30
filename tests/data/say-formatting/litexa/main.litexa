@@ -66,6 +66,22 @@ launch
     say "{'There'} should be a space
       between 'there' and 'should'."
 
+  when EscapesTest
+    say "\<amazon:effect name='whispered'>Hi. I am not a human.\</amazon:effect>"
+    say "That will be \$400 please."
+    # say "Oh, you mean \"that\" thing." # TODO: fix. This should not result in a syntax error
+    say "Her Twitter handle was \@martina."
+
+  when PunctuationTest
+    say "Start"
+    say "word"
+    say "!"
+    say "?"
+    say ":"
+    say ";"
+    say ","
+    say "."
+
 TEST "say statement"
   launch
   alexa: launch, /here: word salad\..*space cats\./
@@ -77,3 +93,7 @@ TEST "say statement"
   alexa: launch, /Start middle end\. Start middle end\. Start middle end\./
   user: "d"
   alexa: launch, /There should be a space between 'there' and 'should'\./i
+  user: EscapesTest
+  alexa: launch, e"<amazon:effect name='whispered'>Hi. I am not a human.</amazon:effect> That will be $400 please. Her Twitter handle was @martina."
+  user: PunctuationTest
+  alexa: launch, /Start word\!\?:;,\./i

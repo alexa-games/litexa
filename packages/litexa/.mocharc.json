@@ -1,0 +1,9 @@
+{
+  "full-trace": true,
+  "require": [
+    "@litexa/core/aliasing",
+    "coffeescript/register"
+  ],
+  "timeout": 1000,
+  "watch-extensions": ["coffee"]
+}

@@ -7,10 +7,17 @@
 
 lib = module.exports.lib = {}
 
+{ parseFragment } = require('./parser.coffee')
 { ParserError } = require('./errors.coffee').lib
 { AssetName } = require('./assets.coffee').lib
-{ replaceNewlineCharacters, isEmptyContentString, isFirstOrLastItemOfArray, dedupeNonNewlineConsecutiveWhitespaces,
-cleanTrailingSpaces, cleanLeadingSpaces } = require('./utils.coffee').lib
+{
+  replaceNewlineCharacters,
+  isEmptyContentString,
+  isFirstOrLastItemOfArray,
+  dedupeNonNewlineConsecutiveWhitespaces,
+  cleanTrailingSpaces,
+  cleanLeadingSpaces
+} = require('./utils.coffee').lib
 
 class lib.StringPart
   constructor: (text) ->
@@ -60,7 +67,8 @@ class lib.StringPart
     "(#{str})"
   toTestRegex: -> @toRegex()
   toTestScore: -> return 10
-  toLocalization: -> @toString()
+  toLocalization: ->
+    return @toString()
 
 
 class lib.TagPart
@@ -115,7 +123,17 @@ class lib.TagPart
         info.process?(@)
 
 
-  toString: -> return "<#{@code} #{@text}>"
+  toString: ->
+    switch @code
+      when "!"
+        return "<#{@code}#{@content}>"
+      when "..."
+        return "<#{@code}#{@variable}>"
+      when "sfx"
+        return "<#{@code} #{@proxy}>"
+      else
+        return "<#{@code}>"
+
   toUtterance: ->
     throw new ParserError null, "you cannot use a tag part in an utterance"
   toSSML: (language) ->
@@ -169,7 +187,8 @@ class lib.TagPart
         @toRegex()
 
   toTestScore: -> return 9
-  toLocalization: -> @toString()
+  toLocalization: ->
+    return @toString()
 
 
 class lib.DatabaseReferencePart
@@ -187,9 +206,29 @@ class lib.DatabaseReferencePart
   toRegex: ->
     return "([\\S\u00A0]+)"
   toTestRegex: -> @toRegex()
-  toLocalization: (context) ->
-    reference = context.registerVariable @toString()
-    "{#{reference}}"
+  toLocalization: (localization) ->
+    return @toString()
+
+
+
+class lib.StaticVariableReferencePart
+  constructor: (@ref) ->
+  needsEscaping: true
+  isStatic: -> true
+  toString: -> return "DEPLOY.#{@ref.toString()}"
+  toUtterance: ->
+    throw new ParserError null, "you cannot use a static reference in an utterance"
+  toLambda: (options) ->
+    return "litexa.DEPLOY.#{@ref.toLambda()}"
+  express: (context) ->
+    return eval "context.lambda.litexa.DEPLOY.#{@ref.toLambda()}"
+  evaluateStatic: (context) ->
+    return eval "context.skill.projectInfo.DEPLOY.#{@ref.toLambda()}"
+  toRegex: ->
+    throw "missing toRegex function for StaticVariableReferencePart"
+  toTestRegex: -> @toRegex()
+  toLocalization: (localization) ->
+    return @toString()
 
 
 class lib.DatabaseReferenceCallPart
@@ -210,9 +249,8 @@ class lib.DatabaseReferenceCallPart
   toRegex: ->
     return "([\\S\u00A0]+)"
   toTestRegex: -> @toRegex()
-  toLocalization: (context) ->
-    reference = context.registerVariable @toString()
-    "{#{reference}}"
+  toLocalization: (localization) ->
+    return @toString()
 
 
 class lib.SlotReferencePart
@@ -230,9 +268,8 @@ class lib.SlotReferencePart
     return "([\\$\\S\u00A0]+)"
   toTestRegex: -> @toRegex()
   toTestScore: -> return 1
-  toLocalization: (context) ->
-    reference = context.registerVariable @toString()
-    "{#{reference}}"
+  toLocalization: (localization) ->
+    return @toString()
 
 
 class lib.JavaScriptPart
@@ -256,9 +293,8 @@ class lib.JavaScriptPart
     # assuming this can only match a single substitution
     return "([\\S\u00A0]+)"
   toTestRegex: -> @toRegex()
-  toLocalization: (context) ->
-    reference = context.registerVariable "" + @expression
-    "{#{reference}}"
+  toLocalization: (localization) ->
+    return @toString()
 
 
 class lib.JavaScriptFragmentPart
@@ -282,18 +318,6 @@ class lib.AssetNamePart
     return "(#{@toSSML()})"
   toTestRegex: -> @toRegex()
   toTestScore: -> return 10
-
-
-class lib.SayEchoPart
-  constructor: (@assetName) ->
-  isSayEcho: true
-  toString: -> return "<as say>"
-  toUtterance: -> throw new ParserError @assetName.location, "can't use an Echo part in an utterance"
-  toLambda: (options) -> return ""
-  express: -> ""
-  toRegex: -> return ""
-  toTestRegex: -> @toRegex()
-  toTestScore: -> return 0
 
 
 partsToExpression = (parts, options) ->
@@ -322,7 +346,6 @@ partsToExpression = (parts, options) ->
       if closed
         before = code[0...p.tagClosePos] + '"'
         after = '"' + code[p.tagClosePos..]
-        #console.log [before, after]
         code =  [before, closed, after].join '+'
 
     if p.needsEscaping
@@ -337,71 +360,102 @@ partsToExpression = (parts, options) ->
 
 
 class lib.Say
-  constructor: (parts) ->
-    @alternates = [ parts ]
+  constructor: (parts, skill) ->
+    @alternates = {
+      default: [ parts ]
+    }
+    @checkForTranslations(skill)
 
   isSay: true
 
-  pushAlternate: (parts) ->
-    @alternates.push parts
+  checkForTranslations: (skill) ->
+    # Check if the localization map exists and has an entry for this string.
+    localizationEntry = skill?.projectInfo?.localization?.speech?[@toString()]
 
-  toString: ->
-    if @alternates.length == 0
-      return ""
-    (p.toString() for p in @alternates[0]).join('')
+    if localizationEntry?
+      for language, translation of localizationEntry
+        # ignore the translation if it's empty
+        continue unless translation
+        # ignore the translation if it isn't for one of the skill languages (could just be comments)
+        continue unless Object.keys(skill.languages).includes(language)
 
-  toExpression: (options) ->
-    partsToExpression @alternates[0], options
+        alternates = translation.split('|') # alternates delineation character is '|'
+
+        for i in [0..alternates.length - 1]
+          # parse the translation to identify the string parts
+          fragment = """say "#{alternates[i]}" """
+
+          parsedTranslation = null
+          try
+            parsedTranslation = parseFragment(fragment, language)
+          catch err
+            throw new Error("Failed to parse the following fragment translated for #{language}:\n#{fragment}\n#{err}")
+
+          if i == 0
+            # first (and potentially only) alternate
+            @alternates[language] = parsedTranslation.alternates.default
+          else
+            # split by '|' returned more than one string -> this is an 'or' alternate
+            @alternates[language].push(parsedTranslation.alternates.default[0])
+
+  pushAlternate: (parts, skill, language = 'default') ->
+    @alternates[language].push parts
+    # re-check localization since alternates are combined into single key as follows:
+    #   "speech|alternate one|alternate two"
+    @checkForTranslations(skill)
+
+  toString: (language = 'default') ->
+    switch @alternates[language].length
+      when 0 then return ''
+      when 1
+        return (p.toString() for p in @alternates[language][0]).join('')
+      else
+        return (a.join('').toString() for a in @alternates[language]).join('|')
+
+  toExpression: (options, language = 'default') ->
+    partsToExpression @alternates[language][0], options
 
   toLambda: (output, indent, options) ->
-    targetFunction = "say"
-    if @reprompt
-      targetFunction = "reprompt"
+    speechTargets = ["say"]
+    if @isReprompt
+      speechTargets = [ "reprompt" ]
+    else if @isAlsoReprompt
+      speechTargets = speechTargets.concat "reprompt"
+
+    writeAlternates = (indent, alternates) ->
+      if alternates.length > 1
+        sayKey = require('./sayCounter').get()
+        output.push "#{indent}switch(pickSayString(context, #{sayKey}, #{alternates.length})) {"
+        for alt, idx in alternates
+          if idx == alternates.length - 1
+            output.push "#{indent}  default:"
+          else
+            output.push "#{indent}  case #{idx}:"
+          writeLine indent + "    ", alt
+          output.push "#{indent}    break;"
+        output.push "#{indent}}"
+      else
+        writeLine indent, alternates[0]
 
     writeLine = (indent, parts) ->
-      if parts[0]?.isSayEcho
-        output.push "#{indent}context.repromptTheSay = true;"
-      else
-        line = partsToExpression(parts, options)
+      line = partsToExpression(parts, options)
+      for target in speechTargets
         if line and line != '""'
-          output.push "#{indent}context.#{targetFunction}.push( #{line} );"
+          output.push "#{indent}context.#{target}.push( #{line} );"
 
-    if @alternates.length > 1
-      sayKey = require('./sayCounter').get()
-      output.push "#{indent}switch(pickSayString(context, #{sayKey}, #{@alternates.length})) {"
-      for alt, idx in @alternates
-        if idx == @alternates.length - 1
-          output.push "#{indent}  default:"
-        else
-          output.push "#{indent}  case #{idx}:"
-        writeLine indent + "    ", alt
-        output.push "#{indent}    break;"
-      output.push "#{indent}}"
-    else
-      writeLine indent, @alternates[0]
-
-  toLocalization: (result, context) ->
-    collectParts = (parts) ->
-      locParts = []
-      for p in parts when p.toLocalization?
-        fragment = p.toLocalization(context)
-        locParts.push fragment if fragment?
-      locParts.join ''
-
-    switch @alternates.length
-      when 0 then return
-      when 1
-        context.pushDialog collectParts(@alternates[0])
-      else
-        context.pushDialog ( collectParts(a) for a in @alternates )
-
+    # Add language-specific output speech to the Lambda, if translations exist.
+    alternates = @alternates[options.language] ? @alternates.default
+    writeAlternates(indent, alternates)
 
   express: (context) ->
     # given the info in the context, fully resolve the parts
-    (p.express(context) for p in @alternates[0]).join("")
+    if @alternates[context.language]?
+      (p.express(context) for p in @alternates[context.language][0]).join("")
+    else
+      (p.express(context) for p in @alternates.default[0]).join("")
 
   matchFragment: (language, line, testLine) ->
-    for parts in @alternates
+    for parts in @alternates.default
       unless parts.regex?
         regexText = ( p.toTestRegex() for p in parts ).join('')
         # prefixed with any number of spaces to eat formatting
@@ -429,3 +483,23 @@ class lib.Say
       return result
 
     return null
+
+  toLocalization: (localization) ->
+    collectParts = (parts) ->
+      locParts = []
+      for p in parts when p.toLocalization?
+        fragment = p.toLocalization(localization)
+        locParts.push fragment if fragment?
+      locParts.join ''
+
+    switch @alternates.default.length
+      when 0 then return
+      when 1
+        speech = collectParts(@alternates.default[0])
+        unless localization.speech[speech]?
+          localization.speech[speech] = {}
+      else
+        speeches = ( collectParts(a) for a in @alternates.default )
+        speeches = speeches.join('|')
+        unless localization.speech[speeches]?
+          localization.speech[speeches] = {}

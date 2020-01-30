@@ -4,6 +4,7 @@
     "doc": "docs"
   },
   "scripts": {
+    "audit:fix": "npx lerna run audit:fix",
     "build": "npm run clean && npm install",
     "clean": "npx lerna clean --yes && npx rimraf ./node_modules ./.nyc_output",
     "coverage": "npx rimraf .nyc_output_combined && npx lerna exec --concurrency 1 npm run coverage && npm run coverage:report",
@@ -30,6 +31,7 @@
     "@litexa/core": "file:packages/litexa",
     "@litexa/deploy-aws": "file:packages/litexa-deploy-aws",
     "@litexa/gadgets": "file:packages/litexa-gadgets",
+    "@litexa/html": "file:packages/litexa-html",
     "@litexa/integration-tests": "file:tests",
     "@litexa/render-template": "file:packages/litexa-render-template"
   },
@@ -43,7 +45,7 @@
     "coffeescript": "2.3.2",
     "lerna": "3.13.1",
     "mkdirp": "0.5.1",
-    "mocha": "6.0.2",
+    "mocha": "6.2.2",
     "module-alias": "2.2.0",
     "move-cli": "1.2.1",
     "nyc": "13.3.0",

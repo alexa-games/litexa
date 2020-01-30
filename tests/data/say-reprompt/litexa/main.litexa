@@ -1,0 +1,14 @@
+launch
+  say "1st say"
+  reprompt "1st reprompt"
+  reprompt "2nd reprompt"
+  say "2nd say"
+
+  when SayRepromptIntent
+    say "say-only"
+    say reprompt "common say and reprompt"
+    reprompt "reprompt-only"
+
+TEST "say reprompt behavior"
+  launch
+  user: SayRepromptIntent

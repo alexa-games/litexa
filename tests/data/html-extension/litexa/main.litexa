@@ -1,0 +1,21 @@
+launch
+  if HTML.isHTMLPresent()
+    say "HTML interface is declared."
+    -> waitForHTML
+  else
+    say "HTML interface is not declared."
+    -> goodbye
+
+waitForHTML
+  when "hello world"
+    -> markHelloWorld
+  otherwise
+    -> goodbye
+
+markHelloWorld
+  HTML.mark("hello-world")
+  -> waitForHTML
+
+goodbye
+  say "Goodbye!"
+  END

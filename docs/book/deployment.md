@@ -14,7 +14,9 @@ looks something like this:
   "deployments": {
     "development": {
       "module": "@litexa/deploy-aws",
-      "S3BucketName": "suncoast-assets",
+      "s3Configuration": {
+        "bucketName": "suncoast-assets"
+      },
       "askProfile": "suncoast",
       "awsProfile": "prototyping"
     }
@@ -148,15 +150,15 @@ go to the [AWS Permissions section](/book/appendix-aws-permissions.html).
 ### AWS Configuration
 
 The `@litexa/deploy-aws` module requires you to fill out one more field in your litexa
-config called `S3BucketName`. There are also some optional `LambdaConfiguration` parameters
-you can put into your configuration for further project customization.
+config called `s3Configuration`. There are also some optional `lambdaConfiguration`
+parameters you can put into your configuration for further project customization.
 
-#### S3BucketName
+#### S3 Configuration
 
 The deploy module uses S3 to host your skill's assets, which can be sounds and images.
 Assets are deployed to the [S3 bucket](
-  https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingBucket.html) with the name you
-put in the `S3BucketName` field in your Litexa config.
+https://docs.aws.amazon.com/AmazonS3/latest/dev/UsingBucket.html) specified by
+`s3Configuration.bucketName` in your Litexa config.
 
 If this bucket doesn't exist yet, the module will automatically create it for you. If
 you create your own bucket:
@@ -168,11 +170,101 @@ files will be marked public on upload.
 See: [Cross-Origin Resource Sharing (CORS)](
   https://docs.aws.amazon.com/AmazonS3/latest/dev/cors.html)
 
+##### Upload Parameters
+
+You can specify S3 upload parameters to groups of your assets by utilizing the
+optional `s3Configuration.uploadParams` object list.
+
+A Litexa config that utilizes `s3Configuration.uploadParams` might look like:
+
+```javascript
+const deploymentConfiguration = {
+  name: 'my-skill',
+  deployments: {
+    production: {
+      module: '@litexa/deploy-aws',
+      s3Configuration: {
+        bucketName: 'my-skill-bucket',
+        uploadParams: [
+          {
+            filter: ['*.mp3'],
+            params: {
+              // check for file change every 10 minutes
+              // (useful for content files that are regularly updated)
+              CacheControl: 'max-age=600'
+            }
+          },
+          {
+            filter: ['*.jpg', '*.png'],
+            params: {
+              // always check for file change
+              // (useful during development)
+              CacheControl: 'no-cache'
+            }
+          },
+          {
+            params: {
+              // no file filter -> applies 1 hour age
+              // to all files that aren't caught by the
+              // above 2 filters
+              CacheControl: 'max-age=3600'
+            }
+          }
+        ]
+      }
+    }
+  }
+}
+```
+
+##### S3 Configuration Schema
+
+The schema for the `s3Configuration` object is as follows:
+
+* `bucketName` - (String)
+  * The name of the bucket that your assets are deployed to.
+* `uploadParams` - (Array\<Object\>) - Optional
+  * `filter` - (Array\<String\>) - Optional
+    * A list of glob patterns that, when matched to your assets,
+      the upload params are applied to.
+      * Litexa uses the
+      [minimatch NPM package](https://www.npmjs.com/package/minimatch)
+      to implement the file pattern matching.
+  * `params` - (Object)
+    * An object that is passed into Litexa's call on
+      the AWS SDK S3 Client's `#upload()` function.
+      * To understand what keys are acceptable in the
+      `params` object, read more about the AWS SDK S3 Client's
+      `#upload()` function in the
+      [AWS SDK docs](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html#upload-property).
+
+:::tip You can define default upload params
+An `uploadParams` object that either has no `filter` specified, or includes a
+`'*'` filter, will be treated as a default set of upload parameters. All
+assets that do not match any other filters will use these `params`.
+:::
+
+:::tip The order of upload params matters
+Any `uploadParams` objects that are not default upload parameters (see above)
+are applied in order. This means that individual assets will be set to use the first,
+and only the first, matching filter's `params`.
+:::
+
+:::warning You may not use the Key, Body, ContentType, and ACL keys
+These keys are reserved by Litexa, so you may not use them as part of an
+`uploadParams` object. If you attempt to use them, the Litexa deployment
+process will fail.
+:::
+
+##### Asset Deployment Location
+
 Assets will be deployed to subdirectories of your bucket, isolating
 specific deployments of specific projects from each other, copying
 the contents of your `litexa/assets` folder to the following location:
 
-    https://s3.{REGION}.amazonaws.com/{BUCKETNAME}/{SKILLNAME}/{DEPLOYMENTTARGET}/
+```stdout
+https://s3.{REGION}.amazonaws.com/{BUCKETNAME}/{SKILLNAME}/{DEPLOYMENTTARGET}/
+```
 
 :::warning Use one S3 bucket across your Litexa projects
 S3 bucket names are *globally unique*. This means that any AWS account cannot
@@ -187,31 +279,82 @@ with the assets in the top level going into the `default` folder. So if you have
 Litexa project named `CatsVsCucumbers` and you're deploying the `development` target,
 your project folder will look like this locally:
 
-    .
-    ├── litexa
-    |   └── assets
-    |       ├── intro.mp3
-    |       ├── introScreen.jpg
-    |       └── en-GB
-    |           ├── intro.mp3
-    |           └── resultScreen.jpg
+```stdout
+.
+├── litexa
+|   ├── assets
+|   |   ├── intro.mp3
+|   |   └── introScreen.jpg
+|   └── languages
+|       └── en-GB
+|           └── assets
+|             ├── intro.mp3
+|             └── resultScreen.jpg
+```
 
 And your S3 bucket would look like this:
 
-    .
-    ├── CatsVsCucumbers
-    |   └── development
-    |       ├── default
-    |       |   ├── intro.mp3
-    |       |   └── introScreen.jpg
-    |       └── en-GB
-    |           ├── intro.mp3
-    |           └── resultScreen.jpg
+```stdout
+.
+├── CatsVsCucumbers
+|   └── development
+|       ├── default
+|       |   ├── intro.mp3
+|       |   └── introScreen.jpg
+|       └── en-GB
+|           ├── intro.mp3
+|           ├── introScreen.mp3
+|           └── resultScreen.jpg
+```
 
 By default, Litexa will upload Alexa-usable files from your assets directory and
 ignore any file types it does not recognize. These files must have the file extensions:
 `.png`, `.jpeg`, `.jpg`, `.mp3`, `.json`, or`.txt`. Litexa extensions may add to that list.
 Please see the [section on assets](/book/presentation.html#asset-file-references) for more information.
+
+:::tip Overriding a deployment target's assets root path
+You can override the skill's assets URL path, instead of using the default S3 path (location of files
+deployed from `litexa/assets`). This can be useful when collaborating on a project with sizable assets,
+to prevent each contributor needing to upload and maintain their own copies of assets.
+
+A deployment target can override the skill asset root path by specifying an `overrideAssetsRoot` URL
+in the Litexa config. For example:
+
+```javascript
+const deploymentConfiguration = {
+  name: 'my-skill',
+  deployments: {
+    deployment_target_name: {
+      module: '@litexa/deploy-aws',
+      overrideAssetsRoot: 'https://path.com/to/your/assets/'
+    }
+  }
+}
+```
+:::
+
+:::tip Skipping Litexa's asset reference validation
+Litexa will validate asset references for certain keywords (`card`, `screen`, `soundEffect`, etc.) and fail
+Litexa tests if those assets aren't found in the `litexa/assets` directory. This validation can be
+disabled per deployment target, when referenced assets are missing locally (which is typically the
+case when `overrideAssetsRoot` is used).
+
+A deployment target can skip asset reference validation by setting disableAssetReferenceValidation in the
+Litexa config. For example:
+
+```javascript
+const deploymentConfiguration = {
+  name: 'my-skill',
+  deployments: {
+    deyployment_target_name: {
+      module: '@litexa/deploy-aws',
+      overrideAssetsRoot: 'https://path.com/to/your/assets/',
+      disableAssetReferenceValidation: true
+    }
+  }
+}
+```
+:::
 
 #### Lambda Configuration (optional)
 
@@ -224,10 +367,13 @@ is an example with all the supported Lambda configuration options:
   "deployments": {
     "development": {
       "module": "@litexa/deploy-aws",
-      "S3BucketName": "suncoast-assets",
+      "s3Configuration": {
+        "bucketName": "suncoast-assets"
+      },
       "askProfile": "suncoast",
       "awsProfile": "prototyping",
       "lambdaConfiguration": {
+        "Runtime": "nodejs10.x",
         "MemorySize": 128,
         "Timeout": 240,
         "Environment": {
@@ -246,6 +392,43 @@ that will be used to call Lambda's [updateFunctionConfiguration](
   https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/Lambda.html#updateFunctionConfiguration-property).
 You can use this to modify the Lambda's timeout, change the memory size, or
 add your own environment variables. All sub keys are optional.
+
+#### DynamoDB TTL (optional)
+
+Litexa has limited support for setting a [Time To Live (TTL)](
+  https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/TTL.html)
+field with each database entry. This may be useful for limiting your table
+data to active users by automatically deleting old user data. To set a Time To
+Live specification, add the `dynamoDbConfiguration` object to your Litexa config:
+
+```javascript
+{
+  deployments: {
+    development: {
+      module: "@litexa/deploy-aws",
+      askProfile: "suncoast",
+      awsProfile: "prototyping",
+      dynamoDbConfiguration: {
+        timeToLive: {
+          AttributeName: "ttl", // needs to match the attribute name specified when enabling TTL
+          secondsToLive: 2592000 // specified in seconds (would wipe data if not updated in 30 days)
+        }
+      }
+    }
+  }
+}
+```
+
+:::warning Litexa does not enable TTL
+At this time, Litexa does **not** create or update your table with your TTL
+settings - it simply updates the specified attribute in the database records
+with every request. You will need to [manually enable TTL](
+  https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/time-to-live-ttl-how-to.html)
+for your table in the AWS console or AWS CLI.
+
+You can find your skill's table name in the `artifacts.json` file as part of
+the `dynamoDBARN`, once the skill has been deployed.
+:::
 
 ### CloudWatch Logging
 
@@ -353,9 +536,29 @@ Litexa takes your `skill.coffee/js/ts` (we might refer to this as `skill.*` in d
 to create your skill manifest file. You can find the constructed skill manifest file after a deployment
 in `.deploy/{yourDeploymentTarget}/skill.json`.
 
-If you use any litexa extensions in your project, they may add the APIs they use to your skill manifest automatically.
+If you use any Litexa extensions in your project, they may add the APIs they use to your skill manifest automatically.
 Otherwise, you will need to add the required fields to your `skill.*`. Likewise, if you use an API Litexa does not
 explicitly support (e.g. Gadget Controller), you will need to add it to your `skill.*`.
+
+#### Deployment Target Overrides
+
+If you want to change your skill manifest based on a specific deployment target, you can do so by keying the original
+manifest content structure on the deployment target name. This is completely optional - any unkeyed targets will fall
+back to using the default manifest.
+
+For example, the below `skill.js` has a different manifest for its `QA` deployment target only.
+
+```javascript
+const standardSkillManifest = { /* ... */ };
+const qaSkillManifest = { /* ... */ };
+
+module.exports = {
+  manifest: standardSkillManifest // default manifest
+  QA: {
+    manifest: qaSkillManifest // "QA" deployment target-specific manifest
+  }
+}
+```
 
 ### Skill Model
 
@@ -408,7 +611,9 @@ Here's an example. Let's say your skill's invocation names in en-US and en-GB ar
   "deployments": {
     "development": {
       "module": "@litexa/deploy-aws",
-      "S3BucketName": "suncoast-assets",
+      "s3Configuration": {
+        "bucketName": "suncoast-assets"
+      },
       "askProfile": "suncoast",
       "awsProfile": "prototyping",
       "invocation": {
@@ -429,7 +634,9 @@ If you instead add an invocation suffix, your Litexa config will look like this:
   "deployments": {
     "development": {
       "module": "@litexa/deploy-aws",
-      "S3BucketName": "suncoast-assets",
+      "s3Configuration": {
+        "bucketName": "suncoast-assets"
+      },
       "askProfile": "suncoast",
       "awsProfile": "prototyping",
       "invocationSuffix": "dev"
@@ -447,17 +654,23 @@ Combining the above examples will net you `cloudy cats dev` in en-GB and
 Once again, you can view the result skill invocation names in the deployed model files at
 `.deploy/{yourDeploymentTarget}/model-{locale}.json`.
 
+### Deployment Target-based Skill Configuration
+
+You can change the skill behavior and language model based on the deployment target you
+are executing tests or deploying the skill for. Please see [DEPLOY variables](
+/book/expressions.html#deploy-variables) for more information.
+
 ### Monetization
 
 Please see the [Monetization chapter](/book/monetization.html).
 
-## Extra Note: The `production` Deployment Target Name
+## Extra Note: Including `production` in the Deployment Target Name
 
-There is a special deployment target name called `production`.
-For deployment targets that are *not* this, a `\ (development)` will be
-automatically appended to the name of your skill, with `development`
-specified as your named deployment target. We recommend creating and
-using this deployment target for your live skill.
+There is a special condition on deployment target names. If the name does *not*
+have the word `production` in it, a ` (<target>)` will be automatically
+appended to the name of your skill, with `<target>` being the name of the
+deployment target you used to deploy the skill. We recommend labeling only
+your production skill deployment target(s) with `production`.
 
 :::tip
 We recommend changing the DynamoDB settings for your live skill to ensure that it does not

@@ -19,6 +19,7 @@
     "wav-decoder": "1.3.0"
   },
   "scripts": {
+    "audit:fix": "npm audit fix",
     "build": "npm run clean && npm install",
     "clean": "npx rimraf node_modules",
     "coverage": "echo \"Missing coverage script.\" && exit 0",

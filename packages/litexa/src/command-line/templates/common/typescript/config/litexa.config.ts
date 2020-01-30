@@ -5,12 +5,12 @@
  *  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  */
 
-const litexaConfiguration: Configuration = {
+const deploymentConfiguration: Configuration = {
     name: '{name}',
     deployments: {
         development: {
             module: '@litexa/deploy-aws',
-            S3BucketName: '',
+            s3Configuration: { bucketName: '' },
             askProfile: '',
             awsProfile: ''
         }
@@ -18,4 +18,4 @@ const litexaConfiguration: Configuration = {
     plugins: {}
 };
 
-export = litexaConfiguration;
+export = deploymentConfiguration;

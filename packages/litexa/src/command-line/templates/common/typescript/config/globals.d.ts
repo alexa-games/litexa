@@ -28,14 +28,38 @@ interface LambdaSettings {
     Timeout?: number;
 }
 
+type DeploymentVariables = {[key: string]: boolean | number | string | object | Array<boolean | number | string | object> }
+
+interface S3Configuration {
+    bucketName: string;
+    uploadParams?: UploadParams[];
+}
+
+interface DynamoDbConfiguration {
+    timeToLive?: {
+        AttributeName: string;
+        secondsToLive: number;
+    }
+}
+
+interface UploadParams {
+    filter?: string[];
+    params: { [key: string]: any };
+}
+
 interface Deployment {
     module: string;
-    S3BucketName: string;
     askProfile: string;
     awsProfile: string;
+    lambdaConfiguration?: LambdaSettings;
+    dynamoDbConfiguration?: DynamoDbConfiguration;
+    s3Configuration: S3Configuration;
+    S3BucketName?: string;  // Deprecated. Now using s3Configuration.bucketName.
     invocationSuffix?: string;
     invocation?: InvocationCollection;
-    lambdaConfiguration?: LambdaSettings;
+    DEPLOY?: DeploymentVariables;
+    disableAssetReferenceValidation?: boolean;
+    overrideAssetsRoot?: string;
 }
 
 interface Configuration {
@@ -134,7 +158,7 @@ interface StrictEndpoint extends Endpoint {
     sslCertificateType: SSLCertificate;
 }
 type StrictRegions = { [key in Region]?: StrictEndpoint };
-type CustomInterface = 'ALEXA_PRESENTATION_APL' | 'AUDIO_PLAYER' | 'CAN_FULFILL_INTENT_REQUEST' | 'GADGET_CONTROLLER' | 'GAME_ENGINE' | 'RENDER_TEMPLATE' | 'VIDEO_APP';
+type CustomInterface = 'ALEXA_PRESENTATION_HTML' | 'ALEXA_PRESENTATION_APL' | 'AUDIO_PLAYER' | 'CAN_FULFILL_INTENT_REQUEST' | 'GADGET_CONTROLLER' | 'GAME_ENGINE' | 'RENDER_TEMPLATE' | 'VIDEO_APP';
 interface Interface {
     type: CustomInterface;
 }

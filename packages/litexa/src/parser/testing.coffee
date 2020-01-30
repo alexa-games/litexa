@@ -97,6 +97,7 @@ makeBaseRequest = (skill) ->
       dev = req.context.System.device
       dev.supportedInterfaces =
         'Alexa.Presentation.APL': {}
+        'Alexa.Presentation.HTML': {}
         Display: {}
     else
       throw new Error "Unknown test device type #{device}"
@@ -971,7 +972,11 @@ class lib.Test
         if k[0] == '_'
           delete obj[k]
 
-    output.raw.push rawObject
+    # If turned on via test options, this logs all raw responses/requests and DB contents.
+    # @TODO: For extensive tests, dumping this raw object aborts with a JS Heap OOM error
+    # (during writeFileSync in test.coffee) -> should be addressed.
+    if context.testContext.options?.logRawData?
+      output.raw.push rawObject
 
     if result.err
       rawObject.error = result.err.stack ? '' + result.err
@@ -1094,11 +1099,13 @@ class lib.Test
         output.log.push logs.join('\n')
         successCount = 0
         failCount = 0
+        failedTestName = undefined
         if success
           successCount = 1
         else
           failCount = 1
-        setTimeout (->resultCallback null, successCount, failCount), 1
+          failedTestName = @name
+        setTimeout (->resultCallback null, successCount, failCount, failedTestName), 1
         return
 
       step = remainingSteps.shift()

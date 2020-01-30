@@ -146,7 +146,7 @@ Here is a sample IntentRequest type `$request` from running `litexa test` in a p
   }
 }
 ```
-### slot variables
+### Slot Variables
 
 The most common use of request variables is population of slot values in
 intents. If an intent contains a slot value, Litexa will automatically populate
@@ -168,7 +168,7 @@ the value the skill received from the request. Therefore, if the user said "my
 cat is named Ellie," then the skill would respond with "Ellie you say. How
 cute!"
 
-### general use variables
+### General-Purpose Variables
 
 You can assign your own $ variables as a messaging system to affect
 downstream states.
@@ -405,6 +405,34 @@ switch score
 
 Coming soon!
 
+## DEPLOY variable
+
+Can reference a property of the optional `DEPLOY` object that can be defined in your
+Litexa configuration file. Assuming that this `DEPLOY` object was defined on your
+`development` deployment target:
+
+```javascript
+development: {
+  DEPLOY: { LOG_LEVEL: 'verbose' }
+  // other configuration...
+}
+```
+
+Then the below condition would be true while testing or running the skill for the
+`development` target:
+
+```coffeescript
+launch
+  if DEPLOY.LOG_LEVEL == "verbose"
+    log "verbose logging enabled"
+```
+
+Please see the Variables and Expressions chapter for how to define and use `DEPLOY`
+variables, and their practical applications.
+
+Note that you cannot reference the `DEPLOY` object by itself; you must reference
+a field on the `DEPLOY` object.
+
 ## directive
 
 Adds directives to the next Alexa response, by calling an
@@ -456,9 +484,37 @@ session should end.
 
 For an example, see [LISTEN (Testing)](#listen-testing).
 
+## exclude file
+
+The `exclude file` statement lets you specify a static [expression](
+#expression) to exclude all the contents of the file. You might want to exclude
+a file of test states from a production build, or exclude a file from versions
+of your skill, as defined by your [DEPLOY](#deploy-variable) variables.
+
+The statement can also be used to skip a `.test.litexa` file if the tests within
+aren't relevant and would otherwise fail for the deployment target being tested.
+For instance:
+
+```coffeescript
+# campaign.test.litexa
+exclude file unless DEPLOY.ENABLE_CAMPAIGN
+
+TEST "campaign setup"
+  # ...
+
+# other tests for campaign mode that assume DEPLOY.ENABLE_CAMPAIGN == true
+```
+
+:::warning
+This statement only works on files that exclusively have tests or states
+that don't have any transitions to them.
+:::
+
 ## Expression
 
 Coming soon!
+
+For now, please reference the Variables and Expressions chapter in the Book.
 
 ## for
 
@@ -662,7 +718,7 @@ The object name that consolidates all `.json` files, keyed by the
    # Reference a JSON file in-line
    say "Test. {jsonFiles["test.json"].test}"
  ```
- 
+
 ## launch
 
 Simulates the user invoking the skill in a Litexa test.
@@ -915,8 +971,8 @@ applied to all voiced responses from this skill. The statement
 should be placed outside of the scope of any state, at the top
 level of the file.
 
-Use this to improve Alexa's pronounciation of words, or select
-a specific pronounciation skill wide, while retaining human
+Use this to improve Alexa's pronunciation of words, or select
+a specific pronunciation skill-wide, while retaining human
 readable spelling in your code.
 
 ```coffeescript
@@ -925,6 +981,24 @@ pronounce "tomato" as "<phoneme alphabet="ipa" ph="/təˈmɑːtoʊ/">tomato</pho
 
 Note that you must use SSML in the replacement text; the Litexa
 SSML shorthand statements (e.g "<!Bravo>") will not work.
+
+### Localized Pronunciations
+
+If you plan to publish your skill to multiple locales, you can define
+locale-specific pronunciations for your voiced responses. Simply add
+your locale-specific pronunciation definitions to the Litexa files that
+reside in said locale's Litexa project directory (see the Localization
+chapter for further information).
+
+:::tip Tip
+We recommend using a standalone file (e.g. `pronounce.litexa`) for
+pronunciation definitions.
+:::
+
+:::warning Note
+Opposite to Litexa's structured-based override features of localization,
+the default locale's pronunciations will not carry over to other locales.
+:::
 
 ## quit
 
@@ -990,13 +1064,13 @@ This would match 'cat', 'caat', 'caaat', etc.
 
 ## reprompt
 
-Specifies the reprompt that will be installed during
-the next response. The content is specified in the
-[Say String](#say-string) format.
-
-Note: Unlike [say](#say) statements, reprompt statements
-are *not* accumulative; only the most recent reprompt statement
-will be included in the response.
+Adds a [Say String](#say-string) to the pending skill response's reprompt speech.
+Same as the [say](#say) statement, any reprompted fragments are accumulated.
+```coffeescript
+reprompt "Hello"
+reprompt "World"
+# would result in Alexa reprompting "Hello World"
+```
 
 ## request:
 
@@ -1122,9 +1196,21 @@ being separated by a single space.
 ```coffeescript
 say "Hello"
 say "World"
+# would result in Alexa saying "Hello World"
 ```
 
-This would result in Alexa saying "Hello World"
+## say reprompt
+
+Combines the [say](#say) and [reprompt](#reprompt) functionality: The indicated
+[Say String](#say-string) is added to both the pending skill response's output speech
+and reprompt speech.
+
+```coffeescript
+say reprompt "something"
+# equivalent to:
+# say "something"
+# reprompt "something"
+```
 
 ## Say String
 
@@ -1521,6 +1607,13 @@ user: "my name is" with $name = Cat # this is valid, but can't happen in a real 
 ```
 
 
+## Utterance
+
+An example phrase to be spoken by the user that maps to an intent.
+Utterances in Litexa are defined in [when](#when) statements.
+
+Please read the State Management chapter for more information on intents and utterances.
+
 ## wait
 
 Simulates a designated amount of time to pass in a Litexa test case.
@@ -1565,7 +1658,7 @@ simulate properly otherwise.
 
 ## when
 
-Defines an intent that the parent state is willing to handle.
+Declares an intent that the parent state is willing to handle.
 
 ```coffeescript
 when "my name is $name"
@@ -1582,7 +1675,9 @@ statements.
 
 The content of the statement can be an [Utterance](#utterance), or an
 [Intent Name](#intent-name). In either case, the statement can be followed
-by a series of subordinate [or](#or) utterance statements that offer
+by a series of one of the two following subordinate statements.
+
+1. The statement can be followed by [or](#or) utterance statements that offer
 alternative ways to specify the same intent.
 
 ```coffeescript
@@ -1590,6 +1685,18 @@ when "my name is $name"
   or "I'm $name"
   or "call me $name"
 ```
+
+2. The statement can be followed by [or](#or) intent name statements to have
+these intents share the same handler.
+
+```coffeescript
+when RephraseQuestionIntent
+  or AMAZON.RepeatIntent
+  or UnsureIntent
+```
+
+These types of subordinate statements cannot be mixed; doing so will result in a
+compile time error.
 
 When the `when` statement contains an [Utterance](#utterance), the underlying
 intent name will be automatically generated from that utterance,
@@ -1637,6 +1744,47 @@ askForAlternativeName
     say "Understood."
 ```
 
+### Postfix Conditional
+
+The statement can include a conditional static [expression](
+#expression). If the condition evaluates to false, then the handler will not
+exist in that state.
+
+```coffeescript
+forkInTheRoad
+  say "Do you want to go left or right?"
+
+  when AlwaysCorrectPath if DEPLOY.shortcutsEnabled
+    or "the correct path"
+    or "next"
+    ...
+
+  when SkipToEnding if DEPLOY.shortcutsEnabled
+    -> ending
+
+  ... # other handlers
+
+  otherwise
+    say "I didn't get that."
+    -> forkInTheRoad
+
+```
+
+This can be a way to exclude some intents for specific deployment targets. For
+the above example, if this was the only place `AlwaysCorrectPath` was defined,
+it would not exist in the language model for the deployment targets that have
+`DEPLOY.shortcutsEnabled = true`. On the other hand, `SkipToEnding` is defined
+elsewhere because there are no utterances attached to its statement, so it will
+exist in the language model.
+
+If the skill is deployed with a deployment target that does not have `DEPLOY.
+shortcutsEnabled = true` and the skill receives `SkipToEnding` in this state,
+Litexa will have the [`otherwise`](#otherwise) handler resolve it.
+
+It may be useful to learn about [DEPLOY variables](#deploy-variable) and static
+[expressions](#expression) for these statements.
+
+
 ## with
 
 Specifies the type of a [slot](#slot), as part of a [when](#when) clause.
@@ -1683,7 +1831,7 @@ language
 model](https://developer.amazon.com/docs/custom-skills/create-and-edit-custom-slot-types.html#json-for-slot-types-interaction-model-schema).
 
 ```javascript
-    // in slots.build.js
+// in slots.build.js
 exports.vehicleNames = function() {
   return {
     name: "LIST_OF_VEHICLES",
@@ -1737,7 +1885,7 @@ use a shortcut and return an array of strings for the values key:
 exports.vehicleNames = function() {
   return {
     name: "LIST_OF_TRAVEL_MODES",
-    values: [ "train",
+    values: [
       "train",
       "jet",
       "fly",

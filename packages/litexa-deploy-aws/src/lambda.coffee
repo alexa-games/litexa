@@ -87,6 +87,8 @@ exports.deploy = (context, logger) ->
   .then ->
     call changeCloudwatchRetentionPolicy
   .then ->
+    call checkForAssetsRoot
+  .then ->
     call endLambdaDeployment
   .catch (err) ->
     logger.error "lambda deployment failed"
@@ -96,7 +98,7 @@ exports.deploy = (context, logger) ->
 preamble = (context, logger, lambdaContext) ->
   new Promise (resolve, reject) ->
     try
-      require('./aws-config')(context, logger, AWS)
+      require('./aws-config').handle(context, logger, AWS)
 
       mkdirp.sync lambdaContext.codeRoot
 
@@ -323,7 +325,7 @@ makeLambdaConfiguration = (context, logger) ->
       Handler: "index.handler" # exports.handler in index.js
       MemorySize: 256 # megabytes, mainly because this also means dedicated CPU
       Role: context.lambdaIAMRoleARN
-      Runtime: "nodejs8.10"
+      Runtime: "nodejs10.x"
       Timeout: 10 # seconds
       Environment:
         Variables:
@@ -650,3 +652,7 @@ changeCloudwatchRetentionPolicy = (context, logger, lambdaContext) ->
         logger.log "Updated CloudWatch retention policy to 30 days"
         context.localCache.saveTimestamp 'appliedLogRetentionPolicy'
         return Promise.resolve()
+
+checkForAssetsRoot = (context, logger, lambdaContext) ->
+  unless context.artifacts.get 'assets-root'
+    logger.warning 'WARNING: Assets root is not set in the deployed lambda environment configuration.'

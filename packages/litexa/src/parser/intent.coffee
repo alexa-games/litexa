@@ -9,7 +9,6 @@ lib = module.exports.lib = {}
 
 { Function, FunctionMap } = require("./function.coffee").lib
 { ParserError, formatLocationStart } = require("./errors.coffee").lib
-{ LocalizationContext } = require('./localization.coffee')
 Utils = require('@src/parser/utils').lib
 
 
@@ -145,7 +144,7 @@ compileSlot = (context, type) ->
   for value, index in data.values
     if typeof(value) == 'string'
       data.values[index] =
-        id: null
+        id: undefined
         name: {
           value: value
           synonyms: []
@@ -172,7 +171,7 @@ createSlotFromArray = (context, slotName, values) ->
 
   for v in values
     type.values.push
-      id: null
+      id: undefined
       name: {
         value: JSON.parse v
         synonyms: []
@@ -300,6 +299,7 @@ class lib.Intent
             refer to a built in intent beginning with `AMAZON.`"
     @builtin = @name in builtInIntents
     @hasContent = false
+    @childIntents = []
 
   report: ->
     "#{@name} {#{k for k of @slots}}"
@@ -366,7 +366,14 @@ class lib.Intent
     Intent.registerUtterance(@location, utterance, @name)
 
   pushAlternate: (parts) ->
+    @hasAlternateUtterance = true
     @pushUtterance new lib.Utterance parts
+
+  pushChildIntent: (intent) ->
+    @childIntents.push(intent.name)
+
+  hasChildIntents: ->
+    return @childIntents.length > 0
 
   pushSlotType: (location, name, type) ->
     if @referenceIntent?
@@ -379,8 +386,7 @@ class lib.Intent
 
   toLambda: (output, options) ->
     indent = "    "
-    if @startFunction?
-      @startFunction.toLambda(output, indent, options)
+    @startFunction?.toLambda(output, indent, options)
 
   hasStatementsOfType: (types) ->
     if @startFunction?
@@ -400,10 +406,24 @@ class lib.Intent
   toModelV2: (context) ->
     return if @referenceIntent?
 
+    if @qualifier?
+      if @qualifier.isStatic()
+        condition = @qualifier.evaluateStatic context
+        if @qualifierIsInverted
+          condition = not condition
+        return null unless condition
+      else
+        throw new ParserError @qualifier.location, "intent conditionals must be static expressions"
+
     result =
       name: @name
 
-    result.samples = ( u.toModelV2(context) for u in @utterances )
+    # Check if we have a localization map, and if so whether we have translated utterances.
+    localizedIntent = context.skill?.projectInfo?.localization?.intents?[@name]
+    if context.language != 'default' && (localizedIntent?[context.language])
+      result.samples = localizedIntent[context.language]
+    else
+      result.samples = ( u.toModelV2(context) for u in @utterances )
 
     if @slots
       slots = []
@@ -417,9 +437,14 @@ class lib.Intent
 
     return result
 
-  toLocalization: (result, context) ->
-    if @startFunction?
-      @startFunction.toLocalization(result, context)
+  toLocalization: (localization) ->
+    @startFunction?.toLocalization(localization)
+
+    for utterance in @utterances
+      finalUtterance = utterance.toModelV2() # replace any $slot with {slot}
+      unless localization.intents[@name].default.includes(finalUtterance)
+        # if this is a newly added utterance, add it to the localization map
+        localization.intents[@name].default.push(finalUtterance)
 
 # Class that supports intent filtering.
 class lib.FilteredIntent extends lib.Intent

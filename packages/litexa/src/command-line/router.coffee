@@ -11,6 +11,7 @@ path = require 'path'
 validator = require './optionsValidator'
 GenerateCommandDirector = require './generateCommandDirector'
 isp = require './isp'
+localization = require './localization'
 projectClean = require './project-clean'
 
 packageVersion = require('../../package.json').version
@@ -28,21 +29,25 @@ module.exports.run = ->
   program
     .command 'model'
     .description "compiles a project's language model and prints it to the console."
+    .option '-d --deployment [deployment]', "which deployment to run, using the name from the deployments map in the Litexa configuration file.", 'development'
     .action (cmd) ->
       chalk.enabled = cmd.parent.color
       options =
         root: root
         type: 'model'
+        deployment: cmd.deployment
         region: cmd.parent.region
       require('./printers.coffee').run options
 
   program
     .command 'handler'
     .description "compiles a project's JavaScript handler and prints it to the console."
+    .option '-d --deployment [deployment]', "which deployment to run, using the name from the deployments map in the Litexa configuration file.", 'development'
     .action (cmd) ->
       chalk.enabled = cmd.parent.color
       options =
         root: root
+        deployment: cmd.deployment
         type: 'handler'
       require('./printers.coffee').run options
 
@@ -142,8 +147,10 @@ module.exports.run = ->
   program
     .command 'test [filter]'
     .description "executes a project's tests and prints the output to the console."
+    .option '-d --deployment [deployment]', "which deployment to run, using the name from the deployments map in the Litexa configuration file.", 'development'
     .option '--no-strict', 'disable strict testing'
     .option '--device [device]', 'which device to emulate (dot, echo, show)', 'show'
+    .option '--log-raw-data [logRawData]', 'dumps all raw requests, responses, and DB contents in .test/output.json'
     .option '-w, --watch', "watch for file changes, then rerun tests"
     .action (filter, cmd) ->
       errors = validator(
@@ -171,10 +178,12 @@ module.exports.run = ->
       options =
         root: root
         filter: filter
+        deployment: cmd.deployment
         strict: cmd.strict
         region: cmd.parent.region
         watch: cmd.watch
         device: cmd.device
+        logRawData: cmd.logRawData
       require('./test.coffee').run options
 
   program
@@ -268,7 +277,7 @@ module.exports.run = ->
         region: cmd.parent.region
       try
         config = await (require('./project-config').loadConfig root)
-        info = new (require('./project-info'))(config)
+        info = new (require('./project-info'))({jsonConfig: config})
         console.log JSON.stringify info, null, 2
       catch err
         console.error err
@@ -341,6 +350,33 @@ module.exports.run = ->
             console.error chalk.red("failed to reset in-skill product entitlements")
         else
           console.error chalk.red("unknown data type '#{data}'. Currently supported data: isp")
+
+  program
+    .command 'localize'
+    .description "parses intents/utterances, and any say/reprompt speech from the default Litexa code files. Updates existing localization.json or creates new file in the Litexa project's root directory."
+    .option '--clone-from [language]', 'specify source language for a cloning operation'
+    .option '--clone-to [language]', 'copy all translations from the language specified by --clone-from to this language'
+    .option '--disable-sort-languages', 'disables sorting languages in localization.json alphabetically'
+    .option '--disable-sort-utterances', 'disables sorting utterances in localization.json alphabetically'
+    .option '--remove-orphaned-utterances', 'remove all localization utterances that are no longer in the skill'
+    .option '--remove-orphaned-speech', 'remove all speech lines that are no longer in the skill'
+    # @TODO: Add options to support creating translation placeholders for languages, and warn about missing translations.
+    # .option '--find-missing-translations [missingLanguage]', 'check for missing strings for a specific language'
+    # .option '--create-localization-excel', 'generate Excel file from contents of localization.json'
+    # .option '--parse-localization-excel [file path]', 'parse translations from indicated Excel file back into localization.json'
+    .action (cmd) ->
+      options = {
+        root: root
+        cloneFrom: cmd.cloneFrom
+        cloneTo: cmd.cloneTo
+        disableSortLanguages: cmd.disableSortLanguages
+        disableSortUtterances: cmd.disableSortUtterances
+        removeOrphanedUtterances: cmd.removeOrphanedUtterances
+        removeOrphanedSpeech: cmd.removeOrphanedSpeech
+        verbose: cmd.parent.verbose
+      }
+
+      localization.localizeSkill(options)
 
   program.on 'command:*', ->
     console.error """Invalid command: #{program.args.join(' ')}

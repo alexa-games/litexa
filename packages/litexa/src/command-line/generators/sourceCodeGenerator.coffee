@@ -46,7 +46,7 @@ class SourceCodeGenerator extends Generator
   _hasLitexaCode: ->
     return @foundLitexaCode if @foundLitexaCode?
 
-    projectInfo = new @projectInfoClass @_projectConfig()
+    projectInfo = new @projectInfoClass { jsonConfig: @_projectConfig() }
     for languageName, language of projectInfo.languages
       for file in language.code.files
         if file.indexOf('.litexa') > 0

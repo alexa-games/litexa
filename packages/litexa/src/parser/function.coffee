@@ -6,7 +6,6 @@
 ###
 
 lib = module.exports.lib = {}
-{ LocalizationContext } = require('./localization.coffee')
 { ParserError } = require("./errors.coffee").lib
 
 
@@ -30,6 +29,34 @@ operatorMap =
   '&&': '&&'
   'or': '||'
   '||': '||'
+  'not': '!'
+
+
+isStaticValue = (v) ->
+  switch typeof(v)
+    when 'string' then return true
+    when 'number' then return true
+    when 'boolean' then return true
+    when 'object' then return v.isStatic?()
+  return false
+
+evaluateStaticValue = (v, context, location) ->
+  switch typeof(v)
+    when 'string'
+      if v[0] == '"' and v[v.length-1] == '"'
+        return v[1...v.length-1]
+      else
+        return v
+    when 'number' then return v
+    when 'boolean' then return v
+    when 'object'
+      unless v.evaluateStatic?
+        throw new ParserError location, "missing evaluateStatic for #{JSON.stringify(v)}"
+      try
+        return v.evaluateStatic(context)
+      catch err
+        throw new ParserError location, "Error in static evaluation: #{err}"
+  throw "don't know how to static evaluate #{JSON.stringify(v)}"
 
 
 class lib.EvaluateExpression
@@ -38,14 +65,20 @@ class lib.EvaluateExpression
   toLambda: (output, indent, options) ->
     output.push "#{indent}#{@expression.toLambda(options)}"
 
+  toString: ->
+    @expression.toString()
+
 
 class lib.Expression
   constructor: (@location, @root) ->
     unless @root?
       throw new ParserError @location, "expression with no root?"
 
-  toString: ->
-    @root.toString()
+  isStatic: ->
+    return isStaticValue(@root)
+
+  evaluateStatic: (context) ->
+    evaluateStaticValue @root, context, @location
 
   toLambda: (options, keepRootParentheses) ->
     if @root.toLambda?
@@ -53,11 +86,49 @@ class lib.Expression
       return @root.toLambda(options)
     return @root
 
+  toString: ->
+    @root.toString()
+
+class lib.UnaryExpression
+  constructor: (@location, @op, @val) ->
+    unless @op of operatorMap
+      throw new ParserError @location, "unrecognized operator #{@op}"
+
+  isStatic: ->
+    return isStaticValue(@val)
+
+  evaluateStatic: (context) ->
+    val = evaluateStaticValue @val, context, @location
+    op = operatorMap[@op]
+    eval "#{op}#{JSON.stringify val}"
+
+  toLambda: (options) ->
+    val = @val
+    if @val.toLambda?
+      val = @val.toLambda(options)
+    op = operatorMap[@op]
+    if @skipParentheses
+      "#{op}#{val}"
+    else
+      "(#{op}#{val})"
+
+  toString: ->
+    "#{@op}#{@val}"
+
 
 class lib.BinaryExpression
   constructor: (@location, @left, @op, @right) ->
     unless @op of operatorMap
       throw new ParserError @location, "unrecognized operator #{@op}"
+
+  isStatic: ->
+    return isStaticValue(@left) and isStaticValue(@right)
+
+  evaluateStatic: (context) ->
+    left = evaluateStaticValue @left, context, @location
+    right = evaluateStaticValue @right, context, @location
+    op = operatorMap[@op]
+    eval "#{JSON.stringify left} #{op} #{JSON.stringify right}"
 
   toLambda: (options) ->
     left = @left
@@ -71,6 +142,9 @@ class lib.BinaryExpression
       "#{left} #{op} #{right}"
     else
       "(#{left} #{op} #{right})"
+
+  toString: ->
+    return "#{@left.toString()} #{@op} #{@right.toString()}"
 
 class lib.LocalExpressionCall
   constructor: (@location, @name, @arguments) ->
@@ -86,6 +160,12 @@ class lib.LocalExpressionCall
     options.scopeManager.checkAccess @location, @name.base
     "await #{@name}(#{args.join(', ')})"
 
+  toString: ->
+    args = []
+    for a in @arguments
+      args.push a.toString()
+
+    return "#{@name}(#{args.join(', ')})"
 
 class lib.DBExpressionCall
   constructor: (@location, @name, @arguments) ->
@@ -100,6 +180,12 @@ class lib.DBExpressionCall
 
     "await context.db.read('#{@name.base}')#{@name.toLambdaTail(options)}(#{args.join(', ')})"
 
+  toString: ->
+    args = []
+    for a in @arguments
+      args.push a.toString()
+
+    return "@#{@name}(#{args.join(', ')})"
 
 class lib.IfCondition
   constructor: (@expression, @negated) ->
@@ -129,16 +215,12 @@ class lib.IfCondition
   collectRequiredAPIs: (apis) ->
     @startFunction?.collectRequiredAPIs?(apis)
 
-  toLocalization: (result, context) ->
-    return unless @startFunction?
-    subContext = new LocalizationContext
-    @startFunction.toLocalization(result, subContext)
-    if subContext.hasContent()
-      context.pushOption @expression, subContext
+  toLocalization: (localization) ->
+    @startFunction?.toLocalization(localization)
 
 
 class lib.ElseCondition
-  constructor: (@expression) ->
+  constructor: (@expression, @negated) ->
 
   pushCode: (line) ->
     @startFunction = @startFunction ? new lib.Function
@@ -149,7 +231,10 @@ class lib.ElseCondition
 
   toLambda: (output, indent, options) ->
     if @expression
-      output.push "#{indent}else if (#{@expression.toLambda(options)}) {"
+      if @negated
+        output.push "#{indent}else if (!(#{@expression.toLambda(options)})) {"
+      else
+        output.push "#{indent}else if (#{@expression.toLambda(options)}) {"
     else
       output.push "#{indent}else {"
     @startFunction?.toLambda(output, indent + "  ", options)
@@ -163,12 +248,8 @@ class lib.ElseCondition
   collectRequiredAPIs: (apis) ->
     @startFunction?.collectRequiredAPIs?(apis)
 
-  toLocalization: (result, context) ->
-    return unless @startFunction?
-    subContext = new LocalizationContext
-    @startFunction.toLocalization(result, subContext)
-    if subContext.hasContent()
-      context.pushOption (@expression ? "else"), subContext
+  toLocalization: (localization) ->
+    @startFunction?.toLocalization(localization)
 
 
 class lib.ForStatement
@@ -206,7 +287,6 @@ class lib.ForStatement
     for l in code
       output.push indent + l
 
-
   hasStatementsOfType: (types) ->
     if @startFunction?
       return @startFunction.hasStatementsOfType(types)
@@ -215,12 +295,8 @@ class lib.ForStatement
   collectRequiredAPIs: (apis) ->
     @startFunction?.collectRequiredAPIs?(apis)
 
-  toLocalization: (result, context) ->
-    return unless @startFunction?
-    subContext = new LocalizationContext
-    @startFunction.toLocalization(result, subContext)
-    if subContext.hasContent()
-      context.pushOption @expression, subContext
+  toLocalization: (localization) ->
+    @startFunction?.toLocalization(localization)
 
 
 class lib.SwitchStatement
@@ -270,6 +346,9 @@ class lib.SwitchStatement
       output.push "#{indent}}"
 
     options.scopeManager.popScope()
+
+  toLocalization: (localization) ->
+    @cases.forEach((c) -> c.startFunction?.toLocalization(localization))
 
 
 class lib.SwitchAssignment
@@ -325,6 +404,9 @@ class lib.SwitchCase
     @startFunction?.toLambda(output, indent + "  ", options)
     output.push "#{indent}}"
 
+  toLocalization: (localization) ->
+    @startFunction?.toLocalization(localization)
+
 
 class lib.SetSetting
   constructor: (@variable, @value) ->
@@ -353,7 +435,6 @@ class lib.WrapClass
 class lib.DBTypeDefinition
   constructor: (@location, @name, @type) ->
 
-
 class lib.LocalDeclaration
   constructor: (@name, @expression) ->
 
@@ -374,6 +455,9 @@ class lib.LocalVariableReference
   toLambda: (options) ->
     options.scopeManager.checkAccess @location, @name.base
     @name.toLambda(options)
+
+  toString: (options) ->
+    return @name
 
 
 class lib.SlotVariableAssignment
@@ -452,11 +536,11 @@ class lib.Function
     if @shouldEndSession
       output.push("context.shouldEndSession = true;")
 
-  toLocalization: (result, context) ->
+  toLocalization: (localization) ->
     return unless 'default' of @languages
     for line, idx in @languages.default
       if line.toLocalization?
-        line.toLocalization(result, context)
+        line.toLocalization(localization)
 
   forEachPart: (language, cb) ->
     return unless @languages[language]
@@ -503,7 +587,7 @@ class lib.FunctionMap
     return unless name of @functions
     return @functions[name].toLambda output, indent, options
 
-  toLocalization: (result, context) ->
+  toLocalization: (localization) ->
 
   forEachPart: (language, cb) ->
     for n, f of @functions

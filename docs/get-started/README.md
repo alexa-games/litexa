@@ -51,8 +51,7 @@ often want to incorporate external code and dependencies alongside your skill lo
   * Windows 10 x64
   * Linux - Ubuntu (14, 16, 18)
 * Development
-  * [Node.js](https://nodejs.org/) version
-    <strong>8.11</strong> or higher
+  * [Node.js](https://nodejs.org/) version <strong>10.x</strong> or higher
 
 ### Installation Steps
 
@@ -317,7 +316,7 @@ Before you deploy your skill, you must have have done the following
 * [Create an Amazon Developer Account](https://developer.amazon.com/alexa-skills-kit)
 * [Create an AWS Account](https://aws.amazon.com/)
 * [Create a custom IAM Policy](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_create.html)
-  derived from the template below:
+  for the deployment user derived from the template below:
   * You will need to replace `myAccountId` and
     `myBucketName` with your [AWS account
     ID](https://docs.aws.amazon.com/general/latest/gr/acct-identifiers.html)
@@ -329,7 +328,7 @@ Before you deploy your skill, you must have have done the following
     @[code lang=json](@/docs/book/litexa-iam-policy-template.json)
     </details>
 * [Create an IAM User](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html)
-  with the above custom IAM policy attached
+  with the above custom IAM policy attached. You could name it something like "litexa-deploy".
 * [Install the AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html) and
   [configure it](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html) with your
   above IAM User credentials.
@@ -347,14 +346,14 @@ npm install -g @litexa/deploy-aws
 
 #### Setup
 
-Deploying requires some simple setup. In the Litexa configuration you must specify your deployment module, the `S3BucketName`
+Deploying requires some simple setup. In the Litexa configuration you must specify your deployment module, the `s3Configuration.bucketName`
 you want to deploy to, your `askProfile`, and your `awsProfile`. By default, Litexa configures your project to deploy with
 the `@litexa/deploy-aws` module for the `development` environment and sets the other options to `null`.
 
 @[code lang=javascript transclude={16-23}](@/packages/litexa/src/command-line/templates/common/javascript/litexa.config.js)
 
 ::: warning NOTE
-If your `S3BucketName` doesn't exist we'll create it for you, given that you provided an S3 bucket name that does not yet exist.
+If your `s3Configuration.bucketName` doesn't exist we'll create it for you, given that you provided an S3 bucket name that does not yet exist.
 Your `askProfile` needs to match one that you configured with `ask init`.
 Your `awsProfile` needs to match one that you configured with `aws configure` and has the IAM Policy listed above.
 :::

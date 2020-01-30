@@ -86,7 +86,6 @@ class lib.Skill
     @reparseLiterateAlexa()
 
   setFile: (filename, language, contents) ->
-    language = language.toLowerCase()
     unless contents?
       console.log filename, language, contents
       throw new Error "probably missing language at skill set file" unless contents?
@@ -191,7 +190,18 @@ class lib.Skill
       for name, file of @files
         if file.extension == 'litexa'
           try
-            @parser.parse file.contentForLanguage(language), {
+            litexaSource = file.contentForLanguage(language)
+            shouldIncludeFile = @parser.parse litexaSource, {
+              lib: lib
+              skill: @
+              source: file.filename()
+              startRule: 'AllFileExclusions'
+              context:
+                skill: @
+            }
+            continue unless shouldIncludeFile
+
+            @parser.parse litexaSource, {
               lib: lib
               skill: @
               source: file.filename()
@@ -271,20 +281,29 @@ class lib.Skill
     # todo name stomp?
     @dataTables[table.name] = table
 
-  pushSayMapping: (location, source, target) ->
-    if source of @sayMapping and @sayMapping[source] != target
-      # TODO: support localized mappings
-      console.error "duplicate pronounciation mapping for #{source} as #{target}, previously #{@sayMapping[source]}"
-      #throw new ParserError location, "duplicate pronounciation mapping for #{source} as #{target}, previously #{@sayMapping[source]}"
-    @sayMapping[source] = target
+  pushSayMapping: (location, from, to) ->
+    if location.language of @sayMapping
+      for mapping in @sayMapping[location.language]
+        if (mapping.from is from) and (mapping.to is not to)
+          throw new ParserError location, "duplicate pronunciation mapping for \'#{from}\'
+            as \'#{to}\' in \'#{location.language}\' language, previously \'#{mapping.to}\'"
+      @sayMapping[location.language].push({ from, to })
+    else
+      @sayMapping[location.language] = [{ from, to }]
 
   pushDBTypeDefinition: (definition) ->
-    if definition.name of @dbTypes
-      old = @dbTypes[definition.name]
-      throw new ParserError definition.location, "The db variable #{old.name} already has the
-        previously defined type #{old.type}"
+    defLocation = definition.location
+    defLanguage = definition.location.language
+    defName = definition.name
+    defType = definition.type
 
-    @dbTypes[definition.name] = definition
+    @dbTypes[defLanguage] = @dbTypes[defLanguage] ? {}
+
+    if @dbTypes[defLanguage]?[defName]?
+      throw new ParserError defLocation, "The DB variable #{@dbTypes[defLanguage][defName]} already
+        has the previously defined type #{@dbTypes[defLanguage][defName]} in language #{defLanguage}"
+
+    @dbTypes[defLanguage][defName] = defType
 
   refreshAllFiles: ->
     litexaDirty = false
@@ -318,6 +337,9 @@ class lib.Skill
       "if (typeof(litexa.modulesRoot) === 'undefined') { litexa.modulesRoot = process.cwd(); }"
     ]
 
+    if @projectInfo.DEPLOY?
+      @libraryCode.push "litexa.DEPLOY = #{JSON.stringify(@projectInfo.DEPLOY)};"
+
     if options.preamble?
       @libraryCode.push options.preamble
     else
@@ -331,6 +353,20 @@ class lib.Skill
     @libraryCode.push "    return `${identity.deviceId}`;"
     @libraryCode.push "  }"
     @libraryCode.push "};"
+
+    # @TODO: remove dynamoDb from core litexa into the deploy-aws module
+    ttlConfiguration = @projectInfo.deployments?[@projectInfo.variant]?.dynamoDbConfiguration?.timeToLive
+    if ttlConfiguration?.AttributeName? and ttlConfiguration?.secondsToLive?
+      if typeof(ttlConfiguration.AttributeName) != "string"
+        throw new Error("`dynamoDbConfiguration.AttributeName` must be a string.")
+      if typeof(ttlConfiguration.secondsToLive) != "number"
+        throw new Error("`dynamoDbConfiguration.secondsToLive` must be a number.")
+      @libraryCode.push "litexa.ttlConfiguration = {"
+      @libraryCode.push "  AttributeName: '#{ttlConfiguration.AttributeName}',"
+      @libraryCode.push "  secondsToLive: #{ttlConfiguration.secondsToLive}"
+      @libraryCode.push "};"
+    else if ttlConfiguration?.AttributeName? or ttlConfiguration?.secondsToLive?
+      console.log "Not setting TTL. If you want to set a TTL, Litexa config requires both `AttributeName` and `secondsToLive` fields in `dynamoDbConfiguration.timeToLive`."
 
     librarySource = fs.readFileSync(__dirname + '/litexa-library.coffee', 'utf8')
     librarySource = coffee.compile(librarySource, {bare: true})
@@ -361,22 +397,17 @@ class lib.Skill
       output.push "__languages['#{language}'] = { enterState:{}, processIntents:{}, exitState:{}, dataTables:{} };"
 
     do =>
-      output.push "litexa.sayMapping = ["
-      lines = []
-      for source, target of @sayMapping
-        source = source.replace(/'/g, '\\\'')
-        target = target.replace(/'/g, '\\\'')
-        lines.push "  { test: new RegExp(' #{source}','gi'), change: ' #{target}' }"
-        lines.push "  { test: new RegExp('#{source} ','gi'), change: '#{target} ' }"
-      output.push lines.join ",\n"
-      output.push "];"
-
-    do =>
-      output.push "litexa.dbTypes = {"
-      lines = []
-      for name, def of @dbTypes
-        lines.push "  #{name}: { type: '#{def.type}' }"
-      output.push lines.join ",\n"
+      output.push "litexa.sayMapping = {"
+      for language of @sayMapping
+        lines = []
+        output.push "  '#{language}': ["
+        for mapping in @sayMapping[language]
+          from = mapping.from.replace /'/g, '\\\''
+          to = mapping.to.replace /'/g, '\\\''
+          lines.push "    { from: new RegExp(' #{from}','gi'), to: ' #{to}' }"
+          lines.push "    { from: new RegExp('#{from} ','gi'), to: '#{to} ' }"
+        output.push lines.join ",\n"
+        output.push "  ],"
       output.push "};"
 
     do =>
@@ -458,8 +489,17 @@ class lib.Skill
       # inject code to map typed DB objects to their
       # types from inside this closure
       output.push "__language.dbTypes = {"
-      output.push (for name, def of @dbTypes
-        "  #{name}: #{def.type}").join(',\n')
+      lines = []
+      for dbTypeName, dbType of @dbTypes[language]
+        lines.push "  #{dbTypeName}: #{dbType}"
+
+      # Copy over any default DB type definitions that aren't explicitly overriden.
+      if language != "default"
+        for dbTypeName, dbType of @dbTypes.default
+          @dbTypes[language] = @dbTypes[language] ? {}
+          @dbTypes[language][dbTypeName] = @dbTypes[language][dbTypeName] ? dbType
+
+      output.push lines.join ",\n"
       output.push "};"
 
       for name, state of @states
@@ -582,7 +622,7 @@ class lib.Skill
 
   getLanguageForRegion: (region) ->
     throw new Error "missing region" unless region?
-    language = region.toLowerCase()
+    language = region
     unless language of @languages
       language = language[0...2]
       if language == 'en'
@@ -618,7 +658,7 @@ class lib.Skill
         intents: []
 
     for name, state of @states
-      state.toModelV2 output, context
+      state.toModelV2 output, context, @extendedEventNames
 
     for name, type of context.types
       output.languageModel.types.push type
@@ -682,14 +722,16 @@ class lib.Skill
 
   toLocalization: () ->
     @refreshAllFiles()
-    result =
-      states: {}
-      intents: {}
+
+    localization = {
+      intents: {},
+      speech: {}
+    }
 
     for name, state of @states
-      state.toLocalization result
+      state.toLocalization(localization)
 
-    return result
+    return localization
 
 
   runTests: (options, cb, tests) ->
@@ -880,6 +922,7 @@ class lib.Skill
     # accumulate output
     successes = 0
     fails = 0
+    failedTests = []
     output = { log:[], cards:[], directives:[], raw:[] }
 
     unless options.singleStep
@@ -899,7 +942,7 @@ class lib.Skill
         totalTime = new Date - firstTimeStamp
         options.reportProgress( "test steps complete #{testCounter-1}/#{totalTests} #{totalTime}ms total" )
         if fails
-          output.summary = "✘ #{successes + fails} tests run, #{fails} failed (#{totalTime}ms)\n"
+          output.summary = "✘ #{successes + fails} tests run, #{fails} failed (#{totalTime}ms)\nFailed tests were:\n  " + failedTests.join("\n  ")
         else
           output.summary = "✔ #{successes} tests run, all passed (#{totalTime}ms)\n"
         unless options.singleStep
@@ -917,9 +960,11 @@ class lib.Skill
       options.reportProgress( "test step #{testCounter++}/#{totalTests} +#{new Date - lastTimeStamp}ms: #{test.name ? test.file?.filename()}" )
       lastTimeStamp = new Date
 
-      test.test testContext, output, (err, successCount, failCount) =>
+      test.test testContext, output, (err, successCount, failCount, failedTestName) =>
         successes += successCount
         fails += failCount
+        if failedTestName
+          failedTests.push(failedTestName)
         if remainingTests.length > 0 and (successCount + failCount) > 0
          output.log.push "\n"
         nextTest()

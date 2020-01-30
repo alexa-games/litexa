@@ -1,0 +1,25 @@
+{
+  "check-coverage": true,
+  "statements": 95,
+  "branches": 95,
+  "functions": 95,
+  "lines": 95,
+  "cwd": "../../",
+  "include": [
+    "packages/litexa-html/lib/*.js"
+  ],
+  "reporter": [
+    "text-summary",
+    "cobertura",
+    "lcovonly",
+    "html"
+  ],
+  "extension": [
+    ".js"
+  ],
+  "all": true,
+  "cache": false,
+  "sourceMap": true,
+  "instrument": true,
+  "report-dir": "./build/brazil-documentation/coverage"
+}

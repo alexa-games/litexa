@@ -291,6 +291,8 @@ effects:
   have them.
   * options are `echo`, `dot`, and `show`, with `show` as
     default
+* `--log-raw-data [logRawData]`: dumps all requests, responses, and
+  DB contents into .test/output.json
 * `--watch/-w`: rerun tests after any file changes in your
   Litexa project. This is handy for the rapid iteration
   stage of development and testing because you can trap
@@ -457,9 +459,12 @@ test library, go to the `litexa` package's
 
 ### .test Directory Contents
 
-Running `litexa test` will generate a .test directory with
-test artifacts. You can delete this at any time without
-affecting your Litexa project.
+Running `litexa test` will generate a .test directory with test artifacts. You
+can delete this at any time without affecting your Litexa project. The command
+is deployment target specific; the artifacts will live in a subdirectory inside
+the `.test` directory, named after the target. If no target is specified,
+`litexa test` will default to the `development` target, which is equivalent to
+`litexa test -d development`.
 
 However, the contents might be useful for diving deeper into
 your test output. Here are all the files and their contents:

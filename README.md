@@ -6,7 +6,11 @@ Litexa is an Alexa domain specific language, developed for long form multi-turn 
 Its parser and tooling is implemented in Node.js and it compiles into JavaScript that expects Node.js
 as a runtime environment.
 
-Specifically it requires node version 8.x or greater, for the `async` support.
+**Note:** *Due to a dependency not compatible with Node.js v12 in the @litexa/assets-wav package, the 
+recommended local runtime and default deployment runtime is Node.js v10. If you are not using this
+package, you are welcome to upgrade both your local and runtime environment to Node.js v12. Refer to our
+[deployment documentation](./docs/book/deployment.md#lambda-configuration-optional) for more configuration 
+details.*
 
 Full documentation is available at <https://litexa.com>
 
@@ -204,7 +208,7 @@ npm run docs:dev
 To run both the reference and the interactive site, run.
 
 ```bash
-npmr run docs
+npm run docs
 ```
 
 The website will update with any change in the docs folder.
@@ -220,3 +224,24 @@ To build the full static website for S3 or GitHub hosting, run the following:
 ```bash
 npm run docs:build
 ```
+
+## Security
+
+Security is of the utmost importance. This section will describe NPM scripts that
+can help with making sure that the code base is as secure as possible.
+
+### Dependency Audit
+
+NPM provides a tool that will scan and automatically install any compatible updates
+to vulnerable dependencies. More on `npm audit` [here](https://docs.npmjs.com/cli/audit).
+
+To run the tool against every Litexa package, run the following from
+the root of the code base:
+
+```bash
+npm run audit:fix
+```
+
+If the tool does automatically install any compatible updates, it's advised to run 
+`npm run coverage` before you commit any changes (to make sure nothing has broken in 
+the update).

@@ -26,6 +26,26 @@ your skill endpoint is load balanced, Litexa
 differentiates between two kinds of variable
 *storage* types: *memory, and database*.
 
+## Storage types
+
+*Memory storage* is ephemeral and exists only for the
+duration of the skill code execution. These kinds
+of variables can be initialized at any time before
+or during the execution of skill code. For example,
+request variables (explained below) can be populated
+from an incoming skill request. When the skill sends
+the response, the code is done executing and
+therefore the variable will no longer exist.
+
+*Database storage* variables persist their value across
+each skill request and response. They can be
+initialized at any time during the execution of skill
+code, and will continue to exist for subsequent skill
+executions. Litexa's backend also makes use of database
+storage to keep track of the current skill state. There
+is only one type of database storage variable, called
+persistent variable.
+
 ## Value Types
 
 Each variable in Litexa can store one of a number of
@@ -227,6 +247,70 @@ askName
     @name = $name
 ```
 
+## DEPLOY Variables
+
+DEPLOY variables are a type of memory storage variable that are references
+to static properties of a `DEPLOY` object defined under a deployment
+target. They are readable during compilation as well as runtime, and can
+be used to manage target-specific skill behavior.
+
+To define DEPLOY variables, add a `DEPLOY` object in your deployment targets
+like so:
+
+```javascript
+const deploymentConfiguration = {
+  name: 'cats-in-space',
+  deployments: {
+    development: {
+      ... // other configuration
+      DEPLOY: { // your DEPLOY variables go in this object
+        DEBUG: true,
+        MODE: 'practice'
+      }
+    },
+    production: {
+      ... // other configuration
+      DEPLOY: {
+        MODE: 'challenge'
+      }
+    },
+    ...
+```
+
+These variables will then be available for use in your Litexa code with their
+values dependent on which deployment target you specified in the litexa command
+(`litexa test`, `litexa deploy`, etc.).
+
+:::warning
+The `DEPLOY` object should only be used for properties, not methods.
+:::
+
+DEPLOY variables can be useful when you want specific values in your builds for
+testing. For example, you can bypass non-deterministic logic.
+
+```coffeescript
+announceCategory
+  say "Your next category is,"
+  if DEPLOY.DISABLE_RANDOM
+    say "{getIncrementalCategory()}."
+  else
+    say "{getRandomCategory()}."
+```
+
+
+Here are some applications of DEPLOY variables:
+* Something like a `DEBUG` flag can be used to turn on test-only intents in your skill. For example, you can use them in test skills to jump to another part of the skill as a
+shortcut.
+* Something like a `LOG_LEVEL` string can be used to set different logging levels.
+* Something like a `VERSION` flag or string could allow deploying multiple similar skills that all use the same core skill logic.
+
+DEPLOY variables are the only type of variable that can be used in [`when`
+statements](/reference/#postfix-conditional) and [file exclusion statements](/reference/#exclude-file).
+
+Otherwise, if you want to deploy multiple skills where most of their
+logic is the same, you can keep them as one Litexa project with different
+`DEPLOY` object configurations, thereby avoiding code duplication.
+
 ## Expressions
 
 There are various places in Litexa syntax that accept
@@ -276,4 +360,38 @@ use their values.
   local b = a + 5
   $count = 10
   local c = ( a * $count ) + b - 7
+```
+
+Calling a function that is available from a non-Litexa code file is also an expression.
+
+```coffeescript
+  local a = foo()
+  local b = bar(a) + 7
+  functionThatDoesNotExplicitlyReturn() # this is still an expression because it
+                                        # will return undefined
+```
+
+### Static Expressions
+
+Static expressions are expressions in which all parts of the expression can be
+evaluated during compilation. If an expression contains any dynamic part, then
+the whole expression is dynamic.
+
+Strings, numbers, and booleans are inherently static. [DEPLOY variables](
+#deploy-variables) are also static, because they are evaluated
+before compilation.
+
+The following examples are static expressions:
+
+```coffeescript
+  if "woem" == "meow" and DEPLOY.type == "debug" # static conditional
+```
+
+And the following are dynamic expressions:
+
+```coffeescript
+  if 10/2 == 5 or $cat == 'chantilly'
+  if isCorrectAnswer($answer)
+  local playerName = "Ellie"
+  if playerName == DEPLOY.name # playerName is not a DEPLOY variable
 ```

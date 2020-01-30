@@ -113,7 +113,7 @@ handlerSteps.checkFastExit = (event, handlerContext) ->
     tryToClose = ->
       dbKey = litexa.overridableFunctions.generateDBKey(handlerContext.identity)
 
-      db.fetchDB { identity: handlerContext.identity, dbKey, fetchCallback: (err, dbObject) ->
+      db.fetchDB { identity: handlerContext.identity, dbKey, ttlConfiguration: litexa.ttlConfiguration, fetchCallback: (err, dbObject) ->
         if err?
           return reject(err)
 
@@ -150,12 +150,12 @@ handlerSteps.runConcurrencyLoop = (event, handlerContext) ->
     # work out the language, from the locale, if it exists
     language = 'default'
     if event.request.locale?
-      lang = event.request.locale.toLowerCase()
+      lang = event.request.locale
       langCode = lang[0...2]
-      if lang of __languages
-        language = lang
-      else if langCode of __languages
-        language = langCode
+
+      for __language of __languages
+        if (lang.toLowerCase() is __language.toLowerCase()) or (langCode is __language)
+          language = __language
 
     litexa.language = language
     handlerContext.identity.litexaLanguage = language
@@ -166,8 +166,7 @@ handlerSteps.runConcurrencyLoop = (event, handlerContext) ->
         exports.Logging.log "CONCURRENCY LOOP iteration #{numberOfTries}, denied db write"
 
       dbKey = litexa.overridableFunctions.generateDBKey(handlerContext.identity)
-
-      db.fetchDB { identity: handlerContext.identity, dbKey, fetchCallback: (err, dbObject) ->
+      db.fetchDB { identity: handlerContext.identity, dbKey, ttlConfiguration: litexa.ttlConfiguration, fetchCallback: (err, dbObject) ->
         # build the context object for the state machine
         try
 
@@ -442,30 +441,33 @@ handlerSteps.createFinalResult = (stateContext) ->
     delete response.shouldEndSession
 
   # build outputSpeech and reprompt from the accumulators
-  joinSpeech = (arr) ->
-    result = arr.join(' ')
+  joinSpeech = (arr, language = 'default') ->
+    return '' unless arr
+    result = arr[0]
+    for line in arr[1..]
+      # If the line starts with punctuation, don't add a space before.
+      if line.match /^[?!:;,.]/
+        result += line
+      else
+        result += " #{line}"
+
     result = result.replace /(  )/g, ' '
-    for mapping in litexa.sayMapping
-      result = result.replace mapping.test, mapping.change
+    if litexa.sayMapping[language]
+      for mapping in litexa.sayMapping[language]
+        result = result.replace mapping.from, mapping.to
     return result
 
   if stateContext.say? and stateContext.say.length > 0
     response.outputSpeech =
       type: "SSML"
-      ssml: "<speak>#{joinSpeech(stateContext.say)}</speak>"
+      ssml: "<speak>#{joinSpeech(stateContext.say, stateContext.language)}</speak>"
       playBehavior: "REPLACE_ALL"
 
-  if stateContext.repromptTheSay
-    stateContext.reprompt = stateContext.reprompt ? []
-    response.reprompt =
-      outputSpeech:
-        type: "SSML"
-        ssml: "<speak>#{joinSpeech(stateContext.reprompt)} #{joinSpeech(stateContext.say)}</speak>"
-  else if stateContext.reprompt? and stateContext.reprompt.length > 0
+  if stateContext.reprompt? and stateContext.reprompt.length > 0
     response.reprompt =
       outputSpeech:
         type: "SSML",
-        ssml: "<speak>#{joinSpeech(stateContext.reprompt)}</speak>"
+        ssml: "<speak>#{joinSpeech(stateContext.reprompt, stateContext.language)}</speak>"
 
   if stateContext.card?
     card = stateContext.card
@@ -534,6 +536,10 @@ handlerSteps.createFinalResult = (stateContext) ->
   stateContext.directives = ( d for d in stateContext.directives when not d.DELETEME )
   if stateContext.directives? and stateContext.directives.length > 0
     response.directives = stateContext.directives
+
+  # last chance, see if the developer left a postprocessor to run here
+  if litexa.responsePostProcessor?
+    litexa.responsePostProcessor wrapper, stateContext
 
   return await new Promise (resolve, reject) ->
     stateContext.db.finalize (err, info) ->

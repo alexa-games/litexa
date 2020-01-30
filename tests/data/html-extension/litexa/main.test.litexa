@@ -1,0 +1,7 @@
+TEST "happy path"
+  launch
+  alexa: waitForHTML, /HTML interface is declared./i
+  user: "hello world"
+  alexa: waitForHTML, /mark name='hello-world'/i
+  user: AMAZON.StopIntent
+  END

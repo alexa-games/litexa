@@ -7,36 +7,34 @@
     "compile:watch": "npx webpack --config webpack.config.js --watch",
     "deploy": "npm run compile && litexa deploy",
     "lint": "npx tslint -c tslint.json --project tsconfig.json --fix",
-    "test": "npx mocha --opts mocha.opts './test/**/*.spec.ts' && npm run test:litexa",
-    "test:debug": "npx mocha debug --opts mocha.opts './test/**/*.spec.ts'",
-    "test:file": "npx mocha --opts mocha.opts",
-    "test:file:debug": "npx mocha debug --opts mocha.opts",
+    "test": "npx mocha './test/**/*.spec.ts' && npm run test:litexa",
+    "test:file": "npx mocha",
     "test:litexa": "npm run compile && litexa test",
     "test:litexa:watch": "npm run compile:watch | litexa test -w",
-    "test:watch": "npx mocha --opts mocha.opts './test/**/*.spec.ts' --watch"
+    "test:watch": "npx mocha './test/**/*.spec.ts' --watch"
   },
   "author": "Amazon",
   "devDependencies": {
-    "@types/chai": "4.1.7",
-    "@types/mocha": "5.2.5",
-    "@types/node": "10.12.18",
-    "@types/pino": "5.8.3",
-    "@types/sinon": "7.0.5",
+    "@types/chai": "4.2.7",
+    "@types/mocha": "5.2.7",
+    "@types/node": "13.1.8",
+    "@types/pino": "5.15.3",
+    "@types/sinon": "7.5.1",
     "chai": "4.2.0",
-    "mocha": "5.2.0",
-    "sinon": "7.2.3",
-    "source-map-support": "0.5.10",
-    "ts-loader": "5.3.3",
-    "ts-node": "8.0.1",
-    "tsconfig-paths": "3.7.0",
-    "tslint": "5.12.1",
-    "typescript": "3.2.4",
-    "webpack": "4.28.4",
-    "webpack-cli": "3.2.1"
+    "mocha": "7.0.0",
+    "sinon": "8.1.0",
+    "source-map-support": "0.5.16",
+    "ts-loader": "6.2.1",
+    "ts-node": "8.6.2",
+    "tsconfig-paths": "3.9.0",
+    "tslint": "6.0.0",
+    "typescript": "3.7.5",
+    "webpack": "4.41.5",
+    "webpack-cli": "3.3.10"
   },
   "dependencies": {
-    "pino": "5.10.6",
-    "pino-pretty": "2.5.0"
+    "pino": "5.16.0",
+    "pino-pretty": "3.5.0"
   },
   "license": "ISC"
 }

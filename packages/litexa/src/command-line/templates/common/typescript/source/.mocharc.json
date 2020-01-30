@@ -1,0 +1,10 @@
+{
+  "full-trace": true,
+  "recursive": true,
+  "require": [
+    "source-map-support/register",
+    "tsconfig-paths/register",
+    "ts-node/register"
+  ],
+  "watch-extensions": ["ts"]
+}

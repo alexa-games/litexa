@@ -408,7 +408,7 @@ By default, Litexa keys any DB entries by the skill session's device ID. If requ
 can be overridden by adding the following function anywhere in the skill's inline code.
 
 ```js
-// The global `litexa` namespace contains compilation-time objects at runtime.
+// The global `litexa` namespace contains compile-time objects at runtime.
 // `overridableFunctions` can be redefined by assigning them to new functionality.
 litexa.overridableFunctions = litexa.overridableFunctions
                               ? litexa.overridableFunctions

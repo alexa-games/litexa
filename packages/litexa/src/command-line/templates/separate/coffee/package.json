@@ -5,22 +5,20 @@
   "scripts": {
     "clean": "npx rimraf node_modules index.js **/*.js && npm install",
     "compile": "npx coffee --compile *.coffee",
-    "test": "npx mocha --opts mocha.opts './{,!(node_modules)/**}/*.spec.coffee'",
-    "test:debug": "npx mocha debug --opts mocha.opts './{,!(node_modules)/**}/*.spec.coffee'",
-    "test:file": "npx mocha --opts mocha.opts",
-    "test:file:debug": "npx mocha debug --opts mocha.opts",
-    "test:watch": "npx mocha --opts mocha.opts './{,!(node_modules)/**}/*.spec.coffee' --watch"
+    "test": "npx mocha './{,!(node_modules)/**}/*.spec.coffee'",
+    "test:file": "npx mocha",
+    "test:watch": "npx mocha './{,!(node_modules)/**}/*.spec.coffee' --watch"
   },
   "author": "Amazon",
   "license": "ISC",
   "devDependencies": {
     "chai": "4.2.0",
-    "coffeescript": "2.3.2",
-    "mocha": "5.2.0",
-    "sinon": "7.2.3"
+    "coffeescript": "2.5.0",
+    "mocha": "7.0.0",
+    "sinon": "8.1.0"
   },
   "dependencies": {
-    "pino": "5.10.6",
-    "pino-pretty": "2.5.0"
+    "pino": "5.16.0",
+    "pino-pretty": "3.5.0"
   }
 }
