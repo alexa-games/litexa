@@ -1,6 +1,6 @@
 {
   "name": "@litexa/integration-tests",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Integration tests for the packages.",
   "scripts": {
     "build": "npm run clean && npm install",
@@ -11,6 +11,5 @@
   },
   "author": "Amazon",
   "license": "Apache-2.0",
-  "private": true,
-  "dependencies": {}
+  "private": true
 }

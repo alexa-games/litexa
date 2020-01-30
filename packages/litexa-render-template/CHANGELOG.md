@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.4.0](https://github.com/alexa-games/litexa/compare/v0.3.1...v0.4.0) (2020-01-30)
+
+
+### Bug Fixes
+
+* addressed potential dependency vulnerabilities ([#91](https://github.com/alexa-games/litexa/issues/91)) ([84d2ba7](https://github.com/alexa-games/litexa/commit/84d2ba7851387deed6fff571ba072018eff9a4f0))
+* Updated deprecated mocha.opts files to RC files. ([#110](https://github.com/alexa-games/litexa/issues/110)) ([4de018d](https://github.com/alexa-games/litexa/commit/4de018d79763c37060894c57265280acdd9c822e))
+
+
+
+
+
 ## [0.3.1](https://github.com/alexa-games/litexa/compare/v0.3.0...v0.3.1) (2019-10-14)
 
 

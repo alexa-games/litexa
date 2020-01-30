@@ -3,6 +3,43 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.4.0](https://github.com/alexa-games/litexa/compare/v0.3.1...v0.4.0) (2020-01-30)
+
+
+### Bug Fixes
+
+* Addressed issues around localized DB type definitions. ([#104](https://github.com/alexa-games/litexa/issues/104)) ([51b83e1](https://github.com/alexa-games/litexa/commit/51b83e1e9b690b5077609e9fb6b7a8e2511da92b))
+* addressed potential dependency vulnerabilities ([#91](https://github.com/alexa-games/litexa/issues/91)) ([84d2ba7](https://github.com/alexa-games/litexa/commit/84d2ba7851387deed6fff571ba072018eff9a4f0))
+* matching behavior in SMAPI for undefined custom slot type ids ([#84](https://github.com/alexa-games/litexa/issues/84)) ([e7c00dd](https://github.com/alexa-games/litexa/commit/e7c00dd75f3a914208b5b7742b269a8cfdb126ec))
+* mobile font and vscode ([e675982](https://github.com/alexa-games/litexa/commit/e6759825d5cec548513adbe0072a2e0e1f1a670f))
+* remove inapplicable warning for not adding events to language model ([#108](https://github.com/alexa-games/litexa/issues/108)) ([c1f0cd8](https://github.com/alexa-games/litexa/commit/c1f0cd8af35210ec96d66b881cdb57b29f2c90b7))
+* spaces are no longer added pre-punctuation while joining output speech ([#92](https://github.com/alexa-games/litexa/issues/92)) ([43133e8](https://github.com/alexa-games/litexa/commit/43133e8892be4e7bae8389f5d599b25be86a5917))
+* Switched a couple absolute import references to relative. ([#120](https://github.com/alexa-games/litexa/issues/120)) ([af06edb](https://github.com/alexa-games/litexa/commit/af06edb71846231e2132d42750ae0423b8b11cd5))
+* update globals.d.ts for dynamoDbConfiguration ([c898187](https://github.com/alexa-games/litexa/commit/c898187873755224566cc2840385b30279548f1d))
+* update litexa template depedencies ([#115](https://github.com/alexa-games/litexa/issues/115)) ([a6764b5](https://github.com/alexa-games/litexa/commit/a6764b56bee5239102c9806de4a01d4ade3fd859))
+* Updated deprecated mocha.opts files to RC files. ([#110](https://github.com/alexa-games/litexa/issues/110)) ([4de018d](https://github.com/alexa-games/litexa/commit/4de018d79763c37060894c57265280acdd9c822e))
+
+
+### Features
+
+* add compilation-time-defined variable type called DEPLOY ([#80](https://github.com/alexa-games/litexa/issues/80)) ([c4b37d2](https://github.com/alexa-games/litexa/commit/c4b37d29453e3e8fc34e8ae48c9286f333c0759f))
+* add configurable TTL field in Litexa config ([#106](https://github.com/alexa-games/litexa/issues/106)) ([6262123](https://github.com/alexa-games/litexa/commit/62621232c31d10f03dfdeaa83de5bc941ac0e6b2))
+* added '!' and 'not' negation operators ([#85](https://github.com/alexa-games/litexa/issues/85)) ([7b275af](https://github.com/alexa-games/litexa/commit/7b275af91ae305d41956ae8397ccbaca3bdb8ea2))
+* added ability to override deployment's assets root path ([#94](https://github.com/alexa-games/litexa/issues/94)) ([d9eb39b](https://github.com/alexa-games/litexa/commit/d9eb39b25df791376b06c864260887b4b66bd8bb))
+* added optional raw data dump command to test CLI ([#87](https://github.com/alexa-games/litexa/issues/87)) ([c5390be](https://github.com/alexa-games/litexa/commit/c5390be5a651084bf67a2f88682f4fe5475904e8))
+* added say-reprompt syntax ([#86](https://github.com/alexa-games/litexa/issues/86)) ([27abbab](https://github.com/alexa-games/litexa/commit/27abbabd5bb2b65be0978bea7f87ce5a923628bd))
+* added string replacement map localization method that is detached from skill code ([#100](https://github.com/alexa-games/litexa/issues/100)) ([08c5057](https://github.com/alexa-games/litexa/commit/08c505716b4916e9f5a297b9a6122975f75219cc))
+* aws s3 configuration ([#90](https://github.com/alexa-games/litexa/issues/90)) ([8a1546d](https://github.com/alexa-games/litexa/commit/8a1546df3dcd6e29094b8308c964d32e52b1a96a))
+* create html extension ([#93](https://github.com/alexa-games/litexa/issues/93)) ([e833b8f](https://github.com/alexa-games/litexa/commit/e833b8f81c68a81446c70237151b55b4c7807f41))
+* localized pronunciations ([#82](https://github.com/alexa-games/litexa/issues/82)) ([6ae79aa](https://github.com/alexa-games/litexa/commit/6ae79aa6f38d3f6543eeea9929a17014ababbd21))
+* made it so that extension interfaces are auto-enabled ([#105](https://github.com/alexa-games/litexa/issues/105)) ([d9f83ad](https://github.com/alexa-games/litexa/commit/d9f83adbe85177aba24f562ea27c466f49984899))
+* multi-intent handlers ([#88](https://github.com/alexa-games/litexa/issues/88)) ([ce855d1](https://github.com/alexa-games/litexa/commit/ce855d1ed8ad69cfbc50eb901408be193371f739)), closes [#89](https://github.com/alexa-games/litexa/issues/89)
+* Update AWS Lambda runtime to nodejs12.x  ([#78](https://github.com/alexa-games/litexa/issues/78)) ([90d426d](https://github.com/alexa-games/litexa/commit/90d426d404c8b76d72e4c645c05cb75a01ed0102))
+
+
+
+
+
 ## [0.3.1](https://github.com/alexa-games/litexa/compare/v0.3.0...v0.3.1) (2019-10-14)
 
 
