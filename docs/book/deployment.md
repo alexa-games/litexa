@@ -282,12 +282,14 @@ your project folder will look like this locally:
 ```stdout
 .
 ├── litexa
-|   └── assets
-|       ├── intro.mp3
-|       ├── introScreen.jpg
+|   ├── assets
+|   |   ├── intro.mp3
+|   |   └── introScreen.jpg
+|   └── languages
 |       └── en-GB
-|           ├── intro.mp3
-|           └── resultScreen.jpg
+|           └── assets
+|             ├── intro.mp3
+|             └── resultScreen.jpg
 ```
 
 And your S3 bucket would look like this:
@@ -301,6 +303,7 @@ And your S3 bucket would look like this:
 |       |   └── introScreen.jpg
 |       └── en-GB
 |           ├── intro.mp3
+|           ├── introScreen.mp3
 |           └── resultScreen.jpg
 ```
 
