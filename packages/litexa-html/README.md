@@ -17,7 +17,8 @@ for sign-up information.
 **WARNING**: The use of this extension is currently reserved for those in the
 Alexa Web API for Games Developer Preview. If you are not in the Developer Preview
 and you have this extension installed, you will not be able to deploy your Alexa
-skills through Litexa.
+skills through Litexa. As an additional note, the API is subject to change, which
+may make this extension out of date.
 
 The module can be installed globally, which makes it available to any of your
 Litexa projects:
@@ -44,6 +45,12 @@ project_dir
         └── html
 ```
 
+**WARNING**: Unlike most of the other Litexa extensions which conditionally add the
+interface declaration based on whether or not they were used in your skill, the
+@litexa/html extension will always add the HTML interface to your skill. Thus, if you
+do not plan on using them for all skills, it may be best to use the local installation
+option for each project.
+
 ## Alexa Web API Interface
 
 Integrating your skill with the Alexa Web API will allow it to both send and receive data
@@ -51,107 +58,47 @@ from your web app.
 
 ### Skill Manifest
 
-Before your skill can send and receive data through the Alexa Web API, you will need to
-specify the interface in your skill's manifest. You will need to include
-`ALEXA_PRESENTATION_HTML` in your `skill.*` file to let Alexa know that you are using it.
-For example, your skill manifest might look something like this:
+This extension automatically adds the `ALEXA_PRESENTATION_HTML` interface declaration to
+your skill manifest upon deployment.
 
-```json
-{
-  "manifest": {
-    "apis": {
-      "custom": {
-        "interfaces": [
-          {
-            "type": "ALEXA_PRESENTATION_HTML"
-          }
-        ]
-  ...
-}
-```
+### Usage
 
-### Directives
+#### HTML.isHTMLPresent()
 
-With Alexa Web API directives, you can send data to your web app from within your skill.
+This extension adds a global `HTML` object you can use in both Litexa and code files. It
+has 1 function, which is to detect whether or not HTML is supported on the user device
+the skill is running on. This is best used in conjunction with conditionally sending HTML
+directives, since you may want to fall back to APL if HTML is not supported on a device.
 
-Use the `directive` keyword in your `*.litexa` files to add these directives to your
-Alexa responses. You can get more information about the usage of the `directive` keyword
-from our
-[Litexa language reference](https://litexa.com/reference/#directive).
-
-#### Start Directive
-
-To start your web app, attach the `Alexa.Presentation.HTML.Start` directive to your skill's response.
-Here's an example of what your Litexa code could look like:
-
-```coffeescript
-launch
-    if HTML.isPresent()
-      directive htmlStartDirective(webAppUrl)
-    ...
-```
-
-And the `#htmlStartDirective()` function would return an object like this, and Litexa will add
-it to your skill's response:
-
-```javascript
-function htmlStartDirective(url) {
-    return {
-        type: "Alexa.Presentation.HTML.Start",
-        configuration: {
-            timeoutInSeconds: 1000
-        },
-        data: {},
-        request: {
-            uri: url,
-            method: "GET",
-            headers: {}
-        },
-        transformers: {}
-    };
-}
-```
-
-#### HandleMessage Directive
-
-To send data to your web app, attach the `Alexa.Presentation.HTML.HandleMessage`
-directive to your skill's response. Here's an example of what your Litexa code could look like:
-
-```coffeescript
-fooState
-  when MyIntent
-    directive htmlHandleMessageDirective(message)
-  ...
-```
-
-And the `#htmlHandleMessageDirective()` function would return an object like the one below, and
-Litexa will add it your skill's response:
-
-```javascript
-function htmlHandleMessageDirective(message) {
-    return {
-        type: "Alexa.Presentation.HTML.HandleMessage",
-        message: message,
-        transformers: {}
-    };
-}
-```
-
-### Events
-
-With Alexa Web API events, your skill can receive & handle data sent from your web app.
-
-#### Message Event
-
-To handle data that is sent from your web app, look for the `Alexa.Presentation.HTML.Message`
-event in your `*.litexa` files like you would for an intent-type event (using the `when` keyword).
 For example:
 
 ```coffeescript
-barState
-    when Alexa.Presentation.HTML.Message
-      say "I received a message from the web app!"
-    ...
+launch
+  if HTML.isHTMLPresent()
+    directive htmlStartDirective(webAppUrl) # returns `Alexa.Presentation.HTML.Start` directive; this will launch the web app
+  else
+    apl apl/splashScreen.json # the apl statement conditionally sends the directive based on if the device supports it
+  ...
+```
+
+**WARNING**: Do not use APL and Web directives in the same response. @TODO: explain conflict
+
+#### Directives
+
+You can use the [`directive`](https://litexa.com/reference/#directive) keyword to add
+HTML directives to your skill responses.
+
+#### Events
+
+To handle data that is sent from your web app, add a `when` listener for the
+`Alexa.Presentation.HTML.Message` event.
+
+```coffeescript
+waitForTransmission
+  when Alexa.Presentation.HTML.Message
+    say "I received a message from the web app!"
+    switch $request.message # payload from web app
+      ...
 ```
 
 ## Advanced Features
@@ -170,6 +117,10 @@ launch
 This will add a substring like `<mark name="screen:blue"/>` to your response's speech.
 This is useful for your HTML runtime in that, when it receives the Alexa response,
 the marks can be used to trigger HTML events that interleave with SSML playback.
+
+@TODO explanation regarding processing marks. It requires:
+1.) a litexa postprocessor that moves (or adds, whatever you want to do) SSML output to HTML message input
+2.) a transformer (explained in Web API docs?) to pull the marks out from the message data and trigger events corresponding to the mark tags.
 
 ## Relevant Resources
 
