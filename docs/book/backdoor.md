@@ -261,12 +261,15 @@ skill-specific in-code `context` handlers.
 
 ## Modifying the Response Object
 
-Modifying the skill response is currently possible in one of two ways:
+Modifying the skill response is currently possible in one of three ways:
 
 1. indirectly, by [modifying response properties](#_2-pending-response-data) in the Litexa
 `context` object, as described above.
 2. directly, by writing a [Litexa extension](extensions.html#_3-runtime-extension) with a
 `beforeFinalResponse` handler which would receive the full response object prior to it being sent.
+3. directly, by writing a function in your skill's project that you then assign to Litexa's
+`responsePostProcessor` handler. Some example use cases:
+    1. @TODO
 
 ## Accepting Novel Events
 
