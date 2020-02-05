@@ -46,8 +46,8 @@ project_dir
 
 ## Alexa Web API Interface
 
-Integrating with Alexa Web API's directives and events, your skill can both send data to
-and receive data from your web app.
+Integrating your skill with the Alexa Web API will allow it to both send and receive data
+from your web app.
 
 ### Skill Manifest
 
