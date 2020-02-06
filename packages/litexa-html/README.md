@@ -101,27 +101,6 @@ waitForTransmission
       ...
 ```
 
-## Advanced Features
-
-### 'mark' SSML Tags
-
-In your `.litexa` files, you can add `mark` SSML tags to your speech, like so:
-
-```coffeescript
-launch
-  say "Hello, World!"
-  HTML.mark("screen:blue")
-  END
-```
-
-This will add a substring like `<mark name="screen:blue"/>` to your response's speech.
-This is useful for your HTML runtime in that, when it receives the Alexa response,
-the marks can be used to trigger HTML events that interleave with SSML playback.
-
-@TODO explanation regarding processing marks. It requires:
-1.) a litexa postprocessor that moves (or adds, whatever you want to do) SSML output to HTML message input
-2.) a transformer (explained in Web API docs?) to pull the marks out from the message data and trigger events corresponding to the mark tags.
-
 ## Relevant Resources
 
 For more information, please refer to the official Alexa Web API for Games documentation:

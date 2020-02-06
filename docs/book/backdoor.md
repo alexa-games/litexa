@@ -268,8 +268,7 @@ Modifying the skill response is currently possible in one of three ways:
 2. directly, by writing a [Litexa extension](extensions.html#_3-runtime-extension) with a
 `beforeFinalResponse` handler which would receive the full response object prior to it being sent.
 3. directly, by writing a function in your skill's project that you then assign to Litexa's
-`responsePostProcessor` handler. Some example use cases:
-    1. @TODO
+`responsePostProcessor` handler.
 
 ## Accepting Novel Events
 
