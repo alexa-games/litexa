@@ -7,6 +7,7 @@ visually rich and interactive voice-controlled game experiences. You'll be able 
 for multimodal devices using HTML and web technologies like Canvas 2D, WebAudio, WebGL,
 JavaScript, and CSS, starting with Echo Show devices and Fire TVs.
 
+
 **NOTE**: The Alexa Web API for Games is currently in Developer Preview. To gain access
 to its features & documentation, visit the [Alexa Developer
 Blog](https://developer.amazon.com/en-US/blogs/alexa/alexa-skills-kit/2019/11/apply-for-the-alexa-web-api-for-games-developer-preview)
@@ -47,7 +48,7 @@ project_dir
 
 **WARNING**: Unlike most of the other Litexa extensions which conditionally add the
 interface declaration based on whether or not they were used in your skill, the
-@litexa/html extension will always add the HTML interface to your skill. Thus, if you
+`@litexa/html` extension will always add the HTML interface to your skill. Thus, if you
 do not plan on using them for all skills, it may be best to use the local installation
 option for each project.
 
@@ -66,7 +67,7 @@ your skill manifest upon deployment.
 #### HTML.isHTMLPresent()
 
 This extension adds a global `HTML` object you can use in both Litexa and code files. It
-has 1 function, which is to detect whether or not HTML is supported on the user device
+has one function, which is to detect whether or not HTML is supported on the user device
 the skill is running on. This is best used in conjunction with conditionally sending HTML
 directives, since you may want to fall back to APL if HTML is not supported on a device.
 
@@ -81,7 +82,8 @@ launch
   ...
 ```
 
-**WARNING**: Do not use APL and Web directives in the same response. @TODO: explain conflict
+**WARNING**: Do not use APL and HTML directives in the same response. The user's device
+will likely experience undesired behavior.
 
 #### Directives
 
