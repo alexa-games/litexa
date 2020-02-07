@@ -52,7 +52,7 @@ interface declaration based on whether or not they were used in your skill, the
 do not plan on using them for all skills, it may be best to use the local installation
 option for each project.
 
-## Alexa Web API Interface
+## Litexa's Alexa Web API Interface
 
 Integrating your skill with the Alexa Web API will allow it to both send and receive data
 from your web app.
