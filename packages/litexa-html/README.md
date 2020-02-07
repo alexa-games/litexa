@@ -7,7 +7,6 @@ visually rich and interactive voice-controlled game experiences. You'll be able 
 for multimodal devices using HTML and web technologies like Canvas 2D, WebAudio, WebGL,
 JavaScript, and CSS, starting with Echo Show devices and Fire TVs.
 
-
 **NOTE**: The Alexa Web API for Games is currently in Developer Preview. To gain access
 to its features & documentation, visit the [Alexa Developer
 Blog](https://developer.amazon.com/en-US/blogs/alexa/alexa-skills-kit/2019/11/apply-for-the-alexa-web-api-for-games-developer-preview)
@@ -88,13 +87,11 @@ will likely experience undesired behavior.
 You can use the [`directive`](https://litexa.com/reference/#directive) keyword to add
 HTML directives to your skill responses.
 
-If you're interested in trying out transformers, but want to maintain a skill that can switch
+If you're interested in trying out transformers (very similar to
+[APL transformers](https://developer.amazon.com/en-US/docs/alexa/alexa-presentation-language/apl-data-source.html#transformers)), but want to maintain a skill that can switch
 between HTML and a speaker only presentation, try using the usual Litexa `say` statements, then
 write a [post processor](http://litexa.com/reference/backdoor.html#modifying-the-alexa-response-object)
 to conditionally move your outputSpeech into a directive instead.
-
-
-
 
 #### Events
 
@@ -115,4 +112,3 @@ For more information, please refer to the official Alexa Web API for Games docum
 
 * [Alexa Web API
 for Games Announcement](https://developer.amazon.com/en-US/blogs/alexa/alexa-skills-kit/2019/11/apply-for-the-alexa-web-api-for-games-developer-preview)
-
