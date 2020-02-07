@@ -19,7 +19,7 @@ for sign-up information.
 Alexa Web API for Games Developer Preview. If you are not in the Developer Preview
 and you have this extension installed, you will not be able to deploy your Alexa
 skills through Litexa. As an additional note, the API is subject to change, which
-may make this extension out of date.
+may leave this extension out of date.
 
 The module can be installed globally, which makes it available to any of your
 Litexa projects:
@@ -46,7 +46,7 @@ project_dir
         └── html
 ```
 
-**WARNING**: Unlike most of the other Litexa extensions which conditionally add the
+**WARNING**: Unlike other Litexa extensions which conditionally add the
 interface declaration based on whether or not they were used in your skill, the
 `@litexa/html` extension will always add the HTML interface to your skill. Thus, if you
 do not plan on using them for all skills, it may be best to use the local installation
@@ -67,11 +67,9 @@ your skill manifest upon deployment.
 #### HTML.isHTMLPresent()
 
 This extension adds a global `HTML` object you can use in both Litexa and code files. It
-has one function, which is to detect whether or not HTML is supported on the user device
-the skill is running on. This is best used in conjunction with conditionally sending HTML
+has one function, which is to detect whether or not HTML is supported on the user's device
+that the skill is running on. This is best used in conjunction with conditionally sending HTML
 directives, since you may want to fall back to APL if HTML is not supported on a device.
-
-For example:
 
 ```coffeescript
 launch
@@ -90,6 +88,14 @@ will likely experience undesired behavior.
 You can use the [`directive`](https://litexa.com/reference/#directive) keyword to add
 HTML directives to your skill responses.
 
+If you're interested in trying out transformers, but want to maintain a skill that can switch
+between HTML and a speaker only presentation, try using the usual Litexa `say` statements, then
+write a [post processor](http://litexa.com/reference/backdoor.html#modifying-the-alexa-response-object)
+to conditionally move your outputSpeech into a directive instead.
+
+
+
+
 #### Events
 
 To handle data that is sent from your web app, add a `when` listener for the
@@ -107,6 +113,6 @@ waitForTransmission
 
 For more information, please refer to the official Alexa Web API for Games documentation:
 
-* [Alexa Web API 
+* [Alexa Web API
 for Games Announcement](https://developer.amazon.com/en-US/blogs/alexa/alexa-skills-kit/2019/11/apply-for-the-alexa-web-api-for-games-developer-preview)
 
