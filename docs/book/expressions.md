@@ -247,6 +247,7 @@ askName
     @name = $name
 ```
 
+
 ## DEPLOY Variables
 
 DEPLOY variables are a type of memory storage variable that are references
@@ -310,6 +311,40 @@ statements](/reference/#postfix-conditional) and [file exclusion statements](/re
 Otherwise, if you want to deploy multiple skills where most of their
 logic is the same, you can keep them as one Litexa project with different
 `DEPLOY` object configurations, thereby avoiding code duplication.
+
+
+## Customizing the Litexa DB Key
+
+For variables that have database storage, Litexa maintains a single document in the
+backing database, by default keyed to the Alexa request's deviceId field, meaning that
+the data will be preserved for the skill running on the same Alexa device only.
+
+Should prefer to key on the userId instead (same skill data, no matter which device
+in the same account runs it), or some other field, you can add the following function
+anywhere in the skill's inline code.
+
+```js
+// The global `litexa` namespace contains compile-time objects at runtime.
+// `overridableFunctions` can be redefined by assigning new functionality to them.
+litexa.overridableFunctions = litexa.overridableFunctions
+                              ? litexa.overridableFunctions
+                              : {};
+
+/* The `identity` parameter will have the following structure:
+{
+  requestAppId,  // = System.application.applicationId
+  userId,        // = System.user.userId
+  deviceId,      // = System.device.deviceId
+  litexaLanguage // = Litexa language (e.g. 'default') for request's locale
+}
+*/
+// Now, let's override the DB key generation.
+litexa.overridableFunctions.generateDBKey = function(identity) {
+  // return a key based on both the deviceId and the request langauge
+  return `${identity.deviceId}|${identity.litexaLanguage}`;
+};
+```
+
 
 ## Expressions
 
