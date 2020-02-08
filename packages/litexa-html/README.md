@@ -87,10 +87,10 @@ will likely experience undesired behavior.
 You can use the [`directive`](https://litexa.com/reference/#directive) keyword to add
 HTML directives to your skill responses.
 
-If you're interested in trying out transformers (very similar to
-[APL transformers](https://developer.amazon.com/en-US/docs/alexa/alexa-presentation-language/apl-data-source.html#transformers)), but want to maintain a skill that can switch
-between HTML and a speaker only presentation, try using the usual Litexa `say` statements, then
-write a [post processor](http://litexa.com/reference/backdoor.html#modifying-the-alexa-response-object)
+If you're interested in trying out transformers in your directives,
+but want to maintain a skill that can switch between an HTML device
+and a speaker only device, try using the usual Litexa `say` statements,
+then write a [post processor](http://litexa.com/reference/backdoor.html#modifying-the-alexa-response-object)
 to conditionally move your outputSpeech into a directive instead.
 
 #### Events
