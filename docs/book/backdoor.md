@@ -222,7 +222,7 @@ printObject = function(obj) { console.log(JSON.stringify(obj)); }
 The Litexa `context` is recreated for every new skill request, and contains the following data:
 
 1. incoming request data (e.g. the Alexa skill session attributes)
-2. accumulated response data (e.g. an array of all the say statements hit so far)
+2. accumulated response data (e.g. an array of all the `say` statements hit so far)
 3. DB data (e.g. persistent and transient variables)
 4. utility data (e.g. skill launch time stamp)
 
