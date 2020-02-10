@@ -46,6 +46,13 @@ storage to keep track of the current skill state. There
 is only one type of database storage variable, called
 persistent variable.
 
+Note: by default, Litexa is set up to create a new
+database entry for each device that a user invokes
+your skill from, protecting it from interference
+should your skill be invoked at the same time on different
+devices. To modify this, see the section below on
+[Customizing the Litexa DB Key](#customizing-the-litexa-db-key).
+
 ## Value Types
 
 Each variable in Litexa can store one of a number of
@@ -78,7 +85,9 @@ launch
   local b = "here's a string with a second, and third line"
 ```
 
-## Local Variables
+## Variable Types
+
+### Local Variables
 
 The first kind of variable behaves much like
 traditional variables in that they are *lexically
@@ -148,7 +157,7 @@ askForAction
     say "Geez, that only took {loops} tries."
 ```
 
-## Request Variables
+### Request Variables
 
 Request variables live from the moment they are
 declared until the end of the current request, that
@@ -211,7 +220,7 @@ askForAttack
       say "Using the $weapon."
 ```
 
-## Persistent Variables
+### Persistent Variables
 
 Sometimes you need a variable to survive longer than
 both local and request variables. Persistent variables
@@ -247,7 +256,7 @@ askName
     @name = $name
 ```
 
-## DEPLOY Variables
+### DEPLOY Variables
 
 DEPLOY variables are a type of memory storage variable that are references
 to static properties of a `DEPLOY` object defined under a deployment
@@ -394,4 +403,36 @@ And the following are dynamic expressions:
   if isCorrectAnswer($answer)
   local playerName = "Ellie"
   if playerName == DEPLOY.name # playerName is not a DEPLOY variable
+```
+
+## Customizing the Litexa DB Key
+
+For variables that have database storage, Litexa maintains a single document in the
+backing database, by default keyed to the Alexa request's deviceId field, meaning that
+the data will be preserved for the skill running on the same Alexa device only.
+
+Should you prefer to key on the userId instead (same skill data, no matter which device
+in the same account runs it), or some other field, you can add the following function
+anywhere in the skill's inline code.
+
+```js
+// The global `litexa` namespace contains compile-time objects at runtime.
+// `overridableFunctions` can be redefined by assigning new functionality to them.
+litexa.overridableFunctions = litexa.overridableFunctions
+                              ? litexa.overridableFunctions
+                              : {};
+
+/* The `identity` parameter will have the following structure:
+{
+  requestAppId,  // = System.application.applicationId
+  userId,        // = System.user.userId
+  deviceId,      // = System.device.deviceId
+  litexaLanguage // = Litexa language (e.g. 'default') for request's locale
+}
+*/
+// Now, let's override the DB key generation.
+litexa.overridableFunctions.generateDBKey = function(identity) {
+  // return a key based on both the deviceId and the request langauge
+  return `${identity.deviceId}|${identity.litexaLanguage}`;
+};
 ```
