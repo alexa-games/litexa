@@ -9,7 +9,6 @@ There are plenty of wonderful Alexa features that Litexa does not yet directly s
 not prevented from using them with a Litexa project! Here are the extension points where you can
 quickly convince Litexa you know better, and have it step out of your way.
 
-
 ## Modifying the Alexa Response Object
 
 The final Litexa product is a response, as specified in [the ASK documentation.](https://developer.amazon.com/en-US/docs/alexa/custom-skills/request-and-response-json-reference.html)
@@ -55,8 +54,6 @@ code.
   }
 ```
 
-
-
 ## Modifying the Language Model
 
 *Not Yet Available*
@@ -68,10 +65,9 @@ out to us with a proposal for where you feel it would be natural to inject it!
 
 ## Accepting Novel Events
 
-To accept named events that Litexa does not yet define in it's core, you can write
+To accept named events that Litexa does not yet define in its core, you can write
 an extension module, where you indicate the new events in the
 `compiler.valideEventNames` list. [Litexa extension](extensions.html#_2-compiler-extension)
-
 
 ## Sending Novel Directives
 
@@ -199,9 +195,6 @@ See the [chapter on testing](/book/testing.html) for more
 information on tools you have available to help trap and
 correct any errors.
 
-
-
-
 ## Reading and Modifying Litexa's `context`
 
 Litexa's runtime primarily operates by creating and manipulating a `context` object in response
@@ -326,8 +319,6 @@ slot variables, so while handling the following intent, you'd expect to see `con
     ```
 :::
 
-
-
 ### 2) Pending Response Data
 
 The Litexa `context` tracks the following data to be included in any pending response:
@@ -363,7 +354,6 @@ addCustomSSML = function(context) {
 Modifying response data can become especially useful when authoring a custom
 [Litexa extension](extensions.html). For instance, the `@litexa/apl` extension keeps track of all
 APL-related data in a newly added `context.apl` object.
-
 
 ### 3) DB Data
 
@@ -439,7 +429,6 @@ launch
     say "We spoke less than 15 minutes ago, did you miss me?"
   @lastLaunchTime = context.now
 ```
-
 
 In summary, the Litexa `context` object is a good starting point for extending Litexa's
 capabilities, be it through external [Litexa extensions](extensions.html), or through
