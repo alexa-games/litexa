@@ -1413,7 +1413,7 @@ AlternativeStatement
   }
 
 /* litexa [with]
-Specifies the type of a [slot](#slot), as part of a [when](#when) clause.
+Specifies the type of a slot, as part of a [when](#when) clause.
 
 The contents of the statement refer to the name of the slot
 in question, and the type it should be expected to receive.
@@ -1539,11 +1539,10 @@ SlotTypeStatement
   }
 
 /* litexa [otherwise]
-Defines a catch all intent that will be executed should
-its parent state receive an intent that it has no explicit
-handler for. It's always possible for the user to say
-something unexpected, so you should generally always have
-something to say to guide them back on track in these cases.
+Defines a catch all intent that will be executed should its parent state receive
+an intent that it has no explicit handler for. It's always possible for the user
+to say something unexpected, so you should generally always have something to say
+to guide them back on track in these cases.
 
 ```coffeescript
 waitForAnswer
@@ -1726,9 +1725,11 @@ Here is a sample IntentRequest type `$request` from running `litexa test` in a p
 ```
 ### Slot Variables
 
-The most common use of request variables is population of slot values in
-intents. If an intent contains a slot value, Litexa will automatically populate
-the $ variable defined in the handler from the skill request.
+The most common use of request variables is population of slots in intents
+(see the [with](#with) documentation for more information on slots). If a
+user invokes an intent with an utterance that has one more multiple slots in
+it, Litexa will automatically populate the $ variable placeholder(s) with
+the slot value(s) the user request was resolved to.
 
 ```coffeescript
 askForCatName
@@ -2173,18 +2174,16 @@ TestEndStatement
   }
 
 /* litexa [user:]
-Sends skill intent requests to the skill to drive test
-execution. Intents are specified by either one of its
-utterances or name:
+Sends skill intent requests to the skill to drive test execution. Intents are
+specified by either one of its utterances or name:
 
 ```coffeescript
 user: "start the game over please" # by utterance
 user: NameIntent # by name
 ```
 
-If a slot value is needed, it can be specified in an
-utterance directly, or it can be appended to the end of the
-statement.
+If a slot value is needed, it can be specified in an utterance directly, or
+it can be appended to the end of the statement.
 
 For example, if a handler in the skill looks like this:
 
@@ -2198,9 +2197,32 @@ For example, if a handler in the skill looks like this:
 Then the following statements behave the same way in your test:
 
 ```coffeescript
-user: "my name is Cat" # Litexa deduces $name = Cat from the utterance
-user: NameIntent with $name = Cat # append more slots by separating them with commas
-user: "my name is" with $name = Cat # this is valid, but can't happen in a real interaction
+user: "my name is Cat" # Litexa deduces $name = "Cat" from the utterance
+user: NameIntent with $name = "Cat" # append more slots by separating them with commas
+user: "my name is" with $name = "Cat" # this is valid, but can't happen in a real interaction
+```
+
+To trigger an `otherwise` handler, the test can use any intent that isn't explicitly
+handled by the current state:
+
+```coffeescript
+launch
+  when AMAZON.YesIntent
+    # AMAZON.YesIntent added to skill's language model.
+    # ... yes handler
+
+  otherwise
+    say "in launch otherwise"
+
+someOtherState
+  when AMAZON.NoIntent
+    # AMAZON.NoIntent added to skill's language model.
+    # ... no handler
+
+TEST "otherwise"
+  launch
+  user: AMAZON.NoIntent # intent not handled in launch or global state -> triggers otherwise handler
+  alexa: launch, /in launch otherwise/
 ```
 
 */
