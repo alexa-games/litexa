@@ -214,6 +214,7 @@ class ProjectInfo
       '.mp4'
       '.ico'
       '.ogg'
+      '.unityweb'
     ]
 
     for kind, info of @extensions
