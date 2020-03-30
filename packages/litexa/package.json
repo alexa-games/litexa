@@ -36,7 +36,7 @@
     "global-modules": "2.0.0",
     "inquirer": "6.2.2",
     "marked": "0.8.0",
-    "mkdirp": "0.5.1",
+    "mkdirp": "1.0.3",
     "module-alias": "2.2.0",
     "pegjs": "0.10.0",
     "pngjs": "3.3.3",
