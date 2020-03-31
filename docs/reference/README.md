@@ -150,7 +150,7 @@ Here is a sample IntentRequest type `$request` from running `litexa test` in a p
 
 The most common use of request variables is population of slots in intents
 (see the [with](#with) documentation for more information on slots). If a
-user invokes an intent with an utterance that has one more multiple slots in
+user invokes an intent with an utterance that has one more more slots in
 it, Litexa will automatically populate the $ variable placeholder(s) with
 the slot value(s) the user request was resolved to.
 
@@ -929,10 +929,14 @@ Used to provide variations to various statements:
 
 ## otherwise
 
-Defines a catch all intent that will be executed should its parent state receive
-an intent that it has no explicit handler for. It's always possible for the user
-to say something unexpected, so you should generally always have something to say
-to guide them back on track in these cases.
+Defines a handler that will catch any skill intent that is not explicitly handled
+by the parent state (or the global state). `otherwise` is a great catch-all
+for anything unexpected the user might say:
+
+1. an intent that is supported elsewhere in the skill but makes no sense in the parent state
+2. an utterance that isn't supported by the skill at all, which could arrive as an
+[AMAZON.FallbackIntent](https://developer.amazon.com/blogs/alexa/post/c97f3bb7-9701-41e8-ac06-a3a44b9f1638/use-the-new-fallback-intent-to-respond-gracefully-to-unexpected-customer-requests)
+if supported by the locale the skill is running in.
 
 ```coffeescript
 waitForAnswer
@@ -1577,8 +1581,8 @@ The above would send the following directive:
 
 ## user:
 
-Sends skill intent requests to the skill to drive test execution. Intents are
-specified by either one of its utterances or name:
+Sends skill intent requests to the skill to drive test execution. An intent is
+specified by either one of its utterances or its name:
 
 ```coffeescript
 user: "start the game over please" # by utterance
@@ -1586,24 +1590,26 @@ user: NameIntent # by name
 ```
 
 If a slot value is needed, it can be specified in an utterance directly, or
-it can be appended to the end of the statement.
-
-For example, if a handler in the skill looks like this:
+it can be appended to the intent name. For example, if a handler in the skill
+looks like this:
 
 ```coffeescript
   when NameIntent
-    or "my name is $name"
-    or "$name"
+    or "my name is $name $surname"
+    or "$name $surname"
     with $name = AMAZON.US_FIRST_NAME
+    with $surname = # ... slot with acceptable surnames
 ```
 
-Then the following statements behave the same way in your test:
+Then the slot values could be specified as follows in your test:
 
 ```coffeescript
-user: "my name is Cat" # Litexa deduces $name = "Cat" from the utterance
-user: NameIntent with $name = "Cat" # append more slots by separating them with commas
-user: "my name is" with $name = "Cat" # this is valid, but can't happen in a real interaction
+user: "my name is Jane Doe" # Litexa deduces $name = "Jane" and $surname = "Doe" from the utterance
+user: NameIntent with $name = "Jane", $surname = "Doe" # multiple slot values are comma-separated
 ```
+
+We recommend the second approach (using the intent name) as it makes the tests more resilient
+to changing utterances.
 
 To trigger an `otherwise` handler, the test can use any intent that isn't explicitly
 handled by the current state:
