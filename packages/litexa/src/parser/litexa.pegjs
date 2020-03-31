@@ -1541,22 +1541,29 @@ SlotTypeStatement
 /* litexa [otherwise]
 Defines a handler that will catch any skill intent that is not explicitly handled
 by the parent state (or the global state). `otherwise` is a great catch-all
-for anything unexpected the user might say:
+for anything unexpected the user might say.
 
-1. an intent that is supported elsewhere in the skill but makes no sense in the parent state
-2. an utterance that isn't supported by the skill at all, which could arrive as an
-[AMAZON.FallbackIntent](https://developer.amazon.com/blogs/alexa/post/c97f3bb7-9701-41e8-ac06-a3a44b9f1638/use-the-new-fallback-intent-to-respond-gracefully-to-unexpected-customer-requests)
-if supported by the locale the skill is running in.
+Let's assume our skill model supports the `AMAZON.YesIntent` and `AMAZON.NoIntent`.
+In a state during which neither of those intents would make any sense we can
+use a succinct `otherwise` handler:
 
 ```coffeescript
-waitForAnswer
+askForFavoriteNumber
+  say "What's your favorite number?"
 
-  when TheAnswerIs
-    say "alright, checking"
+  when FavoriteNumberIntent
+    or "my favorite number is $number"
+    with $number = AMAZON.NUMBER
+    # ...
 
   otherwise
-    say "I'm sorry, I didn't quite get that. Let's try again."
-    -> askQuestion
+    # e.g. user said yes/no which are not explicitly handled in this state
+    say "I'm sorry, I didn't quite catch that. Let's try again."
+    -> askForFavoriteNumber
+
+global
+  # Doesn't have handlers for AMAZON.YesIntent or AMAZON.NoIntent, which would otherwise
+  # take precendence over the above `otherwise`.
 ```
 
 */
@@ -1731,7 +1738,7 @@ Here is a sample IntentRequest type `$request` from running `litexa test` in a p
 
 The most common use of request variables is population of slots in intents
 (see the [with](#with) documentation for more information on slots). If a
-user invokes an intent with an utterance that has one more more slots in
+user invokes an intent with an utterance that has one or more slots in
 it, Litexa will automatically populate the $ variable placeholder(s) with
 the slot value(s) the user request was resolved to.
 
