@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.5.0](https://github.com/alexa-games/litexa/compare/v0.4.1...v0.5.0) (2020-04-01)
+
+
+### Features
+
+* Included unity WebGL file extension in assets whitelist. ([#141](https://github.com/alexa-games/litexa/issues/141)) ([f776dc1](https://github.com/alexa-games/litexa/commit/f776dc1dbd18018c61c733b35db830e6764db48b))
+
+
+
+
+
 # [0.4.0](https://github.com/alexa-games/litexa/compare/v0.3.1...v0.4.0) (2020-01-30)
 
 

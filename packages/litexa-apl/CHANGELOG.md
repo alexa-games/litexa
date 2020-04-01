@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.5.0](https://github.com/alexa-games/litexa/compare/v0.4.1...v0.5.0) (2020-04-01)
+
+**Note:** Version bump only for package @litexa/apl
+
+
+
+
+
 # [0.4.0](https://github.com/alexa-games/litexa/compare/v0.3.1...v0.4.0) (2020-01-30)
 
 
