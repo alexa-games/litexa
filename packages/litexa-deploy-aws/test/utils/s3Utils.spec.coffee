@@ -10,6 +10,7 @@
 
 { collectUploadInfo
   createAssetSets
+  findAndRegisterFilesToUpload
   uploadAssetSet
   validateS3BucketName } = require('../../src/utils/s3Utils')
 
@@ -460,6 +461,41 @@ describe 'S3Utils', ->
           }
         }
       )
+
+  describe '#findAndRegisterFilesToUpload()', ->
+    s3Context = {
+      baseLocation: "dummyBase"
+      assets: {}
+    }
+    languageInfo = {
+      default: {
+        assets: {
+          files: ['subdir\\image.png']
+          root: "dummyRoot"
+        }
+        convertedAssets: {
+          files: []
+          root: "dummyRoot"
+        }
+      }
+      en: {
+        assets: {
+          files: ['otherSubdir\\something.png']
+          root: "enDummyRoot"
+        }
+        convertedAssets: {
+          files: []
+          root: "dummyRoot"
+        }
+      }
+    }
+    it 'uploads asset subdirectory files in Windows', ->
+      findAndRegisterFilesToUpload({s3Context, languageInfo})
+      expect(Object.keys(s3Context.assets).length).to.equal(3)
+      asset = s3Context.assets["dummyBase/default/subdir/image.png"]
+      expect(asset).to.not.equal(undefined)
+      expect(asset.name.includes('\\')).to.equal(false)
+      expect(asset.sourceFilename.includes('\\')).to.equal(false)
 
 
   describe '#uploadAssetSet()', ->
