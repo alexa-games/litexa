@@ -23,7 +23,6 @@ fs = require 'fs'
 path = require 'path'
 debug = require('debug')('litexa')
 { promisify } = require 'util'
-CSON = require 'cson-parser'
 extensions = require('./fileExtensions')
 searchReplace = require('./generators/searchReplace')
 projectNameValidate = require('./generators/validators/projectNameValidator')
