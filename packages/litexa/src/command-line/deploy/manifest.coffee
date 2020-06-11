@@ -62,7 +62,9 @@ module.exports =
 
     logger.log "beginning manifest deployment"
 
-    loadSkillInfo context, manifestContext
+    smapi.prepare logger
+    .then ->
+      loadSkillInfo context, manifestContext
     .then ->
       getManifestFromSkillInfo context, manifestContext
     .then ->
@@ -83,6 +85,9 @@ module.exports =
           logger.error err.stack
         else
           logger.error JSON.stringify err
+      if typeof(err) == 'string'
+        # intended for the cli user
+        throw err
       throw "failed manifest deployment"
 
 
@@ -369,19 +374,23 @@ parseSkillInfo = (data) ->
 
 
 updateSkill = (context, manifestContext) ->
-  smapi.call {
-    askProfile
-    command: 'get-skill'
-    params: { 'skill-id': manifestContext.skillId }
-    logChannel: logger
-  }
+  params =
+    'skill-id': manifestContext.skillId
+
+  if smapi.version.major < 2
+    command = 'get-skill'
+  else
+    command = 'get-skill-manifest'
+    params.stage = 'development'
+
+  smapi.call { askProfile, command, params, logChannel: logger }
   .catch (err) ->
     if err.code == 404
       Promise.reject "The skill ID stored in artifacts.json doesn't seem to exist in the deployment
         account. Have you deleted it manually in the dev console? If so, please delete it from the
         artifacts.json and try again."
     else
-      Promise.reject err
+      Promise.reject "Failed to get the current skill manifest. ask returned: #{err.message}"
   .then (data) ->
     needsUpdating = false
     info = parseSkillInfo data
@@ -390,10 +399,10 @@ updateSkill = (context, manifestContext) ->
     else
       try
         testObjectsEqual info.manifest, manifestContext.manifest
-        logger.log "skill manifest up to date"
+        logger.log "deployed skill manifest matches local"
       catch err
         logger.verbose err
-        logger.log "skill manifest mismatch"
+        logger.log "deployed skill manifest does not match local, updating"
         needsUpdating = true
 
     unless context.artifacts.get('skill-manifest-assets-md5') == manifestContext.deployedIconAssetsMd5Sum
@@ -405,15 +414,20 @@ updateSkill = (context, manifestContext) ->
       return Promise.resolve()
 
     logger.log "updating skill manifest"
-    smapi.call {
-      askProfile
-      command: 'update-skill'
-      params: {
+
+    if smapi.version.major < 2
+      command = 'update-skill'
+      params =
         'skill-id': manifestContext.skillId
         'file': manifestContext.manifestFilename
-      }
-      logChannel: logger
-    }
+    else
+      command = 'update-skill-manifest'
+      params =
+        'skill-id': manifestContext.skillId
+        'manifest': "file:#{manifestContext.manifestFilename}"
+        'stage': 'development'
+
+    smapi.call { askProfile, command, params, logChannel: logger }
     .then (data) ->
       waitForSuccess context, manifestContext.skillId, 'update-skill'
     .then ->
@@ -454,22 +468,29 @@ waitForSuccess = (context, skillId, operation) ->
 
 
 createSkill = (context, manifestContext) ->
-  smapi.call {
-    askProfile
-    command: 'create-skill'
-    params: { 'file': manifestContext.manifestFilename }
-    logChannel: logger
-  }
+  if smapi.version.major < 2
+    command = 'create-skill'
+    params =
+      'file': manifestContext.manifestFilename
+  else
+    command = 'create-skill-for-vendor'
+    params =
+      'manifest': "file:#{manifestContext.manifestFilename}"
+
+  smapi.call { askProfile, command, params, logChannel: logger }
   .then (data) ->
-    # dig out the skill id
-    # logger.log data
-    lines = data.split '\n'
-    skillId = null
-    for line in lines
-      [k, v] = line.split ':'
-      if k.toLowerCase().indexOf('skill id') == 0
-        skillId = v.trim()
-        break
+    if smapi.version.major < 2
+      # dig out the skill id
+      lines = data.split '\n'
+      skillId = null
+      for line in lines
+        [k, v] = line.split ':'
+        if k.toLowerCase().indexOf('skill id') == 0
+          skillId = v.trim()
+          break
+    else
+      result = JSON.parse data
+      skillId = result.skillId
     unless skillId?
       throw "failed to extract skill ID from ask cli response to create-skill"
     logger.log "in progress skill id #{skillId}"
@@ -596,15 +617,19 @@ updateModelForLocale = (context, manifestContext, localeInfo) ->
   locale = localeInfo.code
 
   modelDeployStart = new Date
-  smapi.call {
-    askProfile
-    command: 'get-model'
-    params: {
-      'skill-id': manifestContext.skillId
-      locale: locale
-    }
-    logChannel: logger
+
+  params =  {
+    'skill-id': manifestContext.skillId
+    locale: locale
   }
+
+  if smapi.version.major < 2
+    command = 'get-model'
+  else
+    command = 'get-interaction-model'
+    params.stage = 'development'
+
+  smapi.call { askProfile, command, params, logChannel: logger }
   .catch (err) ->
     # it's fine if it doesn't exist yet, we'll upload
     unless err.code == 404
@@ -641,16 +666,21 @@ updateModelForLocale = (context, manifestContext, localeInfo) ->
       return Promise.resolve()
 
     logger.log "#{locale} model update beginning"
-    smapi.call {
-      askProfile
-      command: 'update-model'
-      params: {
+    smapi.getVersion logger
+    .then (version) ->
+      params =
         'skill-id': manifestContext.skillId
         locale: locale
-        file: filename
-      }
-      logChannel: logger
-    }
+
+      if smapi.version.major < 2
+        command = 'update-model'
+        params.file = filename
+      else
+        command = 'set-interaction-model'
+        params['interaction-model'] = "file:#{filename}"
+        params.stage = 'development'
+
+      smapi.call { askProfile, command, params, logChannel: logger }
     .then ->
       waitForModelSuccess context, manifestContext.skillId, locale, 'update-model'
     .then ->
@@ -661,14 +691,38 @@ updateModelForLocale = (context, manifestContext, localeInfo) ->
 
 enableSkill = (context, manifestContext) ->
   logger.log "ensuring skill is enabled for testing"
-  smapi.call {
-    askProfile
-    command: 'enable-skill'
-    params: { 'skill-id': manifestContext.skillId }
-    logChannel: logger
-  }
+
+  params =
+    'skill-id': manifestContext.skillId
+
+  if smapi.version.major < 2
+    command = 'enable-skill'
+  else
+    command = 'set-skill-enablement'
+    params.stage = 'development'
+
+  smapi.call { askProfile, command, params, logChannel: logger }
   .catch (err) ->
     Promise.reject err
+
+
+module.exports.generateManifest = (options, skill) ->
+  context = await (require '../deploy.coffee').buildDeploymentContext options
+  manifestContext = {}
+
+  require('../../deployment/artifacts.coffee').loadArtifacts { context, logger: context.logger }
+  .then ->
+    artifacts = context.artifacts
+    context.artifacts =
+      get: (key) -> artifacts.tryGet(key) ? "** STUB, #{key} not available yet **"
+    loadSkillInfo context, manifestContext
+  .then ->
+    getManifestFromSkillInfo context, manifestContext
+  .then ->
+    buildSkillManifest context, manifestContext
+  .then ->
+    return manifestContext.manifest
+
 
 module.exports.testing =
   getManifestFromSkillInfo: getManifestFromSkillInfo

@@ -29,6 +29,10 @@ module.exports.run = (options, after) ->
       when 'handler'
         lambda = skill.toLambda()
         logger.log lambda
+      when 'manifest'
+        { generateManifest } = require './deploy/manifest.coffee'
+        manifest = await generateManifest options, skill
+        logger.log JSON.stringify(manifest, null, 2)
       else
         return error "unrecognized printer #{options.type}"
   catch err

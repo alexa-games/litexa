@@ -21,8 +21,8 @@ LoggingChannel = require './loggingChannel'
 { formatLocationStart } = require('../parser/errors').lib
 { validateCoreVersion } = require('./deploy/validators')
 
-module.exports.run = (options) ->
 
+module.exports.buildDeploymentContext = (options, logger) ->
   logStream = options.logger ? console
   verbose = options.verbose ? false
 
@@ -32,59 +32,66 @@ module.exports.run = (options) ->
     verbose
   })
 
-  try
-    deploymentStartTime = new Date
+  deploymentStartTime = new Date
 
-    # ok, load skill
-    skill = await require('./skill-builder').build(options.root, options.deployment)
-    options.deployment = options.deployment ? 'development'
-    skill.projectInfo.variant = options.deployment
+  # ok, load skill
+  skill = await require('./skill-builder').build(options.root, options.deployment)
+  options.deployment = options.deployment ? 'development'
+  skill.projectInfo.variant = options.deployment
 
-    # deployment artifacts live in this temp directory
-    deployRoot = path.join skill.projectInfo.root, '.deploy', skill.projectInfo.variant
-    mkdirp.sync deployRoot
+  # deployment artifacts live in this temp directory
+  deployRoot = path.join skill.projectInfo.root, '.deploy', skill.projectInfo.variant
+  mkdirp.sync deployRoot
 
-    logger.filename = path.join(deployRoot,'deploy.log')
+  logger.filename = path.join(deployRoot,'deploy.log')
 
-    # couldn't log this until now, but it's close enough
-    logger.log "skill build complete in #{(new Date) - deploymentStartTime}ms"
+  # couldn't log this until now, but it's close enough
+  logger.log "skill build complete in #{(new Date) - deploymentStartTime}ms"
 
-    logger.important "beginning deployment of #{skill.projectInfo.root}"
+  logger.important "beginning deployment of #{skill.projectInfo.root}"
 
-    # deploy what?
-    deploymentTypes = parseDeploymentTypes(options)
+  unless 'deployments' of skill.projectInfo
+    throw new Error "missing 'deployments' key in the Litexa config file, can't continue without
+      parameters to pass to the deployment module!"
 
-    unless 'deployments' of skill.projectInfo
-      throw new Error "missing 'deployments' key in the Litexa config file, can't continue without
-        parameters to pass to the deployment module!"
+  deploymentOptions = skill.projectInfo.deployments[options.deployment]
 
-    deploymentOptions = skill.projectInfo.deployments[options.deployment]
+  unless deploymentOptions?
+    throw new Error "couldn't find a deployment called `#{options.deployment}` in the deployments
+      section of the Litexa config file, cannot continue."
 
-    unless deploymentOptions?
-      throw new Error "couldn't find a deployment called `#{options.deployment}` in the deployments
-        section of the Litexa config file, cannot continue."
+  deployModule = require('../deployment/deployment-module')(skill.projectInfo.root, deploymentOptions, logger)
+  deployModule.manifest = require('./deploy/manifest')
 
-    deployModule = require('../deployment/deployment-module')(skill.projectInfo.root, deploymentOptions, logger)
-    deployModule.manifest = require('./deploy/manifest')
+  # the context gets passed between the steps, to
+  # collect shared information
+  context =
+    deployModule: deployModule
+    skill: skill
+    projectInfo: skill.projectInfo
+    projectConfig: skill.projectInfo
+    deployRoot: deployRoot
+    projectRoot: skill.projectInfo?.root
+    sharedDeployRoot: path.join skill.projectInfo.root, '.deploy'
+    cache: options.cache
+    deploymentName: options.deployment
+    deploymentOptions: skill.projectInfo.deployments[options.deployment]
+    JSONValidator: require('../parser/jsonValidator').lib.JSONValidator
+    logger: logger
+  return context
 
 
-    # the context gets passed between the steps, to
-    # collect shared information
-    context =
-      skill: skill
-      projectInfo: skill.projectInfo
-      projectConfig: skill.projectInfo
-      deployRoot: deployRoot
-      projectRoot: skill.projectInfo?.root
-      sharedDeployRoot: path.join skill.projectInfo.root, '.deploy'
-      cache: options.cache
-      deploymentName: options.deployment
-      deploymentOptions: skill.projectInfo.deployments[options.deployment]
-      JSONValidator: require('../parser/jsonValidator').lib.JSONValidator
 
-  catch err
-    logger.error err.message ? err
-    return
+module.exports.run = (options) ->
+
+  deploymentStartTime = new Date
+
+  context = await module.exports.buildDeploymentContext options
+  logger = context.logger
+  verbose = options.verbose ? false
+
+  # deploy what?
+  deploymentTypes = parseDeploymentTypes(options)
 
   require('../deployment/artifacts.coffee').loadArtifacts { context, logger }
   .then ->
@@ -113,8 +120,8 @@ module.exports.run = (options) ->
     if deploymentTypes.assets
       assetsLogger = new LoggingChannel({
         logPrefix: 'assets'
-        logStream
-        logFile: path.join(deployRoot,'assets.log')
+        logSteam: logger.logStream
+        logFile: path.join(context.deployRoot,'assets.log')
         verbose
       })
       assetsPipeline = Promise.resolve()
@@ -122,17 +129,17 @@ module.exports.run = (options) ->
         # run all the external converters
         require('../deployment/assets').convertAssets context, assetsLogger
       .then ->
-        deployModule.assets.deploy context, assetsLogger
+        context.deployModule.assets.deploy context, assetsLogger
       step1.push assetsPipeline
 
     if deploymentTypes.lambda
       lambdaLogger = new LoggingChannel({
         logPrefix: 'lambda'
-        logStream
-        logFile: path.join(deployRoot,'lambda.log')
+        logSteam: logger.logStream
+        logFile: path.join(context.deployRoot,'lambda.log')
         verbose
       })
-      step1.push deployModule.lambda.deploy context, lambdaLogger
+      step1.push context.deployModule.lambda.deploy context, lambdaLogger
 
     Promise.all step1
   .then ->
@@ -140,17 +147,23 @@ module.exports.run = (options) ->
     if deploymentTypes.manifest
       lambdaLogger = new LoggingChannel({
         logPrefix: 'manifest'
-        logStream
-        logFile: path.join(deployRoot,'manifest.log')
+        logSteam: logger.logStream
+        logFile: path.join(context.deployRoot,'manifest.log')
         verbose
       })
-      deployModule.manifest.deploy context, lambdaLogger
+      context.deployModule.manifest.deploy context, lambdaLogger
     else
       Promise.resolve()
   .then ->
     # model upload must be after the manifest, as the skill must exist
     if deploymentTypes.model
-      deployModule.model.deploy skill
+      modelLogger = new LoggingChannel({
+        logPrefix: 'model'
+        logSteam: logger.logStream
+        logFile: path.join(context.deployRoot,'model.log')
+        verbose
+      })
+      context.deployModule.model.deploy context, modelLogger
     else
       Promise.resolve()
   .then ->

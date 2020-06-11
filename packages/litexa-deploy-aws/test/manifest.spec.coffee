@@ -20,10 +20,22 @@ chai.use(chaiAsPromised)
 
 
 describe 'construct and deploy artifacts for manifest', ->
+  this.timeout(5000)
   loggerInterface = undefined
   context = undefined
   sampleArtifacts = undefined
   errorThrown = undefined
+
+  projectRoot = path.join(process.cwd(), '.manifest-test')
+
+  clearTestPath = ->
+    try
+      delete require.cache[require.resolve(path.join projectRoot, 'skill.coffee')]
+      fs.unlinkSync "./.manifest-test/skill.coffee"
+      rimraf.sync '.manifest-test'
+
+  # run once to catch any prior failures
+  clearTestPath()
 
   beforeEach ->
     loggerInterface = {
@@ -35,7 +47,7 @@ describe 'construct and deploy artifacts for manifest', ->
     }
     context =
       # manifest uses require() and it doesn't work in test execution with relative paths
-      projectRoot: path.join(process.cwd(), '.manifest-test')
+      projectRoot: projectRoot
       artifacts:
         get: -> undefined
         save: -> undefined
@@ -69,21 +81,19 @@ describe 'construct and deploy artifacts for manifest', ->
     mkdirp.sync context.deployRoot
 
   afterEach ->
-    delete require.cache[require.resolve(path.join context.projectRoot, 'skill.coffee')]
-    fs.unlinkSync "./.manifest-test/skill.coffee"
-    rimraf.sync '.manifest-test'
+    clearTestPath()
 
   validArtifacts = (name) ->
     return sampleArtifacts[name]
 
   it 'does not find a skill file and generates a default', ->
-    deployManifest = -> Manifest.deploy context, loggerInterface
     try
       await Manifest.deploy context, loggerInterface
     catch e
+      console.log e
       errorThrown = true
       assert(e?, 'exception was thrown')
-      assert.include(e, "skill.* was not found in project root", 'missing skill.* thrown')
+      assert.include(e, "skill.* was not found in project root", 'points out skill.* config file is missing')
     assert(errorThrown, 'an exception was thrown')
     assert(fs.existsSync(path.join context.projectRoot, 'skill.coffee'), 'it generated a default skill.coffee')
     generatedManifest = require '../.manifest-test/skill'
@@ -93,13 +103,12 @@ describe 'construct and deploy artifacts for manifest', ->
     logSpy = spy(loggerInterface, 'log')
     errorSpy = spy(loggerInterface, 'error')
     fs.writeFileSync "./.manifest-test/skill.coffee", 'module.exports = {foo:"bar"}', 'utf8'
-    dummy = -> undefined
     try
       await Manifest.deploy context, loggerInterface
     catch e
       errorThrown = true
       assert(e?, 'exception was thrown')
-      assert.equal(e, "failed manifest deployment")
+      assert.include(e, "'manifest' property", 'points out manifest property is missing')
     assert(errorThrown, 'an exception was thrown')
     assert(logSpy.calledWith(match("building skill manifest")), 'it loaded skill info')
     assert(errorSpy.calledWith(match("Didn't find a 'manifest' property")),
@@ -109,13 +118,12 @@ describe 'construct and deploy artifacts for manifest', ->
     logSpy = spy(loggerInterface, 'log')
     errorSpy = spy(loggerInterface, 'error')
     fs.writeFileSync "./.manifest-test/skill.coffee", 'module.exports = {manifest:"bar"}', 'utf8'
-
     try
       await Manifest.deploy context, loggerInterface
     catch e
       errorThrown = true
       assert(e?, 'exception was thrown')
-      assert.equal(e, "failed manifest deployment")
+      assert.include(e, "lambda ARN", 'points out lambdaARN is missing')
     assert(errorThrown, 'an exception was thrown')
     assert(logSpy.calledWith(match("building skill manifest")), 'it loaded skill info')
     assert(errorSpy.calledWith(match("Missing lambda ARN")), 'artifacts file missing `lambdaARN` field')

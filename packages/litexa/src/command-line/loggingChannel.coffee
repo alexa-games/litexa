@@ -36,6 +36,7 @@ class LoggingChannel
       @lastFileTime = lastFileTime || new Date()
       @startTime = startTime || new Date()
 
+    @fileLogStream = @options.fileLogStream
     @logFile = logFile
 
   # Public Interface
@@ -54,6 +55,8 @@ class LoggingChannel
       writeCondition: writeCondition and @canWriteToLogStream
       timeUpdated: 'lastOutStreamTime'
     }, args))
+
+    args.format = null
 
     @_write(Object.assign({
       writer: @fileLogStream
@@ -97,7 +100,8 @@ class LoggingChannel
   # legacy interface (are these really the responsibility of the logger?)
   derive: (newPrefix) ->
     shallowCopy = Object.assign({}, @options)
-    shallowCopy.logPrefix = newPrefix;
+    shallowCopy.logPrefix = newPrefix
+    shallowCopy.fileLogStream = @fileLogStream
     new LoggingChannel(shallowCopy);
 
   runningTime: ->
@@ -134,6 +138,7 @@ class LoggingChannel
     result
 
   _createFileLogStream: ->
+    return if @fileLogStream?
     @fileLogStream = @fs.createWriteStream @logFile, {flags :'w', encoding: 'utf8'}
 
   # Getters
