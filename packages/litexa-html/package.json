@@ -1,6 +1,6 @@
 {
   "name": "@litexa/html",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "This module adds support for HTML directives to Litexa.",
   "scripts": {
     "audit:fix": "npm audit fix",
