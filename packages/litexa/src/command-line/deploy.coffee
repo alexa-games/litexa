@@ -120,7 +120,7 @@ module.exports.run = (options) ->
     if deploymentTypes.assets
       assetsLogger = new LoggingChannel({
         logPrefix: 'assets'
-        logSteam: logger.logStream
+        logStream: logger.logStream
         logFile: path.join(context.deployRoot,'assets.log')
         verbose
       })
@@ -135,7 +135,7 @@ module.exports.run = (options) ->
     if deploymentTypes.lambda
       lambdaLogger = new LoggingChannel({
         logPrefix: 'lambda'
-        logSteam: logger.logStream
+        logStream: logger.logStream
         logFile: path.join(context.deployRoot,'lambda.log')
         verbose
       })
@@ -147,7 +147,7 @@ module.exports.run = (options) ->
     if deploymentTypes.manifest
       lambdaLogger = new LoggingChannel({
         logPrefix: 'manifest'
-        logSteam: logger.logStream
+        logStream: logger.logStream
         logFile: path.join(context.deployRoot,'manifest.log')
         verbose
       })
@@ -159,7 +159,7 @@ module.exports.run = (options) ->
     if deploymentTypes.model
       modelLogger = new LoggingChannel({
         logPrefix: 'model'
-        logSteam: logger.logStream
+        logStream: logger.logStream
         logFile: path.join(context.deployRoot,'model.log')
         verbose
       })
