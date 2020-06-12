@@ -1,7 +1,7 @@
 {
   "check-coverage": true,
   "statements": 40,
-  "branches": 45,
+  "branches": 40,
   "functions": 15,
   "lines": 40,
   "cwd": "../../",

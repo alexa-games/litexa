@@ -24,7 +24,7 @@
   "dependencies": {
     "adm-zip": "0.4.13",
     "aws-sdk": "2.395.0",
-    "coffeescript": "2.4.1",
+    "coffeescript": "^2.5.0",
     "debug": "3.2.6",
     "md5-file": "4.0.0",
     "mime": "2.4.0",
