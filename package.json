@@ -48,6 +48,7 @@
     "mocha": "^7.0.0",
     "module-alias": "2.2.0",
     "move-cli": "^1.2.1",
+    "move-concurrently": "1.0.1",
     "nyc": "^15.0.0",
     "rimraf": "2.6.3",
     "rollup": "1.10.1",
