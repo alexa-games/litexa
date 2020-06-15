@@ -90,7 +90,7 @@ every in-skill product associated with the specified stage of your skill.
 For example, assuming you've linked a product with the reference name "MyPremiumProduct" to your
 skill in the `development` stage, you would see the following file structure:
 
-```stdout
+```
 project_dir
 └── isp
     └── development

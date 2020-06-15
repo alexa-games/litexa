@@ -62,7 +62,7 @@ a project with an inlined structure.
 
     Your options are as follows:
 
-    ```stdout
+    ```
     -c, --config-language   [configLanguage]    language of the generated configuration file, can be javascript, json, typescript, or coffee
     -s, --source-language   [sourceLanguage]    language of the generated source code, can be javascript, typescript, or coffee
     -b, --bundling-strategy [bundlingStrategy]  the structure of the code layout as it pertains to litexa, can be webpack, npm-link, or none
@@ -91,7 +91,7 @@ If you prefer, `litexa init` is available as an equivalent to `litexa generate`.
 
 An inlined project would look something like this:
 
-```stdout
+```
 .
 ├── README.md
 ├── artifacts.json
@@ -255,7 +255,7 @@ There are two ways to generate a project with a separate structure.
 
 A separate project would look something like this:
 
-```stdout
+```
 .
 ├── README.md
 ├── artifacts.json
@@ -435,7 +435,7 @@ There are two ways to generate a project with a bundled structure.
 
 A bundled project would look something like this:
 
-```stdout
+```
 .
 ├── README.md
 ├── artifacts.json

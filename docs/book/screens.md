@@ -97,7 +97,7 @@ npm install --save @litexa/apl
 
 This should result in the following directory structure:
 
-```stdout
+```
 project_dir
 ├── litexa
 └── node_modules
@@ -125,7 +125,7 @@ file can't be found). This option is meaningful for anything static (e.g. a fixe
 
     For example, assuming the following project structure:
 
-    ```stdout
+    ```
     project_dir
     └── litexa
         └── my_doc.json

@@ -1,0 +1,34 @@
+@require '~@parent-theme/styles/index.styl'
+@require './fonts.styl'
+
+body {
+    font-family: 'Amazon Ember';
+}
+
+.navbar {
+    border: 0;
+}
+
+@media (max-width: $MQMobileNarrow) {
+    body {
+        font-size: 11pt;
+    }
+}
+
+@media (max-width: $MQNarrow) {
+    .page {
+        padding-left: 0;
+    }
+
+}
+
+
+
+.navbar {
+    img.logo {
+        margin-right: 0.25rem;
+        width: auto;
+        min-width: initial;
+        height: $navbarHeight * 0.8;
+    }
+}

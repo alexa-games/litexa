@@ -67,12 +67,12 @@ Litexa's generated project comes with accompanying tests.
 Let's walk through them. The `main.test.litexa` file looks
 like this:
 
-@[code lang=coffeescript](@/packages/litexa/src/command-line/templates/common/litexa/main.test.litexa)
+<<< @/packages/litexa/src/command-line/templates/common/litexa/main.test.litexa
 
 To run tests, type `litexa test` into your command line. You
 will get the following result:
 
-@[code lang=coffeescript](@/docs/book/generatedProjectTestOutput.txt)
+<<< @/docs/book/generatedProjectTestOutput.txt
 
 You can observe in the output structure that 3 tests were
 performed, of which 2 look like simulation transcripts. If
@@ -104,16 +104,20 @@ skill response and saves the state data.
 Litexa test output per command step has the following
 structure:
 
-```coffeescript
-Simplified Skill Request  $slotType=slotValue @ simulated timestamp
-◖----------------◗ Skill Response Speech ... Reprompt
-(optional) test-state changes or other relevant events
+```
+[Step Number] [Request Info] [$slotName=slotValue] @ [simulation timestamp]
+◖----------------◗ [Spoken Response] ... [Reprompt]
+[user log output]
+[test-state changes or other relevant events]
 ```
 
 So in "happy path," the `launch` statement triggers a
 LaunchRequest, which produces the following test output:
 
-@[code lang=coffeescript transclude={11-12}](@/docs/book/generatedProjectTestOutput.txt)
+```shell
+2.  ❢    LaunchRequest    @ 15:01:05
+     ◖----------------◗ "Hi there, human. What's your name?" ... "Please tell me your name?"
+```
 
 Then, the following `user: "my name is Dude"` maps to the
 MY_NAME_IS_NAME intent. Litexa automatically matches the
@@ -121,21 +125,27 @@ user dialogue with one of the intent's defined utterances
 and fills in the slot value that matches its utterance
 structure. You can see the result of that test statement below:
 
-@[code lang=coffeescript transclude={13-15}](@/docs/book/generatedProjectTestOutput.txt)
+```shell
+4.  ❢   MY_NAME_IS_NAME  $name=Dude @ 15:02:10
+     ◖----------------◗ "Nice to meet you, Dude. It's a fine Monday, isn't it? Bye now!" ... NO REPROMPT
+  ◣  Voice session ended
+```
 
-Here, you can see what intent was written, with what slot
-got populated. The skill picks up where it left off, which
-in the code is the `waitForName` state. It sees a handler for
-the intent defined in that state, so it executes the Litexa
-code starting from there. You can also see that the skill
-ended the session with the response.
+Here, you can see what intent was understood, and how the slot
+was populated. The skill picks up where it left off, which
+in the code is the `waitForName` state. You can see the result
+of the say statement, and that no reprompt was given.
+You can also see that the session ended with this response.
 
 The next launch session reopens the skill. The skill
 retained its state from the last response, so we can see
 that the skill response uses the logic branch that says the
 stored name "Dude".
 
-@[code lang=coffeescript transclude={16-18}](@/docs/book/generatedProjectTestOutput.txt)
+```shell
+8.  ❢    LaunchRequest    @ 15:03:15
+     ◖----------------◗ "Hello again, Dude. Wait a minute... you could be someone else. What's your name?" ... "Please tell me your name?"
+```
 
 ### Verification Steps
 
@@ -232,17 +242,50 @@ which tests the functionality in `utils.coffee/js/ts`. For
 these kinds of tests, you would use the [Test
 class](/reference/inlined-code-tests.html).
 
+
 Here is the test case:
 
-@[code lang=javascript transclude={12-21}](@/packages/litexa/src/command-line/templates/inlined/javascript/utils.test.js)
+```javascript
+Test.expect("stuff to work", function() {
+  Test.equal(typeof (todayName()), 'string');
+  Test.check(function() {
+    return addNumbers(1, 2, 3) === 6;
+  });
+  return Test.report(`today is ${todayName()}`);
+});
+```
+
 
 Here is the piece of code it tests:
 
-@[code lang=javascript transclude={12-30}](@/packages/litexa/src/command-line/templates/inlined/javascript/utils.js)
+```javascript
+function todayName() {
+  let day;
+  day = (new Date).getDay();
+  return ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][day];
+}
 
-Here is its test output again:
+function addNumbers(...numbers) {
+  let i, len, num, result;
+  console.log(`the arguments are ${numbers}`);
+  result = 0;
+  for (i = 0, len = numbers.length; i < len; i++) {
+    num = numbers[i];
+    result += num;
+  }
+  return result;
+}
+```
 
-@[code lang=coffeescript transclude={33-36}](@/docs/book/generatedProjectTestOutput.txt)
+
+And gere is its test output again:
+
+```shell
+✔ utils.test.js, 1 tests passed
+  ✔ utils.test.js 'stuff to work'
+  c! the arguments are 1,2,3
+  t! today is Monday
+```
 
 You can see that the test case shows the name of the test in
 the output. The `c!` line corresponds to the `console.log`

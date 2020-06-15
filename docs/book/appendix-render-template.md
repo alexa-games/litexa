@@ -43,7 +43,7 @@ npm install --save @litexa/render-template
 
 This should result in the following directory structure:
 
-```stdout
+```
 project_dir
 ├── litexa
 └── node_modules

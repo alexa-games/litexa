@@ -94,7 +94,7 @@ npm install --save @litexa/gadgets
 
 This should result in the following directory structure:
 
-```stdout
+```
 project_dir
 ├── litexa
 └── node_modules
@@ -618,7 +618,60 @@ We send this directive during the `rollCallCount` state,
 after we receive a valid number for the number of buttons in
 play. Here is how we handle its events in Litexa code:
 
-@[code lang=coffeescript transclude={106-158}](@/samples/button-monte-sample/litexa/main.litexa)
+```coffeescript
+rollCall
+  # close microphone but keep session open
+  LISTEN
+  screen title.jpg
+
+  when GameEngine.InputHandlerEvent "NewButton"
+    local registered = @game.registerButtons($event)
+    # this input handler will get events for already-pressed buttons,
+    # so don't do anything if an already-registered button is pressed
+    if registered
+      directive @game.lightUpNewButtons()
+      soundEffect Button-Pressed.mp3
+      # Note that these say variations all end in {@game.buttonCount()}.
+      # You could move that part to a following say statement by itself,
+      # but it makes more sense to separate out say phrases by content and
+      # presentation, rather than by optimizing for code repetition. If you
+      # work with a localizer for your skill, it will be clearer for them
+      # to understand less-fragmented sentence structures.
+      say "Hey there button {@game.buttonCount()}"
+        or "How you doing, button {@game.buttonCount()}?"
+        or "Hi, button {@game.buttonCount()}"
+        or "What's up, button {@game.buttonCount()}?"
+      soundEffect Wait-Music.mp3
+    # we don't want SSML to be interrupted here, so we enforce a 3 second
+    # minimum time between responses sent from our skill
+    setResponseSpacing = 3000
+    -> rollCall
+
+  when GameEngine.InputHandlerEvent "Timedout"
+    if @game.buttonCount() == 0
+      say "Hmm, I didn't hear from any buttons."
+    else if @game.buttonCount() == 1
+      say "Hey, I only heard from one button."
+    else
+      say "Hmm, I only heard from {@game.buttonCount()} buttons."
+
+    say "If you have issues with your Echo Buttons, go to the menu in your Alexa app and select Help and Feedback. Then, under the User Guide section, select Echo Buttons."
+    screen
+      template: "BodyTemplate6"
+      primaryText: "<center>For troubleshooting steps, go to the menu in your Alexa app and select Help & Feedback. Then, under the User Guide section, select Echo Buttons."
+    card "Echo Button Troubleshooting"
+      content: "For troubleshooting steps, go to the menu in your Alexa app and select Help & Feedback. Then, under the User Guide section, select Echo Buttons."
+    END
+
+  when GameEngine.InputHandlerEvent "Finished"
+    @thisGameDidRollCall = true
+    soundEffect Button-Pressed.mp3
+    local registered = @game.registerButtons($event)
+    say "Got 'em, moving on."
+    setResponseSpacing = 3000
+    -> start
+```
+
 
 Here's how the two code fragments above work together. The
 skill defines an Input Handler with 3 unique
@@ -773,7 +826,18 @@ gadgetId. In a four button game, it looks like:
 The skill uses the same event handler syntax as roll call
 for handling this Input Handler's events:
 
-@[code lang=coffeescript transclude={201-215}](@/samples/button-monte-sample/litexa/main.litexa)
+```coffeescript
+  when GameEngine.InputHandlerEvent "win"
+    -> won
+
+  when GameEngine.InputHandlerEvent "lose"
+    @reason = 'badpick'
+    -> lost
+
+  when GameEngine.InputHandlerEvent "timeout"
+    @reason = 'timeout'
+    -> lost
+```
 
 The Input Handler and event handlers are straightforward
 here.

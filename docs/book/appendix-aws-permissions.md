@@ -91,4 +91,4 @@ in the same AWS account.
 Remember to replace `myAccountId` and `myBucketName` with your AWS
 account ID number and S3 bucket, respectively.
 
-@[code lang=json](@/docs/book/litexa-iam-policy-template.json)
+<<< @/docs/book/litexa-iam-policy-template.json
