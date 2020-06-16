@@ -278,7 +278,7 @@ function addNumbers(...numbers) {
 ```
 
 
-And gere is its test output again:
+And here is its test output again:
 
 ```shell
 ✔ utils.test.js, 1 tests passed

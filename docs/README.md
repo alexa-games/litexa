@@ -184,7 +184,7 @@ litexa deploy
 Litexa is *free!*
 
 Litexa is an Alexa Labs community-supported project (alpha) from the Alexa Games team at Amazon.
-We (Alexa Games) have used Litexa to develop and ship 20+ Alexa skills, YMMV.
+We (Alexa Games) have used Litexa to develop and ship 20+ Alexa skills, your mileage may vary.
 Your feedback is welcome and we are happy to consider contributions.
 Otherwise, you are free to use and modify this software as needed.
 As with all open-source packages, please use them in accordance with the licenses assigned to each package.
