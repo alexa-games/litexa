@@ -8,6 +8,7 @@
 chai = require 'chai'
 { expect } = chai
 { assert, match, stub } = require 'sinon'
+chai.use require 'chai-as-promised'
 
 LoggingChannel = require '@src/command-line/loggingChannel'
 smapi = require '@src/command-line/api/smapi'
@@ -31,16 +32,14 @@ describe 'Spawning ASK CLI command to call SMAPI', ->
 
   it 'errors on missing command', ->
     args.askProfile = 'myProfile'
-    expect () ->
-      smapi.call args
-    .to.throw(Error, "called without a command")
+    expect smapi.call args
+    .to.be.rejectedWith(Error, "called without a command")
 
   it 'errors on missing ASK profile', ->
     args.command = '--help'
 
-    expect () ->
-      smapi.call args
-    .to.throw(Error, "missing an ASK profile")
+    expect smapi.call args
+    .to.be.rejectedWith(Error, "missing an ASK profile")
 
   it 'spawns correct CLI output for given command/params', ->
     args.askProfile = 'mockProfileId'
@@ -50,15 +49,32 @@ describe 'Spawning ASK CLI command to call SMAPI', ->
       'skill-id': 'mockSkillId'
     }
 
-    smapi.call args
-    expectedArgs = [
-      'api',
-      'associate-isp',
-      '--profile',
-      'mockProfileId',
-      '--isp-id',
-      'mockIspId',
-      '--skill-id',
-      'mockSkillId'
-    ]
-    assert.calledWithExactly(spawnStub, 'ask', expectedArgs)
+    logger = new LoggingChannel {}
+    smapi.prepare logger
+    .then ->
+      smapi.call args
+    .then ->
+      if smapi.version.major < 2
+        expectedArgs = [
+          'api',
+          'associate-isp',
+          '--profile',
+          'mockProfileId',
+          '--isp-id',
+          'mockIspId',
+          '--skill-id',
+          'mockSkillId'
+        ]
+      else
+        expectedArgs = [
+          'smapi',
+          'associate-isp',
+          '--profile',
+          'mockProfileId',
+          '--isp-id',
+          'mockIspId',
+          '--skill-id',
+          'mockSkillId'
+        ]
+
+      assert.calledWithExactly(spawnStub, 'ask', expectedArgs)

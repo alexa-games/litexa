@@ -10,6 +10,7 @@
 
 Artifacts = require('../../../src/deployment/artifacts').Artifacts
 isp = require '@src/command-line/isp'
+smapi = require '@src/command-line/api/smapi'
 
 describe 'ISP', ->
   isp.artifacts = undefined
@@ -65,25 +66,45 @@ describe 'ISP', ->
     await isp.pullRemoteProductList(mockProduct, mockArtifactSummary)
 
     expect(smapiStub.callCount).to.equal(1)
-    assert.calledWithMatch(smapiStub, {
-      command: 'list-isp-for-skill'
-      params: {
-        'skill-id': isp.skillId
-        'stage': isp.stage
-      }
-    })
+    if smapi.version.major < 2
+      assert.calledWithMatch(smapiStub, {
+        command: 'list-isp-for-skill'
+        params: {
+          'skill-id': isp.skillId
+          'stage': isp.stage
+        }
+      })
+    else
+      assert.calledWithMatch(smapiStub, {
+        command: 'get-isp-list-for-skill-id'
+        params: {
+          'skill-id': isp.skillId
+          'stage': isp.stage
+        }
+      })
+
 
   it 'provides correct CLI args for retrieving definition for a product', ->
     await isp.getProductDefinition(mockProduct)
 
     expect(smapiStub.callCount).to.equal(1)
-    assert.calledWithMatch(smapiStub, {
-      command: 'get-isp'
-      params: {
-        'isp-id': mockProduct.productId
-        'stage': isp.stage
-      }
-    })
+    if smapi.version.major < 2
+      assert.calledWithMatch(smapiStub, {
+        command: 'get-isp'
+        params: {
+          'isp-id': mockProduct.productId
+          'stage': isp.stage
+        }
+      })
+    else
+      assert.calledWithMatch(smapiStub, {
+        command: 'get-isp-definition'
+        params: {
+          'product-id': mockProduct.productId
+          'stage': isp.stage
+        }
+      })
+
 
   it 'provides correct CLI args for creating a remote product', ->
     isp.artifacts.save 'monetization', {
@@ -94,21 +115,40 @@ describe 'ISP', ->
 
     await isp.createRemoteProduct(mockProduct, mockArtifactSummary)
 
-    expect(smapiStub.callCount).to.equal(2)
-    assert.calledWithMatch(smapiStub.firstCall, {
-      command: 'create-isp'
-      params: {
-        file: mockProduct.filePath
-      }
-    })
+    if smapi.version.major < 2
+      expect(smapiStub.callCount).to.equal(2)
+      assert.calledWithMatch(smapiStub.firstCall, {
+        command: 'create-isp'
+        params: {
+          file: mockProduct.filePath
+        }
+      })
+    else
+      expect(smapiStub.callCount).to.equal(2)
+      assert.calledWithMatch(smapiStub.firstCall, {
+        command: 'create-isp-for-vendor'
+        params: {
+          'create-in-skill-product-request': "file:#{mockProduct.filePath}"
+        }
+      })
 
-    assert.calledWithMatch(smapiStub.secondCall, {
-      command: 'associate-isp'
-      params: {
-        'isp-id': mockProduct.productId
-        'skill-id': isp.skillId
-      }
-    })
+
+    if smapi.version.major < 2
+      assert.calledWithMatch(smapiStub.secondCall, {
+        command: 'associate-isp'
+        params: {
+          'isp-id': mockProduct.productId
+          'skill-id': isp.skillId
+        }
+      })
+    else
+      assert.calledWithMatch(smapiStub.secondCall, {
+        command: 'associate-isp-with-skill'
+        params: {
+          'product-id': mockProduct.productId
+          'skill-id': isp.skillId
+        }
+      })
 
   it 'provides correct CLI args for updating a remote product', ->
     isp.artifacts.save 'monetization', {
@@ -120,14 +160,25 @@ describe 'ISP', ->
     await isp.updateRemoteProduct(mockProduct, mockArtifactSummary)
 
     expect(smapiStub.callCount).to.equal(1)
-    assert.calledWithMatch(smapiStub, {
-      command: 'update-isp'
-      params: {
-        'isp-id': mockProduct.productId
-        file: mockProduct.filePath
-        stage: isp.stage
-      }
-    })
+    if smapi.version.major < 2
+      assert.calledWithMatch(smapiStub, {
+        command: 'update-isp'
+        params: {
+          'isp-id': mockProduct.productId
+          file: mockProduct.filePath
+          stage: isp.stage
+        }
+      })
+    else
+      assert.calledWithMatch(smapiStub, {
+        command: 'update-isp-for-product'
+        params: {
+          'product-id': mockProduct.productId
+          'in-skill-product': "file:#{mockProduct.filePath}"
+          stage: isp.stage
+        }
+      })
+
 
     expect(mockArtifactSummary).to.deep.equal({
       "#{mockProduct.referenceName}": {
@@ -139,30 +190,60 @@ describe 'ISP', ->
     await isp.deleteRemoteProduct(mockProduct)
 
     expect(smapiStub.callCount).to.equal(2)
-    assert.calledWithMatch(smapiStub.firstCall, {
-      command: 'disassociate-isp'
-      params: {
-        'isp-id': mockProduct.productId
-        'skill-id': isp.skillId
-      }
-    })
+    if smapi.version.major < 2
+      assert.calledWithMatch(smapiStub.firstCall, {
+        command: 'disassociate-isp'
+        params: {
+          'isp-id': mockProduct.productId
+          'skill-id': isp.skillId
+        }
+      })
+    else
+      assert.calledWithMatch(smapiStub.firstCall, {
+        command: 'disassociate-isp-with-skill'
+        params: {
+          'product-id': mockProduct.productId
+          'skill-id': isp.skillId
+        }
+      })
 
-    assert.calledWithMatch(smapiStub.secondCall, {
-      command: 'delete-isp'
-      params: {
-        'isp-id': mockProduct.productId
-        stage: isp.stage
-      }
-    })
+
+    if smapi.version.major < 2
+      assert.calledWithMatch(smapiStub.secondCall, {
+        command: 'delete-isp'
+        params: {
+          'isp-id': mockProduct.productId
+          stage: isp.stage
+        }
+      })
+    else
+      assert.calledWithMatch(smapiStub.secondCall, {
+        command: 'delete-isp-for-product'
+        params: {
+          'product-id': mockProduct.productId
+          stage: isp.stage
+        }
+      })
+
+
 
   it 'provides correct CLI args for associating a product', ->
     await isp.associateProduct(mockProduct)
 
     expect(smapiStub.callCount).to.equal(1)
-    assert.calledWithMatch(smapiStub, {
-      command: 'associate-isp'
-      params: {
-        'isp-id': mockProduct.productId
-        'skill-id': isp.skillId
-      }
-    })
+    if smapi.version.major < 2
+      assert.calledWithMatch(smapiStub, {
+        command: 'associate-isp'
+        params: {
+          'isp-id': mockProduct.productId
+          'skill-id': isp.skillId
+        }
+      })
+    else
+      assert.calledWithMatch(smapiStub, {
+        command: 'associate-isp-with-skill'
+        params: {
+          'product-id': mockProduct.productId
+          'skill-id': isp.skillId
+        }
+      })

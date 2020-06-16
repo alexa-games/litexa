@@ -6,5 +6,6 @@
 ###
 
 module.exports =
-  deploy: ->
-    console.log "deploying model"
+  deploy: (context, logger) ->
+    # actually a nop, the model is being uploaded with the manifest right now
+    # logger.log "deploying model"

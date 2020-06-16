@@ -40,6 +40,19 @@ module.exports.run = ->
       require('./printers.coffee').run options
 
   program
+    .command 'manifest'
+    .description "compiles a project's ASK manifest and prints it to the console."
+    .option '-d --deployment [deployment]', "which deployment to run, using the name from the deployments map in the Litexa configuration file.", 'development'
+    .action (cmd) ->
+      chalk.enabled = cmd.parent.color
+      options =
+        root: root
+        type: 'manifest'
+        deployment: cmd.deployment
+        region: cmd.parent.region
+      require('./printers.coffee').run options
+
+  program
     .command 'handler'
     .description "compiles a project's JavaScript handler and prints it to the console."
     .option '-d --deployment [deployment]', "which deployment to run, using the name from the deployments map in the Litexa configuration file.", 'development'
@@ -142,7 +155,13 @@ module.exports.run = ->
         verbose: cmd.parent.verbose
         cache: cmd.cache
         coreVersion: packageVersion
-      await require('./deploy.coffee').run options
+
+      try
+        await require('./deploy.coffee').run options
+      catch err
+        console.error chalk.red "deployment failed"
+        console.error err
+
 
   program
     .command 'test [filter]'
@@ -283,6 +302,22 @@ module.exports.run = ->
         console.error err
 
   program
+    .command 'extensions'
+    .description "prints out currently active extensions."
+    .action (cmd) ->
+      chalk.enabled = cmd.parent.color
+      options =
+        root: root
+        region: cmd.parent.region
+      try
+        config = await (require('./project-config').loadConfig root)
+        info = new (require('./project-info'))({jsonConfig: config})
+        for name, ext of info.extensions
+          console.log "#{chalk.green name}: #{chalk.grey ext.__sourceFilename}"
+      catch err
+        console.error err
+
+  program
     .command 'pull [data]'
     .description "downloads specified data from the hosted skill via SMAPI. Currently supported for:
       isp (downloads remote in-skill products, and ovewrites local product files)"
@@ -301,6 +336,7 @@ module.exports.run = ->
             await isp.init options
             await isp.pullAndStoreRemoteProducts()
           catch err
+            console.error err
             console.error chalk.red("failed to pull in-skill products")
         else
           console.error chalk.red("unknown data type '#{data}'. Currently supported data: isp")
@@ -324,6 +360,7 @@ module.exports.run = ->
             await isp.init options
             await isp.pushLocalProducts()
           catch err
+            console.error err
             console.error chalk.red("failed to push in-skill products")
         else
           console.error chalk.red("unknown data type '#{data}'. Currently supported data: isp")
@@ -347,6 +384,7 @@ module.exports.run = ->
             await isp.init options
             await isp.resetRemoteProductEntitlements()
           catch err
+            console.error err
             console.error chalk.red("failed to reset in-skill product entitlements")
         else
           console.error chalk.red("unknown data type '#{data}'. Currently supported data: isp")

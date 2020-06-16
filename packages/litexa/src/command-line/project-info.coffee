@@ -138,6 +138,7 @@ class ProjectInfo
       options = @extensionOptions[moduleName] ? {}
 
       @extensions[moduleName] = extension options, lib
+      @extensions[moduleName].__sourceFilename = extensionFile
       if @extensions[moduleName].language?.lib?
         for k, v of @extensions[moduleName].language.lib
           if k of lib

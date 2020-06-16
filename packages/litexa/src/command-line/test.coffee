@@ -140,7 +140,10 @@ module.exports.run = (options) ->
     config = await require('./project-config').loadConfig(options.root)
 
     chokidar.watch "#{config.root}/**/*.{litexa,coffee,js,json}", {
-      ignored: [ path.join(config.root, 'node_modules') ]
+      ignored: [
+        path.join(config.root, 'node_modules')
+        path.join(config.root, '.test')
+      ]
       ignoreInitial: true
     }
     .on 'add', (path) ->

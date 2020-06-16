@@ -53,6 +53,9 @@ class Artifacts
       throw "failed to get artifact because no variant is currently set"
     @variantInfo[key]
 
+  tryGet: (key) ->
+    @variantInfo[key]
+
 exports.Artifacts = Artifacts
 
 exports.loadArtifacts = ({ context, logger }) ->

@@ -49,35 +49,39 @@ module.exports =
       @ispDir = path.join skill.projectInfo?.root, 'isp', @deployment
 
       await loadArtifacts { context, @logger }
+      await smapi.prepare @logger
       @artifacts = context.artifacts
       @skillId = @artifacts.get 'skillId'
 
   pullAndStoreRemoteProducts: () ->
-    return new Promise (resolve, reject) =>
-      @pullRemoteProductSummaries()
-      .then (productSummaries) =>
-        @storeProductDefinitions(productSummaries)
-      .then (data) ->
-        resolve()
-      .catch (err) ->
-        reject(err)
+    @pullRemoteProductSummaries()
+    .then (productSummaries) =>
+      @storeProductDefinitions(productSummaries)
+    .then =>
+      @logger.log "done"
 
   pullRemoteProductSummaries: () ->
-    return new Promise (resolve, reject) =>
-      @pullRemoteProductList()
-      .then (productList) ->
-        resolve(JSON.parse(productList))
-      .catch (err) ->
-        reject(err)
+    @pullRemoteProductList()
+    .then (result) ->
+      result = JSON.parse result
+      if smapi.version.major < 2
+        return result
+      else
+        return result.inSkillProductSummaryList
 
   pullRemoteProductList: () ->
     return new Promise (resolve, reject) =>
       @logger.log "querying in-skill products using askProfile '#{@askProfile}' and skill ID
         '#{@skillId}' ..."
 
+      if smapi.version.major < 2
+        command = 'list-isp-for-skill'
+      else
+        command = 'get-isp-list-for-skill-id'
+
       @smapi.call {
         @askProfile
-        command: 'list-isp-for-skill'
+        command
         params: {
           'skill-id': @skillId
           'stage': @stage
@@ -102,15 +106,17 @@ module.exports =
     resetPromises = []
 
     for remoteProduct in remoteProducts
-      resetPromises.push(
-        @smapi.call {
-          @askProfile
-          command: 'reset-isp-entitlement'
-          params: {
-            'isp-id': remoteProduct.productId
-          }
-        }
-      )
+      if smapi.version.major < 2
+        command = 'reset-isp-entitlement'
+        params =
+          'isp-id': remoteProduct.productId
+      else
+        command = 'reset-entitlement-for-product'
+        params =
+          'product-id': remoteProduct.productId
+          'stage': 'development'
+
+      resetPromises.push @smapi.call { @askProfile, command, params, logChannel: @logger }
 
     @logger.log "resetting in-skill product entitlements for skill ID '#{@skillId}' ..."
 
@@ -132,6 +138,9 @@ module.exports =
 
       artifactSummary = {}
 
+      if products.length == 0
+        @logger.log "No products found"
+
       for product in products
         fileName = "#{product.referenceName}.json"
         filePath = path.join @ispDir, fileName
@@ -145,15 +154,18 @@ module.exports =
 
   getProductDefinition: (product) ->
     new Promise (resolve, reject) =>
-      @smapi.call {
-        @askProfile
-        command: 'get-isp'
-        params: {
+      if smapi.version.major < 2
+        command = 'get-isp'
+        params =
           'isp-id': product.productId
           'stage': @stage
-        }
-        logChannel: @logger
-      }
+      else
+        command = 'get-isp-definition'
+        params =
+          'product-id': product.productId
+          'stage': @stage
+
+      @smapi.call { @askProfile, command, params, logChannel: @logger }
       .then (productDefinition) ->
         resolve(JSON.parse productDefinition)
       .catch (err) =>
@@ -205,7 +217,11 @@ module.exports =
           product = {}
           product.filePath = path.join(@ispDir, file)
           product.data = JSON.parse fs.readFileSync(product.filePath, 'utf8')
-          product.referenceName = product.data.referenceName
+          # upgrade from older version
+          unless product.data.inSkillProductDefinition
+            product.data = { inSkillProductDefinition: product.data }
+            fs.writeFileSync(product.filePath, JSON.stringify(product.data,null,2) 'utf8')
+          product.referenceName = product.data.inSkillProductDefinition.referenceName
           product.productId = artifactSummary["#{product.referenceName}"]?.productId
           localProducts.push product
       catch err
@@ -224,17 +240,21 @@ module.exports =
       @logger.log "creating in-skill product '#{product.referenceName}' from #{product.filePath}
         ..."
 
-      @smapi.call {
-        @askProfile
-        command: 'create-isp'
-        params: { file: product.filePath }
-        logChannel: @logger
-      }
+      if smapi.version.major < 2
+        command = 'create-isp'
+        params = { file: product.filePath }
+      else
+        command = 'create-isp-for-vendor'
+        params = { 'create-in-skill-product-request': "file:#{product.filePath}" }
+
+      @smapi.call { @askProfile, command, params, logChannel: @logger }
       .then (data) =>
-        product.productId = data.substring(data.search("amzn1"), data.search(" based"))
-        artifactSummary["#{product.referenceName}"] = {
-          productId: product.productId
-        }
+        if smapi.version.major < 2
+          product.productId = data.substring(data.search("amzn1"), data.search(" based"))
+        else
+          data = JSON.parse data
+          product.productId = data.productId
+        artifactSummary["#{product.referenceName}"] = { productId: product.productId }
         @logger.verbose "successfully created product"
       .then () =>
         @associateProduct(product)
@@ -254,19 +274,22 @@ module.exports =
 
       productId = monetization["#{product.referenceName}"]?.productId
 
-      @logger.log "updating in-skill product '#{product.referenceName}' from #{product.filePath}
-        ..."
+      @logger.log "updating in-skill product '#{product.referenceName}' from #{product.filePath}..."
 
-      @smapi.call {
-        @askProfile,
-        command: 'update-isp'
-        params: {
+      if smapi.version.major < 2
+        command = 'update-isp'
+        params =
           'isp-id': productId
           file: product.filePath
           stage: @stage
-        }
-        logChannel: @logger
-      }
+      else
+        command = 'update-isp-for-product'
+        params =
+          'product-id': productId
+          'in-skill-product': "file:#{product.filePath}"
+          stage: @stage
+
+      @smapi.call { @askProfile, command, params, logChannel: @logger }
       .then (data) =>
         @logger.verbose "successfully updated product"
         artifactSummary["#{product.referenceName}"] = {
@@ -283,15 +306,18 @@ module.exports =
       @disassociateProduct(product)
       .then =>
         @logger.log "deleting in-skill product '#{product.referenceName}' from server ..."
-        @smapi.call {
-          @askProfile
-          command: 'delete-isp'
-          params: {
+        if smapi.version.major < 2
+          command = 'delete-isp'
+          params =
             'isp-id': product.productId
             stage: @stage
-          }
-          logChannel: @logger
-        }
+        else
+          command = 'delete-isp-for-product'
+          params =
+            'product-id': product.productId
+            stage: @stage
+
+        @smapi.call { @askProfile, command, params, logChannel: @logger }
       .then (data) =>
         @logger.verbose "successfully deleted product"
         resolve()
@@ -302,17 +328,20 @@ module.exports =
 
   associateProduct: (product) ->
     return new Promise (resolve, reject) =>
-      @logger.log "associating in-skill product '#{product.referenceName}' to skill ID
-        '#{@skillId}' ..."
-      @smapi.call {
-        @askProfile
-        command: 'associate-isp'
-        params: {
+      @logger.log "associating in-skill product '#{product.referenceName}' to skill ID '#{@skillId}' ..."
+
+      if smapi.version.major < 2
+        command = 'associate-isp'
+        params =
           'isp-id': product.productId
           'skill-id': @skillId
-        }
-        logChannel: @logger
-      }
+      else
+        command = 'associate-isp-with-skill'
+        params =
+          'product-id': product.productId
+          'skill-id': @skillId
+
+      @smapi.call { @askProfile, command, params, logChannel: @logger }
       .then (data) =>
         @logger.verbose "successfully associated product"
         resolve()
@@ -323,17 +352,20 @@ module.exports =
 
   disassociateProduct: (product) ->
     return new Promise (resolve, reject) =>
-      @logger.log "disassociating in-skill product '#{product.referenceName}' from skill
-        '#{@skillId}' ..."
-      @smapi.call {
-        @askProfile
-        command: 'disassociate-isp'
-        params: {
+      @logger.log "disassociating in-skill product '#{product.referenceName}' from skill '#{@skillId}' ..."
+
+      if smapi.version.major < 2
+        command = 'disassociate-isp'
+        params =
           'isp-id': product.productId
           'skill-id': @skillId
-        }
-        logChannel: @logger
-      }
+      else
+        command = 'disassociate-isp-with-skill'
+        params =
+          'product-id': product.productId
+          'skill-id': @skillId
+
+      @smapi.call { @askProfile, command, params, logChannel: @logger }
       .then (data) =>
         @logger.verbose "successfully disassociated product"
         resolve()
