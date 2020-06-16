@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.6.0](https://github.com/alexa-games/litexa/compare/v0.5.1...v0.6.0) (2020-06-16)
+
+
+### Features
+
+* ask-cli v2 compatibility + new “manifest” & “extensions” cmds ([#170](https://github.com/alexa-games/litexa/issues/170)) ([35700d7](https://github.com/alexa-games/litexa/commit/35700d730dd74e12699a43ea2cb19525dd71a25b))
+
+
+
+
+
 ## [0.5.1](https://github.com/alexa-games/litexa/compare/v0.5.0...v0.5.1) (2020-06-12)
 
 **Note:** Version bump only for package @litexa/deploy-aws
