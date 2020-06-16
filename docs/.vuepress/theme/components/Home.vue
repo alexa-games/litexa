@@ -46,6 +46,9 @@ export default {
   padding: $navbarHeight 0;
   margin: 0px auto;
   display: block;
+  background: linear-gradient(to bottom, #fff 2%, #E1F3FC 51%, #fff 100%);
+  background-size: 100% 70%;
+  background-repeat: no-repeat;
 
   .home-aligned {
     max-width: 960px;
