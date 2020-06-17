@@ -51,7 +51,7 @@ cloudScroll(speed, phase) {
   animation: flying (120s / speed) linear (phase * -120s / speed) infinite;
 }
 
-baloonBob(speed, phase) {
+balloonBob(speed, phase) {
   animation: bobbing (20s / speed) ease-in-out (phase * -20s / speed) infinite;
 }
 
@@ -121,7 +121,7 @@ baloonBob(speed, phase) {
   right: 180px;
   top: 120px;
   transition: all 4.3s ease;
-  baloonBob(0.4, 0);
+  balloonBob(0.4, 0);
 }
 
 .cloud-twins ~ .cloud-twins {
@@ -147,7 +147,7 @@ baloonBob(speed, phase) {
   right: 0px;
   top: 1020px;
   transition: all 4.3s ease;
-  baloonBob(0.8, 0.5);
+  balloonBob(0.8, 0.5);
 }
 
 .cloud-bottoms ~ .cloud-bottoms {
@@ -187,7 +187,7 @@ baloonBob(speed, phase) {
   top: 220px;
   opacity: 0.7;
   transition: all 4.3s ease;
-  baloonBob(0.8, 0.5);
+  balloonBob(0.8, 0.5);
 }
 
 .cloud-left-twins ~ .cloud-left-twins {
