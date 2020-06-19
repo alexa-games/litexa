@@ -1,15 +1,15 @@
 # Litexa
 
-![Litexa Logo](./docs/assets/images/logo.png)
+![Litexa Logo](./logo.png)
 
 Litexa is an Alexa domain specific language, developed for long form multi-turn skills such as games.
 Its parser and tooling is implemented in Node.js and it compiles into JavaScript that expects Node.js
 as a runtime environment.
 
-**Note:** *Due to a dependency not compatible with Node.js v12 in the @litexa/assets-wav package, the 
+**Note:** *Due to a dependency not compatible with Node.js v12 in the @litexa/assets-wav package, the
 recommended local runtime and default deployment runtime is Node.js v10. If you are not using this
 package, you are welcome to upgrade both your local and runtime environment to Node.js v12. Refer to our
-[deployment documentation](./docs/book/deployment.md#lambda-configuration-optional) for more configuration 
+[deployment documentation](./docs/book/deployment.md#lambda-configuration-optional) for more configuration
 details.*
 
 Full documentation is available at <https://litexa.com>
@@ -242,6 +242,6 @@ the root of the code base:
 npm run audit:fix
 ```
 
-If the tool does automatically install any compatible updates, it's advised to run 
-`npm run coverage` before you commit any changes (to make sure nothing has broken in 
+If the tool does automatically install any compatible updates, it's advised to run
+`npm run coverage` before you commit any changes (to make sure nothing has broken in
 the update).
