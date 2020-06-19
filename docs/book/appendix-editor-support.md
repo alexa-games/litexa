@@ -7,7 +7,7 @@ language for Alexa skills. Any such files will be denoted with the `.litexa` fil
 
 Visual Studio Code will prompt you to install the extension whenever you open a `.litexa` file. The dialog will look like this:
 
-![Visual Studio Code Install Prompt](../assets/images/vscode-litexa-extension.png)
+![Visual Studio Code Install Prompt](./vscode-litexa-extension.png)
 
 1. Click on "Search Marketplace"
 1. It should find the extension called "Litexa Syntax Highlighting", click "Install"

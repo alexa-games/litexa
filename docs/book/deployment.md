@@ -262,7 +262,7 @@ Assets will be deployed to subdirectories of your bucket, isolating
 specific deployments of specific projects from each other, copying
 the contents of your `litexa/assets` folder to the following location:
 
-```stdout
+```
 https://s3.{REGION}.amazonaws.com/{BUCKETNAME}/{SKILLNAME}/{DEPLOYMENTTARGET}/
 ```
 
@@ -279,7 +279,7 @@ with the assets in the top level going into the `default` folder. So if you have
 Litexa project named `CatsVsCucumbers` and you're deploying the `development` target,
 your project folder will look like this locally:
 
-```stdout
+```
 .
 ├── litexa
 |   ├── assets
@@ -294,7 +294,7 @@ your project folder will look like this locally:
 
 And your S3 bucket would look like this:
 
-```stdout
+```
 .
 ├── CatsVsCucumbers
 |   └── development

@@ -80,7 +80,7 @@ npm install --save-dev @litexa/assets-wav
 
 This should result in the following directory structure:
 
-```stdout
+```
 project_dir
 ├── litexa
 └── node_modules

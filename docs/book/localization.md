@@ -72,7 +72,7 @@ For example, here is what a project structure may look like if the skill
 contains content overrides for 'en-GB' and 'de' (assuming that the default skill
 is written for 'en-US'):
 
-```stdout
+```
 .
 ├── README.md
 ├── artifacts.json
@@ -553,7 +553,7 @@ launch
 
 Running `litexa localize` would then output this in the console:
 
-```stdout
+```
 [localization] +441ms parsing default skill intents, utterances, and output speech ...
 [localization] +320ms the following speech lines are new since the last localization:
 [localization] +1ms + Howdy.
@@ -624,7 +624,7 @@ default language.
 
 ## Localization in code
 
-Both localization methods do not cover all cases of localizing strings. 
+Both localization methods do not cover all cases of localizing strings.
 this means that [slotbuilder functions](/book/state-management.html#slots),
 `context.say.push` calls, function calls that may use strings, and inline code
 speech injection are not localized.
