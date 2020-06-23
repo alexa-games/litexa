@@ -24,7 +24,7 @@ class lib.SoundEffect
 
   isSoundEffect: true
 
-  pushAlternate: (assetName) ->
+  pushAlternate: (location, assetName) ->
     unless assetName.isAssetName
       throw new ParserError assetName.location, "Alternate type mismatch,
         expecting an audio asset here, saw a #{assetName.constructor?.name} instead"

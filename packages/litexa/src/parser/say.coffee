@@ -7,6 +7,11 @@
 
 lib = module.exports.lib = {}
 
+lib[k] = v for k, v of require('./sayVariableParts.coffee')
+lib[k] = v for k, v of require('./sayTagParts.coffee')
+lib[k] = v for k, v of require('./sayJavascriptParts.coffee')
+lib[k] = v for k, v of require('./sayFlowControlParts.coffee')
+
 { parseFragment } = require('./parser.coffee')
 { ParserError } = require('./errors.coffee').lib
 { AssetName } = require('./assets.coffee').lib
@@ -18,6 +23,9 @@ lib = module.exports.lib = {}
   cleanTrailingSpaces,
   cleanLeadingSpaces
 } = require('./utils.coffee').lib
+
+
+
 
 class lib.StringPart
   constructor: (text) ->
@@ -47,8 +55,11 @@ class lib.StringPart
       @text = transformation(@text)
     )
 
-  toString: -> return @text
-  toUtterance: -> return @text
+  visit: (depth, fn) -> fn(depth, @)
+
+  isStringPart: true
+  toString: -> @text
+  toUtterance: -> [ @text.toLowerCase() ]
   toLambda: (options) ->
     # escape quotes
     str = @text.replace(/"/g, '\"')
@@ -71,242 +82,6 @@ class lib.StringPart
     return @toString()
 
 
-class lib.TagPart
-  constructor: (skill, @location, @code, @content, @variable) ->
-    validFontSizes = [2, 3, 5, 7]
-    @attributes = {}
-    @open = false
-
-    openUnlessContent = =>
-      @open = true
-      if @content?.trim().length > 0
-        @open = false
-
-    switch @code
-      when "!"
-        @tag = 'say-as'
-        @attributes =
-          'interpret-as': 'interjection'
-      when "..."
-        @tag = 'break'
-        @attributes =
-          time: @variable
-      when "sfx"
-        @tag = null
-        @proxy = @content
-        @content = null
-      when "fontsize"
-        unless parseInt(@variable) in validFontSizes
-          throw new ParserError @location, "invalid font size #{@variable}, expecting one of #{JSON.stringify validFontSizes}"
-        @tag = 'font'
-        @attributes =
-          size: @variable
-        openUnlessContent()
-      when "center"
-        @tag = 'div'
-        @attributes =
-          align: 'center'
-        openUnlessContent()
-      when "i", "b", "u"
-        @tag = @code
-        openUnlessContent()
-      else
-        # look at extensions that might handle this
-        extensions = skill.getExtensions()
-        info = null
-        if extensions?
-          for name, ext of extensions
-            info = ext?.language?.sayTags?[@code]
-            break if info?
-        unless info?
-          throw new ParserError @location, "unknown tag <#{@code}>"
-        info.process?(@)
-
-
-  toString: ->
-    switch @code
-      when "!"
-        return "<#{@code}#{@content}>"
-      when "..."
-        return "<#{@code}#{@variable}>"
-      when "sfx"
-        return "<#{@code} #{@proxy}>"
-      else
-        return "<#{@code}>"
-
-  toUtterance: ->
-    throw new ParserError null, "you cannot use a tag part in an utterance"
-  toSSML: (language) ->
-    unless language
-      language = "default"
-    if @tag?
-      attributes = ( "#{k}='#{v}'" for k, v of @attributes )
-      if @codeAttributes?
-        for k, v of @codeAttributes
-          attributes.push """#{k}='" + #{v} + "'"""
-      attributes = attributes.join ' '
-      if attributes.length > 0
-        attributes = ' ' + attributes
-      if @open
-          "<#{@tag}#{attributes}>"
-      else
-        if @content
-          "<#{@tag}#{attributes}>#{@content}</#{@tag}>"
-        else
-          "<#{@tag}#{attributes}/>"
-    else if @proxy?
-      @proxy.toSSML language
-    else if @verbatim
-      @verbatim
-    else
-      ""
-
-  toLambda: (options) ->
-    if @proxy?
-      return @proxy.toSSMLFunction options.language
-    '"' + @toSSML(options.language) + '"'
-
-  express: (context) -> @toSSML(context.language)
-  toRegex: ->
-    str = @toSSML()
-    # escape regex control characters
-    str = str.replace( /\?/g, '\\?' )
-    str = str.replace( /\./g, '\\.' )
-    str = str.replace( /\//g, '\\/' )
-    "(#{str})"
-  toTestRegex: ->
-    switch @code
-      when "!"
-        "(#{@toRegex()}|(<!#{@content}>))"
-      when "..."
-        "(#{@toRegex()}|(<...#{@attributes.time}>))"
-      when "sfx"
-        testSFXMatch = "#{if (@proxy?.name && @proxy?.type) then "|(<#{@proxy.name}.#{@proxy.type}>)|(<#{@proxy.name}>)" else ''}"
-        "(#{@toRegex()}#{testSFXMatch})"
-      else
-        @toRegex()
-
-  toTestScore: -> return 9
-  toLocalization: ->
-    return @toString()
-
-
-class lib.DatabaseReferencePart
-  constructor: (@ref) ->
-  isDB: true
-  needsEscaping: true
-  toString: -> return "@#{@ref.toString()}"
-  toUtterance: ->
-    throw new ParserError null, "you cannot use a database reference in an utterance"
-  toLambda: (options) ->
-    return "context.db.read('#{@ref.base}')#{@ref.toLambdaTail()}"
-  express: (context) ->
-    return "STUB" if context.noDatabase
-    return "" + @ref.readFrom(context.db)
-  toRegex: ->
-    return "([\\S\u00A0]+)"
-  toTestRegex: -> @toRegex()
-  toLocalization: (localization) ->
-    return @toString()
-
-
-
-class lib.StaticVariableReferencePart
-  constructor: (@ref) ->
-  needsEscaping: true
-  isStatic: -> true
-  toString: -> return "DEPLOY.#{@ref.toString()}"
-  toUtterance: ->
-    throw new ParserError null, "you cannot use a static reference in an utterance"
-  toLambda: (options) ->
-    return "litexa.DEPLOY.#{@ref.toLambda()}"
-  express: (context) ->
-    return eval "context.lambda.litexa.DEPLOY.#{@ref.toLambda()}"
-  evaluateStatic: (context) ->
-    return eval "context.skill.projectInfo.DEPLOY.#{@ref.toLambda()}"
-  toRegex: ->
-    throw "missing toRegex function for StaticVariableReferencePart"
-  toTestRegex: -> @toRegex()
-  toLocalization: (localization) ->
-    return @toString()
-
-
-class lib.DatabaseReferenceCallPart
-  constructor: (@ref, @args) ->
-  isDB: true
-  needsEscaping: true
-  toString: ->
-    args = (a.toString() for a in @args).join ', '
-    return "@#{@ref.toString()}(#{args})"
-  toUtterance: ->
-    throw new ParserError null, "you cannot use a database reference in an utterance"
-  toLambda: (options) ->
-    args = (a.toLambda(options) for a in @args).join ', '
-    return "(await context.db.read('#{@ref.base}')#{@ref.toLambdaTail()}(#{args}))"
-  express: (context) ->
-    return "STUB" if context.noDatabase
-    return "" + @ref.readFrom(context.db)
-  toRegex: ->
-    return "([\\S\u00A0]+)"
-  toTestRegex: -> @toRegex()
-  toLocalization: (localization) ->
-    return @toString()
-
-
-class lib.SlotReferencePart
-  constructor: (@name) ->
-  isSlot: true
-  needsEscaping: true
-  toString: -> return "$#{@name}"
-  toUtterance: -> "{#{@name}}"
-  toLambda: (options) -> return "context.slots.#{@name.toLambda(options)}"
-  express: (context) ->
-    if @fixedValue
-      return "$#{@name}"
-    return "" + context.slots[@name]
-  toRegex: ->
-    return "([\\$\\S\u00A0]+)"
-  toTestRegex: -> @toRegex()
-  toTestScore: -> return 1
-  toLocalization: (localization) ->
-    return @toString()
-
-
-class lib.JavaScriptPart
-  constructor: (@expression) ->
-  isJavaScript: true
-  needsEscaping: true
-  toString: ->
-    "{#{@expression.toString()}}"
-  toUtterance: ->
-    throw new ParserError null, "you cannot use a JavaScript reference in an utterance"
-  toLambda: (options) ->
-    "(#{@expression.toLambda(options)})"
-  express: (context) ->
-    @expression.toString()
-    # func = (p.express(context) for p in @expression.parts).join(' ')
-    try
-      context.lambda.executeInContext(func)
-    catch e
-      #console.error "failed to execute `#{func}` in context: #{e}"
-  toRegex: ->
-    # assuming this can only match a single substitution
-    return "([\\S\u00A0]+)"
-  toTestRegex: -> @toRegex()
-  toLocalization: (localization) ->
-    return @toString()
-
-
-class lib.JavaScriptFragmentPart
-  constructor: (@func) ->
-  toString: -> return "{ #{@func}}"
-  toUtterance: -> throw new ParserError null, "you cannot use a JavaScript reference in an utterance"
-  toLambda: (options) -> return "#{@func}"
-  express: (context) -> return @func
-  toRegex: -> throw new Error "JavaScriptFragmentPart can't be matched in a regex"
-  toTestRegex: -> @toRegex()
-
-
 class lib.AssetNamePart
   constructor: (@assetName) ->
   isAssetNamePart: true
@@ -318,6 +93,10 @@ class lib.AssetNamePart
     return "(#{@toSSML()})"
   toTestRegex: -> @toRegex()
   toTestScore: -> return 10
+
+
+
+
 
 
 partsToExpression = (parts, options) ->
@@ -398,7 +177,7 @@ class lib.Say
             # split by '|' returned more than one string -> this is an 'or' alternate
             @alternates[language].push(parsedTranslation.alternates.default[0])
 
-  pushAlternate: (parts, skill, language = 'default') ->
+  pushAlternate: (location, parts, skill, language = 'default') ->
     @alternates[language].push parts
     # re-check localization since alternates are combined into single key as follows:
     #   "speech|alternate one|alternate two"
@@ -441,7 +220,7 @@ class lib.Say
       line = partsToExpression(parts, options)
       for target in speechTargets
         if line and line != '""'
-          output.push "#{indent}context.#{target}.push( #{line} );"
+          output.push "#{indent}context.#{target}.push( (#{line}).trim().replace(/ +/g,' ') );"
 
     # Add language-specific output speech to the Lambda, if translations exist.
     alternates = @alternates[options.language] ? @alternates.default

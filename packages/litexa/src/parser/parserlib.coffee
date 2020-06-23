@@ -27,6 +27,7 @@ resetLib = ->
   mergeLib require("./function.coffee")
   mergeLib require("./assets.coffee")
   mergeLib require("./soundEffect.coffee")
+  mergeLib require("./utterance.coffee")
   mergeLib require("./intent.coffee")
   mergeLib require("./state.coffee")
   mergeLib require("./monetization.coffee")

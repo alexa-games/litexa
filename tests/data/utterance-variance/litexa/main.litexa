@@ -1,0 +1,10 @@
+launch
+
+  when "(I|we) did the (thing|things)"
+    say "did the thing"
+
+  when "(send|order|move) $count ships (over|) to $letter $number"
+    with $count = AMAZON.NUMBER
+    with $letter = AMAZON.LETTER
+    with $number = AMAZON.NUMBER
+    say "Moving $count ships to $letter $number"

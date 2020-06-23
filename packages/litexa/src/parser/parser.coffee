@@ -132,9 +132,11 @@ module.exports.parseFragment = (fragment, language) ->
     pushCode: (thing) -> result = thing
     getExtensions: -> {}
 
-  fragmentParser.parse fragment,
+  returnValue = fragmentParser.parse fragment,
     skill: skill
     lib: require './parserlib.coffee'
     language: language ? 'default'
+
+  result = returnValue unless result?
 
   return result

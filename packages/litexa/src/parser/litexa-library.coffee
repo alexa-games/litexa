@@ -79,6 +79,10 @@ pickSayString = (context, key, count) ->
   context.db.write '__sayHistory', sayData
   return value
 
+pickSayFragment = (context, key, options) ->
+  index = pickSayString context, key, options.length
+  return options[index]
+
 
 exports.DataTablePrototype =
   pickRandomIndex: ->
