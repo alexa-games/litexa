@@ -23,7 +23,7 @@
     "build": "npm run clean && npm install",
     "clean": "npx rimraf node_modules",
     "coverage": "echo \"Missing coverage script.\" && exit 0",
-    "test": "echo \"Missing test script.\" && exit 0"
+    "test": "npx mocha './test/**/*.spec.js'"
   },
   "publishConfig": {
     "access": "public"

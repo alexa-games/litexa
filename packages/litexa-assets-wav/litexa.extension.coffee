@@ -55,8 +55,8 @@ exports.processFile = (info, options) ->
 
   stream = require 'stream'
   wavDecoder = require 'wav-decoder'
-  lame = require 'lame'
-  logger = info.logger
+  lame = require '@suldashi/lame'
+  logger = info.logger ? console
 
   match = info.assetName.match /(.*)\.wav$/i
 
