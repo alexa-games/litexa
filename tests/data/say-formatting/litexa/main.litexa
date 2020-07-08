@@ -1,17 +1,17 @@
 launch
   say "There should be
-    a space    between   
+    a space    between
     word and salad here: word {'salad'}."
-  say " There   
-    is   
-    {'1'}   
-    space     
-    {'between'}    
-    each  
-    word. 
+  say " There
+    is
+    {'1'}
+    space
+    {'between'}
+    each
+    word.
     {'hi'}"
   say "There should also be a space between space and cats here: {'space'}  {'cats'}."
-  
+
   when AIntent
     or "a"
     say "{'Interpolated text'} begins this sentence."
@@ -26,7 +26,7 @@ launch
       primaryText: "<b> this is one
         continuous {'line'} {'on'}
         <center>a screen. But this is
-        
+
         not a continuous line."
       displaySpeechAs: "secondaryText"
       hint: "some hint"
@@ -48,19 +48,19 @@ launch
   when CIntent
     or "c"
     say "{'Start'}
-      middle   
+      middle
       end."
     say "Start
-      {'middle'}   
+      {'middle'}
       end."
     say "Start
-      middle   
+      middle
       {'end.'}"
     screen
       primaryText: "{'start'}
-      
+
       {'end'}"
-  
+
   when DIntent
     or "d"
     say "{'There'} should be a space
@@ -69,7 +69,7 @@ launch
   when EscapesTest
     say "\<amazon:effect name='whispered'>Hi. I am not a human.\</amazon:effect>"
     say "That will be \$400 please."
-    # say "Oh, you mean \"that\" thing." # TODO: fix. This should not result in a syntax error
+    say "Oh, you mean \"that\" thing." # TODO: fix. This should not result in a syntax error
     say "Her Twitter handle was \@martina."
 
   when PunctuationTest
@@ -94,6 +94,6 @@ TEST "say statement"
   user: "d"
   alexa: launch, /There should be a space between 'there' and 'should'\./i
   user: EscapesTest
-  alexa: launch, e"<amazon:effect name='whispered'>Hi. I am not a human.</amazon:effect> That will be $400 please. Her Twitter handle was @martina."
+  alexa: launch, e"<amazon:effect name='whispered'>Hi. I am not a human.</amazon:effect> That will be $400 please. Oh, you mean \"that\" thing. Her Twitter handle was @martina."
   user: PunctuationTest
   alexa: launch, /Start word\!\?:;,\./i

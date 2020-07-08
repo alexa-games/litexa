@@ -2812,6 +2812,7 @@ TemplateStringEscapedCharacterPart
   = '\\$' { return new lib.StringPart('$'); }
   / '\\@' { return new lib.StringPart('@'); }
   / '\\<' { return new lib.StringPart('<'); }
+  / '\\"' { return new lib.StringPart('\\"'); }
   / '\\\\' { return new lib.StringPart('\\'); }
   / '\\' symbol:'{' {
     // note: pegjs parser had trouble with using the symbol character in the action
@@ -3270,9 +3271,13 @@ __r "white space including line breaks"
   = (WhiteSpace/LineTerminatorSequence)*
 
 QuotedString
-  = '"' __ inner:$(!'"' .)* '"' {
-    return inner;
+  = '"' __ inner:QuotedStringCharacter* '"' {
+    return inner.join('');
   }
+
+QuotedStringCharacter
+  = '\\"' { return '"'; }
+  / !'"' a:. { return a; }
 
 
 RegionCode
