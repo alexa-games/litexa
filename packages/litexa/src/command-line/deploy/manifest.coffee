@@ -236,8 +236,10 @@ buildSkillManifest = (context, manifestContext) ->
           mergeManifest.publishingInformation.locales[locale] = copy
 
           invocationName = context.deploymentOptions.invocation?[locale] ? data.invocation ? data.name
-          invocationName = invocationName.replace /[^a-zA-Z0-9 ]/g, ' '
-          invocationName = invocationName.toLowerCase()
+          # until such time we can correctly define the acceptable character set, we're
+          # better off disabling this sanitization here and letting SMAPI fail and error out.
+          #invocationName = invocationName.replace /[^a-zA-Z0-9 ]/g, ' '
+          #invocationName = invocationName.toLowerCase()
 
           if context.deploymentOptions.invocationSuffix?
             invocationName += " #{context.deploymentOptions.invocationSuffix}"
