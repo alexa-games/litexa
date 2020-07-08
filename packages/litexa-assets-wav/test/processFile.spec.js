@@ -74,7 +74,13 @@ describe( 'processFile creates an MP3, given a wav file', () => {
     expect( fs.existsSync(target) ).to.be.true;
     expect( fs.existsSync(cacheHash) ).to.be.true;
 
-    const info = fs.statSync(target);
+    // note: previously this test used fs.statSync and mtime to determine
+    // whether the file had been overwritten again. On Windows machines
+    // this turned out to fail intermittently, possibly because the OS
+    // touched the file for some reason.
+
+    fs.unlinkSync(target);
+    expect( fs.existsSync(target) ).to.be.false;
 
     await processFile(
       {
@@ -87,8 +93,25 @@ describe( 'processFile creates an MP3, given a wav file', () => {
       }
     );
 
-    const info2 = fs.statSync(target);
-    expect( info.mtimeMs ).to.equal( info2.mtimeMs );
+    // the cache process should only have checked the MD5 of the source
+    // and the hash in the cache file, so it should not have written the
+    // destination
+    expect( fs.existsSync(target) ).to.be.false;
+
+    // now check to see that disabling the cache ignores the cache file
+    await processFile(
+      {
+        assetName: path.parse(source).base,
+        source: source,
+        destination: target,
+        targetsRoot: targetRoot,
+        nocache: true,
+        logger: nullLogger
+      }
+    );
+
+    expect( fs.existsSync(target) ).to.be.true;
+
   });
 
 });
