@@ -63,6 +63,10 @@ module.exports = {
   title: 'litexa',
   description: 'A domain specific language for building Alexa skills',
   themeConfig: {
+    algolia: {
+      apiKey: '33046bfd9da3c88f198ad313db688f1f',
+      indexName: 'litexa'
+    },
     nav, sidebar,
     sidebarDepth: 3,
     repo: 'alexa-games/litexa',
