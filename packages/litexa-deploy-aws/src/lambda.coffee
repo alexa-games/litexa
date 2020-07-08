@@ -245,7 +245,7 @@ packZipFile = (context, logger, lambdaContext) ->
         zipper.writeZip lambdaContext.zipFilename
 
       zipLog = path.join context.deployRoot, 'zip.out.log'
-      fs.writeFileSync zipLog, stdout
+      fs.writeFileSync zipLog, stdout ? ''
       zipLog = path.join context.deployRoot, 'zip.err.log'
       fs.writeFileSync zipLog, "" + err + stderr
       if err?
