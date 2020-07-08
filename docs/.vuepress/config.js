@@ -73,7 +73,8 @@ module.exports = {
     docsDir: 'docs',
     editLinks: true,
     editLinkText: 'Help us improve this page on GitHub!',
-    logo: "/logo.png"
+    logo: "/logo.png",
+    search: true
   },
   head: [
     ['link', { rel: 'icon', href: `/icon.png` }],
