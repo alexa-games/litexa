@@ -80,6 +80,7 @@ findAndRegisterFilesToUpload = ({ s3Context, languageInfo }) ->
 
 
 registerFileForUpload = ({ s3Context, fileDir, fileName, language }) ->
+  fileName = fileName.replace /\\/g, '/'
   sourceFilePath = "#{fileDir}/#{fileName}"
   s3Context.assetCount += 1
   s3Key = "#{s3Context.baseLocation}/#{language}/#{fileName}"
@@ -239,6 +240,7 @@ endUploadAssets = ({ s3Context, skillContext, logger }) ->
 module.exports = {
   createAssetSets
   collectUploadInfo
+  findAndRegisterFilesToUpload
   listBucketAndUploadAssets
   prepareBucket
   uploadAssetSet
