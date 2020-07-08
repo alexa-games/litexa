@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.1](https://github.com/alexa-games/litexa/compare/v0.6.0...v0.6.1) (2020-07-08)
+
+
+### Bug Fixes
+
+* corrects mp3 package ref, adds tests ([#173](https://github.com/alexa-games/litexa/issues/173)) ([b472cf1](https://github.com/alexa-games/litexa/commit/b472cf18d25ab14670b77aa41764ba914eaacd1f))
+* restoring litexa logo in the root readme ([a3d2cb7](https://github.com/alexa-games/litexa/commit/a3d2cb7bda07480b8749356a5b065805760aafe0))
+
+
+### Features
+
+* upgrade docs to VuePress > 1.0 ([#171](https://github.com/alexa-games/litexa/issues/171)) ([f8683a9](https://github.com/alexa-games/litexa/commit/f8683a908fada291298a53da666a266f5978b355))
+
+
+
+
+
 # [0.6.0](https://github.com/alexa-games/litexa/compare/v0.5.1...v0.6.0) (2020-06-16)
 
 

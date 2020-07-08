@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.1](https://github.com/alexa-games/litexa/compare/v0.6.0...v0.6.1) (2020-07-08)
+
+
+### Bug Fixes
+
+* corrects mp3 package ref, adds tests ([#173](https://github.com/alexa-games/litexa/issues/173)) ([b472cf1](https://github.com/alexa-games/litexa/commit/b472cf18d25ab14670b77aa41764ba914eaacd1f))
+
+
+
+
+
 # [0.6.0](https://github.com/alexa-games/litexa/compare/v0.5.1...v0.6.0) (2020-06-16)
 
 **Note:** Version bump only for package @litexa/assets-wav
