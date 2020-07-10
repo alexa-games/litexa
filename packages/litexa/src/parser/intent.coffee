@@ -264,7 +264,8 @@ class lib.Intent
     if context.language != 'default' && (localizedIntent?[context.language])
       result.samples = localizedIntent[context.language]
     else
-      result.samples = ( u.toModelV2(context) for u in @utterances )
+      result.samples = []
+      result.samples = result.samples.concat( u.toModelV2(context) ) for u in @utterances
 
     if @slots
       slots = []
