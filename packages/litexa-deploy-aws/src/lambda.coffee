@@ -566,7 +566,7 @@ endLambdaDeployment = (context, logger, lambdaContext) ->
 
 ensureDynamoTable = (context, logger, lambdaContext) ->
   unless context.enablePersistentStore
-    logger.log "skipping dynamo table, skill does not require persistent store (probably set to use session store?)"
+    logger.log "skipping dynamo table, skill does not require persistent store (probably set to use session attributes?)"
     context.dynamoTableName = "NO_TABLE_DEPLOYED"
     return
 

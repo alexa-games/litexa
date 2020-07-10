@@ -669,8 +669,8 @@ Please see the [Monetization chapter](/book/monetization.html).
 While most skills usually need to store some data in between sessions, and therefore end
 up needing an online persistent store one way or another, some skills definitely don't
 need to store anything between sessions at all, and so don't need to incur any online
-database costs. In this case, you can switch the litexa persistent store to use Alexa's
-sessionAttributes instead. Modify your litexa config file to indicate you'd like
+database costs. In this case, you can switch the Litexa persistent store to use Alexa's
+session attributes instead. Modify your Litexa config file to indicate you'd like
 this behavior.
 
 ```json
