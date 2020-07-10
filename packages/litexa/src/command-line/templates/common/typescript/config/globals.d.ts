@@ -49,7 +49,7 @@ interface UploadParams {
 
 interface Deployment {
     module: string;
-    useSessionAttributesForPersistentStore: boolean;
+    useSessionAttributesForPersistentStore?: boolean;
     askProfile: string;
     awsProfile: string;
     lambdaConfiguration?: LambdaSettings;
@@ -65,7 +65,7 @@ interface Deployment {
 
 interface Configuration {
     name: string;
-    useSessionAttributesForPersistentStore: boolean;
+    useSessionAttributesForPersistentStore?: boolean;
     deployments: DeploymentCollection;
     plugins: PluginCollection; // Per Environment Option?
 }
