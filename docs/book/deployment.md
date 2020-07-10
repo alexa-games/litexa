@@ -664,6 +664,28 @@ are executing tests or deploying the skill for. Please see [DEPLOY variables](
 
 Please see the [Monetization chapter](/book/monetization.html).
 
+## Switching The Persistent Store to Session Attributes Instead
+
+While most skills usually need to store some data in between sessions, and therefore end
+up needing an online persistent store one way or another, some skills definitely don't
+need to store anything between sessions at all, and so don't need to incur any online
+database costs. In this case, you can switch the litexa persistent store to use Alexa's
+sessionAttributes instead. Modify your litexa config file to indicate you'd like
+this behavior.
+
+```json
+{
+    "name": "Project Name",
+    "useSessionAttributesForPersistentStore": true,
+    "deployments": {}
+}
+```
+
+Note: this modifies the scope of @variables such that they will still store
+data in between *interaction* turns, but only until the skill quits. The next
+time the skill launches, all @data will be lost.
+
+
 ## Extra Note: Including `production` in the Deployment Target Name
 
 There is a special condition on deployment target names. If the name does *not*

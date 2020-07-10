@@ -7,6 +7,7 @@
 
 module.exports =
   name: '{name}'
+  useSessionAttributesForPersistentStore: false
   deployments:
     development:
       module: '@litexa/deploy-aws'

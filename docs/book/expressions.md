@@ -227,6 +227,15 @@ both local and request variables. Persistent variables
 exist from the moment they are created until you decide
 to destroy them.
 
+:::warning
+The project configuration parameter `useSessionAttributesForPersistentStore`
+changes this promise by redirecting persistent storage
+to session attributes instead. This means the variable
+will only exist until the end of each skill session; every
+new launch will begin with no persistent variables defined
+at all.
+:::
+
 Persistent variable names always begin with the `@`
 symbol and always have database storage, meaning they
 must be able to survive being converted to and from

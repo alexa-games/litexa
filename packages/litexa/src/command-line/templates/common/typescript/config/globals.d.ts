@@ -64,6 +64,7 @@ interface Deployment {
 
 interface Configuration {
     name: string;
+    useSessionAttributesForPersistentStore: boolean;
     deployments: DeploymentCollection;
     plugins: PluginCollection; // Per Environment Option?
 }
