@@ -29,6 +29,7 @@ class ProjectInfo
     @logger = logger
     @DEPLOY = @deployments?[@variant]?.DEPLOY ? {}
     @disableAssetReferenceValidation = @deployments?[@variant]?.disableAssetReferenceValidation
+    @useSessionAttributesForPersistentStore = @deployments?[@variant]?.useSessionAttributesForPersistentStore ? false
 
     # Direct Public Side-Effect
     @parseDirectory jsonConfig

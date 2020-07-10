@@ -681,9 +681,31 @@ this behavior.
 }
 ```
 
-Note: this modifies the scope of @variables such that they will still store
-data in between *interaction* turns, but only until the skill quits. The next
-time the skill launches, all @data will be lost.
+You can also override this behavior per-deployment, opting perhaps to only disable
+permanent storage for test deployments.
+
+```json
+{
+    "name": "Project Name",
+    "deployments": {
+      "testing": {
+        "useSessionAttributesForPersistentStore": true,
+      }
+    }
+}
+```
+
+Please note that this option modifies the scope of @variables such that
+they will still store data in between *interaction turns*, but only until
+the skill quits. The next time the skill launches, all @data will be lost.
+
+It is also important to note that switching to sessionAttributes limits the size
+of your persistent storage in accordance with the limitations of sessionAttributes,
+namely that your total response size, that is to say all your persistent variables,
+plus any speech, reprompts, directives, and such, cannot exceed 24kb at any given
+turn.
+See [the ASK documentation on Response Format](https://developer.amazon.com/en-US/docs/alexa/custom-skills/request-and-response-json-reference.html#response-format)
+for more information
 
 
 ## Extra Note: Including `production` in the Deployment Target Name

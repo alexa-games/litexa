@@ -9,10 +9,10 @@
 
 module.exports = {
     name: '{name}',
-    useSessionAttributesForPersistentStore: false,
     deployments: {
         development: {
             module: '@litexa/deploy-aws',
+            useSessionAttributesForPersistentStore: false,
             s3Configuration: {
                 bucketName: null
             },

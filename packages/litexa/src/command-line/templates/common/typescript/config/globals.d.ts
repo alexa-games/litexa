@@ -49,6 +49,7 @@ interface UploadParams {
 
 interface Deployment {
     module: string;
+    useSessionAttributesForPersistentStore: boolean;
     askProfile: string;
     awsProfile: string;
     lambdaConfiguration?: LambdaSettings;

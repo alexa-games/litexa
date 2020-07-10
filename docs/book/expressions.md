@@ -228,9 +228,9 @@ exist from the moment they are created until you decide
 to destroy them.
 
 :::warning
-The project configuration parameter `useSessionAttributesForPersistentStore`
+The project option [`useSessionAttributesForPersistentStore`](/book/deployment.html#switching-the-persistent-store-to-session-attributes-instead)
 changes this promise by redirecting persistent storage
-to session attributes instead. This means the variable
+to Alexa session attributes instead. This means the variable
 will only exist until the end of each skill session; every
 new launch will begin with no persistent variables defined
 at all.
