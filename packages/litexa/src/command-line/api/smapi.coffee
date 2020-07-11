@@ -96,8 +96,14 @@ module.exports = {
           logger.verbose "SMAPI statusCode #{response.statusCode}"
           data.stdout = JSON.stringify response.body, null, 2
 
-      if data.stderr and data.stderr.indexOf('ETag') < 0
-        throw data.stderr
+      if data.stderr
+        if data.stderr.indexOf('ETag') >= 0
+          # some v1 commands returned an ETag, don't need it
+        else if data.stderr.indexOf('This is an asynchronous operation') >= 0
+          # some v2 commands returned a warning, we can ignore those
+        else
+          throw data.stderr
+
       Promise.resolve data.stdout
     .catch (err) ->
       if typeof(err) != 'string'
