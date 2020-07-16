@@ -95,7 +95,10 @@ module.exports = {
             throw "SMAPI command '#{command}' failed, without an error message"
 
         if data.stderr
-          logger.warning data.stderr
+          do ->
+            # we can filter this one out, as it can be confusing in the litexa output
+            return if data.stderr.match /This is an asynchronous operation/
+            logger.warning data.stderr
 
         responseKey = "\nResponse:\n"
         responsePos = data.stdout.indexOf responseKey
