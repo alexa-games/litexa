@@ -88,6 +88,15 @@ module.exports = {
       logger.verbose "SMAPI stderr: #{data.stderr}"
 
       if version.major >= 2
+        if data.errorCode != 0
+          if data.stderr
+            throw data.stderr
+          else
+            throw "SMAPI command '#{command}' failed, without an error message"
+
+        if data.stderr
+          logger.warning data.stderr
+
         responseKey = "\nResponse:\n"
         responsePos = data.stdout.indexOf responseKey
         if responsePos >= 0
@@ -96,13 +105,13 @@ module.exports = {
           logger.verbose "SMAPI statusCode #{response.statusCode}"
           data.stdout = JSON.stringify response.body, null, 2
 
-      if data.stderr
-        if data.stderr.indexOf('ETag') >= 0
-          # some v1 commands returned an ETag, don't need it
-        else if data.stderr.indexOf('This is an asynchronous operation') >= 0
-          # some v2 commands returned a warning, we can ignore those
-        else
-          throw data.stderr
+      if version.major < 2
+        # errors pre V2 were fatal, assume the process failed
+        if data.stderr
+          if data.stderr.indexOf('ETag') >= 0
+            # some v1 commands returned an ETag here, don't need it but it's not an error
+          else
+            throw data.stderr
 
       Promise.resolve data.stdout
     .catch (err) ->
@@ -113,11 +122,12 @@ module.exports = {
         else
           return Promise.reject(err)
 
+      code = undefined
+      message = undefined
+      name = ''
+
       # else, err was a string which means it's the SMAPI call's stderr output
       if version.major < 2
-        code = undefined
-        message = undefined
-        name = ''
         try
           lines = err.split '\n'
           for line in lines
@@ -141,11 +151,11 @@ module.exports = {
             parsed = JSON.parse err
             code = parsed.statusCode
             message = parsed.message
+            if parsed.response?
+              message = JSON.stringify parsed.response, null, 2
             name = parsed.name
           catch err2
             logger.error "failed to extract failure code and message from SMAPI call: #{err2}"
-        else
-          message = err
 
       unless message
         message = "Unknown SMAPI error during command '#{command}': #{err}"
@@ -184,13 +194,14 @@ module.exports = {
         stderr += data
       )
 
-      resolver = ->
+      resolver = (errorCode) ->
         if stdout == null
           stdout = ''
         if typeof(stdout) == 'object'
           stdout = stdout.toString('utf8')
 
         resolve {
+          errorCode,
           stdout,
           stderr
         }
