@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.6.2](https://github.com/alexa-games/litexa/compare/v0.6.1...v0.6.2) (2020-07-17)
+
+
+### Bug Fixes
+
+* ignore ASK cli [Warn] async messages during deploy ([#182](https://github.com/alexa-games/litexa/issues/182)) ([f72b219](https://github.com/alexa-games/litexa/commit/f72b2195a6181f26edff16e6072376908229e857))
+
+
+
+
+
 ## [0.6.1](https://github.com/alexa-games/litexa/compare/v0.6.0...v0.6.1) (2020-07-08)
 
 
