@@ -723,7 +723,7 @@ The object name that consolidates all `.json` files, keyed by the
    # Reference a JSON file in-line
    say "Test. {jsonFiles["test.json"].test}"
  ```
- 
+
 ## launch
 
 Simulates the user invoking the skill in a Litexa test.
@@ -1332,6 +1332,20 @@ say "(Hello|Hi) there"
 say "Hey (you|there|)"
 # says either "Hey you", "Hey there", or just "Hey"
 ```
+
+Note, you cannot use alternation inside tags or other interpolations, but you can put
+those inside alternations. So the following won't work:
+
+```coffeescript
+say "<!hello|hi>"
+```
+
+But the following will:
+
+```coffeescript
+say "(<!hello>|<!hi>)"
+```
+
 
 7. Explicit [SSML](https://developer.amazon.com/docs/custom-skills/speech-synthesis-markup-language-ssml-reference.html):
 To disambiguate from litexa shorthand tags, the '<' character in opening and closing SSML tags must be escaped with slashes.

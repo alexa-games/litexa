@@ -2,9 +2,10 @@
 
 ## `say` Statements
 
-The [say](/reference/#say) statement specifies speech content for Alexa
-to deliver. It takes one string as an argument and, like any Litexa string,
-accommodates the use of line breaks to help legibly format your code.
+The [say](/reference/#say) statement specifies speech content for
+Alexa to deliver. It takes one string as an argument (referred to
+as a Say String) and, like any Litexa string, accommodates the
+use of line breaks to help legibly format your code.
 
 ```coffeescript
 launch
@@ -27,7 +28,7 @@ askAboutRule
   say "Would you like to play with advanced rules?"
 ```
 
-The above skill when launch would produce the speech,
+The above skill when launched would produce the speech,
 *"Hello World. Would you like to play with advanced rules?"*
 
 For heavily trafficked areas of your skill, you may
@@ -59,6 +60,23 @@ permuting variation.
 To keep localization coherent though, you should try to
 keep each fragment of speech as complete as possible!
 :::
+
+For smaller fragments of sentences, you can use an inline
+form of alternation that mirrors the same feature available
+when defining utterances: a combination of grouping with
+`()` characters, and separating alternatives with the `|`
+character.
+
+```coffeescript
+launch
+  say "(Hello|Hi) (there|you|)."
+```
+
+This example defines 6 different possible greetings, including
+*"Hi there."* and *"Hello you"*. Note the empty trailing
+alternative in the second group. This creates the
+cases *"Hi"* and *"Hello"*.
+
 
 ## Say String Interpolation
 
