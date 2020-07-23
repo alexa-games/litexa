@@ -80,8 +80,7 @@ findAndRegisterFilesToUpload = ({ s3Context, languageInfo }) ->
 
 
 registerFileForUpload = ({ s3Context, fileDir, fileName, language }) ->
-  fileName = fileName.replace /\\/g, '/'
-  sourceFilePath = "#{fileDir}/#{fileName}"
+  sourceFilePath = path.join fileDir, fileName
   s3Context.assetCount += 1
   # S3 won't take the wrong slash, and in any case we want
   # this key to be the same no matter which platform we come
