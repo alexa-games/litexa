@@ -77,6 +77,7 @@ module.exports.buildDeploymentContext = (options, logger) ->
     deploymentName: options.deployment
     deploymentOptions: skill.projectInfo.deployments[options.deployment]
     JSONValidator: require('../parser/jsonValidator').lib.JSONValidator
+    enablePersistentStore: !skill.projectInfo?.useSessionAttributesForPersistentStore
     logger: logger
   return context
 

@@ -664,6 +664,50 @@ are executing tests or deploying the skill for. Please see [DEPLOY variables](
 
 Please see the [Monetization chapter](/book/monetization.html).
 
+## Switching The Persistent Store to Session Attributes Instead
+
+While most skills usually need to store some data in between sessions, and therefore end
+up needing an online persistent store one way or another, some skills definitely don't
+need to store anything between sessions at all, and so don't need to incur any online
+database costs. In this case, you can switch the Litexa persistent store to use Alexa's
+session attributes instead. Modify your Litexa config file to indicate you'd like
+this behavior.
+
+```json
+{
+    "name": "Project Name",
+    "useSessionAttributesForPersistentStore": true,
+    "deployments": {}
+}
+```
+
+You can also override this behavior per-deployment, opting perhaps to only disable
+permanent storage for test deployments.
+
+```json
+{
+    "name": "Project Name",
+    "deployments": {
+      "testing": {
+        "useSessionAttributesForPersistentStore": true,
+      }
+    }
+}
+```
+
+Please note that this option modifies the scope of @variables such that
+they will still store data in between *interaction turns*, but only until
+the skill quits. The next time the skill launches, all @data will be lost.
+
+It is also important to note that switching to sessionAttributes limits the size
+of your persistent storage in accordance with the limitations of sessionAttributes,
+namely that your total response size, that is to say all your persistent variables,
+plus any speech, reprompts, directives, and such, cannot exceed 24kb at any given
+turn.
+See [the ASK documentation on Response Format](https://developer.amazon.com/en-US/docs/alexa/custom-skills/request-and-response-json-reference.html#response-format)
+for more information
+
+
 ## Extra Note: Including `production` in the Deployment Target Name
 
 There is a special condition on deployment target names. If the name does *not*

@@ -346,6 +346,12 @@ class lib.Skill
       source = fs.readFileSync(__dirname + '/lambda-preamble.coffee', 'utf8')
       source = coffee.compile(source, {bare: true})
       @libraryCode.push source
+      if @projectInfo.useSessionAttributesForPersistentStore
+        source = fs.readFileSync(__dirname + '/lambda-db-session.coffee', 'utf8')
+      else
+        source = fs.readFileSync(__dirname + '/lambda-db-dynamo.coffee', 'utf8')
+      source = coffee.compile(source, {bare: true})
+      @libraryCode.push source
 
     # some functions we'd like to allow developers to override
     @libraryCode.push "litexa.overridableFunctions = {"
