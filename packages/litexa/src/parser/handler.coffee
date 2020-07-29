@@ -110,10 +110,12 @@ handlerSteps.checkFastExit = (event, handlerContext) ->
   # this is an event that ends the session, but we may have code
   # that needs to cleanup on skill exist that result in a BD write
   new Promise (resolve, reject) ->
+    originalSessionAttributes = JSON.parse JSON.stringify event.session.attributes
+
     tryToClose = ->
       dbKey = litexa.overridableFunctions.generateDBKey(handlerContext.identity)
 
-      db.fetchDB { identity: handlerContext.identity, dbKey, ttlConfiguration: litexa.ttlConfiguration, fetchCallback: (err, dbObject) ->
+      db.fetchDB { identity: handlerContext.identity, dbKey, sessionAttributes: originalSessionAttributes, fetchCallback: (err, dbObject) ->
         if err?
           return reject(err)
 
@@ -166,7 +168,8 @@ handlerSteps.runConcurrencyLoop = (event, handlerContext) ->
         exports.Logging.log "CONCURRENCY LOOP iteration #{numberOfTries}, denied db write"
 
       dbKey = litexa.overridableFunctions.generateDBKey(handlerContext.identity)
-      db.fetchDB { identity: handlerContext.identity, dbKey, ttlConfiguration: litexa.ttlConfiguration, fetchCallback: (err, dbObject) ->
+      sessionAttributes = JSON.parse JSON.stringify event.session.attributes
+      db.fetchDB { identity: handlerContext.identity, dbKey, sessionAttributes: sessionAttributes, fetchCallback: (err, dbObject) ->
         # build the context object for the state machine
         try
 
@@ -183,6 +186,7 @@ handlerSteps.runConcurrencyLoop = (event, handlerContext) ->
             event: event
             request: event.request ? {}
             db: new DBTypeWrapper dbObject, language
+            sessionAttributes: sessionAttributes
 
           stateContext.settings = stateContext.db.read("__settings") ? { resetOnLaunch: true }
 
@@ -430,7 +434,7 @@ handlerSteps.createFinalResult = (stateContext) ->
   # start building the final response json object
   wrapper =
     version: "1.0"
-    sessionAttributes: {}
+    sessionAttributes: stateContext.sessionAttributes
     userAgent: userAgent # this userAgent value is generated in project-info.coffee and injected in skill.coffee
     response:
       shouldEndSession: stateContext.shouldEndSession
