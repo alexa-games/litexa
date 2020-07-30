@@ -54,7 +54,7 @@ notTests
     say "not getTrue,"
 
   if not false and not (false and (false or true)) and not (true and false)
-    say "not (true and false),"
+    say "not \(true and false\),"
 
   if 0 != 1 and 1 != 0 and not getFalse() and not (false and false)
     say "negative conditions,"

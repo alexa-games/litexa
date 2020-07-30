@@ -248,27 +248,6 @@ collectSays = (skill, lambda) ->
   return result
 
 
-grindSays = (language, allSays, line) ->
-  # try to categorize every part of this string into
-  # one of the say statements, anywhere in the skill
-  ctx = {
-    remainder: line
-    says: []
-  }
-
-  while ctx.remainder.length > 0
-    found = false
-    for s in allSays
-      match = s.part.matchFragment(language, ctx.remainder, true)
-      if match?
-        if match.offset == 0
-          found = true
-          ctx.remainder = match.reduced
-          ctx.says.push [line.indexOf(match.removed), match.part, match.removed]
-          break
-    return ctx unless found
-  return ctx
-
 
 class lib.ExpectedExactSay
   # verbatim text match, rather than say string search
@@ -298,6 +277,29 @@ class lib.ExpectedRegexSay
     regexp = new RegExp(@regex.expression, @regex.flags)
     unless test.match(regexp) or abbreviatedTest.match(regexp)
       throw new ParserError @location, "speech did not match regex `/#{@regex.expression}/#{@regex.flags}`"
+
+
+
+grindSays = (language, allSays, line) ->
+  # try to categorize every part of this string into
+  # one of the say statements, anywhere in the skill
+  ctx = {
+    remainder: line
+    says: []
+  }
+
+  while ctx.remainder.length > 0
+    found = false
+    for s in allSays
+      match = s.part.matchFragment(language, ctx.remainder, true)
+      if match?
+        if match.offset == 0
+          found = true
+          ctx.remainder = match.reduced
+          ctx.says.push [line.indexOf(match.removed), match.part, match.removed]
+          break
+    return ctx unless found
+  return ctx
 
 class lib.ExpectedSay
   # expect all say statements that concatenate into @line
@@ -545,10 +547,11 @@ class VoiceStep extends lib.ResponseGeneratingStep
     super()
     @values = {}
     if values?
+      # the parser gives this to use an array of k/v pair arrays
       for v in values
         @values[v[0]] = { value:v[1] }
-    if @say?
-      for alt in @say.alternates
+    if @say?.alternates?.default?
+      for alt in @say.alternates.default
         for part, i in alt
           if part?.isSlot
             unless part.name of @values
@@ -991,8 +994,11 @@ class lib.Test
             break
       success = false
     else if result.event
+      stateName = ""
+      for ident, vars of context.db.identities
+        stateName = vars['__currentState']
       state = "◖#{padStringWithChars({
-        str: context.attributes.state ? ""
+        str: stateName ? ''
         targetLength: skill.maxStateNameLength
         paddingChar: '-'
       })}◗"

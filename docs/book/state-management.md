@@ -261,11 +261,25 @@ askCombo
     -> doubleAttack
 ```
 
-Finally, as Alexa will dutifully recognize any utterance in
-your language at any time, a skill must be prepared to handle
-any intent while waiting in any state. To capture intents
-you don't expect, you can use the `otherwise` statement.
+Where you have utterances that are permutations of a single
+grammar, you can use inline alternation to generate them. You can
+mix and match inline alternation with the `or` statement to compose
+a full intent.
 
+```coffeescript
+idline
+  when AttackEnemy
+    or "swing (my|the) (weapon|sword) (at the enemy|)"
+    or "(attack|kill) the enemy"
+    # this produces 10 utterances, including "swing my sword"
+    # "kill the enemy", and "swing the weapon at the enemy"
+```
+
+
+Finally, as Alexa will dutifully recognize any utterance across
+your entire language model at any time, a skill must be prepared
+to handle any intent while waiting in any state. To capture intents
+you don't expect for a given state, you can use the `otherwise` statement.
 Given that we're not distinguishing between which intent
 is coming in for the state, it's usually best to treat the
 otherwise case as a failure to understand the player's actual
@@ -313,7 +327,7 @@ idling
 Here we have state that defines a single intent, with a single
 slot named `$thing`. We define `$thing` as one of a list of
 possible words: rope, bird, or cage. In the handler, we can use
-the same $thing and assume it contain whatever the user said.
+the same $thing and assume it contains whatever the user said.
 
 :::warning Beware Large Slots!
 Alexa does not guarantee that the word that comes

@@ -129,9 +129,15 @@
       throw new ParserError(location, `Invalid indentation of \`when ${utterance}\`: ` +
         `\`when\` statements can only be directly subordinate to a state and must begin at the first level of indentation.`);
     }
-    const intent = stack[0].target.pushIntent(stack[1].target, location, utterance, intentInfo);
-    popStackTo(1);
-    pushToStack(intent);
+    let intent = null;
+    if (stack[0].target && stack[0].target.pushIntent) {
+      intent = stack[0].target.pushIntent(stack[1].target, location, utterance, intentInfo);
+      popStackTo(1);
+      pushToStack(intent);
+    } else {
+      // during testing there is no skill, just construct the intent
+      intent = new lib.Intent({location: location, utterance: utterance});
+    }
     return intent;
   }
 
@@ -364,6 +370,7 @@ Fragment
 Fragments
   = CardStatement
   / SayStatement
+  / IntentStatement
 
 
 /* litexa [State]
@@ -1172,96 +1179,76 @@ AttributeStatement
 
 /* litexa [when]
 Declares an intent that the parent state is willing to handle.
-
-```coffeescript
-when "my name is $name"
-```
-
-The intent will be rolled into the Alexa skill model for
-your skill. The code subordinate to this statement will
+The intent will be rolled into the Alexa skill language model for
+your skill, and the code subordinate to this statement will
 be executed when your skill receives the intent *and* is in
 this state.
 
-This statement is part of a larger *when clause*, beginning with
-a `when`, followed by optional subordinate `or` and [with](#with)
-statements.
+The basic form of the statement contains a single
+[Utterance String](#utterance-string).
 
-The content of the statement can be an [Utterance](#utterance), or an
-[Intent Name](#intent-name). In either case, the statement can be followed
-by a series of one of the two following subordinate statements.
-
-1. The statement can be followed by [or](#or) utterance statements that offer
-alternative ways to specify the same intent.
 
 ```coffeescript
-when "my name is $name"
-  or "I'm $name"
-  or "call me $name"
+someState
+  when "hello skill"
+    say "hello, human"
 ```
 
-2. The statement can be followed by [or](#or) intent name statements to have
-these intents share the same handler.
+The `when` statement is part of a larger *when clause*, beginning with
+a `when`, followed by optional subordinate `or` and [`with`](#with)
+statements.
+
+`or` statements allow for the definition of alternative utterances.
+
+```coffeescript
+when "hello skill"
+  or "hey there skill"
+  or "howdy skill"
+```
+
+The name for the intent in the language model will be derived from the
+first utterance, in this case `HELLO_SKILL`. You can optionally use an
+alternative `when` form to name it explicitly using any combination of
+letters, periods, and underscores, beginning with a letter. You can
+then use the explicit name elsewhere in your skill to represent the
+same intent.
+
+
+```coffeescript
+askForName
+  say "what is your name?"
+
+  when USER_GIVES_NAME
+    or "my name is $name"
+    or "the name is $name"
+    or "call me $name"
+    say "Got it, thanks $name!"
+
+askForAlternateName
+  say "what should I call you on the weekend?"
+
+  when USER_GIVES_NAME
+    say "Understood."
+```
+
+You can create a compound when clause that combines previously defined
+intents to funnel them all into the same code for a given state. In this
+case, you cannot add further utterances, the compiler will error.
 
 ```coffeescript
 when RephraseQuestionIntent
   or AMAZON.RepeatIntent
   or UnsureIntent
+  say "One more time, human"
+  -> repeatInstructions
 ```
-
-These types of subordinate statements cannot be mixed; doing so will result in a
-compile time error.
-
-When the `when` statement contains an [Utterance](#utterance), the underlying
-intent name will be automatically generated from that utterance,
-e.g. `MY_NAME_IS_NAME` for the above example.
-
-You can reuse the same intent in different states by specifying
-the identical `when` statement; you only have to define the set
-of alternate utterances once.
-
-```coffeescript
-askForName
-  say "what is your name?"
-
-  when "my name is $name"
-    or "the name is $name"
-    or "call me $name"
-    say "Got it, thanks!"
-
-askForAlternateName
-  say "what should I call you on the weekend?"
-
-  when "my name is $name"
-    say "Understood."
-```
-
-When the statement contains an [Intent Name](#intent-name) instead, if the
-name is unique to this skill, then at least one `when` statement
-specifying it must be followed by an or statement in order to
-define at least one utterance for the intent. As per above,
-other locations need not repeat the utterances.
-
-```coffeescript
-askForName
-  say "what is your name?"
-
-  when MyNameIs
-    or "my name is $name"
-    or "call me $name"
-    say "Got it, thanks!"
-
-askForAlternativeName
-  say "what should I call you on the weekend?"
-
-  when MyNameIs
-    say "Understood."
-```
-
-### Postfix Conditional
 
 The statement can include a conditional static [expression](
-#expression). If the condition evaluates to false, then the handler will not
-exist in that state.
+#expression) as a postfix. If the condition evaluates to false at
+compile time, then the entire handler will be omitted from the skill.
+Should all instances of an intent be similarly hidden at compile
+time, then the intent will be omitted from the language model
+altogether.
 
 ```coffeescript
 forkInTheRoad
@@ -1270,33 +1257,21 @@ forkInTheRoad
   when AlwaysCorrectPath if DEPLOY.shortcutsEnabled
     or "the correct path"
     or "next"
-    ...
+    # pick the right path
 
   when SkipToEnding if DEPLOY.shortcutsEnabled
     -> ending
 
-  ... # other handlers
+  when "left"
+    -> choseLeft
+
+  when "right"
+    -> choseRight
 
   otherwise
     say "I didn't get that."
     -> forkInTheRoad
-
 ```
-
-This can be a way to exclude some intents for specific deployment targets. For
-the above example, if this was the only place `AlwaysCorrectPath` was defined,
-it would not exist in the language model for the deployment targets that have
-`DEPLOY.shortcutsEnabled = true`. On the other hand, `SkipToEnding` is defined
-elsewhere because there are no utterances attached to its statement, so it will
-exist in the language model.
-
-If the skill is deployed with a deployment target that does not have `DEPLOY.
-shortcutsEnabled = true` and the skill receives `SkipToEnding` in this state,
-Litexa will have the [`otherwise`](#otherwise) handler resolve it.
-
-It may be useful to learn about [DEPLOY variables](#deploy-variable) and static
-[expressions](#expression) for these statements.
-
 */
 
 /* litexa [Intent Name]
@@ -1325,12 +1300,6 @@ waitForAnswer
 ```
 */
 
-/*  litexa [Utterance]
-An example phrase to be spoken by the user that maps to an intent.
-Utterances in Litexa are defined in [when](#when) statements.
-
-Please read the State Management chapter for more information on intents and utterances.
-*/
 IntentStatement
   = "when" ___ ![a-zA-Z"] {
     throw new ParserError(location(), "intent identifiers must begin with a letter, upper or lower case");
@@ -1358,10 +1327,12 @@ IntentStatement
         }
       }
     });
+    return intent;
   }
   / "when" ___ "Connections.Response" {
     const intent = pushIntent(location(), 'Connections.Response', {class:lib.FilteredIntent});
     intent.setCurrentIntentFilter({ name: '__' });
+    return intent;
   }
   / "when" ___ utterance:(UtteranceString / DottedIdentifier) ___ type:("if"/"unless") ___ qualifier:ExpressionString {
     const intent = pushIntent(location(), utterance, false);
@@ -1369,9 +1340,11 @@ IntentStatement
     if (type === "unless") {
       intent.qualifierIsInverted = true;
     }
+    return intent;
   }
   / "when" ___ utterance:(UtteranceString / DottedIdentifier) {
     const intent = pushIntent(location(), utterance, false);
+    return intent;
   }
 
 /* litexa [or]
@@ -1382,17 +1355,24 @@ Used to provide variations to various statements:
 */
 
 AlternativeStatement
-  = "or" ___ parts:(SayStringParts) {
+  = "or" ___ '"' parts:SayStringContents '"' {
     const target = getTarget();
     if (target && target.pushAlternate) {
       if (target instanceof lib.Intent) {
-        if (target.hasChildIntents()) {
-          throw new ParserError(location, `Can't add utterance as an \`or\` alternative to \`${target.name}\` because it `
-            + `already has intent name alternatives. Utterance and intent name alternatives can't be combined in a single handler; `
-            + `please use one or the other.`);
-        }
+        let group = new lib.PartListPart(location(), parts);
+        let utterance = new lib.Utterance(location(), group);
+        target.pushAlternate(location(), utterance, skill);
+      } else {
+        target.pushAlternate(location(), parts, skill);
       }
-      target.pushAlternate(parts, skill);
+    } else {
+      throw new ParserError(location(), "Couldn't find anything to add an alternative to here");
+    }
+  }
+  / "or" ___ utterance:UtteranceString {
+    const target = getTarget();
+    if (target && target.pushAlternate) {
+      target.pushAlternate(location(), utterance, skill);
     } else {
       throw new ParserError(location(), "Couldn't find anything to add an alternative to here");
     }
@@ -1400,13 +1380,15 @@ AlternativeStatement
   / "or" ___ parts:(AssetName / DottedIdentifier) {
     const target = getTarget();
     if (target instanceof lib.Intent) {
-      if (parts.isAssetName) { // parts was parsed into an AssetName type; reconstruct it as the original text
+      if (parts.isAssetName) {
+        // parts was mistakenly parsed into an AssetName type,
+        // reconstruct the original text and treat it as an alternative intent name instead
         parts = parts.toString();
       }
       const intent = pushIntent(location(), parts, false, true);
       target.pushChildIntent(intent);
     } else if (target && target.pushAlternate) {
-      target.pushAlternate(parts, skill);
+      target.pushAlternate(location(), parts, skill);
     } else {
       throw new ParserError(location(), "Couldn't find anything to add an alternative to here");
     }
@@ -2661,14 +2643,85 @@ TestLogStateTraces
   }
 
 
+
+
+/* litexa [Utterance String]
+Utterance strings are used in [`when`](#when) and their subordinate `or`
+statements to define things the user might say to your skill. See [Alexa
+Skill Kit documentation](https://developer.amazon.com/en-US/docs/alexa/custom-skills/create-intents-utterances-and-slots.html)
+for guidance on how author this content.
+
+The basic form describes verbatim what the user would say. It can contain
+any characters that are valid for Alexa Skills language model utterances.
+
+```coffeescript
+when "I want some coins"
+  say "sure, have some coins."
+```
+
+In order to capture variables, you can specify one or more slot names as $variables.
+When you do so, the full [`when`](#when) clause must contain [`with`](#with)
+statements to define what kinds of slots they are.
+
+```coffeescript
+when "I want $count coins"
+  with $count = AMAZON.NUMBER
+  say "sure, have exactly $count coins."
+```
+
+You may omit $slot names from utterance variations. Should the user invoke the
+intent with one of those utterances, the $variable will be undefined.
+
+You can generate better coverage of all possible utterances a user may
+say by using alternation, a combination of grouping with the `()` characters
+and defining alternative fragments with the `|` character.
+
+```coffeescript
+when "(I|we) (want|need) $coin (coin|coins)"
+```
+
+This would produce 8 variations, including "I want $coin coins" and "we need $coin coin".
+
+An alternation with an empty tail indicates that a variation set should be produced
+with the given group producing no output.
+
+```coffeescript
+when "I want $coin (coin|coins|)"
+```
+
+This would produce 3 variations: "I want $coin coin", "I want $coin coins", and
+"I want $count"
+*/
+
 UtteranceString
-  = '"' parts:UtteranceStringPart* '"' {
-    return new lib.Utterance(parts);
+  = '"' parts:UtteranceStringAlternation '"' {
+    return new lib.Utterance(location(), parts);
   }
 
-UtteranceStringPart
-  = $(!'"' !'$' !'@' .)+ { return new lib.StringPart(text()); }
+UtteranceStringAlternation
+  = a:UtterancePartGroup tail:UtteranceStringAlternationTail+ {
+    tail.unshift(a);
+    return new lib.AlternatingPart(location(), tail);
+  }
+  / UtterancePartGroup
+
+UtteranceStringAlternationTail
+  = '|' a:UtterancePartGroup { return a; }
+  / '|' { return new lib.StringPart(''); }
+
+UtterancePartGroup
+  = parts:UtteranceStringPrimitive+ {
+    if (parts.length == 1) {
+      return parts[0];
+    }
+    return new lib.PartListPart(location(), parts);
+  }
+
+UtteranceStringPrimitive
+  = $(!'"' !'$' !'(' !')' !'|' .)+ { return new lib.StringPart(text()); }
   / name:SlotVariableReference { return new lib.SlotReferencePart(name); }
+  / '(' contents:UtteranceStringAlternation ')' { return contents; }
+
 
 
 ScreenString
@@ -2690,17 +2743,20 @@ ScreenStringPart
   / TemplateStringDatabasePart
   / TemplateStringTaggedPart
 
-/* litexa [Say String]
-The Say String format is used by [say](#say) and [reprompt](#reprompt) statements,
-and supports any of the following:
 
-1. Alphanumerical characters and punctuation:
+
+/* litexa [Say String]
+The Say String format is used by [say](#say) and [reprompt](#reprompt) statements
+to define what Alexa will say, and supports any combination of the following features.
+
+1. Alphanumerical characters and basic punctuation. Note, punctuation that isn't
+valid Alexa SSML is stripped silently.
 
 ```coffeescript
 say "Basic statement with letters, the numbers 1, 2, 3, and punctuation."
 ```
 
-2. Interpolated [@](#variable) DB variables and [$](#variable-2) slot variables:
+2. Interpolated [@DB variables](#variable) and [$slot variables](#variable-2)
 
 ```coffeescript
 @myDbVar = 'myDbVar'
@@ -2708,86 +2764,126 @@ say "My DB variable's value is @myDbVar."
 
 when "my name is $name"
   with $name = AMAZON.US_FIRST_NAME
-  say "Your name is $name."
+  say "Got it, your name is $name."
 ```
 
-3. Interpolated [expressions](#expression):
+3. Interpolated [expressions](#expression). These can reference litexa variables
+and your inline code.
 
 ```js
-function echo(str) { return str; }
-
-const myConst = 'my constant'
+// in Javascript
+function pluralize( count, singular, plural) {
+  return count == 1 ? singular : plural;
+}
+const myConst = 'a surprise'
 ```
 
 ```coffeescript
-say "{1 + 1}"               # says "2"
-say "{echo('test')}"        # says "test"
-say "constant is {myConst}" # says "constant is my constant"
+# in litexa
+say "1 plus 1 is {1 + 1}"
+# says "1 plus 1 is 2"
+
+@coinCount = 3
+say "you have @coinCount {pluralize(@coinCount,'coin','coins')}"
+# says "you have 3 coins"
+
+say "constant is {myConst}"
+# says "constant is a surprise"
 
 @intro = 'Hello '
 when "my name is $name"
   with $name = "Bob"
-  say "{@intro + $name}!"  # says "Hello Bob!"
+  say "{@intro + $name}!"
+  # says "Hello Bob!"
 ```
 
-4. Explicit [SSML](https://developer.amazon.com/docs/custom-skills/speech-synthesis-markup-language-ssml-reference.html):
+4. Shorthand tags, abbreviated versions of [SSML](https://developer.amazon.com/docs/custom-skills/speech-synthesis-markup-language-ssml-reference.html).
+Each tag is enclosed in the `<>` characters and begins with a symbol or keyword.
+
+* `<!>` [Interjections / Speechcons](https://developer.amazon.com/docs/custom-skills/speechcon-reference-interjections-english-us.html)
+It's often necessary to include punctuation as part of the word,
+e.g. a comma separator; when you do so, add it inside the tag
+to avoid errors in reading the punctuation as a separate word.
 
 ```coffeescript
-# Note the required escape slashes before the opening/closing SSML tags!
-say "\<say-as interpret-as='ordinal'>1\</say-as>"
-# says "first"
+say "<!abracadabra,> she said."
+# shorthand for: "<say-as interpret-as="interjection">abracadabra,</say-as> she said."
 ```
 
-5. Shorthand [SSML](https://developer.amazon.com/docs/custom-skills/speech-synthesis-markup-language-ssml-reference.html),
-which facilitates using the following tags:
-* [Interjections](https://developer.amazon.com/docs/custom-skills/speechcon-reference-interjections-english-us.html)
-
-```coffeescript
-say "<!abracadabra>"
-# shorthand for: "<say-as interpret-as="interjection">abracadabra!</say-as>"
-```
-
-* [Break time](https://developer.amazon.com/docs/custom-skills/speech-synthesis-markup-language-ssml-reference.html#break)
+* `<...>` [Break / Pause time](https://developer.amazon.com/docs/custom-skills/speech-synthesis-markup-language-ssml-reference.html#break)
+You can specify the unit as either milliseconds `ms` or seconds `s`.
 
 ```coffeescript
 say "Before pause. <...100ms> After 100 millisecond pause."
 # shorthand for: "Before pause. <break time='100ms'> After 100 millisecond pause."
 ```
 
-* [Audio](https://developer.amazon.com/docs/custom-skills/speech-synthesis-markup-language-ssml-reference.html#audio)
+* `<sfx>` [Audio Files](https://developer.amazon.com/docs/custom-skills/speech-synthesis-markup-language-ssml-reference.html#audio)
+This is functionally equivalent to using the [soundEffect](#soundeffect) statement
 
 ```coffeescript
 # assuming a sound.mp3 file is deployed with skill, via litexa/assets
 say "playing sound effect <sfx sound.mp3>"
-# shorthand for: "playing sound effect <audio src='[deployed_mp3_url]' />"
+# shorthand for: "playing sound effect <audio src='[deployed_mp3_url]'/>"
 ```
 
-6. Multi-line strings:
+5. Multi-line strings. Note, line breaks are interpreted as single spaces in the generated output.
 
 ```coffeescript
 say "Multiline
   string!
-  <!abracadabra>!"
+  <!abracadabra>"
 
-# says: "Multiline string!<say-as interpret-as='interjection'>abracadabra</say-as>!
+# says: "Multiline string!<say-as interpret-as='interjection'>abracadabra</say-as>"
 ```
 
-7. Combinations of multiple components:
+6. Alternation. This is a the inline definition of random options,
+defined by the combination of two things: groups defined with `()`
+bracketing, and alternative fragments separated with the `|` character.
+You can leave a fragment empty to signify omitting the group altogether.
 
 ```coffeescript
-say "<!aloha>. This {'is ' + 'an ' + 'example'}
-  of <...100ms> multiple
-  \<amazon:effect name='whispered'>components\</amazon:effect>."
+say "(Hello|Hi) there"
+# says either "Hello there" or "Hi there"
+
+say "Hey (you|there|)"
+# says either "Hey you", "Hey there", or just "Hey"
 ```
+
+7. Explicit [SSML](https://developer.amazon.com/docs/custom-skills/speech-synthesis-markup-language-ssml-reference.html):
+To disambiguate from litexa shorthand tags, the '<' character in opening and closing SSML tags must be escaped with slashes.
+
+```coffeescript
+say "\<say-as interpret-as='ordinal'>1\</say-as>"
+# says "first"
+```
+
 */
 SayString
-  = parts:SayStringParts {
+  = '"' parts:SayStringContents '"' {
     return new lib.Say(parts, skill);
   }
 
-SayStringParts
-  = '"' parts:SayStringPart* '"' {
-    return parts;
+SayStringContents
+  = part:SayStringAlternation { return [part]; }
+
+SayStringAlternation
+  = a:SayStringGroup tail:SayStringAlternationTail+ {
+    tail.unshift(a);
+    return new lib.AlternatingPart(location(),tail);
+  }
+  / SayStringGroup
+
+SayStringAlternationTail
+  = '|' a:SayStringGroup { return a; }
+  / '|' { return new lib.StringPart('') }
+
+SayStringGroup
+  = parts:SayStringPart+ {
+    if (parts.length <= 1 ) {
+      return parts[0];
+    }
+    return new lib.PartListPart(location(), parts);
   }
 
 SayStringPart
@@ -2802,17 +2898,21 @@ SayStringPart
   / TemplateStringPausePart
   / TemplateStringInterjectionPart
   / TemplateStringTaggedPart
+  / '(' contents: SayStringAlternation ')' { return contents; }
 
 
 TemplateStringClearPart
-  = $(!'"' !'$' !'@' !'{' !'<' !'\\' !'DEPLOY' .)+ { return new lib.StringPart(text()); }
+  = $(!'"' !'$' !'@' !'{' !'<' !'\\' !'DEPLOY' !'|' !'(' !')' .)+ { return new lib.StringPart(text()); }
 
 
 TemplateStringEscapedCharacterPart
   = '\\$' { return new lib.StringPart('$'); }
   / '\\@' { return new lib.StringPart('@'); }
   / '\\<' { return new lib.StringPart('<'); }
+  / '\\>' { return new lib.StringPart('>'); }
   / '\\"' { return new lib.StringPart('\\"'); }
+  / '\\(' { return new lib.StringPart('('); }
+  / '\\)' { return new lib.StringPart(')'); }
   / '\\\\' { return new lib.StringPart('\\'); }
   / '\\' symbol:'{' {
     // note: pegjs parser had trouble with using the symbol character in the action
@@ -2925,7 +3025,6 @@ TestSaidString
 
 TestSaidStringPart
   = $(!'"' !'@' !'<' .)+ { return new lib.StringPart(text()); }
-  / '$' name:AssetName '>' { return new lib.AssetNamePart(name); }
   / '@' name:VariableReference { return new lib.DatabaseReferencePart(name); }
   / '<' name:AssetName '>' { return new lib.AssetNamePart(name); }
   / TemplateStringEscapedCharacterPart
