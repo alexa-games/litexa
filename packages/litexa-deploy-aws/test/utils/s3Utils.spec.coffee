@@ -178,6 +178,10 @@ describe 'S3Utils', ->
         }
       }
 
+      # the expectation is that filenames will respect local file system norms
+      for file in expectedS3Context.assets
+        file.sourceFilename = path.normalize file.sourceFilename
+
       collectUploadInfo({ s3Context, skillContext, logger: fakeLogger, md5Override: fakeMD5 })
       expect(s3Context).to.deep.equal(expectedS3Context)
 
