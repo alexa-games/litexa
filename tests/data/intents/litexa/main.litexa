@@ -2,7 +2,7 @@ launch
   when "something"
   when "with spaces"
   when "how about, symbols?"
-  when "should || this <work>?"
+  when "should / this <work>?"
   when "1, 2, 3"
   when "1 something"
   when "  spaces   lots of space    s  "
@@ -32,7 +32,7 @@ someState
   when "handler is utterance"
     or lowercase
     say "got {context.event.request.intent.name}"
-  
+
   when "another intent"
     or PreviouslyNotDefinedIntentName
     say "moving to otherState"
@@ -45,7 +45,7 @@ otherState
   when "another intent"
     or "another intent alternate"
     say "otherState got {context.event.request.intent.name}"
-  
+
   when PreviouslyNotDefinedIntentName
     or "some utterance for this intent"
 

@@ -8,7 +8,9 @@
 lib = module.exports.lib = {}
 
 { Function, FunctionMap } = require("./function.coffee").lib
+{ Slot } = require("./utterance.coffee").lib
 { ParserError, formatLocationStart } = require("./errors.coffee").lib
+{ Utterance } = require('./utterance.coffee').lib
 Utils = require('@src/parser/utils').lib
 
 
@@ -72,172 +74,6 @@ identifierFromString = (location, str) ->
   str
 
 
-class lib.Utterance
-  constructor: (@parts) ->
-
-  toString: ->
-    return ( p.toString() for p in @parts ).join('')
-
-  toUtterance: ->
-    return ( p.toUtterance() for p in @parts ).join('')
-
-  toModelV2: ->
-    return @toUtterance()
-
-  parse: (line) ->
-    unless @regex?
-      @testScore = 0
-      @testScore += p.toTestScore() for p in @parts
-      regexText = ( p.toRegex() for p in @parts ).join('')
-      regexText = "^#{regexText}$"
-      @regex = new RegExp(regexText, 'i')
-
-    match = @regex.exec(line)
-    return [null, null] unless match?
-
-    result = {}
-    for read, idx in match[1..]
-      part = @parts[idx]
-      if part?.isSlot
-        result[part.name] = read
-    return [@testScore, result]
-
-  isEquivalentTo: (otherUtterance) ->
-    return otherUtterance.toUtterance() == @toUtterance()
-
-  isUtterance: true
-
-compileSlot = (context, type) ->
-  code = context.skill.getFileContents type.filename, context.language
-
-  code = code.js ? code
-  unless code
-    throw new ParserError null, "Couldn't find contents of file #{type.filename} to build slot type"
-
-  exports = {}
-  try
-    eval code
-  catch err
-    throw new ParserError null, "While compiling #{type.filename}: #{err}"
-
-  unless (k for k of exports).length > 0
-    throw new ParserError null, "Slot type builder file #{type.filename} does not appear to export
-      any slot building functions"
-  unless type.functionName of exports
-    throw new ParserError null, "Slot type builder #{type.functionName} not found in
-      #{type.filename}, saw these functions in there [#{(k for k of exports).join(',')}]"
-
-  try
-    data = exports[type.functionName](context.skill, context.language)
-  catch err
-    throw new ParserError null, "While building #{type.functionName} from #{type.filename}: #{err}"
-
-  unless typeof(data) == 'object'
-    throw new ParserError null, "Slot builder #{type.functionName} returned #{JSON.stringify data},
-      expected an object in the form { name:"", values:[] }"
-
-  for key in ['name', 'values']
-    unless key of data
-      throw new ParserError null, "Missing key `#{key}` in result of slot builder
-        #{type.functionName}: #{JSON.stringify data}"
-
-  for value, index in data.values
-    if typeof(value) == 'string'
-      data.values[index] =
-        id: undefined
-        name: {
-          value: value
-          synonyms: []
-        }
-
-  if data.name of context.types
-    throw new ParserError null, "Duplicate slot type definition found for name `#{data.name}`.
-      Please remove one."
-
-  context.types[data.name] = data
-  return data.name
-
-
-createSlotFromArray = (context, slotName, values) ->
-  typeName = "#{slotName}Type"
-
-  if typeName of context.types
-    throw new ParserError null, "Duplicate slot type definition found for name `#{typeName}` while
-      creating implicit type for slot `#{slotName}`. Please remove conflicting definitions."
-
-  type =
-    name: typeName
-    values: []
-
-  for v in values
-    type.values.push
-      id: undefined
-      name: {
-        value: JSON.parse v
-        synonyms: []
-      }
-
-  if context?
-    context.types[typeName] = type
-
-  return typeName
-
-
-class lib.Slot
-  constructor: (@name) ->
-
-  setType: (location, type) ->
-    if @type?
-      if @type.filename? and @type.functionName?
-        throw new ParserError location, "The slot named `#{@name}` already has a defined type from
-          the slot builder: `#{@type.filename}:#{@type.functionName}`"
-      else
-        throw new ParserError location, "The slot named `#{@name}` already has a defined type:
-          `#{@type}`"
-
-    @type = type
-    @typeLocation = location
-    if typeof(@type) == 'string'
-      @builtinType = @type.indexOf('AMAZON.') == 0
-
-  collectDefinedSlotTypes: (context, customSlotTypes) ->
-    unless @type?
-      throw new ParserError null, "the slot named `#{@name}` doesn't have a 'with' statement
-        defining its type"
-
-    if Array.isArray @type
-      typeName = createSlotFromArray(context, @name.toString(), @type)
-      customSlotTypes.push typeName
-    else if @type.isFileFunctionReference
-      typeName = compileSlot(context, @type)
-      customSlotTypes.push typeName
-
-  validateSlotTypes: (customSlotTypes) ->
-    # @TODO: Validate built in types? Maybe just a warning?
-    if typeof(@type) == 'string' and not @builtinType
-      unless @type in customSlotTypes
-        throw new ParserError @typeLocation, "the slot type named `#{@type}` is not defined
-          anywhere"
-
-  toModelV2: (context, slots) ->
-    unless @type?
-      throw new ParserError null, "missing type for slot `#{@name}`"
-
-    if Array.isArray @type
-      slots.push {
-        name: @name.toString()
-        type: createSlotFromArray(context, @name.toString(), @type)
-      }
-    else if @type.isFileFunctionReference
-      slots.push {
-        name: @name.toString()
-        type: compileSlot(context, @type)
-      }
-    else
-      slots.push {
-        name: @name.toString()
-        type: @type
-      }
 
 
 class lib.Intent
@@ -350,8 +186,8 @@ class lib.Intent
       return @referenceIntent.pushUtterance utterance
 
     # normalize the utterance text to lower case: capitalization is irrelevant
-    for part in utterance.parts
-      unless part.isSlot
+    utterance.visit 0, (depth, part) ->
+      if part.isStringPart
         part.text = part.text.toLowerCase()
 
     for u in @utterances
@@ -359,15 +195,20 @@ class lib.Intent
 
     @utterances.push utterance
     @hasUtterances = true
-    for part in utterance.parts when part.isSlot
+    utterance.visit 0, (depth, part) =>
+      return unless part.isSlot
       unless @slots[part.name]
-        @slots[part.name] = new lib.Slot(part.name)
+        @slots[part.name] = new Slot(part.name)
 
     Intent.registerUtterance(@location, utterance, @name)
 
-  pushAlternate: (parts) ->
+  pushAlternate: (location, utterance, skill) ->
+    if @hasChildIntents()
+      throw new ParserError location, "Can't add this utterance as an 'or' alternative
+        here because this handler already specifies multiple intents. Add the alternative
+        to one of the original intent declarations instead."
     @hasAlternateUtterance = true
-    @pushUtterance new lib.Utterance parts
+    @pushUtterance utterance
 
   pushChildIntent: (intent) ->
     @childIntents.push(intent.name)
@@ -423,7 +264,8 @@ class lib.Intent
     if context.language != 'default' && (localizedIntent?[context.language])
       result.samples = localizedIntent[context.language]
     else
-      result.samples = ( u.toModelV2(context) for u in @utterances )
+      result.samples = []
+      result.samples = result.samples.concat( u.toModelV2(context) ) for u in @utterances
 
     if @slots
       slots = []
@@ -445,6 +287,8 @@ class lib.Intent
       unless localization.intents[@name].default.includes(finalUtterance)
         # if this is a newly added utterance, add it to the localization map
         localization.intents[@name].default.push(finalUtterance)
+
+
 
 # Class that supports intent filtering.
 class lib.FilteredIntent extends lib.Intent

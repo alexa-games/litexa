@@ -81,10 +81,10 @@ exports.runSkill = (name) ->
       try
         js = skill.toLambda()
       catch err
-        if err.location
+        if err.location?.start?.line?
           l = err.location
           err = new Error "
-            #{l.source}[#{l.start.line}:#{l.start.column}]
+            #{l.source}[#{l.start?.line}:#{l.start?.column}]
             #{err.toString()}"
         return reject(err)
 
@@ -146,10 +146,10 @@ exports.buildSkillModel = (name, locale='en-US') ->
       try
         js = skill.toLambda()
       catch err
-        if err.location
+        if err.location?.start?.line?
           l = err.location
           err = new Error "
-            #{l.source}[#{l.start.line}:#{l.start.column}]
+            #{l.source}[#{l.start?.line}:#{l.start?.column}]
             #{err.toString()}"
         return reject(err)
 

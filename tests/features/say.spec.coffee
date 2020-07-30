@@ -26,12 +26,16 @@ execute = (object, func, properties) ->
   options.scopeManager.allocate null, 'constant'
   options.scopeManager.allocate null, 'echoThis'
 
-  escapeSpeech = (str) -> str
+  escapeSpeech = (str) -> '' + str
   context =
     say:[]
     db:
       read: (key) -> properties[key]
     slots: properties
+
+  pickSayFragment = (context, key, options) ->
+    index = Math.floor Math.random() * options.length
+    return options[index]
 
   output = []
   try
@@ -40,7 +44,8 @@ execute = (object, func, properties) ->
       wrapper = null
       output.unshift 'wrapper = async function(){'
       output.push '};'
-      eval output.join '\n'
+      context.code = output.join '\n'
+      eval context.code
       await wrapper()
     else
       output = object[func] options
@@ -51,17 +56,27 @@ execute = (object, func, properties) ->
   return context
 
 
+
 expectSay = (fragment, expectation, properties) ->
   properties = properties ? {}
   result = await parser.parseFragment """say "#{fragment}" """
   debug result.alternates[0]
   context = await execute result, 'toLambda', properties
   string = context.say.join ' '
-  assert.equal string, expectation
+  if Array.isArray(expectation)
+    for ex in expectation
+      if string == ex
+        return
+    console.log context.code
+    assert.fail "\"#{string}\" was not found in #{JSON.stringify(expectation)}"
+  else
+    if string != expectation
+      console.log context.code
+    assert.equal string, expectation
 
 expectSayError = (fragment, error, properties) ->
   try
-    await expectSay fragment, '', properties
+    await await expectSay fragment, '', properties
     Promise.reject "didn't fail as expected with #{error}"
   catch err
     assert.equal err.toString(), "Error: #{error}"
@@ -89,20 +104,20 @@ expectScreenString = (fragment, expectation, properties) ->
 describe 'interpolates say strings', ->
 
   it 'does line concatenation', ->
-    expectSay """something
+    await expectSay """something
       or
       other
     """, "something or other"
 
   it 'treats empty lines as breaks', ->
-    expectSay """something
+    await expectSay """something
 
       or
       other
     """, "something\nor other"
 
   it 'treats multiple empty lines as breaks', ->
-    expectSay """something
+    await expectSay """something
 
 
       or
@@ -110,7 +125,7 @@ describe 'interpolates say strings', ->
     """, "something\n\nor other"
 
   it 'treats empty lines as breaks repeatedly', ->
-    expectSay """something
+    await expectSay """something
 
       or
 
@@ -118,58 +133,58 @@ describe 'interpolates say strings', ->
     """, "something\nor\nother"
 
   it 'interpolates database values', ->
-    expectSay "hello @name", "hello Bob", { name: "Bob" }
+    await expectSay "hello @name", "hello Bob", { name: "Bob" }
 
   it 'interpolates slot values', ->
-    expectSay "hello $name", "hello Bob", { name: "Bob" }
+    await expectSay "hello $name", "hello Bob", { name: "Bob" }
 
   it 'mixes slots and database', ->
-    expectSay "hello $alice, @bob", "hello Alice, Bob", { alice: "Alice", bob: "Bob" }
+    await expectSay "hello $alice, @bob", "hello Alice, Bob", { alice: "Alice", bob: "Bob" }
 
   it 'interprets breaks', ->
     Promise.all [
-      expectSay "<...100ms>", "<break time=\'100ms\'/>"
-      expectSay "oh, <...100ms> I guess so", "oh, <break time=\'100ms\'/> I guess so"
-      expectSay "oh,<...100ms>I guess so", "oh,<break time=\'100ms\'/>I guess so"
-      expectSay "<...100ms> I guess so", "<break time=\'100ms\'/> I guess so"
+      await expectSay "<...100ms>", "<break time=\'100ms\'/>"
+      await expectSay "oh, <...100ms> I guess so", "oh, <break time=\'100ms\'/> I guess so"
+      await expectSay "oh,<...100ms>I guess so", "oh,<break time=\'100ms\'/>I guess so"
+      await expectSay "<...100ms> I guess so", "<break time=\'100ms\'/> I guess so"
     ]
 
   it 'interprets interjections', ->
     Promise.all [
-      expectSay "<!something>", "<say-as interpret-as='interjection'>something</say-as>"
-      expectSay "<!something else>", "<say-as interpret-as='interjection'>something else</say-as>"
-      expectSay "<!something!>", "<say-as interpret-as='interjection'>something!</say-as>"
-      expectSay "<! something>", "<say-as interpret-as='interjection'>something</say-as>"
-      expectSay "<! something>,", "<say-as interpret-as='interjection'>something,</say-as>"
-      expectSay "<! something>, something", "<say-as interpret-as='interjection'>something,</say-as> something"
-      expectSay "<! something, >something", "<say-as interpret-as='interjection'>something, </say-as>something"
-      expectSay "<! something,> something", "<say-as interpret-as='interjection'>something,</say-as> something"
+      await expectSay "<!something>", "<say-as interpret-as='interjection'>something</say-as>"
+      await expectSay "<!something else>", "<say-as interpret-as='interjection'>something else</say-as>"
+      await expectSay "<!something!>", "<say-as interpret-as='interjection'>something!</say-as>"
+      await expectSay "<! something>", "<say-as interpret-as='interjection'>something</say-as>"
+      await expectSay "<! something>,", "<say-as interpret-as='interjection'>something,</say-as>"
+      await expectSay "<! something>, something", "<say-as interpret-as='interjection'>something,</say-as> something"
+      await expectSay "<! something, >something", "<say-as interpret-as='interjection'>something, </say-as>something"
+      await expectSay "<! something,> something", "<say-as interpret-as='interjection'>something,</say-as> something"
     ]
 
   it 'interprets multiple interjections', ->
     Promise.all [
-      expectSay "<! something,> <!other>", "<say-as interpret-as='interjection'>something,</say-as> <say-as interpret-as='interjection'>other</say-as>"
+      await expectSay "<! something,> <!other>", "<say-as interpret-as='interjection'>something,</say-as> <say-as interpret-as='interjection'>other</say-as>"
 
-      expectSay "<! something>,<!other>", "<say-as interpret-as='interjection'>something,</say-as><say-as interpret-as='interjection'>other</say-as>"
+      await expectSay "<! something>,<!other>", "<say-as interpret-as='interjection'>something,</say-as><say-as interpret-as='interjection'>other</say-as>"
 
-      expectSay "<! something.><!other>", "<say-as interpret-as='interjection'>something.</say-as><say-as interpret-as='interjection'>other</say-as>"
+      await expectSay "<! something.><!other>", "<say-as interpret-as='interjection'>something.</say-as><say-as interpret-as='interjection'>other</say-as>"
     ]
 
   it 'interpolates expressions', ->
-    expectSay "{1 + 1}", "2"
-    expectSay "{echoThis(\"called\")}", "called"
-    expectSay "{echoThis('called')}", "called"
-    expectSay "{constant}", "goat"
+    await expectSay "{1 + 1}", "2"
+    await expectSay "{echoThis(\"called\")}", "called"
+    await expectSay "{echoThis('called')}", "called"
+    await expectSay "{constant}", "goat"
 
   it 'interpolates expressions with variables', ->
-    expectSay "{@first + $last}", "BobBobson", { first:'Bob', last:'Bobson' }
+    await expectSay "{@first + $last}", "BobBobson", { first:'Bob', last:'Bobson' }
 
   it 'interpolates multiple expressions', ->
-    expectSay "@name is {12 + $age - @flatter} years old {@when}.", "Dude is 15 years old today.",
+    await expectSay "@name is {12 + $age - @flatter} years old {@when}.", "Dude is 15 years old today.",
       { name: 'Dude', age: 5, flatter: 2, when: 'today'}
 
   it 'rejects unknown tags', ->
-    expectSayError "<nonsense>", "unknown tag <nonsense>"
+    await expectSayError "<nonsense>", "unknown tag <nonsense>"
 
 
 describe 'interpolates on-screen strings', ->
@@ -277,3 +292,52 @@ describe 'adds reprompts correctly', ->
         assert.equal individualSayReprompt.reprompt.outputSpeech.ssml, '<speak>1st reprompt 2nd reprompt</speak>'
         assert.equal sayReprompt.outputSpeech.ssml, '<speak>say-only common say and reprompt</speak>'
         assert.equal sayReprompt.reprompt.outputSpeech.ssml, '<speak>common say and reprompt reprompt-only</speak>'
+
+
+describe 'supports inline alternation', ->
+  it 'supports a single alternative', ->
+    Promise.all ( for i in [0...20]
+      await expectSay "this | that", [ "this", "that" ]
+    )
+
+  it 'supports multiple alternatives', ->
+    Promise.all ( for i in [0...20]
+      await expectSay "this | that | the other", [ "this", "that", "the other" ]
+    )
+
+  it 'supports the hanging alternate', ->
+    Promise.all ( for i in [0...20]
+      await expectSay "this | that | ", [ "this", "that", "" ]
+    )
+
+  it 'supports the hanging alternate in a group', ->
+    Promise.all ( for i in [0...20]
+      await expectSay "(this | that |) thing ", [ "this thing", "that thing", "thing" ]
+    )
+
+  it 'supports lots of multiple alternatives', ->
+    Promise.all ( for i in [0...20]
+      await expectSay "this | that | the other | longer stuff | 1, 2, 3, 4", [ "this", "that", "the other", "longer stuff", "1, 2, 3, 4" ]
+    )
+
+  it 'supports alternation with @variables', ->
+    Promise.all ( for i in [0...20]
+      await expectSay "hello | @greeting", [ "hello", "hi" ], { greeting: "hi" }
+    )
+
+  it 'supports grouping and alternation with @variables', ->
+    Promise.all ( for i in [0...20]
+      await expectSay "(@greeting | @parting) there", [ "hi there", "bye there" ], { greeting: "hi", parting: "bye" }
+    )
+
+  it 'supports a complex mix of groups and alternations', ->
+    Promise.all ( for i in [0...20]
+      await expectSay "((take | bring) your (@item | gift) | go away)", [
+        "take your book",
+        "take your gift",
+        "bring your book",
+        "bring your gift",
+        "go away"
+      ], { item: "book" }
+    )
+

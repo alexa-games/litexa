@@ -252,7 +252,7 @@ describe 'supports intent statements', ->
     global
       when AMAZON.YesIntent
         say "hello"
-      
+
       when AMAZON.YesIntent
         or AMAZON.NextIntent
         say "hi"
@@ -263,7 +263,7 @@ describe 'supports intent statements', ->
     global
       when AMAZON.YesIntent
         say "hello"
-      
+
       when AMAZON.NextIntent
         or AMAZON.YesIntent
         say "hi"
@@ -296,7 +296,7 @@ describe 'supports intent statements', ->
         or AMAZON.HelpIntent
         or "hello intent"
         say "hello"
-    """, "Can't add utterance as an `or` alternative to `AMAZON.YesIntent` because it already has intent name alternatives"
+    """, "Can't add this utterance as an 'or' alternative here because this handler already specifies multiple intents. Add the alternative to one of the original intent declarations instead."
 
   it 'does not allow creating multi-intent handlers if utterances exist', ->
     expectFailParse """
@@ -325,15 +325,14 @@ describe 'supports intent statements', ->
 
       when "meow"
         or AMAZON.YesIntent
-      
+
       when AMAZON.RepeatIntent
         or "rephrase that"
     """
-  
+
   it 'creates a skill model that includes child intents of multi-intent handlers', ->
     model = await buildSkillModel 'intents'
     intents = model.languageModel.intents.map (intent) -> intent.name
     assert("PreviouslyNotDefinedIntentName" in intents, 'PreviouslyNotDefinedIntentName exists in model')
     assert("AMAZON.NoIntent" in intents, 'AMAZON.NoIntent exists in model')
     assert("OtherIntentName" in intents, 'OtherIntentName exists in model')
-    

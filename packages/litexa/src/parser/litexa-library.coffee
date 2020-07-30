@@ -49,7 +49,7 @@ pickSayString = (context, key, count) ->
         value = 1 - history[0]
       else
         value = randomIndex(2)
-      history[0] = value
+      history[0] = value % 2
 
     when count < 5
       # until 4, the pattern below is a little
@@ -60,7 +60,7 @@ pickSayString = (context, key, count) ->
       value = randomIndex(count)
       if value == history[0]
         value = ( value + 1 ) % count
-      history[0] = value
+      history[0] = value % 5
 
     else
       # otherwise, guarantee we'll see at least
@@ -77,7 +77,11 @@ pickSayString = (context, key, count) ->
 
   sayData[key] = history
   context.db.write '__sayHistory', sayData
-  return value
+  return value % count
+
+pickSayFragment = (context, key, options) ->
+  index = pickSayString context, key, options.length
+  return options[index]
 
 
 exports.DataTablePrototype =

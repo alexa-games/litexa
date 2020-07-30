@@ -188,8 +188,16 @@ render = ->
 
 
   do ->
+    # instructions to vuepress, where the docs are hosted
+    frontMatter = """
+      ---
+      sidebarDepth: 1
+      ---
+    """
+
     markdownEntries = [
-      "# Language Reference\n",
+      frontMatter
+      "# Language Reference\n"
     ]
 
     substituteLinks = (text) ->
