@@ -9,8 +9,8 @@ For more information, see the [Alexa developer portal documentation](https://dev
 
 There are two broad activities to creating a Web API capable skill: starting a web page and 
 communicating with it. In this extension, new statements and an `HTML` API object 
-give you tools that help ties these to your Litexa data. Note that the `HTML` API 
-object is available as if it were in your inline javascript context, so you can refer
+give you tools that help tie these to your Litexa data. Note that the `HTML` API 
+object is available as if it were in your inline JavaScript context, so you can refer
 to it anywhere in the inline context, or from expressions in your Litexa code. 
 
 
@@ -46,7 +46,7 @@ project_dir
 ### `HTML` statement
 
 This injects an `Alexa.Presentation.HTML.Start` directive into the current response, 
-which causes a device to load the given url. This statement will do nothing in the
+which causes a device to load the given URL. This statement will do nothing in the
 absence of the HTML interface, so it's safe to let it silently fail.
 
 The presence of this statement will also automatically add the `ALEXA_PRESENTATION_HTML`
@@ -67,7 +67,7 @@ website from the Litexa assets folder.
 
 Note, as with the directive, the timeout given is in seconds. 
 
-Whatever you pass to initialData, you can expect to arrive in your webapp as the 
+Whatever you pass to initialData, you can expect to arrive in your web page as the 
 data payload to successful initialization of the Alexa API object. [See the API documentation](https://html.games.alexa.a2z.com/modules/alexa.html) for details.
 
 The `transformers` key expects an array value that will be added into the appropriate
@@ -154,9 +154,9 @@ function myStartDirective(){
 ```
 
 
-### `HTML.Mark(name)` and `<mark name>`
+### `HTML.mark(name)` and `<mark name>`
 
-The `HTML.Mark()` function appends a formatted SSML tag to the current
+The `HTML.mark()` function appends a formatted SSML tag to the current
 say string.
 The `<mark>` shorthand tag does the same thing inline in a say string.
 When sent to your web app via a transformer, the mark will appear as an `ssml` 
@@ -164,7 +164,7 @@ tag type in the speechmarks list, at the appropriate timestamp.
 
 ```coffeescript
 launch 
-  HTML.Mark("begin")
+  HTML.mark("begin")
   say "Hello <mark wave> there player!"
 ```
 

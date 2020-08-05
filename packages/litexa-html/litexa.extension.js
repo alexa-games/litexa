@@ -46,7 +46,7 @@ HTMLStartClass = (lib) => {
               throw "Failed to parse a number"
             }
           } catch (err) {
-            throw new lib.ParserError(location, "invalid value. This should be an integer, representing the number of seconds that the webview will stay open without any user input.");
+            throw new lib.ParserError(location, "invalid value. This should be an integer, representing the number of seconds that the WebView will stay open without any user input.");
           }
           break;
         case 'initialData': 

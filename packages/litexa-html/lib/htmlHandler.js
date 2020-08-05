@@ -29,7 +29,7 @@ module.exports = (context) => {
     let absoluteUrl = url;
     
     if ( absoluteUrl.indexOf('http://') >= 0 ) {
-      throw new Error("The Alexa Web API will only work with https URLS, failed on " + url);
+      throw new Error("The Alexa Web API will only work with https URLs, failed on " + url);
     }
     
     if ( absoluteUrl.indexOf('https://') < 0 ) {
