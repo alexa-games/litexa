@@ -16,6 +16,7 @@ Litexa extensions support the following customizations:
 1. extending Litexa's language with new statements
 2. adding new validators to Litexa's compilation and testing steps
 3. adding new runtime functionality
+4. adding new asset types to upload
 
 :::warning Deployment extensions
 Extensions modifying Litexa's deployment behavior, such as
@@ -435,6 +436,21 @@ module.exports = function(context) {
   }
 }
 ```
+
+### 4) Runtime Extension
+You can instruct the deployment module to consider additional files for upload
+by just adding an array of additional filename extensions to your extension's 
+definition object.
+
+```javascript
+module.exports = (options, lib) => {
+  return {
+    additionalAssetExtensions: [".cool", ".great"]
+  }
+}
+```
+
+
 
 ## Conclusion
 
