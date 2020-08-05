@@ -7,6 +7,7 @@ HTMLStartClass = (lib) => {
       this.timeout = 120;
       this.initialData = null;
       this.transformers = null;
+      this.breakURLCaching = false;
     }
 
     toLambda(output, indent, options) {
@@ -26,8 +27,14 @@ HTMLStartClass = (lib) => {
           transformers = JSON.stringify(this.transformers);
         }
       }
+      let url = this.url;
+      if ( this.breakURLCaching ) {
+        url = `('${this.url}?=' + Math.floor(Math.random()*9999999))`;
+      } else {
+        url = `'${this.url}'`;
+      }
       output.push(`context.directives = context.directives || [];`);
-      output.push(`context.directives.push(HTML.start('${this.url}', ${this.timeout}, ${data}, ${transformers}));`);
+      output.push(`context.directives.push(HTML.start(${url}, ${this.timeout}, ${data}, ${transformers}));`);
     }
 
     collectRequiredAPIs(apis) {
@@ -55,8 +62,13 @@ HTMLStartClass = (lib) => {
         case 'transformers': 
           this.transformers = value;
           break;
+        case 'breakURLCaching':
+          if ( typeof(value) === 'string' ) { value = value === 'true' }
+          else { value = !!value; }
+          this.breakURLCaching = value;
+          break;
         default:
-          throw new lib.ParserError(location, `Unsupported attribute '${key}' found in HTML statement', expecting one of 'url', 'timeout', 'initialData', or 'transformers'`);
+          throw new lib.ParserError(location, `Unsupported attribute '${key}' found in HTML statement', expecting one of 'url', 'breakURLCaching', 'timeout', 'initialData', or 'transformers'`);
       }
     }
   }
