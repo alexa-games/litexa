@@ -1167,7 +1167,27 @@ AttributeStatement
       throw new ParserError(location(), "Couldn't find anything to add an attribute to here");
     }
   }
-  / key:ExistingIdentifier __ ":" __ value:(Number / AssetURL / JsonFileName / AssetName / BooleanLiteral / VariableReference / ScreenString / QuotedString / ExpressionString) {
+  / key:ExistingIdentifier __ ":" __ value:(Number / AssetURL / JsonFileName / AssetName / BooleanLiteral / ScreenString / QuotedString ) {
+    const target = getTarget();
+    if (target && target.pushAttribute) {
+      target.pushAttribute(location(), key, value);
+    } else {
+      throw new ParserError(location(), "Couldn't find anything to add an attribute to here");
+    }
+  }
+  / key:ExistingIdentifier __ ":" __ value:VariableReference !( '(' / '.' ) {
+    // this branch needs to carefully avoid shadowing the next one
+    // at some point we have to backtrack here and remove this branch 
+    // in favor of somehow evaluating an expression at compile time for
+    // attributes that expect a single string value.
+    const target = getTarget();
+    if (target && target.pushAttribute) {
+      target.pushAttribute(location(), key, value);
+    } else {
+      throw new ParserError(location(), "Couldn't find anything to add an attribute to here");
+    }
+  }
+  / key:ExistingIdentifier __ ":" __ value:ExpressionString {
     const target = getTarget();
     if (target && target.pushAttribute) {
       target.pushAttribute(location(), key, value);

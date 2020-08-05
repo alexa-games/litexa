@@ -4,13 +4,9 @@
   "description": "This module adds support for HTML directives to Litexa.",
   "scripts": {
     "audit:fix": "npm audit fix",
-    "build": "npm run clean && npm install",
     "clean": "npx rimraf node_modules",
-    "compile": "npx rollup --config rollup.config.js",
     "coverage": "npx nyc npm test && node ../../cacheCoverage.js",
-    "postinstall": "npm run compile",
-    "test": "npx mocha './test/**/*.spec.js'",
-    "test:file": "npx mocha"
+    "test": "npx mocha './test/**/*.spec.js'"
   },
   "author": "Amazon",
   "keywords": [
@@ -22,9 +18,6 @@
   ],
   "license": "Apache-2.0",
   "dependencies": {
-    "rollup": "1.10.1",
-    "rollup-plugin-commonjs": "9.3.4",
-    "rollup-plugin-node-resolve": "4.2.3"
   },
   "publishConfig": {
     "access": "public"

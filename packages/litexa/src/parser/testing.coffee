@@ -81,6 +81,7 @@ makeBaseRequest = (skill) ->
       System:
         device:
           deviceId: "someDeviceId"
+          supportedInterfaces: []
         user:
           userId: "amzn1.ask.account.stuff"
         application:
@@ -89,16 +90,19 @@ makeBaseRequest = (skill) ->
     version: "1.0"
   }
   device = skill.testDevice ? 'dot'
+  blockedInterfaces = skill.testBlockedInterfaces ? []
+  pushInterface = (interfaceName) =>
+    return if interfaceName in blockedInterfaces
+    req.context.System.device.supportedInterfaces[interfaceName] = {}
 
   switch device
     when 'dot', 'echo'
       dev = req.context.System.device
     when 'show'
       dev = req.context.System.device
-      dev.supportedInterfaces =
-        'Alexa.Presentation.APL': {}
-        'Alexa.Presentation.HTML': {}
-        Display: {}
+      pushInterface('Display')
+      pushInterface('Alexa.Presentation.APL')
+      pushInterface('Alexa.Presentation.HTML')
     else
       throw new Error "Unknown test device type #{device}"
 
