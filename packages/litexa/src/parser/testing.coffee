@@ -1086,6 +1086,9 @@ class lib.Test
       captures: db.captures
       testContext: testContext
 
+    # reset this for each test
+    skill.testBlockedInterfaces = [];
+
     success = true
 
     gap = (" " for i in [0...skill.maxStateNameLength+2]).join('')
