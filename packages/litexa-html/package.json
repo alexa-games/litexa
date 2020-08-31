@@ -5,7 +5,7 @@
   "scripts": {
     "audit:fix": "npm audit fix",
     "clean": "npx rimraf node_modules",
-    "coverage": "npx nyc npm test && node ../../cacheCoverage.js",
+    "coverage": "echo intentionally no coverage report",
     "test": "npx mocha './test/**/*.spec.js'"
   },
   "author": "Amazon",

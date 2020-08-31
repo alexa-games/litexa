@@ -21,7 +21,7 @@ chai.use(chaiAsPromised)
 
 describe 'construct and deploy artifacts for manifest', ->
   # observed long pauses that didn't impact outcome during local testing
-  this.timeout(5000)
+  this.timeout(10000)
 
   loggerInterface = undefined
   context = undefined
