@@ -159,7 +159,7 @@ function myStartDirective(){
 The `HTML.mark()` function appends a formatted SSML tag to the current
 say string.
 The `<mark>` shorthand tag does the same thing inline in a say string.
-When sent to your web app via a transformer, the mark will appear as an `ssml` 
+When sent to your web page via a transformer, the mark will appear as an `ssml` 
 tag type in the speechmarks list, at the appropriate timestamp.
 
 ```coffeescript
@@ -178,7 +178,7 @@ include with the usual `start`, `end`, and `time` speechmark properties.
 
 ### Events
 
-To handle data that is sent from your web app, add a `when` listener for the
+To handle data that is sent from your web page, add a `when` listener for the
 `Alexa.Presentation.HTML.Message` event in an appropriate state. Note you can
 add it to the `global` state to handle any incoming message irrespective of
 the current skill state.
@@ -186,8 +186,8 @@ the current skill state.
 ```coffeescript
 waitForTransmission
   when Alexa.Presentation.HTML.Message
-    say "I received a message from the web app!"
-    switch $request.message # payload from web app
+    say "I received a message from the web page!"
+    switch $request.message # payload from web page
       ...
 ```
 
