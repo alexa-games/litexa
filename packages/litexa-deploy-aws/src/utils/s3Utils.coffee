@@ -80,16 +80,19 @@ findAndRegisterFilesToUpload = ({ s3Context, languageInfo }) ->
 
 
 registerFileForUpload = ({ s3Context, fileDir, fileName, language }) ->
-  fileName = fileName.replace /\\/g, '/'
-  sourceFilePath = "#{fileDir}/#{fileName}"
+  sourceFilename = path.join fileDir, fileName
   s3Context.assetCount += 1
-  s3Key = "#{s3Context.baseLocation}/#{language}/#{fileName}"
+  # S3 won't take the wrong slash, and in any case we want
+  # this key to be the same no matter which platform we come
+  # from
+  canonicalFilename = fileName.replace /\\/g, '/'
+  s3Key = "#{s3Context.baseLocation}/#{language}/#{canonicalFilename}"
   validateS3PathName(s3Key)
-  md5 = md5File.sync(sourceFilePath)
+  md5 = md5File.sync(sourceFilename)
 
   s3Context.assets[s3Key] = {
     name: fileName
-    sourceFilename: sourceFilePath
+    sourceFilename: sourceFilename
     md5: md5
     md5Brief: md5.slice(md5.length - 8)
     needsUpload: true

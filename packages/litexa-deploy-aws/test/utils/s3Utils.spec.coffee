@@ -7,6 +7,7 @@
 
 { assert, expect } = require('chai')
 { match, spy, stub } = require('sinon')
+path = require('path')
 
 { collectUploadInfo
   createAssetSets
@@ -177,6 +178,10 @@ describe 'S3Utils', ->
           }
         }
       }
+
+      # the expectation is that filenames will respect local file system norms
+      for name, file of expectedS3Context.assets
+        file.sourceFilename = path.normalize file.sourceFilename
 
       collectUploadInfo({ s3Context, skillContext, logger: fakeLogger, md5Override: fakeMD5 })
       expect(s3Context).to.deep.equal(expectedS3Context)
@@ -494,8 +499,12 @@ describe 'S3Utils', ->
       expect(Object.keys(s3Context.assets).length).to.equal(3)
       asset = s3Context.assets["dummyBase/default/subdir/image.png"]
       expect(asset).to.not.equal(undefined)
-      expect(asset.name.includes('\\')).to.equal(false)
-      expect(asset.sourceFilename.includes('\\')).to.equal(false)
+      expect(asset.name.includes('\\')).to.equal(true)
+      expect(asset.sourceFilename.includes('\\')).to.equal(true)
+      asset = s3Context.assets["dummyBase/en/otherSubdir/something.png"]
+      expect(asset).to.not.equal(undefined)
+      expect(asset.name.includes('\\')).to.equal(true)
+      expect(asset.sourceFilename.includes('\\')).to.equal(true)
 
 
   describe '#uploadAssetSet()', ->
