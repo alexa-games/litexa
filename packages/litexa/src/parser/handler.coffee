@@ -46,7 +46,6 @@ exports.handler = (event, lambdaContext, callback) ->
   unless event.session.attributes?
     event.session.attributes = {}
 
-
   handlerSteps.extractIdentity(event, handlerContext)
   .then ->
     handlerSteps.checkFastExit(event, handlerContext)
@@ -196,6 +195,10 @@ handlerSteps.runConcurrencyLoop = (event, handlerContext) ->
 
           await handlerSteps.parseRequestData stateContext
           await handlerSteps.initializeMonetization stateContext, event
+          # in the special case of us launching the skill from cold, we want to 
+          # warm up the landing state first, before delivering it the intent
+          if !stateContext.currentState and stateContext.handoffState
+            await handlerSteps.enterLaunchHandoffState stateContext 
           await handlerSteps.routeIncomingIntent stateContext
           await handlerSteps.walkStates stateContext
           response = await handlerSteps.createFinalResult stateContext
@@ -249,6 +252,7 @@ handlerSteps.parseRequestData = (stateContext) ->
         incomingState = 'launch'
         stateContext.currentState = null
 
+      # honor resetOnLaunch
       isColdLaunch = request.type == 'LaunchRequest' or stateContext.event.session?.new
       if stateContext.settings.resetOnLaunch and isColdLaunch
         incomingState = 'launch'
@@ -276,6 +280,7 @@ handlerSteps.parseRequestData = (stateContext) ->
         stateContext.nextState = incomingState
 
     when 'Connections.Response'
+      stateContext.intent = 'Connections.Response'
       stateContext.handoffIntent = true
 
       # if we get this and we're not in progress,
@@ -325,13 +330,23 @@ handlerSteps.initializeMonetization = (stateContext, event) ->
     stateContext.monetization.fetchEntitlements = true
     stateContext.db.write "__monetization", stateContext.monetization
 
-  if event.request?.type == 'Connections.Response'
-    stateContext.intent = 'Connections.Response'
-    stateContext.handoffIntent = true
-    stateContext.handoffState = 'launch'
-    stateContext.nextState = 'launch'
-
   return Promise.resolve()
+
+
+handlerSteps.enterLaunchHandoffState = (stateContext) ->
+  state = stateContext.handoffState
+  unless state of __languages[stateContext.language].enterState
+    throw new Error "Entering an unknown state `#{state}`"
+  await __languages[stateContext.language].enterState[state](stateContext)
+  stateContext.currentState = stateContext.handoffState
+
+  if enableStateTracing
+    stateContext.traceHistory.push stateContext.handoffState
+  if logStateTraces
+    item = "enter (at launch) #{stateContext.handoffState}"
+    exports.Logging.log "STATETRACE " + item
+
+
 
 
 handlerSteps.routeIncomingIntent = (stateContext) ->
@@ -400,6 +415,7 @@ handlerSteps.walkStates = (stateContext) ->
       if enableStateTracing
         stateContext.traceHistory.push stateContext.handoffState
       if logStateTraces
+        item = "drain intent #{stateContext.intent} in #{stateContext.handoffState}"
         exports.Logging.log "STATETRACE " + item
       await __languages[stateContext.language].processIntents[stateContext.handoffState]?(stateContext)
 

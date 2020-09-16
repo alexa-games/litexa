@@ -13,6 +13,9 @@ describe 'supports intent statements', ->
   it 'runs the intents integration test', ->
     runSkill 'intents'
 
+  it 'runs the one shot integration test', ->
+    runSkill 'one-shot'
+
   it 'does not allow wrong indentation of intents', ->
     expectParse """
     waitForResponse
