@@ -53,6 +53,22 @@ menu
   when LISTEN10
     LISTEN events, microphone
 
+  when END_TRUMPS_ALL 
+    -> first 
+    LISTEN 
+    END
+
+  when TRANSITION_TRUMPS_ALL 
+    LISTEN 
+    END
+    -> first 
+
+  when LISTEN_TRUMPS_ALL 
+    -> first 
+    END
+    LISTEN 
+
+
 
 first
   if false
@@ -186,3 +202,15 @@ TEST "happy"
   launch
   user: LISTEN10
   LISTEN microphone
+
+  launch 
+  user: END_TRUMPS_ALL
+  END 
+
+  launch 
+  user: LISTEN_TRUMPS_ALL
+  LISTEN events 
+
+  launch 
+  user: TRANSITION_TRUMPS_ALL
+  alexa: second
