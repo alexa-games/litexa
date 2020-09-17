@@ -723,7 +723,7 @@ The object name that consolidates all `.json` files, keyed by the
    # Reference a JSON file in-line
    say "Test. {jsonFiles["test.json"].test}"
  ```
-
+ 
 ## launch
 
 Simulates the user invoking the skill in a Litexa test.
@@ -1089,7 +1089,32 @@ reprompt "World"
 
 ## request:
 
-Coming soon!
+The `request` statement lets you generate specific request types, loading
+their bodies from a JSON file. This is useful for testing inputs that Litexa 
+may not be aware of, or for providing data in requests that Litexa normally
+does not generate.
+
+The statement takes a filename reference. The file will be assumed to 
+contain just the `request` parameter of an Alexa skill request object. 
+See [the ASK service documentation](https://developer.amazon.com/en-US/docs/alexa/custom-skills/request-and-response-json-reference.html#request-body-parameters)
+for more information.
+
+```json
+{
+  "type": "IntentRequest",
+  "locale": "en-US",
+  "intent": {
+    "name": "HELLO_INTENT"
+  }
+}
+```
+
+```coffeescript
+TEST "testing from file"
+  launch 
+  request: helloIntentRequest.test.json
+  alexa: null, "Oh, hello there!"
+```
 
 ## Reserved Word
 
@@ -1332,20 +1357,6 @@ say "(Hello|Hi) there"
 say "Hey (you|there|)"
 # says either "Hey you", "Hey there", or just "Hey"
 ```
-
-Note, you cannot use alternation inside tags or other interpolations, but you can put
-those inside alternations. So the following won't work:
-
-```coffeescript
-say "<!hello|hi>"
-```
-
-But the following will:
-
-```coffeescript
-say "(<!hello>|<!hi>)"
-```
-
 
 7. Explicit [SSML](https://developer.amazon.com/docs/custom-skills/speech-synthesis-markup-language-ssml-reference.html):
 To disambiguate from litexa shorthand tags, the '<' character in opening and closing SSML tags must be escaped with slashes.

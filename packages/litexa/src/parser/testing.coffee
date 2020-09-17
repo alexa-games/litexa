@@ -515,7 +515,7 @@ class lib.ResponseGeneratingStep
       resultCallback ex, result
 
 class RequestStep extends lib.ResponseGeneratingStep
-  constructor: (@location, @name, @source) ->
+  constructor: (@location, @requestType, @source) ->
     super()
 
   isVoiceStep: true
@@ -523,9 +523,23 @@ class RequestStep extends lib.ResponseGeneratingStep
   run: ({ skill, lambda, context, resultCallback }) ->
     result = @makeResult()
     context.attributes = {}
-    result.intent = "LaunchRequest"
+    
     event = makeBaseRequest( skill )
-    event.request = { type: @name }
+    
+    if @requestType
+      # support for just generating an empty request with a given type
+      event.request = { type: @requestType }
+    
+    if @source?
+      # support for loading a request from a file
+      unless skill.files[@source]
+        return resultCallback new ParserError @location, "couldn't find file #{@source} for this request"
+      event.request = skill.files[@source].contentForLanguage('default')
+    
+    # try to fish out an intent name for the test report 
+    # if there is one, otherwise show the request type
+    result.intent = event.request.intent?.name ? event.request.type
+    
     result.event = event
     @processEvent { result, skill, lambda, context, resultCallback }
 

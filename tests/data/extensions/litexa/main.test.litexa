@@ -2,7 +2,7 @@ TEST "happy path"
   launch 
   alexa: launch, e"runtime says, Hello world. love, runtime inline. Inline statement said 79. Require statement said 52. Runtime require here, after state machine. Runtime inline here, after state machine."
 
-  request: SYSTEM.NotRealIntent
+  user: SYSTEM.NotRealIntent
 
-  request: TotallyNot.RealIntent
-  request: TotallyNot.RealIntent
+  user: TotallyNot.RealIntent
+  user: TotallyNot.RealIntent
