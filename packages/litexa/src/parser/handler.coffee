@@ -92,6 +92,22 @@ handlerSteps.extractIdentity = (event, handlerContext) ->
     resolve()
 
 
+
+getLanguage = (event) ->
+  # work out the language, from the locale, if it exists
+  language = 'default'
+  if event.request.locale?
+    lang = event.request.locale
+    langCode = lang[0...2]
+
+    for __language of __languages
+      if (lang.toLowerCase() is __language.toLowerCase()) or (langCode is __language)
+        language = __language
+
+  return language
+
+
+
 handlerSteps.checkFastExit = (event, handlerContext) ->
 
   # detect fast exit for valid events we don't route yet, or have no response to
@@ -118,14 +134,22 @@ handlerSteps.checkFastExit = (event, handlerContext) ->
         if err?
           return reject(err)
 
-        # todo, insert any new skill cleanup code here
-        #   check to see if dbObject needs flushing
+        language = getLanguage(event)
+
+        if litexa.sessionTerminatingCallback?
+          stateContext =
+            now: (new Date(event.request?.timestamp)).getTime()
+            requestId: event.request.requestId
+            language: language
+            event: event
+            request: event?.request ? {}
+            db: new DBTypeWrapper dbObject, language
+            sessionAttributes: event?.session?.attributes
+          litexa.sessionTerminatingCallback(stateContext) 
 
         # all clear, we don't have anything active
         if loggingLevel
           exports.Logging.log "VERBOSE Terminating input handler early"
-
-        return resolve(false)
 
         # write back the object, to clear our memory
         dbObject.finalize (err) ->
@@ -148,16 +172,7 @@ handlerSteps.runConcurrencyLoop = (event, handlerContext) ->
     numberOfTries = 0
     requestTimeStamp = (new Date(event.request?.timestamp)).getTime()
 
-    # work out the language, from the locale, if it exists
-    language = 'default'
-    if event.request.locale?
-      lang = event.request.locale
-      langCode = lang[0...2]
-
-      for __language of __languages
-        if (lang.toLowerCase() is __language.toLowerCase()) or (langCode is __language)
-          language = __language
-
+    language = getLanguage(event)
     litexa.language = language
     handlerContext.identity.litexaLanguage = language
 
@@ -570,6 +585,11 @@ handlerSteps.createFinalResult = (stateContext) ->
   # last chance, see if the developer left a postprocessor to run here
   if litexa.responsePostProcessor?
     litexa.responsePostProcessor wrapper, stateContext
+
+  if stateContext.shouldEndSession && litexa.sessionTerminatingCallback?
+    # we're about to quit, won't get session ended, 
+    # so this counts as the very last moment in this session
+    litexa.sessionTerminatingCallback(stateContext) 
 
   return await new Promise (resolve, reject) ->
     stateContext.db.finalize (err, info) ->
