@@ -388,16 +388,26 @@ handlerSteps.walkStates = (stateContext) ->
   # keep processing state transitions until we're done
   MaximumTransitionCount = 500
   for i in [0...MaximumTransitionCount]
+    # prime the next transition
+    nextState = stateContext.nextState
+
+    # stop if there isn't one
+    unless nextState
+      return
+
+    # run the exit handler if there is one
+    lastState = stateContext.currentState
+    if lastState?
+      await __languages[stateContext.language].exitState[lastState](stateContext)
+
+    # check in case the exit handler caused a redirection
     nextState = stateContext.nextState
     stateContext.nextState = null
 
     unless nextState
       return
 
-    lastState = stateContext.currentState
     stateContext.currentState = nextState
-    if lastState?
-      await __languages[stateContext.language].exitState[lastState](stateContext)
 
     if enableStateTracing
       stateContext.traceHistory.push nextState

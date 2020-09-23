@@ -236,6 +236,7 @@ collectSays = (skill, lambda) ->
 
   for stateName, state of skill.states
     state.startFunction?.forEachPart skill.testLanguage, collect
+    state.endFunction?.forEachPart skill.testLanguage, collect
 
     for intentName, intent of state.intents
       intent.startFunction?.forEachPart skill.testLanguage, collect

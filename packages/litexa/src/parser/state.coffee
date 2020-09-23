@@ -291,6 +291,7 @@ class lib.State
 
   collectRequiredAPIs: (apis) ->
     @startFunction?.collectRequiredAPIs(apis)
+    @endFunction?.collectRequiredAPIs(apis)
     if @intents?
       for name, intent of @intents
         intent.collectRequiredAPIs apis
