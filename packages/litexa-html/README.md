@@ -202,3 +202,63 @@ but want to maintain a skill that can switch between an HTML device
 and a speaker only device, try using the usual Litexa `say` statements,
 then write a [post processor](http://litexa.com/reference/backdoor.html#modifying-the-alexa-response-object)
 to conditionally move your outputSpeech into a directive instead.
+
+
+
+### Project structure
+
+There are a lot of ways to build a webapp, so there are a lot of 
+ways you can build one to go along with your Litexa skill. One very
+convenient single page application structure we've experimented 
+with, is as follows:
+
+```
+- project
+|-- webpack.config.js
+|-- app // all app development happens here
+   |-- code
+   |-- styles
+   |-- etc
+|-- skill // this is your litexa root
+   |-- litexa 
+      |-- inline-code.js // webpack target
+      |-- assets
+         |-- app-code.js // also webpack target!
+         |-- app.html
+         |-- etc 
+```
+
+This structure relies on [webpack](https://webpack.js.org/) to bundle 
+your app, defining two separate entry points, with two different 
+outputs in the same config file:
+
+1. `inline-code.js`, exposing your business logic function 
+  calls to your Litexa code.
+
+2. `app-code.js` and others, placing your webapp inside the 
+  Litexa assets directory, to get uploaded in sync with your 
+  Litexa deployments, which makes it conveniently available to 
+  this extension's `HTML` statement.
+
+This lets you develop your webapp in convenient module format, and 
+easily share references between your webapp and skill code. If you're 
+using TypeScript, you could share interfaces and classes between the 
+two, so that you could for instance use the same type to 
+construct a message in your skill, and to write the receiving 
+function in your webapp.
+
+At development time, you can use webpack's built in development server
+to preview and iterate on your webapp in a desktop browser, and then
+quickly see it on device by running a `litexa deploy` command. If you
+do use the webpack server, specify `writeToDisk` in the configuration
+to make sure you have files on disk for Litexa to upload.
+
+Note: should you find your development slowing down as your webApp gets 
+larger, both in terms of webpack's build time and Litexa's deploy 
+time, you may want to think about splitting the bulk of your 
+assets into a different directory, and then uploading them separately. 
+Chances are most (music, images, meshes, etc) don't need to be 
+synchronized as often as your code changes.
+Webpack supports the convenient `contentBase` property in its server
+that will let you serve additional assets in your development server,
+letting you continue to use relative asset references.
