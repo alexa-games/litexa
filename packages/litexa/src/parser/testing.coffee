@@ -686,16 +686,16 @@ class ResumeStateStep
 
 
 validateDirective = (directive, context) ->
-  validatorFunction = directiveValidators[directive.type]
+  validatorFunction = directiveValidators[directive?.type]
 
   unless validatorFunction?
     # no? Try the ones from any loaded extensions
-    validatorFunction = context.skill.directiveValidators[directive.type]
+    validatorFunction = context.skill.directiveValidators[directive?.type]
 
   unless validatorFunction?
     if context.skill.projectInfo?.directiveWhitelist?
-      return null if directive.type in context.skill.projectInfo?.directiveWhitelist
-    return [ "unknown directive type #{directive.type}" ]
+      return null if directive?.type in context.skill.projectInfo?.directiveWhitelist
+    return [ "unknown directive type #{directive?.type}" ]
   try
     validator = new JSONValidator directive
     validatorFunction(validator)
@@ -1052,7 +1052,7 @@ class lib.Test
         for directive in result.directives
           index = output.directives.length
           output.directives.push directive
-          logs.push "                          [DIRECTIVE #{index}] #{directive.type}"
+          logs.push "                          [DIRECTIVE #{index}] #{directive?.type}"
           validationErrors = validateDirective(directive, context)
           if validationErrors
             for error in validationErrors

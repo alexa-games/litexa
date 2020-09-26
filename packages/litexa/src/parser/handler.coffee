@@ -537,7 +537,7 @@ handlerSteps.createFinalResult = (stateContext) ->
   stateContext.db.write "__settings", stateContext.settings
 
   # filter out any directives that were marked for removal
-  stateContext.directives = ( d for d in stateContext.directives when not d.DELETEME )
+  stateContext.directives = ( d for d in stateContext.directives when not d?.DELETEME )
   if stateContext.directives? and stateContext.directives.length > 0
     response.directives = stateContext.directives
 
