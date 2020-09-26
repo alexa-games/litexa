@@ -27,6 +27,9 @@ module.exports = (context) => {
     initialData = initialData || undefined;
     transformers = transformers || undefined;
     let absoluteUrl = url;
+    if ( typeof(absoluteUrl) !== 'string' ) {
+      throw new Error("HTML.start can only take a string as the url argument, got " + url);
+    }
     
     if ( absoluteUrl.indexOf('http://') >= 0 ) {
       throw new Error("The Alexa Web API will only work with https URLs, failed on " + url);
