@@ -1,0 +1,24 @@
+launch 
+  when "bark"
+    say "woof"
+
+  when Connections.Response "Buy"
+    say "Got the goods: $request.payload.message"
+    -> thanksForBuying
+
+
+thanksForBuying
+  say "thanks!"
+  
+receivedRando
+  say "eh?"
+
+TEST "woof"
+  launch 
+  request: barkRequest.test.json
+  alexa: launch, "woof"
+
+TEST "buy"
+  request: buyAcceptedRequest.json
+  alexa: thanksForBuying
+

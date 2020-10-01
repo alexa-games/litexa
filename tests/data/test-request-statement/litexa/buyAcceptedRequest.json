@@ -1,0 +1,14 @@
+{
+  "type": "Connections.Response",
+  "name": "Buy",
+  "status": {
+      "code": "200",
+      "message": "OK"  
+  },
+  "payload": {
+      "purchaseResult":"ACCEPTED",    
+      "productId":"someProductId",   
+      "message":"chaching!"
+  },
+  "token": "yourTokenReturned"
+}

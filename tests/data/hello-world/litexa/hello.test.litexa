@@ -7,12 +7,12 @@ TEST "cold launch"
 
 TEST "with intent"
   user: "I'm Bob"
-  alexa: null, "Nice to meet you Bob, hear ya next time."
+  alexa: null, "<door-bell.mp3> Nice to meet you Bob, hear ya next time."
   END
 
 TEST "help"
   user: AMAZON.HelpIntent
-  alexa: askName, "Introduce yourself by saying something like my name is Jane. What is your name?"
+  alexa: askName, "<door-bell.mp3> Introduce yourself by saying something like my name is Jane. What is your name?"
 
   launch
   alexa: askName, "What is your name?"

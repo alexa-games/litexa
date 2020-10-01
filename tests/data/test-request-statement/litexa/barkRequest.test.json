@@ -1,0 +1,7 @@
+{
+  "type": "IntentRequest",
+  "locale": "en-US",
+  "intent": {
+    "name": "BARK"
+  }
+}

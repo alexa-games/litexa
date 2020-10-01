@@ -46,7 +46,6 @@ exports.handler = (event, lambdaContext, callback) ->
   unless event.session.attributes?
     event.session.attributes = {}
 
-
   handlerSteps.extractIdentity(event, handlerContext)
   .then ->
     handlerSteps.checkFastExit(event, handlerContext)
@@ -93,6 +92,22 @@ handlerSteps.extractIdentity = (event, handlerContext) ->
     resolve()
 
 
+
+getLanguage = (event) ->
+  # work out the language, from the locale, if it exists
+  language = 'default'
+  if event.request.locale?
+    lang = event.request.locale
+    langCode = lang[0...2]
+
+    for __language of __languages
+      if (lang.toLowerCase() is __language.toLowerCase()) or (langCode is __language)
+        language = __language
+
+  return language
+
+
+
 handlerSteps.checkFastExit = (event, handlerContext) ->
 
   # detect fast exit for valid events we don't route yet, or have no response to
@@ -119,14 +134,22 @@ handlerSteps.checkFastExit = (event, handlerContext) ->
         if err?
           return reject(err)
 
-        # todo, insert any new skill cleanup code here
-        #   check to see if dbObject needs flushing
+        language = getLanguage(event)
+
+        if litexa.sessionTerminatingCallback?
+          stateContext =
+            now: (new Date(event.request?.timestamp)).getTime()
+            requestId: event.request.requestId
+            language: language
+            event: event
+            request: event?.request ? {}
+            db: new DBTypeWrapper dbObject, language
+            sessionAttributes: event?.session?.attributes
+          litexa.sessionTerminatingCallback(stateContext) 
 
         # all clear, we don't have anything active
         if loggingLevel
           exports.Logging.log "VERBOSE Terminating input handler early"
-
-        return resolve(false)
 
         # write back the object, to clear our memory
         dbObject.finalize (err) ->
@@ -149,16 +172,7 @@ handlerSteps.runConcurrencyLoop = (event, handlerContext) ->
     numberOfTries = 0
     requestTimeStamp = (new Date(event.request?.timestamp)).getTime()
 
-    # work out the language, from the locale, if it exists
-    language = 'default'
-    if event.request.locale?
-      lang = event.request.locale
-      langCode = lang[0...2]
-
-      for __language of __languages
-        if (lang.toLowerCase() is __language.toLowerCase()) or (langCode is __language)
-          language = __language
-
+    language = getLanguage(event)
     litexa.language = language
     handlerContext.identity.litexaLanguage = language
 
@@ -196,6 +210,10 @@ handlerSteps.runConcurrencyLoop = (event, handlerContext) ->
 
           await handlerSteps.parseRequestData stateContext
           await handlerSteps.initializeMonetization stateContext, event
+          # in the special case of us launching the skill from cold, we want to 
+          # warm up the landing state first, before delivering it the intent
+          if !stateContext.currentState and stateContext.handoffState
+            await handlerSteps.enterLaunchHandoffState stateContext 
           await handlerSteps.routeIncomingIntent stateContext
           await handlerSteps.walkStates stateContext
           response = await handlerSteps.createFinalResult stateContext
@@ -249,6 +267,7 @@ handlerSteps.parseRequestData = (stateContext) ->
         incomingState = 'launch'
         stateContext.currentState = null
 
+      # honor resetOnLaunch
       isColdLaunch = request.type == 'LaunchRequest' or stateContext.event.session?.new
       if stateContext.settings.resetOnLaunch and isColdLaunch
         incomingState = 'launch'
@@ -276,6 +295,7 @@ handlerSteps.parseRequestData = (stateContext) ->
         stateContext.nextState = incomingState
 
     when 'Connections.Response'
+      stateContext.intent = 'Connections.Response'
       stateContext.handoffIntent = true
 
       # if we get this and we're not in progress,
@@ -325,13 +345,23 @@ handlerSteps.initializeMonetization = (stateContext, event) ->
     stateContext.monetization.fetchEntitlements = true
     stateContext.db.write "__monetization", stateContext.monetization
 
-  if event.request?.type == 'Connections.Response'
-    stateContext.intent = 'Connections.Response'
-    stateContext.handoffIntent = true
-    stateContext.handoffState = 'launch'
-    stateContext.nextState = 'launch'
-
   return Promise.resolve()
+
+
+handlerSteps.enterLaunchHandoffState = (stateContext) ->
+  state = stateContext.handoffState
+  unless state of __languages[stateContext.language].enterState
+    throw new Error "Entering an unknown state `#{state}`"
+  await __languages[stateContext.language].enterState[state](stateContext)
+  stateContext.currentState = stateContext.handoffState
+
+  if enableStateTracing
+    stateContext.traceHistory.push stateContext.handoffState
+  if logStateTraces
+    item = "enter (at launch) #{stateContext.handoffState}"
+    exports.Logging.log "STATETRACE " + item
+
+
 
 
 handlerSteps.routeIncomingIntent = (stateContext) ->
@@ -373,16 +403,26 @@ handlerSteps.walkStates = (stateContext) ->
   # keep processing state transitions until we're done
   MaximumTransitionCount = 500
   for i in [0...MaximumTransitionCount]
+    # prime the next transition
+    nextState = stateContext.nextState
+
+    # stop if there isn't one
+    unless nextState
+      return
+
+    # run the exit handler if there is one
+    lastState = stateContext.currentState
+    if lastState?
+      await __languages[stateContext.language].exitState[lastState](stateContext)
+
+    # check in case the exit handler caused a redirection
     nextState = stateContext.nextState
     stateContext.nextState = null
 
     unless nextState
       return
 
-    lastState = stateContext.currentState
     stateContext.currentState = nextState
-    if lastState?
-      await __languages[stateContext.language].exitState[lastState](stateContext)
 
     if enableStateTracing
       stateContext.traceHistory.push nextState
@@ -400,6 +440,7 @@ handlerSteps.walkStates = (stateContext) ->
       if enableStateTracing
         stateContext.traceHistory.push stateContext.handoffState
       if logStateTraces
+        item = "drain intent #{stateContext.intent} in #{stateContext.handoffState}"
         exports.Logging.log "STATETRACE " + item
       await __languages[stateContext.language].processIntents[stateContext.handoffState]?(stateContext)
 
@@ -544,6 +585,11 @@ handlerSteps.createFinalResult = (stateContext) ->
   # last chance, see if the developer left a postprocessor to run here
   if litexa.responsePostProcessor?
     litexa.responsePostProcessor wrapper, stateContext
+
+  if stateContext.shouldEndSession && litexa.sessionTerminatingCallback?
+    # we're about to quit, won't get session ended, 
+    # so this counts as the very last moment in this session
+    litexa.sessionTerminatingCallback(stateContext) 
 
   return await new Promise (resolve, reject) ->
     stateContext.db.finalize (err, info) ->

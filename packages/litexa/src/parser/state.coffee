@@ -15,6 +15,11 @@ class lib.Transition
   constructor: (@name, @stop) ->
 
   toLambda: (output, indent, options) ->
+    # this overrides any instruction to stop and return a response
+    output.push "#{indent}delete context.shouldEndSession;"
+    output.push "#{indent}delete context.shouldDropSession;"
+
+    # queue the next state
     output.push "#{indent}context.nextState = '#{@name}';"
     if @stop
       output.push "#{indent}context.handoffState = '#{@name}';"
@@ -40,14 +45,27 @@ class lib.SetSkillEnd
   constructor: ->
 
   toLambda: (output, indent, options) ->
+    # cancel any pending state transitions or handoffs
+    output.push "#{indent}context.nextState = null;"
+    output.push "#{indent}context.handoffState = null;"
+    output.push "#{indent}context.handoffIntent = null;"
+    output.push "#{indent}delete context.shouldDropSession;"
+    # flag that we're exiting with this response
     output.push "#{indent}context.shouldEndSession = true;"
 
 class lib.SetSkillListen
   constructor: (@kinds) ->
 
   toLambda: (output, indent, options) ->
+    # cancel any pending state transitions or handoffs
+    output.push "#{indent}context.nextState = null;"
+    output.push "#{indent}context.handoffState = null;"
+    output.push "#{indent}context.handoffIntent = null;"
+
+    # we don't want a session end
     output.push "#{indent}context.shouldEndSession = false;"
     unless 'microphone' in @kinds
+      # but we're not listening for the microphone
       output.push "#{indent}context.shouldDropSession = true;"
 
 
@@ -291,6 +309,7 @@ class lib.State
 
   collectRequiredAPIs: (apis) ->
     @startFunction?.collectRequiredAPIs(apis)
+    @endFunction?.collectRequiredAPIs(apis)
     if @intents?
       for name, intent of @intents
         intent.collectRequiredAPIs apis

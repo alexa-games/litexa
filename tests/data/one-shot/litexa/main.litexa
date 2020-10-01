@@ -1,0 +1,33 @@
+launch 
+  say "first"
+  local shotTwo = false
+  -> normalExit
+
+  when ONE_SHOT_ONE 
+    say "shot one"
+
+  when ONE_SHOT_TWO 
+    say "shot two"
+    shotTwo = true
+    -> alteredExit
+
+  if shotTwo 
+    say "local"
+  say "done"
+
+normalExit
+
+alteredExit
+
+
+TEST "no intent"
+  launch
+  alexa: normalExit, "first done"
+
+TEST "shot one"
+  user: ONE_SHOT_ONE
+  alexa: normalExit, "first shot one done"
+
+TEST "shot two"
+  user: ONE_SHOT_TWO
+  alexa: alteredExit, "first shot two local done"

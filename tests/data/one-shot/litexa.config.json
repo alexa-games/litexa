@@ -1,0 +1,12 @@
+{
+  "deployments": {
+    "development": {
+      "module": "@litexa/deploy-aws",
+      "s3Configuration": {
+        "bucketName": null
+      },
+      "askProfile": null,
+      "awsProfile": null
+    }
+  }
+}
