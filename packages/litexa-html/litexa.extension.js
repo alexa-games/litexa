@@ -47,5 +47,13 @@ module.exports = (options, lib) => {
     source: htmlHandler
   };
 
-  return { compiler, language, runtime };
+  const additionalAssetExtensions = [
+    '.html', '.js', '.map', '.css',
+    '.gif', '.webm', '.webp',
+    '.ogg', '.m4a', '.mp4',
+    '.glb', '.gltf',
+    '.ttf', '.otf', '.woff'
+  ];
+
+  return { compiler, language, runtime, additionalAssetExtensions };
 };
