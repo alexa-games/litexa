@@ -36,7 +36,7 @@ launch
 <LatestUpdates title='Latest Updates' changeLogURL='https://github.com/alexa-games/litexa/blob/master/CHANGELOG.md'>
 
 * [New syntax for defining permutations](book/state-management.html#intents-and-utterances). In `say` strings this works as an inline version of `or` statements, while in utterances this generates every permutation and adds it to your language model.<br/>`when "(I|we) (want|would like) to (see|hear) the news (please|)"`
-* You can now optionally [disable persistant storage](book/deployment.html#switching-the-persistent-store-to-session-attributes-instead), redirecting state storage to ephemeral `sessionAttributes` instead.
+* You can now optionally [disable persistent storage](book/deployment.html#switching-the-persistent-store-to-session-attributes-instead), redirecting state storage to ephemeral `sessionAttributes` instead.
 * [One shot intents](book/state-management.html#oneshot-intents) are now delivered after launch state is entered.
 
 </LatestUpdates>

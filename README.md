@@ -187,8 +187,8 @@ For more info on Vuepress - <https://v0.vuepress.vuejs.org/guide/#how-it-works>
 
 ### Build The Website for Hosting
 
-To build the full static website for S3 or GitHub hosting, run the following to get a static
-render generate at docs/.vuepress/dist
+To build the full static website for S3 or GitHub hosting, run the following to get a
+static render generated at `docs/.vuepress/dist`
 
 ```bash
 npm run docs:build

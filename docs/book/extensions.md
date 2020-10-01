@@ -1,6 +1,6 @@
 # Litexa Extensions
 
-Litexa supports custom extensions, which are special node.js modules that can be installed to augment
+Litexa supports custom extensions, which are special Node.js modules that can be installed to augment
 Litexa's core functionality. These extensions can be installed locally in a Litexa project's parent
 directory (in which case they only affect that individual project), or globally (in which case they
 affect all Litexa projects on the same machine).
@@ -41,7 +41,7 @@ Litexa extensions support the following customizations:
 3. adding new runtime functionality
 4. adding new asset types to upload
 
-As each Litexa extension is its own node.js module, so step 1 in writing your own is to initialize a new module.
+As each Litexa extension is its own Node.js module, so step 1 in writing your own is to initialize a new module.
 During development, don't forget that npm supports installing a module by absolute and local references on your hard drive.
 Installing your extension into a test skill ASAP makes iterating much easier.
 
