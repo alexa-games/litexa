@@ -78,7 +78,8 @@ class lib.SlotReferencePart
       return "$#{@name}"
     return "" + context.slots[@name]
   toRegex: ->
-    return "(?<#{@name}>[\\$\\S\u00A0]+)"
+    cleanName = @name.toString().replace(/\./g, '_')
+    return "(?<#{cleanName}>[\\$\\S\u00A0]+)"
   toTestRegex: -> @toRegex()
   toTestScore: -> return 1
   toLocalization: (localization) ->

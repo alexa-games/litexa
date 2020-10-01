@@ -24,3 +24,6 @@ describe 'supports testing a skill', ->
 
   it 'supports capturing/resuming tests', ->
     preamble.runSkill 'test-capture-resume'
+
+  it 'supports the `request` test statement', ->
+    preamble.runSkill 'test-request-statement'

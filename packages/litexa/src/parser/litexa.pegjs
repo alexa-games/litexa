@@ -2236,14 +2236,36 @@ TestLineUser
     }
 
 /* litexa [request:]
-Coming soon!
+The `request` statement lets you generate specific request types, loading
+their bodies from a JSON file. This is useful for testing inputs that Litexa 
+may not be aware of, or for providing data in requests that Litexa normally
+does not generate.
+
+The statement takes a filename reference. The file will be assumed to 
+contain just the `request` parameter of an Alexa skill request object. 
+See [the ASK service documentation](https://developer.amazon.com/en-US/docs/alexa/custom-skills/request-and-response-json-reference.html#request-body-parameters)
+for more information.
+
+```json
+{
+  "type": "IntentRequest",
+  "locale": "en-US",
+  "intent": {
+    "name": "HELLO_INTENT"
+  }
+}
+```
+
+```coffeescript
+TEST "testing from file"
+  launch 
+  request: helloIntentRequest.test.json
+  alexa: null, "Oh, hello there!"
+```
 */
 TestLineRequest
-  = "request:" __ name:DottedIdentifier ___ source:AssetName {
-    currentTest().pushRequest(location(), name, source);
-  }
-  / "request:" __ name:DottedIdentifier {
-    currentTest().pushRequest(location(), name, null);
+  = "request:" ___ source:AssetName {
+    currentTest().pushRequest(location(), null, source);
   }
 
 TestSlotVariables
