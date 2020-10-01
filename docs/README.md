@@ -1,6 +1,6 @@
 ---
 home: true
-tagline: A new <a href="https://en.wikipedia.org/wiki/Literate_programming">literate style programming</a> language and toolchain for building long form Alexa skills
+tagline: A <a href="https://en.wikipedia.org/wiki/Literate_programming">literate style</a> programming language and toolchain for building long form Alexa skills
 heroText: Litexa
 actionText: Get Started →
 actionLink: /get-started/
@@ -23,13 +23,24 @@ launch
     or "Greetings, human."
   say "What's your name?"
 
-  when "My name is $name"
+  when "(my|the) name is $name"
+    or "(you can|you should|) call me $name"
     with name = AMAZON.US_FIRST_NAME
     say "Hey! nice to meet you, $name."
     soundEffect happy.mp3
 ```
 :::
 </Feature>
+
+
+<LatestUpdates title='Latest Updates' changeLogURL='https://github.com/alexa-games/litexa/blob/master/CHANGELOG.md'>
+
+* New syntax for defining permutations. In `say` strings this works as an inline version of `or` statements, while in utterances this generates every permutation and adds it to your language model.<br/>`when "(I|we) (want|would like) to (see|hear) the news (please|)"`
+* You can now optionally disable persistant storage, redirecting state storage to ephemeral `sessionAttributes` instead.
+* One shot intents are now delivered after launch state is entered.
+
+</LatestUpdates>
+
 
 <div class='feature-cards home-aligned'>
 
@@ -250,7 +261,11 @@ You know, we've mostly made games with it, so we can't say for sure. We'd very m
 
 ## What extensions and features are currently available?
 
+Each of the following extensions is available to install via npm as optional modules.
+
 * **litexa/deploy-aws:** A deployment module that pushes a skill to AWS using Lambda, DynamoDB, and S3.
+
+* **litexa/html:** An extension that simplifies launching and exchanging messages with a web app as part of the [Alexa Web API for Games](https://developer.amazon.com/en-US/blogs/alexa/alexa-skills-kit/2020/07/alexa-web-api-for-games-generally-available).
 
 * **litexa/apl:** An extension that makes working with the Alexa Presentation Language (APL) in your Litexa project more powerful, with shorthand for managing APL documents and common design patterns.
 
