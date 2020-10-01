@@ -6,9 +6,10 @@
  */
 
 const moduleAlias = require('module-alias');
+const path = require('path');
 moduleAlias.addAliases({
-    '@root'  : __dirname,
-    '@src': __dirname + '/src',
-    '@test': __dirname + '/test',
+    '@root': __dirname,
+    '@src': path.join(__dirname, '/src'),
+    '@test': path.join(__dirname, '/test'),
 });
 moduleAlias();
