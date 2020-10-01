@@ -15,7 +15,7 @@
 
 fs = require 'fs'
 path = require 'path'
-globalModulesPath = require('global-modules')
+globalDirectories = require('global-dirs')
 debug = require('debug')('litexa-project-info')
 LoggingChannel = require './loggingChannel'
 
@@ -151,7 +151,7 @@ class ProjectInfo
       deployModules
       path.join @root, 'node_modules'
       path.join @root, 'modules'
-      globalModulesPath
+      globalDirectories.npm.packages
     ]
 
   parseLanguage: (root, lang) ->
