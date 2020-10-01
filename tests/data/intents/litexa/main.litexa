@@ -7,6 +7,8 @@ launch
   when "1 something"
   when "  spaces   lots of space    s  "
   when AMAZON.YesIntent
+  when Alexa.Presentation.HTML.Message
+  when Connections.Response "Accepted"
   when MyIntentName
   when My_IntentName
   when One_Two_three
@@ -21,6 +23,9 @@ launch
   when OtherIntentName
     or "other intent name"
     -> someState
+  when AMAZON.StopIntent 
+    or "no really stop"
+    or "definitely stop"
 
 someState
   say "in some state"

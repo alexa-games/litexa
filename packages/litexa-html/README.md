@@ -1,24 +1,20 @@
-# Litexa HTML Support
-
-This module adds support for the Alexa Web API for Games.
+# Litexa HTML Web API Support
 
 The Alexa Web API for Games allows you to use existing web technologies and tools to create
-visually rich and interactive voice-controlled game experiences. You'll be able to build
+visually rich and interactive voice-controlled game experiences. You can build
 for multimodal devices using HTML and web technologies like Canvas 2D, WebAudio, WebGL,
 JavaScript, and CSS, starting with Echo Show devices and Fire TVs.
 
-**NOTE**: The Alexa Web API for Games is currently in Developer Preview. To gain access
-to its features & documentation, visit the [Alexa Developer
-Blog](https://developer.amazon.com/en-US/blogs/alexa/alexa-skills-kit/2019/11/apply-for-the-alexa-web-api-for-games-developer-preview)
-for sign-up information.
+For more information, see the [Alexa developer portal documentation](https://developer.amazon.com/en-US/docs/alexa/web-api-for-games/understand-alexa-web-api-for-games.html)
+
+There are two broad activities to creating a Web API capable skill: starting a web page and 
+communicating with it. In this extension, new statements and an `HTML` API object 
+give you tools that help tie these to your Litexa data. Note that the `HTML` API 
+object is available as if it were in your inline JavaScript context, so you can refer
+to it anywhere in the inline context, or from expressions in your Litexa code. 
+
 
 ## Installation
-
-**WARNING**: The use of this extension is currently reserved for those in the
-Alexa Web API for Games Developer Preview. If you are not in the Developer Preview
-and you have this extension installed, you will not be able to deploy your Alexa
-skills through Litexa. As an additional note, the API is subject to change, which
-may leave this extension out of date.
 
 The module can be installed globally, which makes it available to any of your
 Litexa projects:
@@ -45,47 +41,161 @@ project_dir
         └── html
 ```
 
-**WARNING**: Unlike other Litexa extensions which conditionally add the
-interface declaration based on whether or not they were used in your skill, the
-`@litexa/html` extension will always add the HTML interface to your skill. Thus, if you
-do not plan on using them for all skills, it may be best to use the local installation
-option for each project.
 
-## Litexa's Alexa Web API Interface
 
-Integrating your skill with the Alexa Web API will allow it to both send and receive data
-from your web app.
+### `HTML` statement
 
-### Skill Manifest
+This injects an `Alexa.Presentation.HTML.Start` directive into the current response, 
+which causes a device to load the given URL. This statement will do nothing in the
+absence of the HTML interface, so it's safe to let it silently fail.
 
-This extension automatically adds the `ALEXA_PRESENTATION_HTML` interface declaration to
-your skill manifest upon deployment.
+The presence of this statement will also automatically add the `ALEXA_PRESENTATION_HTML`
+to your skill manifest.
 
-### Usage
+```coffeescript
+launch
+  HTML "app.html"
+    timeout: 200
+    initialData: @appData
+    transformers: makeStartTransformers(@appData)
+  -> idle
+```
 
-#### HTML.isHTMLPresent()
+You can either use an absolute URL or a relative one, in which case Litexa will 
+append the current assets root to the URL, letting you easily deploy your related
+website from the Litexa assets folder.
 
-This extension adds a global `HTML` object you can use in both Litexa and code files. It
-has one function, which is to detect whether or not HTML is supported on the user's device
-that the skill is running on. This is best used in conjunction with conditionally sending HTML
-directives, since you may want to fall back to APL if HTML is not supported on a device.
+Note, as with the directive, the timeout given is in seconds. 
+
+Whatever you pass to initialData, you can expect to arrive in your web page as the 
+data payload to successful initialization of the Alexa API object. [See the API documentation](https://html.games.alexa.a2z.com/modules/alexa.html) for details.
+
+The `transformers` key expects an array value that will be added into the appropriate
+location of the start directive.
+
+For more information on what these values do, see [the directive documentation](https://developer.amazon.com/en-US/docs/alexa/web-api-for-games/alexa-presentation-html-interface.html#start-directive) 
+
+
+
+
+### `HTML.isHTMLPresent()`
+
+`HTML.isHTMLPresent` will return true at runtime if the skill is currently running on 
+a device that supports the Alexa Web API. You can use this to write conditional 
+code that branches on whether the user will see your HTML.
 
 ```coffeescript
 launch
   if HTML.isHTMLPresent()
-    directive htmlStartDirective(webAppUrl) # returns `Alexa.Presentation.HTML.Start` directive; this will launch the web app
+    HTML "app.html"
+    -> startApp
   else
-    apl apl/splashScreen.json # the apl statement conditionally sends the directive based on if the device supports it
-  ...
+    say "Ah, I see your device doesn't support HTML. Let's try this instead."
+    -> alternativeExperience
 ```
 
-**WARNING**: Do not use APL and HTML directives in the same response. The user's device
-will likely experience undesired behavior.
+If at any time you need to shortcircuit HTML, you can call `HTML.setEnabled(false)`
+to make `isHTMLPresent()` subsequently report false regardless of the device capabilities. 
 
-#### Directives
+Note that by default Litexa test runs as if it were running
+on an Echo Show-like device, and will behave as if HTML is present. 
+You can specify an Echo Dot like device instead by calling `litexa test --device=dot`
 
-You can use the [`directive`](https://litexa.com/reference/#directive) keyword to add
-HTML directives to your skill responses.
+You can conditionally disable HTML in your Litexa tests by using the `DisableHTML` 
+test statement. This lets you create a single test suite that tests both conditions,
+as long as you test with a device that initially supports HTML.
+
+```coffeescript
+TEST "with HTML"
+  DisableHTML false
+  launch
+
+TEST "without HTML"
+  DisableHTML true
+  launch
+```
+
+
+### `HTML.start(url, timeout, initialData, transformers)`
+
+If you'd prefer to manipulate the directive directly, this function will
+create an `Alexa.Presentation.HTML.Start` directive you can edit further. 
+You may want to do  this if you need to add additional headers, for instance.
+
+**IMPORTANT!** If you go this route, Litexa cannot automatically add 
+the `ALEXA_PRESENTATION_HTML` to your skill manifest, so you'll need to 
+add that manually.
+
+You can use the directive as is:
+
+```coffeescript
+launch 
+  directive HTML.start("hello.html")
+  -> startApp
+```
+
+Or perhaps pass it through your own adaptor function:
+
+```coffeescript
+launch 
+  directive myStartDirective()
+  -> startApp
+```
+
+```javascript
+// utils.js
+function myStartDirective(){
+  let directive = HTML.start("hello.html");
+  directive.request.headers = {
+    "Authorization" : "token"
+  };
+  return directive;
+}
+```
+
+
+### `HTML.mark(name)` and `<mark name>`
+
+The `HTML.mark()` function appends a formatted SSML tag to the current
+say string.
+The `<mark>` shorthand tag does the same thing inline in a say string.
+When sent to your web page via a transformer, the mark will appear as an `ssml` 
+tag type in the speechmarks list, at the appropriate timestamp.
+
+```coffeescript
+launch 
+  HTML.mark("begin")
+  say "Hello <mark wave> there player!"
+```
+
+This will produce the SSML: `<mark name='begin'/>Hello <mark name='wave'/> there player!`. 
+When rendered through a transformer, you'll find the first mark at the 
+start of the speechmark, and the second one following the last 
+viseme for the word "Hello". Both will take the form `{ type: "ssml", value: "wave" }`, 
+substituting each's respective names for the value property, and also
+include with the usual `start`, `end`, and `time` speechmark properties.
+
+
+### Events
+
+To handle data that is sent from your web page, add a `when` listener for the
+`Alexa.Presentation.HTML.Message` event in an appropriate state. Note you can
+add it to the `global` state to handle any incoming message irrespective of
+the current skill state.
+
+```coffeescript
+waitForTransmission
+  when Alexa.Presentation.HTML.Message
+    say "I received a message from the web page!"
+    switch $request.message # payload from web page
+      ...
+```
+
+
+
+## Tips
+
+### Working with both speaker only devices and devices with screens
 
 If you're interested in trying out transformers in your directives,
 but want to maintain a skill that can switch between an HTML device
@@ -93,22 +203,62 @@ and a speaker only device, try using the usual Litexa `say` statements,
 then write a [post processor](http://litexa.com/reference/backdoor.html#modifying-the-alexa-response-object)
 to conditionally move your outputSpeech into a directive instead.
 
-#### Events
 
-To handle data that is sent from your web app, add a `when` listener for the
-`Alexa.Presentation.HTML.Message` event.
 
-```coffeescript
-waitForTransmission
-  when Alexa.Presentation.HTML.Message
-    say "I received a message from the web app!"
-    switch $request.message # payload from web app
-      ...
+### Project structure
+
+There are a lot of ways to build a webapp, so there are a lot of 
+ways you can build one to go along with your Litexa skill. One very
+convenient single page application structure we've experimented 
+with, is as follows:
+
+```
+- project
+|-- webpack.config.js
+|-- app // all app development happens here
+   |-- code
+   |-- styles
+   |-- etc
+|-- skill // this is your litexa root
+   |-- litexa 
+      |-- inline-code.js // webpack target
+      |-- assets
+         |-- app-code.js // also webpack target!
+         |-- app.html
+         |-- etc 
 ```
 
-## Relevant Resources
+This structure relies on [webpack](https://webpack.js.org/) to bundle 
+your app, defining two separate entry points, with two different 
+outputs in the same config file:
 
-For more information, please refer to the official Alexa Web API for Games documentation:
+1. `inline-code.js`, exposing your business logic function 
+  calls to your Litexa code.
 
-* [Alexa Web API
-for Games Announcement](https://developer.amazon.com/en-US/blogs/alexa/alexa-skills-kit/2019/11/apply-for-the-alexa-web-api-for-games-developer-preview)
+2. `app-code.js` and others, placing your webapp inside the 
+  Litexa assets directory, to get uploaded in sync with your 
+  Litexa deployments, which makes it conveniently available to 
+  this extension's `HTML` statement.
+
+This lets you develop your webapp in convenient module format, and 
+easily share references between your webapp and skill code. If you're 
+using TypeScript, you could share interfaces and classes between the 
+two, so that you could for instance use the same type to 
+construct a message in your skill, and to write the receiving 
+function in your webapp.
+
+At development time, you can use webpack's built in development server
+to preview and iterate on your webapp in a desktop browser, and then
+quickly see it on device by running a `litexa deploy` command. If you
+do use the webpack server, specify `writeToDisk` in the configuration
+to make sure you have files on disk for Litexa to upload.
+
+Note: should you find your development slowing down as your webApp gets 
+larger, both in terms of webpack's build time and Litexa's deploy 
+time, you may want to think about splitting the bulk of your 
+assets into a different directory, and then uploading them separately. 
+Chances are most (music, images, meshes, etc) don't need to be 
+synchronized as often as your code changes.
+Webpack supports the convenient `contentBase` property in its server
+that will let you serve additional assets in your development server,
+letting you continue to use relative asset references.

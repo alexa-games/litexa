@@ -1,0 +1,14 @@
+launch 
+  HTML "index.html"
+    timeout: 600
+    initialData: makeInitialData(@appState)
+    transformers: makeInitialTransformers()
+    breakURLCaching: false
+  -> idle 
+
+idle 
+  when SEND_MESSAGE 
+    
+
+TEST "launching"
+  launch

@@ -81,6 +81,7 @@ makeBaseRequest = (skill) ->
       System:
         device:
           deviceId: "someDeviceId"
+          supportedInterfaces: []
         user:
           userId: "amzn1.ask.account.stuff"
         application:
@@ -89,16 +90,19 @@ makeBaseRequest = (skill) ->
     version: "1.0"
   }
   device = skill.testDevice ? 'dot'
+  blockedInterfaces = skill.testBlockedInterfaces ? []
+  pushInterface = (interfaceName) =>
+    return if interfaceName in blockedInterfaces
+    req.context.System.device.supportedInterfaces[interfaceName] = {}
 
   switch device
     when 'dot', 'echo'
       dev = req.context.System.device
     when 'show'
       dev = req.context.System.device
-      dev.supportedInterfaces =
-        'Alexa.Presentation.APL': {}
-        'Alexa.Presentation.HTML': {}
-        Display: {}
+      pushInterface('Display')
+      pushInterface('Alexa.Presentation.APL')
+      pushInterface('Alexa.Presentation.HTML')
     else
       throw new Error "Unknown test device type #{device}"
 
@@ -697,16 +701,16 @@ class ResumeStateStep
 
 
 validateDirective = (directive, context) ->
-  validatorFunction = directiveValidators[directive.type]
+  validatorFunction = directiveValidators[directive?.type]
 
   unless validatorFunction?
     # no? Try the ones from any loaded extensions
-    validatorFunction = context.skill.directiveValidators[directive.type]
+    validatorFunction = context.skill.directiveValidators[directive?.type]
 
   unless validatorFunction?
     if context.skill.projectInfo?.directiveWhitelist?
-      return null if directive.type in context.skill.projectInfo?.directiveWhitelist
-    return [ "unknown directive type #{directive.type}" ]
+      return null if directive?.type in context.skill.projectInfo?.directiveWhitelist
+    return [ "unknown directive type #{directive?.type}" ]
   try
     validator = new JSONValidator directive
     validatorFunction(validator)
@@ -1063,7 +1067,7 @@ class lib.Test
         for directive in result.directives
           index = output.directives.length
           output.directives.push directive
-          logs.push "                          [DIRECTIVE #{index}] #{directive.type}"
+          logs.push "                          [DIRECTIVE #{index}] #{directive?.type}"
           validationErrors = validateDirective(directive, context)
           if validationErrors
             for error in validationErrors
@@ -1096,6 +1100,9 @@ class lib.Test
       skill: skill
       captures: db.captures
       testContext: testContext
+
+    # reset this for each test
+    skill.testBlockedInterfaces = [];
 
     success = true
 

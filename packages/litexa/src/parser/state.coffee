@@ -326,7 +326,7 @@ class lib.State
       continue if name == '--default--'
       continue if intent.referenceIntent?
       unless intent.hasUtterances
-        unless context.skill.testDevice? and (name in extendedEventNames or name.includes('.')) # supported events have '.' in their names
+        unless (name in extendedEventNames) or name.includes('.')
           console.warn "`#{name}` does not have utterances; not adding to language model."
         continue
       try

@@ -333,9 +333,28 @@ describe 'supports intent statements', ->
         or "rephrase that"
     """
 
-  it 'creates a skill model that includes child intents of multi-intent handlers', ->
+  model = null
+  intentNames = null
+  it 'compiles the intents test skill', ->
     model = await buildSkillModel 'intents'
-    intents = model.languageModel.intents.map (intent) -> intent.name
-    assert("PreviouslyNotDefinedIntentName" in intents, 'PreviouslyNotDefinedIntentName exists in model')
-    assert("AMAZON.NoIntent" in intents, 'AMAZON.NoIntent exists in model')
-    assert("OtherIntentName" in intents, 'OtherIntentName exists in model')
+    intentNames = model.languageModel.intents.map (intent) -> intent.name
+
+  it 'creates a skill model that includes child intents of multi-intent handlers', ->
+    assert("PreviouslyNotDefinedIntentName" in intentNames, 'PreviouslyNotDefinedIntentName exists in model')
+    assert("AMAZON.NoIntent" in intentNames, 'AMAZON.NoIntent did not exist in model')
+    assert("OtherIntentName" in intentNames, 'OtherIntentName did not exist in model')
+
+  it 'includes unextended built in Amazon intents', ->
+    intent = null 
+    for v in model.languageModel.intents
+      intent = v if v.name == "AMAZON.YesIntent"
+    assert( intent != null, 'AMAZON.YesIntent was not included in the model' )
+    assert( intent.samples.length == 0, 'AMAZON.YesIntent had sample utterances when it should not' )
+
+  it 'extends built in Amazon intents', ->
+    intent = null 
+    for v in model.languageModel.intents
+      intent = v if v.name == "AMAZON.StopIntent"
+    assert("no really stop" in intent.samples, '`no really stop` was not added to the intent')
+    assert("definitely stop" in intent.samples, '`definitely stop` was not added to the intent')
+    
