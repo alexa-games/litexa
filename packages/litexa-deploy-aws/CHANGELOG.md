@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.7.0](https://github.com/alexa-games/litexa/compare/v0.6.2...v0.7.0) (2020-10-02)
+
+
+### Bug Fixes
+
+* fix asset subdirectory uploads to S3 from windows  ([#153](https://github.com/alexa-games/litexa/issues/153)) ([#164](https://github.com/alexa-games/litexa/issues/164)) ([e1b5718](https://github.com/alexa-games/litexa/commit/e1b57182d3b1972a2cc87f63fdf922211b898aa9))
+* normalize file system slashes when making S3 key ([#184](https://github.com/alexa-games/litexa/issues/184)) ([31e5b80](https://github.com/alexa-games/litexa/commit/31e5b80c4a15508987593731cfdd298a2de20a3e))
+
+
+### Features
+
+* allow switching persistent store to session attributes instead ([#181](https://github.com/alexa-games/litexa/issues/181)) ([5d61bf5](https://github.com/alexa-games/litexa/commit/5d61bf5d307807036b08463be67b8c16e4c4b6fc))
+* revamp of HTML extension for WebAPI support ([#186](https://github.com/alexa-games/litexa/issues/186)) ([ca846c0](https://github.com/alexa-games/litexa/commit/ca846c013079fec2b71d5adb5f78bf45fa9241bb))
+
+
+
+
+
 # [0.6.0](https://github.com/alexa-games/litexa/compare/v0.5.1...v0.6.0) (2020-06-16)
 
 
