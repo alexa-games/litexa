@@ -48,7 +48,7 @@ module.exports = (options, lib) => {
   };
 
   const additionalAssetExtensions = [
-    '.html', '.js', '.map', '.css',
+    '.html', '.js', '.map', '.css', '.ico',
     '.gif', '.webm', '.webp',
     '.ogg', '.m4a', '.mp4',
     '.glb', '.gltf',
