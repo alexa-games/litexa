@@ -35,9 +35,9 @@ launch
 
 <LatestUpdates title='Latest Updates' changeLogURL='https://github.com/alexa-games/litexa/blob/master/CHANGELOG.md'>
 
-* [New syntax for defining permutations](book/state-management.html#intents-and-utterances). In `say` strings this works as an inline version of `or` statements, while in utterances this generates every permutation and adds it to your language model.<br/>`when "(I|we) (want|would like) to (see|hear) the news (please|)"`
-* You can now optionally [disable persistent storage](book/deployment.html#switching-the-persistent-store-to-session-attributes-instead), redirecting state storage to ephemeral `sessionAttributes` instead.
-* [One shot intents](book/state-management.html#oneshot-intents) are now delivered after launch state is entered.
+* [New syntax for defining permutations](/book/state-management.html#intents-and-utterances). In `say` strings this works as an inline version of `or` statements, while in utterances this generates every permutation and adds it to your language model.<br/>`when "(I|we) (want|would like) to (see|hear) the news (please|)"`
+* You can now optionally [disable persistent storage](/book/deployment.html#switching-the-persistent-store-to-session-attributes-instead), redirecting state storage to ephemeral `sessionAttributes` instead.
+* [One shot intents](/book/state-management.html#oneshot-intents) are now delivered after launch state is entered.
 
 </LatestUpdates>
 
@@ -261,7 +261,7 @@ You know, we've mostly made games with it, so we can't say for sure. We'd very m
 
 ## Does Litexa cover all Alexa functionality?
 
-Litexa core is concerned with basic request routing and response generation. It has syntax to let you respond to arbitrary events, generate arbitrary directives, and inject custom JavaScript code to access any Alexa feature. Additional high level functionality is provided as [Litexa extensions](book/extensions.html), optional npm modules that add new syntax and runtime functionality.
+Litexa core is concerned with basic request routing and response generation. It has syntax to let you respond to arbitrary events, generate arbitrary directives, and inject custom JavaScript code to access any Alexa feature. Additional high level functionality is provided as [Litexa extensions](/book/extensions.html), optional npm modules that add new syntax and runtime functionality.
 
 * [**litexa/deploy-aws:**](https://www.npmjs.com/package/@litexa/deploy-aws) A deployment module that pushes a skill to AWS using Lambda, DynamoDB, and S3.
 
