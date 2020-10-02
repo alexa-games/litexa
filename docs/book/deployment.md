@@ -728,7 +728,29 @@ See [DynamoDB Capacity Modes](
 ) for more information.
 :::
 
-## Relevant Resources
+## Adding New Filetypes to the Assets Upload
+
+Litexa whitelists the kinds of files it will deploy from your assets directory,
+rather than uploading them all. You can add to this filter by specifying additional
+file extensions in your Litexa configuration file. Just specify the extension
+in an array, each beginning with the period. 
+You can specify this key on both the root configuration object, as well as 
+add more in each specific deployment.
+
+```json
+{
+  "name": "my project name",
+  "deployments": {
+    "development": {
+      "additionalAssetExtensions": [".test"]
+    }
+  },
+  "additionalAssetExtensions": [".csv", ".data"]
+}
+```
+
+
+## Additional Resources
 
 * [AWS permissions](/book/appendix-aws-permissions.html) for setting up your IAM user with the
 required permissions.

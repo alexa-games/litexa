@@ -61,6 +61,7 @@ interface Deployment {
     DEPLOY?: DeploymentVariables;
     disableAssetReferenceValidation?: boolean;
     overrideAssetsRoot?: string;
+    additionalAssetExtensions?: Array<string>; 
 }
 
 interface Configuration {
@@ -68,6 +69,7 @@ interface Configuration {
     useSessionAttributesForPersistentStore?: boolean;
     deployments: DeploymentCollection;
     plugins: PluginCollection; // Per Environment Option?
+    additionalAssetExtensions?: Array<string>; 
 }
 
 /*

@@ -201,25 +201,26 @@ class ProjectInfo
     assetExtensionsWhitelist = [
       '.png'
       '.jpg'
+      '.jpeg'
       '.svg'
       '.mp3'
-      '.otf'
       '.json'
-      '.jpeg'
       '.txt'
-      '.html'
-      '.css'
-      '.js'
-      '.map'
-      '.glb'
-      '.m4a'
-      '.mp4'
-      '.ico'
-      '.ogg'
-      '.unityweb'
     ]
 
+    if @additionalAssetExtensions?
+      for ext in @additionalAssetExtensions 
+        assetExtensionsWhitelist.push ext    
+
+    if @deployments?[@variant]?.additionalAssetExtensions?
+      for ext in @deployments?[@variant]?.additionalAssetExtensions
+        assetExtensionsWhitelist.push ext    
+
     for kind, info of @extensions
+      if info.additionalAssetExtensions?
+        for ext in info.additionalAssetExtensions
+          assetExtensionsWhitelist.push ext        
+
       continue unless info.assetPipeline?
       for proc, procIndex in info.assetPipeline
         # @TODO: Validate processor here?
