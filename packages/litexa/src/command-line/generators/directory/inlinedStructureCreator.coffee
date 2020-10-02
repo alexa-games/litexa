@@ -51,7 +51,7 @@ class InlinedStructureCreator extends StructureCreator
       sourcePaths: dirs
       destination: @litexaDirectory,
       dataTransform: @dataTransform.bind(this)
-      whitelist: [
+      filterList: [
         'main.*litexa'
         'util.*(js|coffee|ts)'
         '.*\\.json'
@@ -64,7 +64,7 @@ class InlinedStructureCreator extends StructureCreator
       sourcePaths: dirs
       destination: @rootPath,
       dataTransform: @dataTransform.bind(this)
-      whitelist: [
+      filterList: [
         '.*\\.md$'
         '\\.gitignore$'
       ]

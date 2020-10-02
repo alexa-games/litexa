@@ -21,21 +21,21 @@ class TemplateFilesHandler
   syncDir: ({
     sourcePaths
     destination
-    whitelist = []
+    filterList = []
     dataTransform = (data) -> data
   }) ->
     for sourcePath in sourcePaths
       files = @_listFiles(sourcePath)
 
-      for file in @_permit(whitelist, files)
+      for file in @_permit(filterList, files)
         data = @_readFile(sourcePath, file)
         data = dataTransform(data)
         @_writeFile(destination, file, data)
 
   # "Private"  Methods
-  _permit: (whitelist, files) ->
+  _permit: (filterList, files) ->
     files.filter (file) ->
-      whitelist.reduce((acc, cur) ->
+      filterList.reduce((acc, cur) ->
           match = ///^#{cur}///
           acc = acc || (file.search(match) > -1)
         false)

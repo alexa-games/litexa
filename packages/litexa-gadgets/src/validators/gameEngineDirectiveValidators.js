@@ -25,7 +25,7 @@ startInputHandlerDirectiveValidator = function(validator) {
   const validKeys = requiredKeys.concat(optionalKeys);
 
   validator.require(requiredKeys);
-  validator.whiteList(validKeys);
+  validator.allowOnly(validKeys);
 
   validateDirectiveType({ validator, directive, expectedType: 'GameEngine.StartInputHandler' });
 
@@ -74,7 +74,7 @@ recognizerFunctions = {
     const validKeys = requiredKeys.concat(optionalKeys);
 
     validator.require(requiredKeys);
-    validator.whiteList(validKeys);
+    validator.allowOnly(validKeys);
 
     if (recognizer.anchor != null) {
       validator.oneOf('anchor', ['start', 'end', 'anywhere']);
@@ -136,7 +136,7 @@ validateAllPatterns = function(validator, recognizer) {
 
 validatePattern = function(validator, pattern) {
   const optionalKeys = ['gadgetIds', 'action', 'colors', 'repeat'];
-  validator.whiteList(optionalKeys);
+  validator.allowOnly(optionalKeys);
 
   if (pattern.action != null) {
     validator.oneOf("action", ['up', 'down']);
@@ -217,7 +217,7 @@ validateEvent = function({ validator, directive, event }) {
   const validKeys = requiredKeys.concat(optionalKeys);
 
   validator.require(requiredKeys);
-  validator.whiteList(validKeys);
+  validator.allowOnly(validKeys);
 
   validateEventRecognizers({ validator, directive, event });
 

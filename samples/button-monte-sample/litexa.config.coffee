@@ -17,6 +17,6 @@ module.exports =
   extensionOptions: {}
   # there is no built-in Litexa support for this directive,
   # so declaring it here
-  directiveWhitelist: [
+  validDirectivesList: [
     "GadgetController.SetLight"
   ]

@@ -6,22 +6,13 @@ Litexa is an Alexa domain specific language, developed for long form multi-turn 
 Its parser and tooling is implemented in Node.js and it compiles into JavaScript that expects Node.js
 as a runtime environment.
 
-**Note:** *Due to a dependency not compatible with Node.js v12 in the @litexa/assets-wav package, the
-recommended local runtime and default deployment runtime is Node.js v10. If you are not using this
-package, you are welcome to upgrade both your local and runtime environment to Node.js v12. Refer to our
-[deployment documentation](./docs/book/deployment.md#lambda-configuration-optional) for more configuration
-details.*
-
 Full documentation is available at <https://litexa.com>
 
 **Disclaimer:**
 *Litexa is an Alexa Labs community-supported project (alpha) from the Alexa Games team at Amazon. We (Alexa Games) have
 used Litexa to develop and ship 20+ Alexa skills. Your feedback is welcome and we are happy to consider contributions.
 Otherwise, you are free to use and modify this software as needed. As with all open-source packages, please use them in
-accordance with the licenses assigned to each package. For official Alexa supported skill development tools, we
-recommend using tools in the [Alexa Skills Kit](https://developer.amazon.com/en-US/alexa/alexa-skills-kit) like [Skill
-Flow Builder](https://developer.amazon.com/blogs/alexa/post/83c61d4e-ab3f-443e-bf71-75b5354bdc9e/skill-flow-builder) and
-the [ASK SDK](https://developer.amazon.com/docs/alexa-skills-kit-sdk-for-nodejs/overview.html). Thanks and enjoy!*
+accordance with the licenses assigned to each package. Thanks and enjoy!*
 
 ## Packages
 
@@ -42,6 +33,12 @@ to learn more about the [Litexa deployment module](./docs/book/deployment.md#lit
 An extension that makes working with APL documents in your Litexa project more powerful with
 shorthand for managing APL documents and common design patterns. Click to learn more about the
 [APL extension](./docs/book/screens.md#apl-directives).
+
+### @litexa/html
+
+An extension that makes working with HTML web apps as part of the Alexa WebAPI for Games
+a little easier, e.g. with a statement that generates the HTML Start directive, automatically
+updates the skill manifest, and patches Litexa assets relative URLs.
 
 ### litexa-vscode
 
@@ -161,37 +158,17 @@ shared dependencies in package.json
 
 if this command succeeds, you should have fair confidence the code is in a good working state.
 
-### Adding a new package
-
-To add a new package edit the `lerna.json` file with your new package run
-
-```bash
-npm run sync:dependencies
-```
-
-this will run the lerna `link` command and bring in the new package as a dependency for the lerna
-project, as well as bring up the common devDependencies. After this is done, don't forget to run
-`npm run clean` to install those dependencies, and version your changes.
-
-For more information on the `link` command
-[check out the lerna docs](https://github.com/lerna/lerna/tree/master/commands/link#readme)
-
 ## Documentation Website
 
 Full documentation is available at <https://litexa.com.> To run the documentation
 website locally, please do the following.
 
-### One Time Setup
-
-```bash
-npm install -g vuepress
-npm install -g markdown-it-vuepress-code-snippet-enhanced
-```
 
 ### Generate Language Reference
 
-In the `./packages/litexa/src/parser/litexa.pegjs` file all the comments can include markdown. From
-the root to extract and update the website run
+The parser source `./packages/litexa/src/parser/litexa.pegjs` supports using block comments
+to document individual statements. The process of refreshing the doc website is manually done
+by running the command:
 
 ```bash
 npm run docs:reference
@@ -205,21 +182,13 @@ To start the docs website in interactive/watch mode, then run this:
 npm run docs:dev
 ```
 
-To run both the reference and the interactive site, run.
-
-```bash
-npm run docs
-```
-
 The website will update with any change in the docs folder.
 For more info on Vuepress - <https://v0.vuepress.vuejs.org/guide/#how-it-works>
 
-We are using a small extension to grab code from docs. Info here:
-<https://www.npmjs.com/package/markdown-it-vuepress-code-snippet-enhanced>
-
 ### Build The Website for Hosting
 
-To build the full static website for S3 or GitHub hosting, run the following:
+To build the full static website for S3 or GitHub hosting, run the following to get a
+static render generated at `docs/.vuepress/dist`
 
 ```bash
 npm run docs:build

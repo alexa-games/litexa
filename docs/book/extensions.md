@@ -1,15 +1,38 @@
 # Litexa Extensions
 
-Litexa supports custom extensions, which are special Node modules that can be installed to augment
+Litexa supports custom extensions, which are special Node.js modules that can be installed to augment
 Litexa's core functionality. These extensions can be installed locally in a Litexa project's parent
 directory (in which case they only affect that individual project), or globally (in which case they
 affect all Litexa projects on the same machine).
 
-Examples of such extensions are the [@litexa/gadgets extension](gadgets-custom-interfaces.html#installation), the
-[@litexa/apl extension](screens.html#installation), and the
-[@litexa/render-template extension](appendix-render-template.html#installation). These extensions
-allow for optional customizations of Litexa, and can be installed on a project-by-project basis,
-depending on requirements.
+The Alexa Games team has written a set of extensions to add higher level support for some features
+we use. If you find yourself needing functionality absent in Litexa, or wanting to customize something
+to your specific workflow you may want to look into writing your own extension. Open an issue on
+the Litexa Github if you'd like to talk to us about your use case.
+
+
+## Extension Directory
+
+To discover which extensions, both local and global, are visible to your current skill, run the command
+`litexa extensions`. That will give you a printout of each extension's name and location on disk.
+
+Here's a list of public extensions currently available via npm:
+
+* [**litexa/deploy-aws:**](https://www.npmjs.com/package/@litexa/deploy-aws) A deployment module that pushes a skill to AWS using Lambda, DynamoDB, and S3.
+
+* [**litexa/html:**](https://www.npmjs.com/package/@litexa/html) An extension that simplifies launching and exchanging messages with a web app as part of the [Alexa Web API for Games](https://developer.amazon.com/en-US/blogs/alexa/alexa-skills-kit/2020/07/alexa-web-api-for-games-generally-available).
+
+* [**litexa/apl:**](https://www.npmjs.com/package/@litexa/apl) An extension that makes working with the Alexa Presentation Language (APL) in your Litexa project more powerful, with shorthand for managing APL documents and common design patterns.
+
+* [**litexa/render-template:**](https://www.npmjs.com/package/@litexa/render-template) An extension that supports easily building, sending, and validating a `Display.RenderTemplate` directive, the predecessor to APL.
+
+* [**litexa/assets-wav:**](https://www.npmjs.com/package/@litexa/assets-wav) A WAV/MP3 composer that can combine multiple overlapping samples into a single MP3 stream, and a binding layer for use in Literate Alexa.
+
+* [**litexa/gadgets:**](https://www.npmjs.com/package/@litexa/gadgets) An extension for the Gadgets Skill API, which powers interaction with Echo Buttons (and potentially other Alexa Gadgets).
+
+
+
+## Authoring new Extensions
 
 Litexa extensions support the following customizations:
 
@@ -18,12 +41,17 @@ Litexa extensions support the following customizations:
 3. adding new runtime functionality
 4. adding new asset types to upload
 
+As each Litexa extension is its own Node.js module, so step 1 in writing your own is to initialize a new module.
+During development, don't forget that npm supports installing a module by absolute and local references on your hard drive.
+Installing your extension into a test skill ASAP makes iterating much easier.
+
 :::warning Deployment extensions
 Extensions modifying Litexa's deployment behavior, such as
 [@litexa/deploy-aws](deployment.html#litexa-deploy-aws), currently follow a different structure.
 Deployment extensions will be properly documented or assimilated to the below structure, at a
 future date.
 :::
+
 
 ## Extension Structure
 
@@ -273,7 +301,8 @@ module.exports = function(lib) {
 
 ### 2) Compiler Extension
 
-The `compiler` specification can whitelist event types, and add validators for:
+The `compiler` specification can instruct the runtime to accept additional
+event types, and add validators for:
 
 1. skill manifest (validated during deployment)
 2. skill interaction model (validated during deployment)
@@ -295,7 +324,8 @@ module.exports = function(options, lib) {
     /*
       By default, Litexa accepts the following event types:
         LaunchRequest, IntentRequest, Connections.Response
-      Extensions can whitelist additional event types, by adding them to this array.
+      Extensions can make Litexa accept additional event types,
+        by adding them to this array.
     */
     'NAMESPACE.NewValidEvent'
   ]
@@ -346,9 +376,9 @@ compiler: {
     // 3) error handling for object keys
       // add error if any of keys are missing in the jsonObject:
       validator.require(keys);
-      // add error if any non-whitelisted keys found in jsonObject:
-      validator.whitelist(keys);
-      // combined validation of above 'require' + 'whitelist':
+      // add error if any unexpected keys found in jsonObject:
+      validator.allowOnly(keys);
+      // combined validation of above 'require' + 'allowOnly':
       validator.strictOnly(keys);
     }
 }
@@ -439,7 +469,7 @@ module.exports = function(context) {
 
 ### 4) Runtime Extension
 You can instruct the deployment module to consider additional files for upload
-by just adding an array of additional filename extensions to your extension's 
+by just adding an array of additional filename extensions to your extension's
 definition object.
 
 ```javascript

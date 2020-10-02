@@ -146,14 +146,14 @@ yet, you can inform Litexa that you've vouched for the type and
 that it should assume it is correct:
 
 1. You will need to add the desired directive's type to the
-   `directiveWhitelist` field of your Litexa project's
+   `validDirectivesList` field of your Litexa project's
    `litexa.config.*` as seen below:
 
     ```json
     {
       "name": "myFirstProject",
       "deployments": { ... },
-      "directiveWhitelist": [
+      "validDirectivesList": [
         "AudioPlayer.Play"
       ]
     }
@@ -184,10 +184,10 @@ that it should assume it is correct:
     ```
 
 For directives supported by Litexa extensions, any
-generated directives will be validated for correct content,
+generated directives should be validated for correct content,
 raising an error during compilation so that you can catch it
 as early as possible. Directives that you vouch for manually
-in the whitelist though, offer no such protection, so an
+in the validDirectivesList though, offer no such protection, so an
 invalid directive won't be caught until runtime. In those
 cases, refer to your Litexa logs to discover what the problem is.
 

@@ -34,31 +34,31 @@ describe 'TemplateFilesHandler', ->
       rimraf.sync(tmpDir)
 
   describe '#syncDir', ->
-    it "doesn't write any files if no whitelist is provided", ->
+    it "doesn't write any files if no filterList is provided", ->
       filesHandler.syncDir({
         sourcePaths: [path.join 'common', 'litexa'],
         destination: 'tmp'
       })
       assert(!fs.existsSync(path.join 'tmp', 'main.litexa'),
-        "main file did not get created because it wasn't whitelisted")
+        "main file did not get created because it wasn't in the filter list")
       assert(!fs.existsSync(path.join 'tmp', 'main.test.litexa'),
-        "main test file did not get created because it wasn't whitelisted")
+        "main test file did not get created because it wasn't in the filter list")
 
-    it 'only writes the files that are whitelisted', ->
+    it 'only writes the files that are in the filter', ->
       filesHandler.syncDir({
         sourcePaths: [path.join 'common', 'litexa'],
         destination: 'tmp',
-        whitelist: ['main.litexa$']
+        filterList: ['main.litexa$']
       })
       assert(fs.existsSync(path.join 'tmp', 'main.litexa'), 'main file was created')
       assert(!fs.existsSync(path.join 'tmp', 'main.test.litexa'),
-        "main test file did not get created because it wasn't whitelisted")
+        "main test file did not get created because it wasn't in the filter list")
 
-    it 'applies each whitelist regex', ->
+    it 'applies each filter regex', ->
       filesHandler.syncDir({
         sourcePaths: [path.join 'common', 'litexa'],
         destination: 'tmp',
-        whitelist: [
+        filterList: [
           'main.litexa$'
           'main.test.litexa$'
         ]
@@ -73,7 +73,7 @@ describe 'TemplateFilesHandler', ->
           path.join 'bundled', 'typescript', 'source'
         ],
         destination: 'tmp',
-        whitelist: ['.mocharc.json$']
+        filterList: ['.mocharc.json$']
       })
       dataString = fs.readFileSync((path.join 'tmp', '.mocharc.json'), 'utf8')
       expect(dataString).to.include('"recursive": true')
@@ -90,7 +90,7 @@ describe 'TemplateFilesHandler', ->
           path.join 'bundled', 'typescript', 'config'
         ],
         destination: 'tmp',
-        whitelist: ['.*\\.json$'],
+        filterList: ['.*\\.json$'],
         dataTransform: test.transform
       })
 

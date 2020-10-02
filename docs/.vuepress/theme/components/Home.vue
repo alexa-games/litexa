@@ -33,10 +33,10 @@ export default {
     actionLink() {
       return {
         link: this.data.actionLink,
-        text: this.data.actionText
+        text: this.data.actionText,
       };
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -123,6 +123,7 @@ export default {
       transition: background-color 0.1s ease;
       box-sizing: border-box;
       border-bottom: 1px solid darken($accentColor, 10%);
+      box-shadow: 5px 5px 10px 2px #90d6ff;
 
       &:hover {
         background-color: lighten($accentColor, 10%);

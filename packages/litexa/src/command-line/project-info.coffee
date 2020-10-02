@@ -170,7 +170,7 @@ class ProjectInfo
 
     return if @root == '--mockRoot'
 
-    fileBlacklist = [
+    fileExclusionList = [
       'package.json'
       'package-lock.json'
       'tsconfig.json'
@@ -182,7 +182,7 @@ class ProjectInfo
 
     # collect all the files in the litexa directory
     # as inputs for the litexa compiler
-    codeExtensionsWhitelist = [
+    codeFileExtensionTypes = [
       '.litexa'
       '.coffee'
       '.js'
@@ -194,11 +194,11 @@ class ProjectInfo
       return false unless fs.lstatSync(fullPath).isFile()
       return false if f[0] == '.'
       extension = path.extname f
-      return false unless extension in codeExtensionsWhitelist
+      return false unless extension in codeFileExtensionTypes
       return true
     def.code.files = ( f for f in fs.readdirSync(def.code.root) when codeFilter(f) )
 
-    assetExtensionsWhitelist = [
+    assetExtensionsToInclude = [
       '.png'
       '.jpg'
       '.jpeg'
@@ -209,17 +209,17 @@ class ProjectInfo
     ]
 
     if @additionalAssetExtensions?
-      for ext in @additionalAssetExtensions 
-        assetExtensionsWhitelist.push ext    
+      for ext in @additionalAssetExtensions
+        assetExtensionsToInclude.push ext
 
     if @deployments?[@variant]?.additionalAssetExtensions?
       for ext in @deployments?[@variant]?.additionalAssetExtensions
-        assetExtensionsWhitelist.push ext    
+        assetExtensionsToInclude.push ext
 
     for kind, info of @extensions
       if info.additionalAssetExtensions?
         for ext in info.additionalAssetExtensions
-          assetExtensionsWhitelist.push ext        
+          assetExtensionsToInclude.push ext
 
       continue unless info.assetPipeline?
       for proc, procIndex in info.assetPipeline
@@ -250,7 +250,7 @@ class ProjectInfo
         return false unless fs.lstatSync(fullPath).isFile()
         return false if f[0] == '.'
         extension = path.extname f
-        unless extension in assetExtensionsWhitelist
+        unless extension in assetExtensionsToInclude
           return false
         return true
 
@@ -259,7 +259,7 @@ class ProjectInfo
       processDirectory = (root) ->
         debug "processing asset dir #{root}"
         for f in fs.readdirSync(root)
-          continue if f in fileBlacklist
+          continue if f in fileExclusionList
 
           f = path.join root, f
           stat = fs.statSync f
