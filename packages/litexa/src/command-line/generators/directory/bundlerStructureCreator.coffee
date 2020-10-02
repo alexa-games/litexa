@@ -89,23 +89,23 @@ class BundlerStructureCreator extends StructureCreator
         litexaSource
       ]
       destination: @litexaDirectory
-      whitelist: [
+      filterList: [
         'main.*litexa'
       ]
     })
 
     # Populate top-level lib directory
-    libDirWhitelist = [
+    libDirFilter = [
       'index.(js|coffee|ts)$'
     ]
     if @sourceLanguage == 'typescript'
-      libDirWhitelist.push '.*\\.d.ts$'
+      libDirFilter.push '.*\\.d.ts$'
 
     @templateFilesHandler.syncDir({
       sourcePaths: languageDirs
       destination: @libDirectory
       dataTransform: @dataTransform.bind(this)
-      whitelist: libDirWhitelist
+      filterList: libDirFilter
     })
 
     # Populate lib services
@@ -113,7 +113,7 @@ class BundlerStructureCreator extends StructureCreator
       sourcePaths: languageDirs
       destination: @libServicesDirectory
       dataTransform: @dataTransform.bind(this)
-      whitelist: [
+      filterList: [
         '.*\\.service\\.(js|coffee|ts)$'
       ]
     })
@@ -123,7 +123,7 @@ class BundlerStructureCreator extends StructureCreator
       sourcePaths: languageDirs
       destination: @libComponentsDirectory
       dataTransform: @dataTransform.bind(this)
-      whitelist: [
+      filterList: [
         'utils\\.(js|coffee|ts)$'
         'logger\\.(js|coffee|ts)$'
       ]
@@ -134,7 +134,7 @@ class BundlerStructureCreator extends StructureCreator
       sourcePaths: languageDirs
       destination: @testServicesDirectory
       dataTransform: @dataTransform.bind(this)
-      whitelist: [
+      filterList: [
         '.*\\.service\\.spec\\.(js|coffee|ts)$'
       ]
     })
@@ -144,7 +144,7 @@ class BundlerStructureCreator extends StructureCreator
       sourcePaths: languageDirs
       destination: @testComponentsDirectory
       dataTransform: @dataTransform.bind(this)
-      whitelist: [
+      filterList: [
         'utils.spec.(js|coffee|ts)$'
       ]
     })
@@ -159,7 +159,7 @@ class BundlerStructureCreator extends StructureCreator
       sourcePaths: [litexaSource].concat languageDirs
       destination: @rootPath
       dataTransform: @dataTransform.bind(this)
-      whitelist: [
+      filterList: [
         '\\.gitignore$'
         '.*\\.md$'
         '.*\\.json$'

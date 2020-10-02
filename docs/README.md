@@ -211,7 +211,7 @@ For officially supported skill development tools, look for tools in the
 
 ## Does Litexa handle Alexa feature X?
 
-Check out [The Book](/book/) for features that Litexa has value added syntax for. Don't see something you want to use? No sweat, Litexa lets you write your own directives from scratch, and whitelist incoming event names.
+Check out [The Book](/book/) to find Alexa features that Litexa supports with unique syntax. Don't see something you want to use? No sweat, Litexa has syntax to let you emit any arbitrary directive, and accept any incoming event, so no Alexa feature is inaccessible. Have a great idea for new Litexa syntax? Let us know!
 
 </FAQuestion>
 

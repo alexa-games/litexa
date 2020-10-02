@@ -301,7 +301,8 @@ module.exports = function(lib) {
 
 ### 2) Compiler Extension
 
-The `compiler` specification can whitelist event types, and add validators for:
+The `compiler` specification can instruct the runtime to accept additional
+event types, and add validators for:
 
 1. skill manifest (validated during deployment)
 2. skill interaction model (validated during deployment)
@@ -323,7 +324,8 @@ module.exports = function(options, lib) {
     /*
       By default, Litexa accepts the following event types:
         LaunchRequest, IntentRequest, Connections.Response
-      Extensions can whitelist additional event types, by adding them to this array.
+      Extensions can make Litexa accept additional event types,
+        by adding them to this array.
     */
     'NAMESPACE.NewValidEvent'
   ]
@@ -374,9 +376,9 @@ compiler: {
     // 3) error handling for object keys
       // add error if any of keys are missing in the jsonObject:
       validator.require(keys);
-      // add error if any non-whitelisted keys found in jsonObject:
-      validator.whitelist(keys);
-      // combined validation of above 'require' + 'whitelist':
+      // add error if any unexpected keys found in jsonObject:
+      validator.allowOnly(keys);
+      // combined validation of above 'require' + 'allowOnly':
       validator.strictOnly(keys);
     }
 }

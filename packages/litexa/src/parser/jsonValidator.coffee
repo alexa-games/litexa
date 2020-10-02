@@ -69,7 +69,7 @@ class lib.JSONValidator
 
   strictlyOnly: (parameters) ->
     @require parameters
-    @whiteList parameters
+    @allowOnly parameters
 
   require: (parameters) ->
     [loc, value] = @getValue('')
@@ -85,6 +85,11 @@ class lib.JSONValidator
           @fail p, "missing required parameter"
 
   whiteList: (parameters) ->
+    # note, this function will be deprecated eventually, please use `allowOnly` instead
+    console.warn("The JSON validator function `whiteList` has been renamed `allowOnly`, please adjust this code.")
+    @allowOnly(parameters)
+
+  allowOnly: (parameters) ->
     [loc, value] = @getValue('')
     for k, v of value
       unless k in parameters

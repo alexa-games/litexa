@@ -60,7 +60,7 @@ class SeparateStructureCreator extends StructureCreator
 
     strategyLanguageSource = @path.join prefix, @sourceLanguage
 
-    whitelist = [
+    filterList = [
       'main.*litexa'
       'util.*(js|coffee|ts)'
       'logger.*(js|coffee|ts)'
@@ -72,12 +72,12 @@ class SeparateStructureCreator extends StructureCreator
     ]
 
     if @sourceLanguage == 'coffee'
-      whitelist.push('main.coffee$')
+      filterList.push('main.coffee$')
     else
-      whitelist.push('main.js$')
+      filterList.push('main.js$')
 
     if @sourceLanguage == 'typescript'
-      whitelist.push '.*\\.d.ts$'
+      filterList.push '.*\\.d.ts$'
 
     # litexa directory files
     @templateFilesHandler.syncDir({
@@ -87,7 +87,7 @@ class SeparateStructureCreator extends StructureCreator
       ]
       destination: @litexaDirectory
       dataTransform: @dataTransform.bind(this)
-      whitelist
+      filterList
     })
 
     # lib directory files
@@ -98,7 +98,7 @@ class SeparateStructureCreator extends StructureCreator
       ]
       destination: @separateFolder
       dataTransform: @dataTransform.bind(this)
-      whitelist
+      filterList
     })
 
     # root directory files
@@ -111,7 +111,7 @@ class SeparateStructureCreator extends StructureCreator
       ]
       destination: @rootPath,
       dataTransform: @dataTransform.bind(this)
-      whitelist: [
+      filterList: [
         '.*\\.md$'
         '\\.gitignore$'
       ]
