@@ -16,7 +16,7 @@ setLightDirectiveValidator = function(validator) {
   const validKeys = requiredKeys.concat(optionalKeys);
 
   validator.require(requiredKeys);
-  validator.whiteList(validKeys);
+  validator.allowOnly(validKeys);
 
   validateDirectiveType({ validator, directive, expectedType: 'GadgetController.SetLight' })
 

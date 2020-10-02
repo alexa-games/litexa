@@ -191,12 +191,12 @@ buildSkillManifest = (context, manifestContext) ->
         manifestContext.deployedIconAssetsMd5Sum = ''
 
         for locale, data of fileManifest.publishingInformation.locales
-          # copy over kosher keys, ignore the rest
-          whitelist = ['name', 'summary', 'description'
+          # copy over expected keys, ignore the rest
+          expectedKeys = ['name', 'summary', 'description'
             'examplePhrases', 'keywords', 'smallIconUri',
             'largeIconUri']
           copy = {}
-          for k in whitelist
+          for k in expectedKeys
             copy[k] = data[k]
 
           # check for language-specific skill icon files that were deployed via 'assets'

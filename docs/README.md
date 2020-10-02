@@ -1,6 +1,6 @@
 ---
 home: true
-tagline: A new <a href="https://en.wikipedia.org/wiki/Literate_programming">literate style programming</a> language and toolchain for building long form Alexa skills
+tagline: A <a href="https://en.wikipedia.org/wiki/Literate_programming">literate style</a> programming language and toolchain for building long form Alexa skills
 heroText: Litexa
 actionText: Get Started →
 actionLink: /get-started/
@@ -23,13 +23,24 @@ launch
     or "Greetings, human."
   say "What's your name?"
 
-  when "My name is $name"
+  when "(my|the) name is $name"
+    or "(you can|you should|) call me $name"
     with name = AMAZON.US_FIRST_NAME
     say "Hey! nice to meet you, $name."
     soundEffect happy.mp3
 ```
 :::
 </Feature>
+
+
+<LatestUpdates title='Latest Updates' changeLogURL='https://github.com/alexa-games/litexa/blob/master/CHANGELOG.md'>
+
+* [New syntax for defining permutations](/book/state-management.html#intents-and-utterances). In `say` strings this works as an inline version of `or` statements, while in utterances this generates every permutation and adds it to your language model.<br/>`when "(I|we) (want|would like) to (see|hear) the news (please|)"`
+* You can now optionally [disable persistent storage](/book/deployment.html#switching-the-persistent-store-to-session-attributes-instead), redirecting state storage to ephemeral `sessionAttributes` instead.
+* [One shot intents](/book/state-management.html#oneshot-intents) are now delivered after launch state is entered.
+
+</LatestUpdates>
+
 
 <div class='feature-cards home-aligned'>
 
@@ -200,7 +211,7 @@ For officially supported skill development tools, look for tools in the
 
 ## Does Litexa handle Alexa feature X?
 
-Check out [The Book](/book/) for features that Litexa has value added syntax for. Don't see something you want to use? No sweat, Litexa lets you write your own directives from scratch, and whitelist incoming event names.
+Check out [The Book](/book/) to find Alexa features that Litexa supports with unique syntax. Don't see something you want to use? No sweat, Litexa has syntax to let you emit any arbitrary directive, and accept any incoming event, so no Alexa feature is inaccessible. Have a great idea for new Litexa syntax? Let us know!
 
 </FAQuestion>
 
@@ -248,17 +259,17 @@ You know, we've mostly made games with it, so we can't say for sure. We'd very m
 
 <FAQuestion>
 
-## What extensions and features are currently available?
+## Does Litexa cover all Alexa functionality?
 
-* **litexa/deploy-aws:** A deployment module that pushes a skill to AWS using Lambda, DynamoDB, and S3.
+Litexa core is concerned with basic request routing and response generation. It has syntax to let you respond to arbitrary events, generate arbitrary directives, and inject custom JavaScript code to access any Alexa feature. Additional high level functionality is provided as [Litexa extensions](/book/extensions.html), optional npm modules that add new syntax and runtime functionality.
 
-* **litexa/apl:** An extension that makes working with the Alexa Presentation Language (APL) in your Litexa project more powerful, with shorthand for managing APL documents and common design patterns.
+* [**litexa/deploy-aws:**](https://www.npmjs.com/package/@litexa/deploy-aws) A deployment module that pushes a skill to AWS using Lambda, DynamoDB, and S3.
 
-* **litexa/render-template:** An extension that supports easily building, sending, and validating a `Display.RenderTemplate` directive, the predecessor to APL.
+* [**litexa/html:**](https://www.npmjs.com/package/@litexa/html) An extension that simplifies launching and exchanging messages with a web app as part of the [Alexa Web API for Games](https://developer.amazon.com/en-US/blogs/alexa/alexa-skills-kit/2020/07/alexa-web-api-for-games-generally-available).
 
-* **litexa/assets-wav:** A WAV/MP3 composer that can combine multiple overlapping samples into a single MP3 stream, and a binding layer for use in Literate Alexa.
+* [**litexa/apl:**](https://www.npmjs.com/package/@litexa/apl) An extension that makes working with the Alexa Presentation Language (APL) in your Litexa project more powerful, with shorthand for managing APL documents and common design patterns.
 
-* **litexa/gadgets:** An extension for the Gadgets Skill API, which powers interaction with Echo Buttons (and potentially other Alexa Gadgets).
+* [**litexa/assets-wav:**](https://www.npmjs.com/package/@litexa/assets-wav) A converter that automatically encodes your lossless source WAV files into the correct SSML supported MP3 format at upload time.
 
 * Additionally, there is built-in support for [In Skill Purchasing (ISP)](/book/monetization.html) in the core package, and a [VSCode extension](/book/appendix-editor-support) that provides syntax highlighting for `.litexa` files. We've also provided documentation for how to [use Alexa features that Litexa does not yet support](/book/backdoor.html).
 

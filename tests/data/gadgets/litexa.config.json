@@ -1,4 +1,4 @@
 {
   "name": "gadgetTests",
-  "directiveWhitelist": []
+  "validDirectivesList": []
 }

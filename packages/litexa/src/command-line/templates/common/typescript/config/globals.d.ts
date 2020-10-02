@@ -68,8 +68,9 @@ interface Configuration {
     name: string;
     useSessionAttributesForPersistentStore?: boolean;
     deployments: DeploymentCollection;
-    plugins: PluginCollection; // Per Environment Option?
+    plugins?: PluginCollection; // Per Environment Option?
     additionalAssetExtensions?: Array<string>; 
+    validDirectivesList?: Array<string>;
 }
 
 /*

@@ -7,7 +7,7 @@
 
 { ParserError, formatLocationStart } = (require './errors').lib
 
-# blacklist a set of references we know we don't want shadowed
+# exclude a set of references we know we don't want shadowed
 # anywhere, or rather know we want to allow access to
 protectedNames = ['context']
 
