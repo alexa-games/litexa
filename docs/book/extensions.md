@@ -6,7 +6,7 @@ directory (in which case they only affect that individual project), or globally 
 affect all Litexa projects on the same machine).
 
 The Alexa Games team has written a set of extensions to add higher level support for some features
-we use. If you find yourself needing functionality absent in Litexa, or wanting to customise something
+we use. If you find yourself needing functionality absent in Litexa, or wanting to customize something
 to your specific workflow you may want to look into writing your own extension. Open an issue on
 the Litexa Github if you'd like to talk to us about your use case.
 
@@ -469,7 +469,7 @@ module.exports = function(context) {
 
 ### 4) Runtime Extension
 You can instruct the deployment module to consider additional files for upload
-by just adding an array of additional filename extensions to your extension's 
+by just adding an array of additional filename extensions to your extension's
 definition object.
 
 ```javascript
