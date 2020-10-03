@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.1](https://github.com/alexa-games/litexa/compare/v0.7.0...v0.7.1) (2020-10-03)
+
+
+### Bug Fixes
+
+* restore lost support for implicit microphone open on state transitions ([4a9f518](https://github.com/alexa-games/litexa/commit/4a9f5186a6bbbe7ce8752bc6e9f67ba343ff915a))
+
+
+
+
+
 # [0.7.0](https://github.com/alexa-games/litexa/compare/v0.6.2...v0.7.0) (2020-10-02)
 
 
