@@ -417,10 +417,15 @@ handlerSteps.walkStates = (stateContext) ->
 
     # check in case the exit handler caused a redirection
     nextState = stateContext.nextState
-    stateContext.nextState = null
 
     unless nextState
       return
+
+    # the state transition resets the next transition state
+    # and implies that we'll go back to opening the mic
+    stateContext.nextState = null
+    stateContext.shouldEndSession = false
+    delete stateContext.shouldDropSession
 
     stateContext.currentState = nextState
 
