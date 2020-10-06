@@ -1,0 +1,11 @@
+{
+  "name": "@litexa/apl-a",
+  "version": "0.0.1",
+  "description": "Support for auto generating APL-A documents from Litexa semantics",
+  "scripts": {
+    "test": "npx mocha ./test"
+  },
+  "author": "Amazon",
+  "license": "Apache-2.0",
+  "devDependencies": {}
+}
