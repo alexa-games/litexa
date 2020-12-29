@@ -16,6 +16,8 @@ statements, the way you'd normal expect them to concatenate in
 launch
   APLABlock "intro"
     background: intro-jingle.mp3
+    fadeIn: 1000
+    loop: 3
     delay: 3000
 
   say "Welcome to the skill!"
@@ -25,6 +27,7 @@ launch
   @lastLaunch = context.now
 
   soundEffect ready.mp3
+
   say "Let's get right to it."
     or "I'm ready to get into it."
   -> getStarted
@@ -44,8 +47,22 @@ mainTemplate: {
           type: "Mixer",
           items: [
             {
-              type: "Audio",
-              source: "intro-jingle.mp3"
+              items:
+              [
+                {
+                  type: "Audio",
+                  source: "intro-jingle.mp3",
+                  filter: { type: "fadein" }
+                },
+                {
+                  type: "Audio",
+                  source: "intro-jingle.mp3"
+                },
+                {
+                  type: "Audio",
+                  source: "intro-jingle.mp3"
+                }
+              ]
             },
             {
               type: "Sequence",

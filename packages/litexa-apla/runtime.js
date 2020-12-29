@@ -108,6 +108,11 @@ module.exports = (context) => {
   };
 
   userFacing.accumulator = [];
+  userFacing.componentAccumulator = [];
+
+  userFacing.pushComponent = ( component ) => {
+    context.say.push( component );
+  }
 
   // insert a marker that Litexa "say" material after this point
   // belongs in a named block for later reference
@@ -132,7 +137,7 @@ module.exports = (context) => {
     // kicks us over to APL-A.
     let audioTester = /\<audio/g;
     for ( let say of context.say ) {
-      if ( say.match( audioTester ) ) {
+      if ( (typeof(say) == "string") && say.match( audioTester ) ) {
         simple = false;
       }
     }
@@ -160,10 +165,21 @@ module.exports = (context) => {
     // drop any blocks that didn't end up with content
     blocks = blocks.filter( b => b.say.length > 0 );
 
-    // Within a block we don't care about preserving individual say
+    // Within a block we don't care about preserving individual text say
     // items, so we can merge them into single speech blocks
     for ( let block of blocks ) {
-      block.say = [ block.say.join(' ') ];
+      let mergeds = [];
+      for ( let say of block.say ) {
+        if ( typeof(say) == 'string' ) {
+          if ( typeof( mergeds[mergeds.length-1]) == 'string' ) {
+            mergeds[mergeds.length-1] += ' ' + say;
+          } else {
+            mergeds.push(say);
+          }
+        } else {
+          mergeds.push( say );
+        }
+      }
     }
 
     // we've taken responsibility for audio being not SSML compatible format
@@ -185,6 +201,8 @@ module.exports = (context) => {
         return APLAudio( name, item.audio );
       } else if ( item.silence ) {
         return APLASilence( item.silence );
+      } else if ( typeof(item) == 'object') {
+        return item;
       } else {
         return APLSpeechSSML( name, item );
       }
