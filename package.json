@@ -16,7 +16,8 @@
     "docs:reference": "cd ./packages/litexa && npm run rdoc && npx mv ./src/documentation/reference.md ../../docs/reference/README.md && cd ../../",
     "postinstall": "npx lerna bootstrap && npx lerna link convert",
     "release": "npm run build && npm run coverage",
-    "test": "npx lerna exec --concurrency 1 npm run test"
+    "test": "npx lerna exec --concurrency 1 npm run test",
+    "update-lock-files": "npm install --package-lock-only && npx lerna exec -- npm install --package-lock-only"
   },
   "author": "Amazon",
   "license": "Apache-2.0",
