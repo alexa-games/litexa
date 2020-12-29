@@ -1,6 +1,6 @@
 {
   "name": "@litexa/apl",
-  "version": "0.7.0",
+  "version": "0.7.2",
   "description": "This module adds support for APL directives to Litexa.",
   "scripts": {
     "audit:fix": "npm audit fix",
