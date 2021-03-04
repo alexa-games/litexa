@@ -1,6 +1,6 @@
 {
   "name": "@litexa/deploy-aws",
-  "version": "0.7.2",
+  "version": "0.7.4",
   "description": "Implements deployment for Litexa to AWS Lambda, DynamoDB and S3.",
   "main": "index.js",
   "scripts": {
