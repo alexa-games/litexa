@@ -3,6 +3,43 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.2](https://github.com/alexa-games/litexa/compare/v0.7.1...v0.7.2) (2020-12-29)
+
+**Note:** Version bump only for package @litexa/integration-tests
+
+
+
+
+
+## [0.7.1](https://github.com/alexa-games/litexa/compare/v0.7.0...v0.7.1) (2020-10-03)
+
+
+### Bug Fixes
+
+* restore lost support for implicit microphone open on state transitions ([4a9f518](https://github.com/alexa-games/litexa/commit/4a9f5186a6bbbe7ce8752bc6e9f67ba343ff915a))
+
+
+
+
+
+# [0.7.0](https://github.com/alexa-games/litexa/compare/v0.6.2...v0.7.0) (2020-10-02)
+
+
+### Bug Fixes
+
+* adding support for escaped quote characters in say strings ([#176](https://github.com/alexa-games/litexa/issues/176)) ([07c93f1](https://github.com/alexa-games/litexa/commit/07c93f1163be1ae9da337cf26b7b637afe98ce63))
+
+
+### Features
+
+* adding new utterance and say alternation syntax ([#175](https://github.com/alexa-games/litexa/issues/175)) ([fe569d3](https://github.com/alexa-games/litexa/commit/fe569d31ded0a30acaf5b198f824a1bf8a072ea0))
+* one shot intents are now delivered after launch is entered ([#188](https://github.com/alexa-games/litexa/issues/188)) ([a783699](https://github.com/alexa-games/litexa/commit/a7836994c4133816acb867b7fc7e8d989eb780b7))
+* revamp of HTML extension for WebAPI support ([#186](https://github.com/alexa-games/litexa/issues/186)) ([ca846c0](https://github.com/alexa-games/litexa/commit/ca846c013079fec2b71d5adb5f78bf45fa9241bb))
+
+
+
+
+
 # [0.6.0](https://github.com/alexa-games/litexa/compare/v0.5.1...v0.6.0) (2020-06-16)
 
 **Note:** Version bump only for package @litexa/integration-tests

@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.2](https://github.com/alexa-games/litexa/compare/v0.7.1...v0.7.2) (2020-12-29)
+
+**Note:** Version bump only for package @litexa/html
+
+
+
+
+
+# [0.7.0](https://github.com/alexa-games/litexa/compare/v0.6.2...v0.7.0) (2020-10-02)
+
+
+### Features
+
+* revamp of HTML extension for WebAPI support ([#186](https://github.com/alexa-games/litexa/issues/186)) ([ca846c0](https://github.com/alexa-games/litexa/commit/ca846c013079fec2b71d5adb5f78bf45fa9241bb))
+* specify additional asset upload file extensions ([#191](https://github.com/alexa-games/litexa/issues/191)) ([4bb17f9](https://github.com/alexa-games/litexa/commit/4bb17f975489480d06bb439a71c2db245b615d54))
+
+
+
+
+
 # [0.6.0](https://github.com/alexa-games/litexa/compare/v0.5.1...v0.6.0) (2020-06-16)
 
 **Note:** Version bump only for package @litexa/html

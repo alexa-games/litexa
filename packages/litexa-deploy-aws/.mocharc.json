@@ -4,6 +4,6 @@
     "@litexa/core/aliasing",
     "coffeescript/register"
   ],
-  "timeout": 1000,
+  "timeout": 10000,
   "watch-extensions": ["coffee"]
 }

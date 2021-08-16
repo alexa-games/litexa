@@ -3,6 +3,55 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.7.3](https://github.com/alexa-games/litexa/compare/v0.7.2...v0.7.3) (2020-12-30)
+
+**Note:** Version bump only for package @litexa/core
+
+
+
+
+
+## [0.7.2](https://github.com/alexa-games/litexa/compare/v0.7.1...v0.7.2) (2020-12-29)
+
+**Note:** Version bump only for package @litexa/core
+
+
+
+
+
+## [0.7.1](https://github.com/alexa-games/litexa/compare/v0.7.0...v0.7.1) (2020-10-03)
+
+
+### Bug Fixes
+
+* restore lost support for implicit microphone open on state transitions ([4a9f518](https://github.com/alexa-games/litexa/commit/4a9f5186a6bbbe7ce8752bc6e9f67ba343ff915a))
+
+
+
+
+
+# [0.7.0](https://github.com/alexa-games/litexa/compare/v0.6.2...v0.7.0) (2020-10-02)
+
+
+### Bug Fixes
+
+* adding support for escaped quote characters in say strings ([#176](https://github.com/alexa-games/litexa/issues/176)) ([07c93f1](https://github.com/alexa-games/litexa/commit/07c93f1163be1ae9da337cf26b7b637afe98ce63))
+* allow characters outside basic ASCII into invocation names ([#177](https://github.com/alexa-games/litexa/issues/177)) ([2e79120](https://github.com/alexa-games/litexa/commit/2e791205ae65ab8916a16f369224c362b14fb7d7))
+* find global extensions in Windows when using nvm ([#189](https://github.com/alexa-games/litexa/issues/189)) ([5bf8c99](https://github.com/alexa-games/litexa/commit/5bf8c9965a5daa0f9eff7760caeddebaa59e03e1))
+
+
+### Features
+
+* adding new utterance and say alternation syntax ([#175](https://github.com/alexa-games/litexa/issues/175)) ([fe569d3](https://github.com/alexa-games/litexa/commit/fe569d31ded0a30acaf5b198f824a1bf8a072ea0))
+* allow switching persistent store to session attributes instead ([#181](https://github.com/alexa-games/litexa/issues/181)) ([5d61bf5](https://github.com/alexa-games/litexa/commit/5d61bf5d307807036b08463be67b8c16e4c4b6fc))
+* one shot intents are now delivered after launch is entered ([#188](https://github.com/alexa-games/litexa/issues/188)) ([a783699](https://github.com/alexa-games/litexa/commit/a7836994c4133816acb867b7fc7e8d989eb780b7))
+* revamp of HTML extension for WebAPI support ([#186](https://github.com/alexa-games/litexa/issues/186)) ([ca846c0](https://github.com/alexa-games/litexa/commit/ca846c013079fec2b71d5adb5f78bf45fa9241bb))
+* specify additional asset upload file extensions ([#191](https://github.com/alexa-games/litexa/issues/191)) ([4bb17f9](https://github.com/alexa-games/litexa/commit/4bb17f975489480d06bb439a71c2db245b615d54))
+
+
+
+
+
 ## [0.6.2](https://github.com/alexa-games/litexa/compare/v0.6.1...v0.6.2) (2020-07-17)
 
 

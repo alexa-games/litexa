@@ -53,20 +53,33 @@ menu
   when LISTEN10
     LISTEN events, microphone
 
-  when END_TRUMPS_ALL 
-    -> first 
-    LISTEN 
+  when LISTEN11
+    END
+    -> implicitListen
+
+  when LISTEN12
+    LISTEN events
+    -> implicitListen
+
+  when LISTEN13
+    END
+    -> beforeImplicitListen
+
+
+  when END_TRUMPS_ALL
+    -> first
+    LISTEN
     END
 
-  when TRANSITION_TRUMPS_ALL 
-    LISTEN 
+  when TRANSITION_TRUMPS_ALL
+    LISTEN
     END
-    -> first 
+    -> first
 
-  when LISTEN_TRUMPS_ALL 
-    -> first 
+  when LISTEN_TRUMPS_ALL
+    -> first
     END
-    LISTEN 
+    LISTEN
 
 
 
@@ -134,6 +147,12 @@ listen6
 
 listen8
   LISTEN events
+
+beforeImplicitListen
+  -> implicitListen
+
+implicitListen
+
 
 
 bad
@@ -203,14 +222,30 @@ TEST "happy"
   user: LISTEN10
   LISTEN microphone
 
-  launch 
+  launch
+  user: LISTEN11
+  LISTEN microphone
+
+  launch
+  user: LISTEN12
+  LISTEN microphone
+
+  launch
+  user: LISTEN13
+  LISTEN microphone
+
+
+TEST "trumps"
+  launch
   user: END_TRUMPS_ALL
-  END 
+  END
 
-  launch 
+  launch
   user: LISTEN_TRUMPS_ALL
-  LISTEN events 
+  LISTEN events
 
-  launch 
+  launch
   user: TRANSITION_TRUMPS_ALL
   alexa: second
+  LISTEN microphone
+  LISTEN microphone
