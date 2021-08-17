@@ -248,3 +248,4 @@ TEST "trumps"
   user: TRANSITION_TRUMPS_ALL
   alexa: second
   LISTEN microphone
+  LISTEN microphone

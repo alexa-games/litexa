@@ -17,6 +17,7 @@
     "Litexa"
   ],
   "license": "Apache-2.0",
+  "dependencies": {},
   "publishConfig": {
     "access": "public"
   },
