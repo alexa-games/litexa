@@ -7,7 +7,6 @@
 
 const runtimeSource = require('./runtime.js');
 
-
 module.exports = (options, lib) => {
   const compiler = {
     validEventNames: [],
@@ -16,6 +15,11 @@ module.exports = (options, lib) => {
       model: () => {},
       directives: {
         'Alexa.Presentation.APLA.RenderDocument': () => {}
+      }
+    },
+    formatters: {
+      directives: {
+        'Alexa.Presentation.APLA.RenderDocument': require('./renderDocument-formatter.js').formatter 
       }
     }
   };
