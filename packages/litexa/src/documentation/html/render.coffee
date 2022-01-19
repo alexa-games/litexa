@@ -53,8 +53,9 @@ render = ->
         text: text
         link: link
       return "<h#{level} id='#{link}'>#{text}</h#{level}>"
-
-    marked = (text) -> markedLib text, { renderer: renderer }
+  
+    markedLib.marked.setOptions { renderer: renderer }
+    marked = (text) -> markedLib.marked.parse(text)
 
 
   entries = {}
@@ -186,6 +187,14 @@ render = ->
 
     html = html.replace '{toc}', tocHTML.join '\n'
 
+  do ->
+    # write HTML version, intentionally disabled right now
+    ###
+    outputFilename = path.join moduleRoot, '..', 'documentation.html'
+    fs.writeFileSync outputFilename, html, 'utf8'
+    console.log ''
+    console.log chalk.green "Wrote #{outputFilename}"
+    ###
 
   do ->
     # instructions to vuepress, where the docs are hosted

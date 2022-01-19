@@ -1,8 +1,7 @@
 {
   "full-trace": true,
   "require": [
-    "coffeescript/register",
-    "./preamble.coffee"
+    "./mocha-requires.js"
   ],
   "timeout": 20000,
   "watch-extensions": ["coffee"]

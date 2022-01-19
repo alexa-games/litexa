@@ -1,8 +1,7 @@
 {
   "full-trace": true,
   "require": [
-    "@litexa/core/aliasing",
-    "coffeescript/register"
+    "./mocha-requires.js"
   ],
   "timeout": 1000,
   "watch-extensions": ["coffee"]

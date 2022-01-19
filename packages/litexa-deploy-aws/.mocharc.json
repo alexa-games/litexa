@@ -1,7 +1,7 @@
 {
   "full-trace": true,
   "require": [
-    "@litexa/core/aliasing",
+    "@litexa/core/aliasing.js",
     "coffeescript/register"
   ],
   "timeout": 10000,
