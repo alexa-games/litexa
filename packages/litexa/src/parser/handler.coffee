@@ -19,7 +19,7 @@ shouldUniqueURLs = process?.env?.shouldUniqueURLs == 'true'
 # assets root location is determined by an external variable
 litexa.assetsRoot = process?.env?.assetsRoot ? litexa.assetsRoot
 
-handlerSteps = {}
+exports.handlerSteps = handlerSteps = {}
 
 exports.handler = (event, lambdaContext, callback) ->
 
@@ -258,6 +258,8 @@ handlerSteps.parseRequestData = (stateContext) ->
   if request.type == 'LaunchRequest'
     reportValueMetric 'Launches'
 
+  initializeExtensionObjects stateContext
+
   switch request.type
     when 'IntentRequest', 'LaunchRequest'
       incomingState = stateContext.currentState
@@ -326,8 +328,6 @@ handlerSteps.parseRequestData = (stateContext) ->
 
       unless handled
         throw new Error "unrecognized event type: #{request.type}"
-
-  initializeExtensionObjects stateContext
 
 
 handlerSteps.initializeMonetization = (stateContext, event) ->
