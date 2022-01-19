@@ -137,11 +137,15 @@ module.exports = (context) => {
     // kicks us over to APL-A.
     let audioTester = /\<audio/g;
     for ( let say of context.say ) {
-      if ( (typeof(say) == "string") && say.match( audioTester ) ) {
+      if ( (typeof(say) == "string") ) {
+        if ( say.match( audioTester ) ) {
+          simple = false;
+        }
+      } else {
         simple = false;
       }
     }
-
+    
     if ( simple ) {
       // no modifications to make here, we'll let the say content
       // go down the usual pipe and end up in outputSpeech
