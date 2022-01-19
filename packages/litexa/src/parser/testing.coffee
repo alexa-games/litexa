@@ -1063,13 +1063,21 @@ class lib.Test
       if result.card?
         index = output.cards.length
         output.cards.push result.card
-        logs.push "                          [CARD #{index}] #{result.cardReference}"
+        logs.push "      [CARD #{index}] #{result.cardReference}"
 
       if result.directives?
         for directive in result.directives
           index = output.directives.length
           output.directives.push directive
-          logs.push "                          [DIRECTIVE #{index}] #{directive?.type}"
+          if directive? && context.skill.directiveFormatters[directive?.type]?
+            lines = context.skill.directiveFormatters[directive?.type](directive)
+            if Array.isArray(lines) 
+              for line in lines 
+                logs.push "      #{line}"
+            else 
+                logs.push "      #{lines}"
+          else
+            logs.push "      [DIRECTIVE #{index}] #{directive?.type}"
           validationErrors = validateDirective(directive, context)
           if validationErrors
             for error in validationErrors

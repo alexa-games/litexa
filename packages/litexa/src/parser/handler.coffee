@@ -281,11 +281,12 @@ handlerSteps.parseRequestData = (stateContext) ->
         if intent.slots?
           for name, obj of intent.slots
             stateContext.slots[name] = obj.value
-            auth = obj.resolutions?.resolutionsPerAuthority?[0]
-            if auth? and auth.status?.code == 'ER_SUCCESS_MATCH'
-              value = auth.values?[0]?.value?.name
-              if value?
-                stateContext.slots[name] = value
+            authorities = obj.resolutions?.resolutionsPerAuthority ? []
+            for auth in authorities 
+              if auth? and auth.status?.code == 'ER_SUCCESS_MATCH'
+                value = auth.values?[0]?.value?.name
+                if value?
+                  stateContext.slots[name] = value
 
         stateContext.handoffIntent = true
         stateContext.handoffState = incomingState

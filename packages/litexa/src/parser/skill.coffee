@@ -69,6 +69,7 @@ class lib.Skill
 
     # cache these for testing later
     @directiveValidators = {}
+    @directiveFormatters = {}
     for extensionName, extensionInfo of @projectInfo.extensions
       vals = extensionInfo.compiler?.validators?.directives ? {}
       for directiveName, validator of vals
@@ -78,6 +79,15 @@ class lib.Skill
             #{directiveName} found in both #{extensionName} and #{v.sourceExtension}"
         validator.sourceExtension = extensionName
         @directiveValidators[directiveName] = validator
+        
+      forms = extensionInfo.compiler?.formatters?.directives ? {}
+      for directiveName, formatter of forms
+        if directiveName of @directiveFormatters
+          v = @directiveFormatters[directiveName]
+          throw new Error "duplicate directive formatter for the directive
+            #{directiveName} found in both #{extensionName} and #{v.sourceExtension}"
+        formatter.sourceExtension = extensionName
+        @directiveFormatters[directiveName] = formatter
 
     # sources
     @files = {}
