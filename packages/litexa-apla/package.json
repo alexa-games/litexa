@@ -1,6 +1,6 @@
 {
   "name": "@litexa/apla",
-  "version": "0.0.1",
+  "version": "0.8.0",
   "description": "Support for auto generating APL-A documents from Litexa semantics",
   "scripts": {
     "test": "npx mocha ./test"

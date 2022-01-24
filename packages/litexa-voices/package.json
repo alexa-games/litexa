@@ -1,6 +1,6 @@
 {
   "name": "@litexa/voices",
-  "version": "0.0.1",
+  "version": "0.8.0",
   "description": "This module adds support for voice tags in litexa.",
   "scripts": {
     "audit:fix": "npm audit fix",

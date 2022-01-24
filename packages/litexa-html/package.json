@@ -1,6 +1,6 @@
 {
   "name": "@litexa/html",
-  "version": "0.7.2",
+  "version": "0.8.0",
   "description": "This module adds support for HTML directives to Litexa.",
   "scripts": {
     "audit:fix": "npm audit fix",
@@ -17,7 +17,6 @@
     "Litexa"
   ],
   "license": "Apache-2.0",
-  "dependencies": {},
   "publishConfig": {
     "access": "public"
   },
