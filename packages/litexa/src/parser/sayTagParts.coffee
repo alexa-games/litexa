@@ -94,7 +94,7 @@ class lib.TagPart
       ""
 
   toLambda: (options) ->
-    if @proxy?
+    if @proxy?.toSSMLFunction?
       return @proxy.toSSMLFunction options.language
     '"' + @toSSML(options.language) + '"'
 

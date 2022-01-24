@@ -1,0 +1,26 @@
+{
+  "name": "@litexa/voices",
+  "version": "0.0.1",
+  "description": "This module adds support for voice tags in litexa.",
+  "scripts": {
+    "audit:fix": "npm audit fix",
+    "clean": "npx rimraf node_modules",
+    "coverage": "echo intentionally no coverage report",
+    "test": "echo no tests yet"
+  },
+  "author": "Amazon",
+  "keywords": [
+    "Alexa",
+    "Skill",
+    "HTML",
+    "SDK",
+    "Litexa"
+  ],
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": "github:alexa-games/litexa",
+  "bugs": "https://github.com/alexa-games/litexa/issues",
+  "homepage": "https://litexa.com"
+}

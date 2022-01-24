@@ -17,6 +17,7 @@
         "packages/litexa-html",
         "packages/litexa-render-template",
         "packages/litexa-apla",
+        "packages/litexa-voices",
         "tests"
     ],
     "version": "0.7.5"

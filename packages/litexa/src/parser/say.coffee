@@ -110,13 +110,15 @@ partsToExpression = (parts, options) ->
       return ''
     closed = []
     for tag in tagContext by -1
-      closed.push "</#{tag}>"
+      closed.push tag
     tagContext = []
     '"' + closed.join('') + '"'
 
   result = for p in parts
-    if p.open
-      tagContext.push p.tag
+    if p.open and p.tag
+      tagContext.push "</#{p.tag}>"
+    if p.proxy?.closeSSML?
+      tagContext.push p.proxy.closeSSML()
 
     code = p.toLambda options
 
