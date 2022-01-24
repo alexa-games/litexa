@@ -96,7 +96,7 @@ module.exports = {
 
         if data.stderr
           do ->
-            # we can filter this one out, as it can be confusing in the litexa output
+            # we can filter this informational one out, as it can be confusing in the litexa output
             return if data.stderr.match /This is an asynchronous operation/
             logger.warning data.stderr
 
@@ -152,11 +152,12 @@ module.exports = {
           try
             err = err[offset + prefix.length ..]
             parsed = JSON.parse err
-            code = parsed.statusCode
+            code = parsed.detail?.statusCode ? parsed.statusCode
             message = parsed.message
-            if parsed.response?
-              message = JSON.stringify parsed.response, null, 2
-            name = parsed.name
+            response = parsed.detail?.response ? parsed.response
+            if response?
+              message = JSON.stringify response, null, 2
+            name = parsed.detail?.name ? parsed.name
           catch err2
             logger.error "failed to extract failure code and message from SMAPI call: #{err2}"
 
