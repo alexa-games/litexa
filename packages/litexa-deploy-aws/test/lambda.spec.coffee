@@ -15,6 +15,10 @@ path = require 'path'
 rimraf = require 'rimraf'
 mkdirp = require 'mkdirp'
 
+lambdaIsReadyConfigFunc = -> {
+  promise: -> Promise.resolve( { State: 'Active', LastUpdateStatus: "Successful" } )
+}
+
 describe 'Running Deploy to Lambda', ->
   loggerInterface = undefined
   context = undefined
@@ -97,6 +101,7 @@ describe 'Running Deploy to Lambda', ->
       getPolicyPromise = (resolve) ->
         resolve({Policy: "{\"Statement\": [#{JSON.stringify(lambdaTriggerStatement)}]}"})
       awsLambda = {
+        getFunctionConfiguration: lambdaIsReadyConfigFunc
         getPolicy: -> return {
             promise: -> return new Promise(getPolicyPromise)
           }
@@ -122,6 +127,7 @@ describe 'Running Deploy to Lambda', ->
       addPolicyPromise = (resolve) ->
         resolve("Permission added")
       awsLambda = {
+        getFunctionConfiguration: lambdaIsReadyConfigFunc
         getPolicy: -> return {
             promise: -> return new Promise(getPolicyPromise)
           }
@@ -147,6 +153,7 @@ describe 'Running Deploy to Lambda', ->
       addPolicyPromise = (resolve) ->
         resolve("Permission added")
       awsLambda = {
+        getFunctionConfiguration: lambdaIsReadyConfigFunc
         getPolicy: -> return {
             promise: -> return new Promise(getPolicyPromise)
           }
