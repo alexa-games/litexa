@@ -35,6 +35,27 @@ writeFileIfDifferent = (filename, contents) ->
       return writeFilePromise(filename, contents, 'utf8').then(-> Promise.resolve(true))
 
 
+waitForLambdaActiveState = (context, logger, lambdaContext) ->
+  new Promise (resolve, reject) ->
+    check = -> 
+      params =
+        FunctionName: context.lambdaName
+
+      lambdaContext.lambda.getFunctionConfiguration(params).promise()
+      .then (data) ->
+        if data.State == "Active" and data.LastUpdateStatus == "Successful"
+          logger.log "finished waiting for Lambda state #{data.State} #{data.LastUpdateStatus}"
+          resolve()
+        else if data.State == "Failed" or data.LastUpdateStatus == "Failed"
+          reject "Lambda update failure, check status in the dev console"
+        else 
+          logger.log "waiting for Lambda state #{data.State} #{data.LastUpdateStatus}"
+          setTimeout check, 1000
+      .catch (err) -> 
+        reject err
+    check()
+
+
 # TODO: Used for unit testing. Can remove when refactoring code to be more modular and test friendly
 #   as eval does reduce runtime performance, but this should mainly be in the build process
 exports.unitTestHelper = (funcName) ->
@@ -325,7 +346,7 @@ makeLambdaConfiguration = (context, logger) ->
       Handler: "index.handler" # exports.handler in index.js
       MemorySize: 256 # megabytes, mainly because this also means dedicated CPU
       Role: context.lambdaIAMRoleARN
-      Runtime: "nodejs10.x"
+      Runtime: "nodejs14.x"
       Timeout: 10 # seconds
       Environment:
         Variables:
@@ -333,7 +354,6 @@ makeLambdaConfiguration = (context, logger) ->
           loggingLevel: loggingLevel
           dynamoTableName: context.dynamoTableName
           assetsRoot: context.artifacts.get 'assets-root'
-
 
     if context.deploymentOptions.lambdaConfiguration?
       # if this option is present, merge that object into the config, key by key
@@ -393,6 +413,8 @@ createLambda = (context, logger, lambdaContext) ->
       Description: 'Current live version, used to refer to this lambda by the Alexa skill. In an emergency, you can point this to an older version of the code.'
 
     lambdaContext.lambda.createAlias(params).promise()
+    .then ->
+      waitForLambdaActiveState context, logger, lambdaContext
 
 
 updateLambdaConfig = (context, logger, lambdaContext) ->
@@ -424,6 +446,8 @@ updateLambdaConfig = (context, logger, lambdaContext) ->
       params[k] = v
 
     lambdaContext.lambda.updateFunctionConfiguration(params).promise()
+  .then -> 
+    waitForLambdaActiveState(context, logger, lambdaContext)
 
 
 updateLambdaCode = (context, logger, lambdaContext) ->
@@ -441,9 +465,13 @@ updateLambdaCode = (context, logger, lambdaContext) ->
     Publish: true
     ZipFile: fs.readFileSync(lambdaContext.zipFilename)
 
-  lambdaContext.lambda.updateFunctionCode(params).promise()
+  waitForLambdaActiveState( context, logger, lambdaContext )
+  .then ->
+    lambdaContext.lambda.updateFunctionCode(params).promise()
   .then (data) ->
     context.localCache.storeHash 'lambdaSHA256', data.CodeSha256
+  .then -> 
+    waitForLambdaActiveState(context, logger, lambdaContext)
 
 
 checkLambdaQualifier = (context, logger, lambdaContext) ->
@@ -488,7 +516,30 @@ checkLambdaQualifier = (context, logger, lambdaContext) ->
 
 
 checkLambdaPermissions = (context, logger, lambdaContext) ->
+
+  ### 
+  ASK requires a permission like the following on the lambda, 
+   so that it can trigger the lambda from outside the AWS account.
+  These appear as "triggers" in the AWS console
+  {
+    "Version": "2012-10-17",
+    "Id": "default",
+    "Statement": [
+      {
+        "Sid": "lambda-94cdceb7-89c4-4e68-a1c6-c43752178f53",
+        "Effect": "Allow",
+        "Principal": {
+          "Service": "alexa-appkit.amazon.com"
+        },
+        "Action": "lambda:InvokeFunction",
+        "Resource": "arn:aws:lambda:us-east-1:085202703559:function:Barnaby_development_litexa_handler"
+      }
+    ]
+  }
+  ###
+
   if context.localCache.timestampExists "lambdaPermissionsChecked-#{lambdaContext.qualifier}"
+    logger.verbose "skipping Lambda permissions check"
     return Promise.resolve()
 
   addPolicy = (cache) ->
@@ -503,6 +554,7 @@ checkLambdaPermissions = (context, logger, lambdaContext) ->
     lambdaContext.lambda.addPermission(params).promise()
     .catch (err) ->
       logger.error "Failed to add permissions to lambda: #{err}"
+      throw "failed to add ASK trigger permission to the lambda"
     .then (data) ->
       logger.verbose "addPermission: #{JSON.stringify(data, null, 2)}"
 
@@ -556,6 +608,9 @@ checkLambdaPermissions = (context, logger, lambdaContext) ->
     Promise.all(promises)
     .then ->
       context.localCache.saveTimestamp "lambdaPermissionsChecked-#{lambdaContext.qualifier}"
+    .then -> 
+      waitForLambdaActiveState(context, logger, lambdaContext)
+
 
 
 endLambdaDeployment = (context, logger, lambdaContext) ->
