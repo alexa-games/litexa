@@ -14,7 +14,6 @@
 #  * .csv are data files?
 
 coffee = require 'coffeescript'
-{ Skill } = require './skill.coffee'
 
 exp = module.exports
 
