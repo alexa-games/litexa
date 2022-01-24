@@ -87,7 +87,7 @@ module.exports = (context) => {
       return [ line ];
     }
     let before = line.substr( 0, match.index ).trim();
-    let after = line.substr( match.index + match[0].length );
+    let after = line.substr( match.index + match[0].length ).trim();
     let inside = match[1].trim();
     let result = [];
     if ( before ) { result = result.concat( splitAudioTags(before) ) }
