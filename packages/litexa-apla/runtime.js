@@ -7,17 +7,22 @@
 
 module.exports = (context) => {
 
+  // known list of APLA component types, used as a filter blow to prevent
+  //  including any say objects that aren't valid APLA, which may have been
+  //  inserted by other systems 
+  const KnownAPLATypes = [ 'Audio', 'Mixer', 'Selector', 'Sequencer', 'Silence', 'Speech' ];
+  
   // simple constructors for the various components
   function APLADirective() {
     let mainItems = [];
 
     return [ {
       type: "Alexa.Presentation.APLA.RenderDocument",
-      token: "developer-provided-string",
-      dataSource: {},
+      token: "request:" + context.request.requestId,
+      datasources: {},
       document: {
         type: "APLA",
-        version: "0.8",
+        version: "0.91",
         mainTemplate: {
           items: [
             {
@@ -109,6 +114,7 @@ module.exports = (context) => {
 
   userFacing.accumulator = [];
   userFacing.componentAccumulator = [];
+  userFacing.disableAPLA = false;
 
   userFacing.pushComponent = ( component ) => {
     context.say.push( component );
@@ -126,6 +132,22 @@ module.exports = (context) => {
   }
 
   let afterStateMachine = () => {
+    
+    const disableAPLA = userFacing.disableAPLA;
+    if (disableAPLA) {
+      // if we have to bail on APLA processing, then we have to
+      // dump anything that we pushed into the say array that isn't
+      // a standard speech string
+      let filteredSay = [];
+      for ( let say of context.say ) {
+        if ( (typeof(say) == "string") ) {
+          filteredSay.push( say );
+        }
+      }
+      context.say = filteredSay;
+      return;
+    }
+    
     let accumulator = userFacing.accumulator;
 
     // If the response is plain text to speech, then we
@@ -199,16 +221,19 @@ module.exports = (context) => {
 
     // prepare the APL-A directive that'll carry the APL-A doc
     let [ directive, mainItems ] = APLADirective();
-
-    let sayToComponent = (name, item) => {
+    
+    let pushSayAsComponent = (list, name, item) => {
       if ( item.audio ) {
-        return APLAudio( name, item.audio );
+        list.push( APLAudio( name, item.audio ) );
       } else if ( item.silence ) {
-        return APLASilence( item.silence );
+        list.push( APLASilence( item.silence ) );
       } else if ( typeof(item) == 'object') {
-        return item;
+        // support building components manually in the skill code
+        if ( KnownAPLATypes.indexOf(item.type) >= 0 ) {
+          list.push(item);
+        }
       } else {
-        return APLSpeechSSML( name, item );
+       list.push( APLSpeechSSML( name, item ) );
       }
     }
 
@@ -235,13 +260,13 @@ module.exports = (context) => {
 
       if ( block.say.length == 1 ) {
         // blocks with just a single thing can just be the thing
-        container.push(sayToComponent( name, block.say[0] ));
+        pushSayAsComponent( container, name, block.say[0] );
       } else {
         // blocks with multiple bits of content are wrapped in a sequence
         let sequence = APLASequencer( name );
         container.push(sequence);
         for ( let say of block.say ) {
-          sequence.items.push(sayToComponent( undefined, say ));
+          pushSayAsComponent( sequence.items, undefined, say );
         }
       }
     }

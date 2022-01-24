@@ -1,5 +1,5 @@
 {
-  "name": "@litexa/apl-a",
+  "name": "@litexa/apla",
   "version": "0.0.1",
   "description": "Support for auto generating APL-A documents from Litexa semantics",
   "scripts": {

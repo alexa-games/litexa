@@ -22,6 +22,8 @@ Here's a list of public extensions currently available via npm:
 
 * [**litexa/html:**](https://www.npmjs.com/package/@litexa/html) An extension that simplifies launching and exchanging messages with a web app as part of the [Alexa Web API for Games](https://developer.amazon.com/en-US/blogs/alexa/alexa-skills-kit/2020/07/alexa-web-api-for-games-generally-available).
 
+* [**litexa/apla:**](https://www.npmjs.com/package/@litexa/apla) An extension that makes working with the Alexa Presentation Language for Audio (APLA) in your Litexa project more powerful. It converts `say` and `soundEffect` statements into APLA blocks, and adds the `APLABlock` statement to specify layered background audio.
+
 * [**litexa/apl:**](https://www.npmjs.com/package/@litexa/apl) An extension that makes working with the Alexa Presentation Language (APL) in your Litexa project more powerful, with shorthand for managing APL documents and common design patterns.
 
 * [**litexa/render-template:**](https://www.npmjs.com/package/@litexa/render-template) An extension that supports easily building, sending, and validating a `Display.RenderTemplate` directive, the predecessor to APL.
@@ -83,10 +85,19 @@ module.exports = function(options, lib) {
       // Litexa runtime handlers
     },
     lib: {
-      // Any custom libraries to be merged with Litexa's 'lib' container:
-      // These libraries become available during compilation/runtime.
-      // Specifying libraries that name clash with existing Litexa core
-      // libraries or other extension libraries will throw an error.
+      // Any custom library properties to be merged with Litexa's 
+      //  'lib' object. These libraries properties become available 
+      //   during Litexa compilation/runtime.
+      // Each extension should usually contribute none or one, 
+      //   named after the extension.
+      // Specifying properties that name clash with existing Litexa core
+      // libraries or other extensions will throw an error.
+    },
+    formatters: {
+      // different kinds of object to text transformer functions
+      directives: {
+        // takes a directive object, returns text to include in litexa test output
+      }
     }
   }
 }

@@ -92,3 +92,5 @@ mainTemplate: {
   ]
 }
 ```
+
+You can disable APLA generation temporarily for any given response by setting the variable `APLA.disableAPLA` to `true`.
