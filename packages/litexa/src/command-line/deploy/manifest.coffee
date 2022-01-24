@@ -345,7 +345,7 @@ createOrUpdateSkill = (context, manifestContext) ->
   skillId = context.artifacts.get 'skillId'
   if skillId?
     manifestContext.skillId = skillId
-    logger.log "skillId found in artifacts, getting information"
+    logger.log "skillId found in artifacts, getting information for #{manifestContext.skillId}"
     updateSkill context, manifestContext
   else
     logger.log "no skillId found in artifacts, creating new skill"
@@ -388,11 +388,11 @@ updateSkill = (context, manifestContext) ->
   smapi.call { askProfile, command, params, logChannel: logger }
   .catch (err) ->
     if err.code == 404
-      Promise.reject "The skill ID stored in artifacts.json doesn't seem to exist in the deployment
+      Promise.reject "[code: #{err.code}] The skill ID stored in artifacts.json doesn't seem to exist in the deployment
         account. Have you deleted it manually in the dev console? If so, please delete it from the
         artifacts.json and try again."
     else
-      Promise.reject "Failed to get the current skill manifest. ask returned: #{err.message}"
+      Promise.reject "[code: #{err.code}] Failed to get the current skill manifest. ask returned: #{err.message}"
   .then (data) ->
     needsUpdating = false
     info = parseSkillInfo data
@@ -689,7 +689,11 @@ updateModelForLocale = (context, manifestContext, localeInfo) ->
       dt = (new Date) - modelDeployStart
       logger.log "#{locale} model update complete, total time #{dt}ms"
     .catch (err) ->
-      Promise.reject err
+      if err.message
+        logger.important err.message
+        Promise.reject "Failed to upload model"
+      else
+        Promise.reject err
 
 enableSkill = (context, manifestContext) ->
   logger.log "ensuring skill is enabled for testing"
