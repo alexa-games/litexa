@@ -34,7 +34,8 @@
     "@litexa/gadgets": "file:packages/litexa-gadgets",
     "@litexa/html": "file:packages/litexa-html",
     "@litexa/integration-tests": "file:tests",
-    "@litexa/render-template": "file:packages/litexa-render-template"
+    "@litexa/render-template": "file:packages/litexa-render-template",
+    "@litexa/apla": "file:packages/litexa-apla"
   },
   "devDependencies": {
     "assert": "^1.5.0",

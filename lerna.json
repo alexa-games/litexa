@@ -16,6 +16,7 @@
         "packages/litexa-gadgets",
         "packages/litexa-html",
         "packages/litexa-render-template",
+        "packages/litexa-apla",
         "tests"
     ],
     "version": "0.7.5"
