@@ -1,10 +1,23 @@
 {
   "name": "@litexa/apla",
+  "author": "Amazon",
   "version": "0.8.0",
+  "license": "Apache-2.0",
   "description": "Support for auto generating APL-A documents from Litexa semantics",
+  "keywords": [
+    "Alexa",
+    "APLA",
+    "Skill",
+    "Litexa"
+  ],
   "scripts": {
     "test": "npx mocha ./test"
   },
-  "author": "Amazon",
-  "license": "Apache-2.0"
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": "github:alexa-games/litexa",
+  "bugs": "https://github.com/alexa-games/litexa/issues",
+  "homepage": "https://litexa.com",
+  "gitHead": "1433954be45b5d6dabe3a3282775c30830858395"
 }

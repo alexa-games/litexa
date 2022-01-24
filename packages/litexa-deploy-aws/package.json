@@ -37,5 +37,6 @@
   },
   "repository": "github:alexa-games/litexa",
   "bugs": "https://github.com/alexa-games/litexa/issues",
-  "homepage": "https://litexa.com"
+  "homepage": "https://litexa.com",
+  "gitHead": "1433954be45b5d6dabe3a3282775c30830858395"
 }
