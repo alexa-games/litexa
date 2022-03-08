@@ -21,7 +21,7 @@
   "scripts": {
     "audit:fix": "npm audit fix",
     "build": "npm run clean && npm install",
-    "clean": "npx rimraf node_modules",
+    "clean": "npx --ignore-existing rimraf node_modules",
     "coverage": "echo \"Missing coverage script.\" && exit 0",
     "test": "npx mocha './test/**/*.spec.js'"
   },

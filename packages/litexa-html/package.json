@@ -4,7 +4,7 @@
   "description": "This module adds support for HTML directives to Litexa.",
   "scripts": {
     "audit:fix": "npm audit fix",
-    "clean": "npx rimraf node_modules",
+    "clean": "npx --ignore-existing rimraf node_modules",
     "coverage": "echo intentionally no coverage report",
     "test": "npx mocha './test/**/*.spec.js'"
   },

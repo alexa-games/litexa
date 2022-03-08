@@ -2,7 +2,7 @@
   "name": "{name}",
   "version": "1.0.0",
   "scripts": {
-    "clean": "npx rimraf node_modules && npm install",
+    "clean": "npx --ignore-existing rimraf node_modules && npm install",
     "compile": "npx tsc",
     "compile:watch": "npx tsc -w",
     "deploy": "npm run compile && litexa deploy",

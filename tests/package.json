@@ -4,7 +4,7 @@
   "description": "Integration tests for the packages.",
   "scripts": {
     "build": "npm run clean && npm install",
-    "clean": "npx rimraf node_modules",
+    "clean": "npx --ignore-existing rimraf node_modules",
     "coverage": "npx nyc npm test && node ../cacheCoverage.js",
     "test": "npx mocha './features/*.spec.coffee'",
     "test:file": "npx mocha"

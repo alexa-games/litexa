@@ -2,7 +2,7 @@
   "name": "{name}",
   "version": "1.0.0",
   "scripts": {
-    "clean": "npx rimraf node_modules litexa/main.js && npm install",
+    "clean": "npx --ignore-existing rimraf node_modules litexa/main.js && npm install",
     "compile": "npx webpack --config webpack.config.js && npx tsc",
     "compile:watch": "npx webpack --config webpack.config.js --watch",
     "deploy": "npm run compile && litexa deploy",

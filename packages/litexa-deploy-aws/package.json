@@ -6,7 +6,7 @@
   "scripts": {
     "audit:fix": "npm audit fix",
     "build": "npm run clean && npm install",
-    "clean": "npx rimraf node_modules",
+    "clean": "npx --ignore-existing rimraf node_modules",
     "coverage": "npx nyc npm test && node ../../cacheCoverage.js",
     "test": "npx mocha './test/**/*.spec.coffee'",
     "test:file": "npx mocha"
