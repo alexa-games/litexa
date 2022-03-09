@@ -37,7 +37,7 @@ writeFileIfDifferent = (filename, contents) ->
 
 waitForLambdaActiveState = (context, logger, lambdaContext) ->
   new Promise (resolve, reject) ->
-    check = -> 
+    check = ->
       params =
         FunctionName: context.lambdaName
 
@@ -48,10 +48,10 @@ waitForLambdaActiveState = (context, logger, lambdaContext) ->
           resolve()
         else if data.State == "Failed" or data.LastUpdateStatus == "Failed"
           reject "Lambda update failure, check status in the dev console"
-        else 
+        else
           logger.log "waiting for Lambda state #{data.State} #{data.LastUpdateStatus}"
           setTimeout check, 1000
-      .catch (err) -> 
+      .catch (err) ->
         reject err
     check()
 
@@ -77,11 +77,13 @@ exports.deploy = (context, logger) ->
 
   call preamble
   .then ->
+    # copying node_modules purges output directory -> do this before writing skill JS and readme
+    call copyNodeModules
+  .then ->
     # all of this can happen at the same time
     step1 = [
       call writeReadme
       call writeSkillJS
-      call copyNodeModules
       call ensureDynamoTable
     ]
 
@@ -158,7 +160,7 @@ writeReadme = (context, logger, lambdaContext) ->
 writeSkillJS = (context, logger, lambdaContext) ->
   code = context.skill.toLambda()
 
-  filename = path.join(lambdaContext.codeRoot,'index.js')
+  filename = path.join(lambdaContext.codeRoot, 'index.js')
   writeFileIfDifferent filename, code
   .then (wrote) ->
     if wrote
@@ -227,19 +229,26 @@ copyNodeModules = (context, logger, lambdaContext) ->
     execCmd = "rsync -crt --copy-links --delete --exclude '*.git' #{sourceDir} #{targetDir}"
     if process.platform == SupportedOS.WIN
       # WINCOMPAT - Windows uses robocopy in place of rsync to ensure files get replicated to destination
-      execCmd = "robocopy  #{sourceDir} #{targetDir} /mir /copy:DAT /sl /xf \"*.git\" /r:3 /w:4"
+      execCmd = "robocopy #{sourceDir} #{targetDir} /mir /copy:DAT /sl /xf \"*.git\" /r:3 /w:4"
 
     exec execCmd, (err, stdout, stderr) ->
-      logger.log "rsync: \n" + stdout if stdout
-      deltaTime = (new Date) - startTime
-      fs.writeFileSync modulesCache, ''
-      logger.log "synchronized node_modules in #{deltaTime}ms"
-      if err?
+
+      if process.platform == SupportedOS.WIN
+        logger.log "robocopy stdout:" + stdout if stdout
+      else
+        logger.log "rsync stdout:\n" + stdout if stdout
+
+      # Ignore error codes 1 and 2 on Windows: Returned by robocopy even if mirror/purge is successful.
+      if err? && (process.platform != SupportedOS.WIN || err.code > 2)
+        logger.error "copying node_modules failed with error code: #{err.code}"
         reject(err)
       else if stderr
         logger.log stderr
         reject(err)
       else
+        deltaTime = (new Date) - startTime
+        fs.writeFileSync modulesCache, ''
+        logger.log "synchronized node_modules in #{deltaTime}ms"
         context.localCache.saveTimestamp 'copiedNodeModules'
         resolve()
 
@@ -446,7 +455,7 @@ updateLambdaConfig = (context, logger, lambdaContext) ->
       params[k] = v
 
     lambdaContext.lambda.updateFunctionConfiguration(params).promise()
-  .then -> 
+  .then ->
     waitForLambdaActiveState(context, logger, lambdaContext)
 
 
@@ -470,7 +479,7 @@ updateLambdaCode = (context, logger, lambdaContext) ->
     lambdaContext.lambda.updateFunctionCode(params).promise()
   .then (data) ->
     context.localCache.storeHash 'lambdaSHA256', data.CodeSha256
-  .then -> 
+  .then ->
     waitForLambdaActiveState(context, logger, lambdaContext)
 
 
@@ -517,8 +526,8 @@ checkLambdaQualifier = (context, logger, lambdaContext) ->
 
 checkLambdaPermissions = (context, logger, lambdaContext) ->
 
-  ### 
-  ASK requires a permission like the following on the lambda, 
+  ###
+  ASK requires a permission like the following on the lambda,
    so that it can trigger the lambda from outside the AWS account.
   These appear as "triggers" in the AWS console
   {
@@ -608,7 +617,7 @@ checkLambdaPermissions = (context, logger, lambdaContext) ->
     Promise.all(promises)
     .then ->
       context.localCache.saveTimestamp "lambdaPermissionsChecked-#{lambdaContext.qualifier}"
-    .then -> 
+    .then ->
       waitForLambdaActiveState(context, logger, lambdaContext)
 
 
