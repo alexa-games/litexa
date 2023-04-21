@@ -1,8 +1,5 @@
-{% note %}
-
-**DEPRECATED** As of April 2023 the Alexa Games team will no longer support or maintain this official distribution of Litexa. Thank you to all the folks who have used Litexa to make great Alexa skills over the years!
-
-{% endnote %}
+> **Warning**
+> **DEPRECATED** As of April 2023 the Alexa Games team will no longer support or maintain this official distribution of Litexa. Thank you to all the folks who have used Litexa to make great Alexa skills over the years!
 
 # Litexa (archived!)
 
