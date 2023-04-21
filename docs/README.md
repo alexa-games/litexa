@@ -1,14 +1,20 @@
 ---
 home: true
 tagline: A <a href="https://en.wikipedia.org/wiki/Literate_programming">literate style</a> programming language and toolchain for building long form Alexa skills
-heroText: Litexa
-actionText: Get Started →
-actionLink: /get-started/
+heroText: Litexa [archived]
 
 footer: >
     Brought to you with ❤ by the Alexa Games team at Amazon.
-    © 2019, Amazon.com, Inc. or its affiliates. All Rights Reserved.
+    © 2023, Amazon.com, Inc. or its affiliates. All Rights Reserved.
 ---
+
+<LatestUpdates title='Final Update' changeLogURL='https://github.com/alexa-games/litexa/blob/master/CHANGELOG.md'>
+
+As of April 2023, we've updated dependencies to catch up with the latest security patches. With that, we're ending our 4 year journey with Litexa and deprecating the official distribution on GitHub and npm. The repository will remain accessible, and we will leave this site and documentation up for a while as an archive for those who still use it. A big thank you to everyone who built exciting Alexa skills with Litexa!
+
+</LatestUpdates>
+
+
 
 <Feature title="The Language" link="/book/" link-text="Read the full Language Specification">
 ::: slot description
@@ -31,16 +37,6 @@ launch
 ```
 :::
 </Feature>
-
-
-<LatestUpdates title='Latest Updates' changeLogURL='https://github.com/alexa-games/litexa/blob/master/CHANGELOG.md'>
-
-* [New syntax for defining permutations](/book/state-management.html#intents-and-utterances). In `say` strings this works as an inline version of `or` statements, while in utterances this generates every permutation and adds it to your language model.<br/>`when "(I|we) (want|would like) to (see|hear) the news (please|)"`
-* You can now optionally [disable persistent storage](/book/deployment.html#switching-the-persistent-store-to-session-attributes-instead), redirecting state storage to ephemeral `sessionAttributes` instead.
-* [One shot intents](/book/state-management.html#oneshot-intents) are now delivered after launch state is entered.
-
-</LatestUpdates>
-
 
 <div class='feature-cards home-aligned'>
 
@@ -187,6 +183,14 @@ litexa deploy
 
 
 <div class="faquestions">
+
+<FAQuestion>
+
+## Does Litexa's deprecation mean my skills will stop working?
+
+No! You can still use Litexa to generate and deploy new builds of your skills, and your existing skill deployments will be unaffected. This official repository and the npm package is deprecated, so no further patches or updates will happen, but you are free to fork it and update it as you see fit for your projects.
+
+</FAQuestion>
 
 <FAQuestion>
 

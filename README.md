@@ -1,4 +1,10 @@
-# Litexa
+{% note %}
+
+**DEPRECATED** As of April 2023 the Alexa Games team will no longer support or maintain this official distribution of Litexa. Thank you to all the folks who have used Litexa to make great Alexa skills over the years!
+
+{% endnote %}
+
+# Litexa (archived!)
 
 ![Litexa Logo](./logo.png)
 
@@ -9,10 +15,7 @@ as a runtime environment.
 Full documentation is available at <https://litexa.com>
 
 **Disclaimer:**
-*Litexa is an Alexa Labs community-supported project (alpha) from the Alexa Games team at Amazon. We (Alexa Games) have
-used Litexa to develop and ship 20+ Alexa skills. Your feedback is welcome and we are happy to consider contributions.
-Otherwise, you are free to use and modify this software as needed. As with all open-source packages, please use them in
-accordance with the licenses assigned to each package. Thanks and enjoy!*
+*Litexa we an Alexa Labs community-supported project (alpha) from the Alexa Games team at Amazon, where we used Litexa to develop and ship many Alexa skills. As of April 2023 we no longer support ongoing development of and with Litexa, and so this official repository is deprecated. Thank you to everyone who made great Alexa skills with this project!*
 
 ## Packages
 

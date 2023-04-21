@@ -1,7 +1,7 @@
 <template>
   <div class="home-aligned">
     <div class="latest-updates">
-      <h2>🔔 Latest Updates</h2>
+      <h2>🔔 {{$attrs.title}}</h2>
       <slot />
       <div class="feature-buttons">
         <a class="nav-link" :href="$attrs.changeLogURL">
