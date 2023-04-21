@@ -4,7 +4,7 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "clean": "npx rimraf node_modules && npm install",
+    "clean": "npx --ignore-existing rimraf node_modules && npm install",
     "compile": "npx tsc",
     "compile:watch": "npx tsc -w",
     "test": "npx mocha '**/*.spec.ts'",

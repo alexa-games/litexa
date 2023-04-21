@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "clean": "npx rimraf node_modules && npm install",
+    "clean": "npx --ignore-existing rimraf node_modules && npm install",
     "test": "npx mocha './{,!(node_modules)/**}/*.spec.js'",
     "test:file": "npx mocha",
     "test:watch": "npx mocha './{,!(node_modules)/**}/*.spec.js' --watch",

@@ -2,7 +2,7 @@
   "name": "{name}-build",
   "version": "1.0.0",
   "scripts": {
-    "clean": "npx rimraf node_modules && npm install",
+    "clean": "npx --ignore-existing rimraf node_modules && npm install",
     "compile": "npx tsc",
     "deploy": "npm run compile && litexa deploy",
     "lint": "npx tslint -c tslint.json --project tsconfig.json --fix"

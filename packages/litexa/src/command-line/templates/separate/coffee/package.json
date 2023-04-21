@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "clean": "npx rimraf node_modules index.js **/*.js && npm install",
+    "clean": "npx --ignore-existing rimraf node_modules index.js **/*.js && npm install",
     "compile": "npx coffee --compile *.coffee",
     "test": "npx mocha './{,!(node_modules)/**}/*.spec.coffee'",
     "test:file": "npx mocha",
