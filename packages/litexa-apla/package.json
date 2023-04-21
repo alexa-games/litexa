@@ -1,7 +1,7 @@
 {
   "name": "@litexa/apla",
   "author": "Amazon",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "license": "Apache-2.0",
   "description": "Support for auto generating APL-A documents from Litexa semantics",
   "keywords": [
